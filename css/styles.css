@@ -1,6 +1,6 @@
 /* ============================================================
    AccessPlay — Design System & Global Styles (Redesigned)
-   Theme: Deep Ocean / Access — Dark mode with teal & coral
+   Theme: Deep Ocean / AccessPlay — Dark mode with teal & coral
    ============================================================ */
 
 /* ── Google Fonts ── */
@@ -13,15 +13,15 @@
   --bg-surface:     #0f1f38;
   --bg-card:        rgba(15, 31, 56, 0.7);
   --bg-card-hover:  rgba(20, 42, 75, 0.85);
-  --accent:         #0084ff;
-  --accent-light:   #33a1ff;
-  --accent-dim:     #0066cc;
-  --accent-glow:    rgba(0, 132, 255, 0.25);
-  --coral:          #ffcc00;
-  --coral-light:    #ffe066;
-  --coral-glow:     rgba(255, 204, 0, 0.25);
-  --electric:       #00e5ff;
-  --electric-glow:  rgba(0, 229, 255, 0.20);
+  --accent:         #0ea5e9;
+  --accent-light:   #33ffdf;
+  --accent-dim:     #00b89c;
+  --accent-glow:    rgba(0, 229, 195, 0.25);
+  --coral:          #ff6b4a;
+  --coral-light:    #ff8a6e;
+  --coral-glow:     rgba(255, 107, 74, 0.25);
+  --electric:       #3d8bfd;
+  --electric-glow:  rgba(61, 139, 253, 0.20);
   --text-primary:   #e8f0fc;
   --text-secondary: #8fa4c4;
   --text-muted:     #5a7099;
@@ -49,10 +49,10 @@ body.light-theme {
   --text-muted:     #718096;
   --border:         rgba(0, 0, 0, 0.1);
   --shadow-card:    0 8px 32px rgba(0, 0, 0, 0.08);
-  --accent:         #0066cc;
-  --accent-light:   #0084ff;
-  --accent-dim:     #004c99;
-  --accent-glow:    rgba(0, 102, 204, 0.2);
+  --accent:         #00a88f;
+  --accent-light:   #00ccad;
+  --accent-dim:     #008f7a;
+  --accent-glow:    rgba(0, 168, 143, 0.2);
 }
 
 /* ── Reset ── */

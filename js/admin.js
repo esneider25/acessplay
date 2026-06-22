@@ -24,13 +24,13 @@ let adminAuthVerified = false;
 
 // ── Initialization ──
 document.addEventListener('DOMContentLoaded', () => {
-  if (localStorage.getItem('accessplay_theme') === 'light') {
+  if (localStorage.getItem('recargaaccessplay_theme') === 'light') {
     document.body.classList.add('light-theme');
   }
 
   if (typeof firebase !== 'undefined' && firebase.auth) {
     firebase.auth().onAuthStateChanged((user) => {
-      if (user && user.email === 'admin@accesplay.com') {
+      if (user && user.email === 'adminaccessplay@gmail.com') {
         adminAuthVerified = true;
         if (window.DATA_LOADED) initAdminApp();
       } else {
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleAdminTheme() {
   document.body.classList.toggle('light-theme');
   const isLight = document.body.classList.contains('light-theme');
-  localStorage.setItem('accessplay_theme', isLight ? 'light' : 'dark');
+  localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
 }
 
 function initAdminApp() {
@@ -54,7 +54,7 @@ function initAdminApp() {
   if (!window.DATA_LOADED) {
     container.innerHTML = `
       <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-deep);">
-        <div class="tracking-spinner" style="font-size: 3rem;">🎮</div>
+        <div class="tracking-spinner" style="font-size: 3rem;">🤖</div>
         <h2 style="margin-top: 20px; color: var(--accent);">Conectando con la base de datos...</h2>
       </div>
     `;
@@ -83,8 +83,8 @@ function initAdminApp() {
     <div class="admin-container">
       <aside class="admin-sidebar">
         <div class="admin-logo">
-          <span class="admin-logo-icon">🎮</span>
-          <span class="admin-logo-text">Access Admin</span>
+          <span class="admin-logo-icon">🤖</span>
+          <span class="admin-logo-text">AccessPlay Admin</span>
         </div>
         <ul class="admin-nav">
           <li class="admin-nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
@@ -569,7 +569,7 @@ function renderDashboard(container) {
                       <div style="font-size: 0.75rem; color: var(--text-muted);">${u.email}</div>
                     </td>
                     <td style="padding: 12px 10px;">
-                      <span class="admin-badge" style="background: ${u.role === 'revendedor' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(0, 229, 195, 0.15)'}; color: ${u.role === 'revendedor' ? '#d8b4fe' : '#00e5c3'};">${u.role.toUpperCase()}</span>
+                      <span class="admin-badge" style="background: ${u.role === 'revendedor' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(0, 229, 195, 0.15)'}; color: ${u.role === 'revendedor' ? '#d8b4fe' : '#0ea5e9'};">${u.role.toUpperCase()}</span>
                     </td>
                     <td style="padding: 12px 10px; text-align: right; font-weight: bold; color: #42a5f5;">$${u.spent.toFixed(2)}</td>
                   </tr>
@@ -745,7 +745,7 @@ async function renderCustomers(container) {
         </div>
       </div>
       <div style="color: var(--text-secondary);">Pedidos: <b>${c.totalOrders}</b></div>
-      <div style="font-weight: bold; color: #00e5c3;">$${c.totalSpent.toFixed(2)}</div>
+      <div style="font-weight: bold; color: #0ea5e9;">$${c.totalSpent.toFixed(2)}</div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         ${c.uid ? `
           <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openRoleModal('${c.uid}', '${c.role}', ${c.discountPercentage})">
@@ -903,7 +903,7 @@ function openCategoryModal(catId = null) {
   const modalContent = document.getElementById('admin-modal-content');
   if (!overlay || !modalContent) return;
 
-  let cat = { id: '', name: '', icon: '📦', color: '#00e5c3', gradient: 'linear-gradient(135deg, #00e5c3, #00b89c)' };
+  let cat = { id: '', name: '', icon: '📦', color: '#0ea5e9', gradient: 'linear-gradient(135deg, #0ea5e9, #00b89c)' };
   if (catId) {
     const found = CATEGORIES.find(c => c.id === catId);
     if (found) cat = JSON.parse(JSON.stringify(found));
@@ -2280,7 +2280,7 @@ function exportOrders() {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `accessplay_pedidos_${new Date().toISOString().slice(0, 10)}.csv`;
+  link.download = `recargaaccessplay_pedidos_${new Date().toISOString().slice(0, 10)}.csv`;
   link.click();
   URL.revokeObjectURL(link.href);
   showAdminToast(`📥 ${orders.length} pedidos exportados a CSV`, 'success');
@@ -2391,7 +2391,7 @@ async function testTelegramConnection() {
     return;
   }
   showAdminToast('Probando conexión...', 'info');
-  const success = await sendTelegramMessage('🎮 <b>¡Conexión Exitosa!</b>\nLas notificaciones de AccessPlay están funcionando correctamente.');
+  const success = await sendTelegramMessage('🤖 <b>¡Conexión Exitosa!</b>\nLas notificaciones de AccessPlay están funcionando correctamente.');
   if (success) {
     showAdminToast('✅ Mensaje de prueba enviado', 'success');
   } else {
@@ -2693,7 +2693,7 @@ function renderSettings(container) {
         <div class="admin-form-group">
           <label class="admin-form-label" style="display: flex; justify-content: space-between; align-items: center;">
             <span>Activar Mensaje al entrar a la página</span>
-            <input type="checkbox" id="setting-announcement-enabled" ${config.announcementEnabled ? 'checked' : ''} style="width: 24px; height: 24px; accent-color: #00e5c3; cursor: pointer;">
+            <input type="checkbox" id="setting-announcement-enabled" ${config.announcementEnabled ? 'checked' : ''} style="width: 24px; height: 24px; accent-color: #0ea5e9; cursor: pointer;">
           </label>
         </div>
         <div class="admin-form-group">
@@ -2717,18 +2717,18 @@ function renderSettings(container) {
     const isOldHtmlString = typeof savedTerms === 'string' && savedTerms.includes('<h4>');
     
     const defaultTerms = [
-      { title: 'Aceptación del Servicio', titleColor: '#00e5c3', desc: 'Al utilizar AccessPlay, registrarte o realizar un pedido, aceptas estar de acuerdo con todos los términos aquí descritos. Nos reservamos el derecho de modificar estos términos en cualquier momento.', descColor: '#e2e8f0' },
+      { title: 'Aceptación del Servicio', titleColor: '#0ea5e9', desc: 'Al utilizar AccessPlay, registrarte o realizar un pedido, aceptas estar de acuerdo con todos los términos aquí descritos. Nos reservamos el derecho de modificar estos términos en cualquier momento.', descColor: '#e2e8f0' },
       { title: 'Responsabilidad de Datos (IDs y Cuentas)', titleColor: '#facc15', desc: 'El cliente es el único responsable de proporcionar correctamente su ID de jugador, Zona o datos de cuenta. AccessPlay no se hace responsable por recargas enviadas a cuentas equivocadas debido a errores tipográficos por parte del usuario.', descColor: '#e2e8f0' },
       { title: 'Tiempos de Procesamiento y Entrega', titleColor: '#60a5fa', desc: 'Las recargas automatizadas toman de 1 a 5 minutos una vez confirmado el pago. Las recargas manuales (internas) o envíos de códigos pueden tardar entre 10 a 30 minutos dentro de nuestro horario de atención. En caso de fallas con los servidores del juego, el tiempo puede extenderse.', descColor: '#e2e8f0' },
       { title: 'Política de Reembolsos', titleColor: '#ef4444', desc: 'Una vez que una recarga o código digital ha sido procesado y entregado con éxito, NO hay devoluciones ni reembolsos bajo ninguna circunstancia. Solo se emitirán reembolsos (a su saldo de Monedero o cuenta bancaria) si el producto no pudo ser entregado por falta de stock o error de nuestra plataforma.', descColor: '#e2e8f0' },
-      { title: 'Uso del Monedero y Revendedores', titleColor: '#10b981', desc: 'El saldo cargado al Monedero (Wallet) no puede ser retirado en efectivo, solo puede ser utilizado para compras dentro de la tienda. Los usuarios con rol de \'Revendedor\' gozan de descuentos exclusivos, pero están sujetos a las mismas políticas de no-reembolso por errores de tipeo de IDs.', descColor: '#e2e8f0' },
+      { title: 'Uso del Monedero y Revendedores', titleColor: '#0ea5e9', desc: 'El saldo cargado al Monedero (Wallet) no puede ser retirado en efectivo, solo puede ser utilizado para compras dentro de la tienda. Los usuarios con rol de \'Revendedor\' gozan de descuentos exclusivos, pero están sujetos a las mismas políticas de no-reembolso por errores de tipeo de IDs.', descColor: '#e2e8f0' },
       { title: 'Prevención de Fraude y Bloqueos', titleColor: '#a855f7', desc: 'Contamos con sistemas Anti-Spam. Cualquier intento de enviar comprobantes falsos, comprobantes reciclados, o hacer múltiples pedidos falsos resultará en el BLOQUEO PERMANENTE de la IP, número de WhatsApp y cuenta del usuario, perdiendo acceso a su Monedero sin derecho a reclamo.', descColor: '#e2e8f0' }
     ];
 
     window.currentTermsEditorData = Array.isArray(savedTerms) 
       ? savedTerms 
       : typeof savedTerms === 'string' && !isOldHtmlString
-        ? [{ title: 'Términos', titleColor: '#00e5c3', desc: savedTerms, descColor: '#e2e8f0' }]
+        ? [{ title: 'Términos', titleColor: '#0ea5e9', desc: savedTerms, descColor: '#e2e8f0' }]
         : defaultTerms;
     
     if (!window.currentTermsEditorData) window.currentTermsEditorData = defaultTerms;
@@ -2756,7 +2756,7 @@ window.renderTermsEditor = function() {
         </div>
         <div style="width: 80px;">
           <label class="admin-form-label">Color</label>
-          <input type="color" class="admin-form-input" value="${t.titleColor || '#00e5c3'}" style="height: 48px; padding: 2px;" onchange="window.currentTermsEditorData[${i}].titleColor = this.value">
+          <input type="color" class="admin-form-input" value="${t.titleColor || '#0ea5e9'}" style="height: 48px; padding: 2px;" onchange="window.currentTermsEditorData[${i}].titleColor = this.value">
         </div>
       </div>
       <div style="display: flex; gap: 10px;">
@@ -2772,7 +2772,7 @@ window.renderTermsEditor = function() {
       </div>
     </div>
   `).join('') + `
-    <button class="btn-secondary" onclick="window.currentTermsEditorData.push({title:'', titleColor:'#00e5c3', desc:'', descColor:'#e2e8f0'}); window.renderTermsEditor()" style="width: 100%; border-style: dashed; padding: 12px; margin-top: 10px; justify-content: center;">+ Agregar Nueva Sección</button>
+    <button class="btn-secondary" onclick="window.currentTermsEditorData.push({title:'', titleColor:'#0ea5e9', desc:'', descColor:'#e2e8f0'}); window.renderTermsEditor()" style="width: 100%; border-style: dashed; padding: 12px; margin-top: 10px; justify-content: center;">+ Agregar Nueva Sección</button>
   `;
 };
 
@@ -2821,7 +2821,7 @@ function checkAdminNotifications() {
       if (currentUnread > lastUnreadMessages) {
         body += `¡Nuevo mensaje de soporte!`;
       }
-      new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>' });
+      new Notification(title, { body, icon: 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🤖</text></svg>' });
     }
   }
 
@@ -2834,7 +2834,7 @@ function renderAdminLogin(container) {
   container.innerHTML = `
     <div style="display:flex; justify-content:center; align-items:center; min-height:100vh; background:var(--bg-body);">
       <div style="background:var(--bg-surface); padding:40px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); width:100%; max-width:400px; text-align:center;">
-        <div style="font-size:3rem; margin-bottom:10px;">🎮</div>
+        <div style="font-size:3rem; margin-bottom:10px;">🤖</div>
         <h2 style="color:var(--text-primary); margin-bottom:30px;">AccessPlay Admin</h2>
         <input type="email" id="admin-user" class="admin-input" placeholder="Correo de Administrador" style="margin-bottom:15px; text-align:center;">
         <input type="password" id="admin-pass" class="admin-input" placeholder="Contraseña" style="margin-bottom:20px; text-align:center;" onkeydown="if(event.key==='Enter')adminLogin()">
@@ -3057,7 +3057,7 @@ function renderCustomersTable(usersList) {
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${user.name || '-'}</td>
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${user.whatsapp || 'N/A'}</td>
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${dateStr}</td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: right; color: #10b981; font-weight: bold; white-space: nowrap;">${wallet.toFixed(2)}</td>
+        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: right; color: #0ea5e9; font-weight: bold; white-space: nowrap;">${wallet.toFixed(2)}</td>
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; white-space: nowrap;">
           <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openRoleModal('${user.uid}', '${user.role || 'cliente'}', ${user.discountPercentage || 0}, ${user.referralLimit || 30})">
             ${(user.role === 'revendedor') ? '💼 Revend (+' + (user.discountPercentage || 0) + '%)' : (user.role === 'influencer' ? '✨ Influencer' : '👤 Cliente')}
@@ -3187,7 +3187,7 @@ function renderWithdrawals(container) {
 
       let statusBadge = '';
       if (w.status === 'pending') statusBadge = '<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">⏳ Pendiente</span>';
-      else if (w.status === 'completed') statusBadge = '<span style="background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">✅ Pagado</span>';
+      else if (w.status === 'completed') statusBadge = '<span style="background: rgba(16, 185, 129, 0.2); color: #0ea5e9; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">✅ Pagado</span>';
       else if (w.status === 'rejected') statusBadge = '<span style="background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">🚫 Rechazado</span>';
 
       return `
@@ -3198,12 +3198,12 @@ function renderWithdrawals(container) {
                       <div style="font-size: 0.75rem; color: var(--text-secondary);">${w.userEmail}</div>
                     </td>
                     <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #3b82f6;">${w.amountPoints} PTS</td>
-                    <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #10b981;">$${w.amountUsd} USD</td>
+                    <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #0ea5e9;">$${w.amountUsd} USD</td>
                     <td style="padding: 12px; font-size: 0.85rem;">${detailsStr}</td>
                     <td style="padding: 12px; text-align: center;">${statusBadge}</td>
                     <td style="padding: 12px; text-align: right;">
                       ${w.status === 'pending' ? `
-                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-bottom: 5px; background: #10b981; border-color: #10b981;" onclick="updateWithdrawalStatus('${w.id}', 'completed', '${w.userId}', ${w.amountPoints})">Aprobar</button>
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-bottom: 5px; background: #0ea5e9; border-color: #0ea5e9;" onclick="updateWithdrawalStatus('${w.id}', 'completed', '${w.userId}', ${w.amountPoints})">Aprobar</button>
                         <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" onclick="updateWithdrawalStatus('${w.id}', 'rejected', '${w.userId}', ${w.amountPoints})">Rechazar</button>
                       ` : ''}
                     </td>
@@ -3270,7 +3270,7 @@ window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, point
     const sortedTx = [...user.transactions].sort((a, b) => b.date - a.date);
     txHtml = sortedTx.map(tx => {
       let sign = tx.amount >= 0 ? '+' : '';
-      let color = tx.amount >= 0 ? '#10b981' : '#ff5252';
+      let color = tx.amount >= 0 ? '#0ea5e9' : '#ff5252';
       let icon = tx.type === 'deposit' ? '💰' : (tx.type === 'purchase' ? '🛒' : '🔄');
       return `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 8px;">
@@ -3291,7 +3291,7 @@ window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, point
     <div style="background: var(--bg-surface); padding: 30px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column;">
       <h3 style="margin-top: 0; margin-bottom: 20px; display: flex; justify-content: space-between;">
         <span>Movimientos de ${user.name || user.email}</span>
-        <span style="color: #10b981;">$${parseFloat(user.wallet || 0).toFixed(2)}</span>
+        <span style="color: #0ea5e9;">$${parseFloat(user.wallet || 0).toFixed(2)}</span>
       </h3>
       <div style="overflow-y: auto; flex: 1; padding-right: 10px;">
         ${txHtml}
@@ -3355,7 +3355,7 @@ window.openCustomerInfoModal = function (uid) {
           </div>
           <div>
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Saldo (Monedero)</div>
-            <div style="font-weight: bold; color: #10b981;">$${wallet.toFixed(2)}</div>
+            <div style="font-weight: bold; color: #0ea5e9;">$${wallet.toFixed(2)}</div>
           </div>
         </div>
 
@@ -3366,7 +3366,7 @@ window.openCustomerInfoModal = function (uid) {
             <div style="font-size: 0.75rem; color: var(--text-secondary);">Pendientes</div>
           </div>
           <div style="flex: 1; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
-            <div style="font-size: 1.5rem; font-weight: bold; color: #10b981;">${completed}</div>
+            <div style="font-size: 1.5rem; font-weight: bold; color: #0ea5e9;">${completed}</div>
             <div style="font-size: 0.75rem; color: var(--text-secondary);">Completadas</div>
           </div>
           <div style="flex: 1; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
@@ -3392,7 +3392,7 @@ window.openRoleModal = function (uid, currentRole, currentDiscount, currentRefer
           <label>Rol</label>
           <select id="role-select" class="form-input" onchange="document.getElementById('discount-group').style.display = this.value === 'revendedor' ? 'block' : 'none'; document.getElementById('referral-limit-group').style.display = this.value === 'influencer' ? 'block' : 'none'">
             <option value="cliente" ${(currentRole !== 'revendedor' && currentRole !== 'influencer') ? 'selected' : ''}>Cliente Normal</option>
-            <option value="influencer" ${currentRole === 'influencer' ? 'selected' : ''}>Influencer Access</option>
+            <option value="influencer" ${currentRole === 'influencer' ? 'selected' : ''}>Influencer AccessPlay</option>
             <option value="revendedor" ${currentRole === 'revendedor' ? 'selected' : ''}>Revendedor</option>
           </select>
         </div>
@@ -3493,7 +3493,7 @@ function renderBanners(container) {
 }
 
 function adminEditBanner(id) {
-  let b = { id: 'banner-' + Date.now(), title: '', desc: '', badge: '', badgeColor: '#00e5c3', imageUrl: '', bgGradient: 'linear-gradient(135deg, #111827, #1f2937)', btnText: 'Ver Más', btnLink: 'catalog', btnColor: 'var(--accent)', btnTextColor: 'var(--bg-deep)' };
+  let b = { id: 'banner-' + Date.now(), title: '', desc: '', badge: '', badgeColor: '#0ea5e9', imageUrl: '', bgGradient: 'linear-gradient(135deg, #111827, #1f2937)', btnText: 'Ver Más', btnLink: 'catalog', btnColor: 'var(--accent)', btnTextColor: 'var(--bg-deep)' };
   let isEdit = false;
 
   if (id) {
@@ -3540,7 +3540,7 @@ function adminEditBanner(id) {
         </div>
         <div class="form-group">
           <label>Color Etiqueta</label>
-          <input type="color" id="banner-badgeColor" class="admin-input" value="${b.badgeColor || '#00e5c3'}">
+          <input type="color" id="banner-badgeColor" class="admin-input" value="${b.badgeColor || '#0ea5e9'}">
         </div>
       </div>
 

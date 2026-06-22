@@ -19,7 +19,7 @@ const appState = {
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('ref')) {
-    localStorage.setItem('accessplay_referredBy', urlParams.get('ref'));
+    localStorage.setItem('recargaaccessplay_referredBy', urlParams.get('ref'));
   }
   if (urlParams.get('recharge') === 'true') {
     appState.currentView = 'wallet-recharge';
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     appState.trackingOrderId = urlParams.get('tracking');
     window.history.replaceState({}, document.title, window.location.pathname);
   }
-  if (localStorage.getItem('accessplay_theme') === 'light') {
+  if (localStorage.getItem('recargaaccessplay_theme') === 'light') {
     document.body.classList.add('light-theme');
   }
   renderApp();
@@ -42,12 +42,12 @@ document.addEventListener('DOMContentLoaded', () => {
 function toggleTheme() {
   document.body.classList.toggle('light-theme');
   const isLight = document.body.classList.contains('light-theme');
-  localStorage.setItem('accessplay_theme', isLight ? 'light' : 'dark');
+  localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
 }
 
 // ── Render ──
 function showAnnouncementModal(message) {
-  if (sessionStorage.getItem('accessplay_announcement_seen') === 'true') return;
+  if (sessionStorage.getItem('recargaaccessplay_announcement_seen') === 'true') return;
   
   const modalContainer = document.createElement('div');
   modalContainer.id = 'announcement-modal-container';
@@ -55,7 +55,7 @@ function showAnnouncementModal(message) {
     <div class="modal-overlay active" style="z-index: 9999; backdrop-filter: blur(5px);">
       <div class="modal payment-flow-modal" style="text-align: center; max-width: 500px; border: 1px solid rgba(0, 229, 195, 0.3); background: var(--bg-card); padding: 35px 25px;">
         <div style="font-size: 3.5rem; margin-bottom: 15px; text-shadow: 0 0 15px rgba(0, 229, 195, 0.4);">📢</div>
-        <h3 style="color: #00e5c3; margin-bottom: 15px; font-size: 1.5rem;">Aviso Importante</h3>
+        <h3 style="color: #0ea5e9; margin-bottom: 15px; font-size: 1.5rem;">Aviso Importante</h3>
         <div style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6; font-size: 1.05rem; text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
           ${message}
         </div>
@@ -68,7 +68,7 @@ function showAnnouncementModal(message) {
   document.body.appendChild(modalContainer);
 
   document.getElementById('announcement-modal-btn').addEventListener('click', () => {
-    sessionStorage.setItem('accessplay_announcement_seen', 'true');
+    sessionStorage.setItem('recargaaccessplay_announcement_seen', 'true');
     const overlay = modalContainer.querySelector('.modal-overlay');
     overlay.classList.remove('active');
     setTimeout(() => {
@@ -84,7 +84,7 @@ function renderApp() {
   if (!window.DATA_LOADED) {
     app.innerHTML = `
       <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <div class="tracking-spinner" style="font-size: 3rem;">🎮</div>
+        <div class="tracking-spinner" style="font-size: 3rem;">🤖</div>
         <h2 style="margin-top: 20px; color: var(--accent);">Conectando...</h2>
       </div>
     `;
@@ -107,7 +107,7 @@ function renderApp() {
     return;
   }
 
-  const termsAccepted = sessionStorage.getItem('accessplay_terms_accepted');
+  const termsAccepted = sessionStorage.getItem('recargaaccessplay_terms_accepted');
   const termsHtml = !termsAccepted ? (typeof renderTermsModal === 'function' ? renderTermsModal() : '') : '';
 
   if (appState.currentView === 'home') {
@@ -361,7 +361,7 @@ function selectPayment(methodId) {
   const screenshotGroup = document.getElementById('screenshot-group');
   
   if (methodId === 'wallet') {
-    if (container) container.innerHTML = `<div class="payment-details-card" style="border-color: #10b981;">
+    if (container) container.innerHTML = `<div class="payment-details-card" style="border-color: #0ea5e9;">
       <h4>💰 Pago con Monedero</h4>
       <p>El monto será descontado automáticamente de tu saldo actual.</p>
     </div>`;
@@ -426,7 +426,7 @@ function updateOrderSummary() {
       const bs = usdToBs(amount);
       const isUsd = method.currency === 'usd';
       const totalHtml = isUsd 
-        ? `<div class="order-summary-row total" style="color: #00e5c3;"><span>Total a pagar (USD)</span><span>$${amount.toFixed(2)} USD</span></div>`
+        ? `<div class="order-summary-row total" style="color: #0ea5e9;"><span>Total a pagar (USD)</span><span>$${amount.toFixed(2)} USD</span></div>`
         : `<div class="order-summary-row total"><span>Total a pagar (Bs.)</span><span>Bs. ${formatBs(bs)}</span></div>`;
       
       summary.innerHTML = `
@@ -965,7 +965,7 @@ function showOrderConfirmation(order) {
           <div class="pf-step-content" id="pf-content-3">
             <div class="pf-success">
               <div class="pf-check-circle">
-                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#00e5c3" stroke-width="2.5">
+                <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#0ea5e9" stroke-width="2.5">
                   <path d="M20 6L9 17l-5-5"/>
                 </svg>
               </div>
@@ -1035,7 +1035,7 @@ function advanceToStep(step) {
 function createConfetti() {
   const container = document.getElementById('pf-confetti');
   if (!container) return;
-  const colors = ['#00e5c3', '#ff6b4a', '#3d8bfd', '#f5c518', '#e040fb', '#4caf50'];
+  const colors = ['#0ea5e9', '#ff6b4a', '#3d8bfd', '#f5c518', '#e040fb', '#4caf50'];
   for (let i = 0; i < 40; i++) {
     const confetti = document.createElement('div');
     confetti.className = 'confetti-piece';
@@ -1786,18 +1786,18 @@ window.verifyGameId = async function(productId) {
 
       if (name && typeof name === 'string' && name.trim() !== '' && !name.includes('@')) {
         appState.verifiedPlayerName = name;
-        resultDiv.innerHTML = `<span style="color: #00e5c3;">✅ Nombre: <b>${name}</b></span>`;
+        resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${name}</b></span>`;
       } else {
         // Fallback inteligente: buscar cualquier string que no sea un correo y tenga longitud de nombre
         let fallbackName = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && !v.includes('@'));
         
         if (fallbackName) {
            appState.verifiedPlayerName = fallbackName;
-           resultDiv.innerHTML = `<span style="color: #00e5c3;">✅ Nombre: <b>${fallbackName}</b></span>`;
+           resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${fallbackName}</b></span>`;
         } else {
            // Imprimir un mini-resumen de los datos recibidos para que el usuario pueda decirnos qué llaves llegaron
            const availableKeys = Object.keys(src).filter(k => typeof src[k] === 'string' || typeof src[k] === 'number').map(k => `${k}: ${src[k]}`).join(', ');
-           resultDiv.innerHTML = `<span style="color: #00e5c3; font-size: 0.8rem;">✅ Encontrado: ${availableKeys.substring(0, 100)}...</span>`;
+           resultDiv.innerHTML = `<span style="color: #0ea5e9; font-size: 0.8rem;">✅ Encontrado: ${availableKeys.substring(0, 100)}...</span>`;
         }
       }
     } else {
@@ -1833,9 +1833,9 @@ function initPublicAuth() {
     const authNavItem = document.getElementById('auth-nav-item');
     
     // If the user is the admin, don't mix them into the public UI wallet (or we can just show "Admin")
-    if (user && user.email === 'admin@accesplay.com') {
+    if (user && user.email === 'adminaccessplay@gmail.com') {
        if (authNavItem) {
-          authNavItem.innerHTML = `<a onclick="window.location.href='/admin'" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer;">Ir al Panel</a>`;
+          authNavItem.innerHTML = `<a onclick="window.location.href='/admin'" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Ir al Panel</a>`;
        }
        return;
     }
@@ -1852,7 +1852,7 @@ function initPublicAuth() {
         }
 
         if (authNavItem) {
-          authNavItem.innerHTML = `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer;">Mi Perfil ($${Number(userProfile.wallet || 0).toFixed(2)})</a>`;
+          authNavItem.innerHTML = `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Mi Perfil ($${Number(userProfile.wallet || 0).toFixed(2)})</a>`;
         }
       });
     } else {
@@ -1933,7 +1933,7 @@ function registerWithEmail() {
     const user = result.user;
     user.updateProfile({ displayName: name });
     
-    const referredBy = localStorage.getItem('accessplay_referredBy') || null;
+    const referredBy = localStorage.getItem('recargaaccessplay_referredBy') || null;
     firebase.database().ref('users/' + user.uid).set({
       email: email,
       name: name,
@@ -1977,12 +1977,12 @@ function authWithGoogle() {
     if(modal) modal.remove();
     
     const user = result.user;
-    if (user.email === 'admin@accesplay.com') return; // Admin bypass
+    if (user.email === 'adminaccessplay@gmail.com') return; // Admin bypass
     
     // Ensure user profile exists
     firebase.database().ref('users/' + user.uid).once('value', (snap) => {
       if (!snap.exists()) {
-        const referredBy = localStorage.getItem('accessplay_referredBy') || null;
+        const referredBy = localStorage.getItem('recargaaccessplay_referredBy') || null;
         firebase.database().ref('users/' + user.uid).set({
           email: user.email,
           name: user.displayName,
@@ -2011,7 +2011,7 @@ function showProfileModal() {
         
         <div style="background: var(--bg-card); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center; border: 1px solid var(--border-color);">
           <div style="font-size: 0.9rem; color: var(--text-secondary);">Saldo Disponible (Monedero)</div>
-          <div style="font-size: 2.5rem; font-weight: bold; color: #10b981; margin-top: 10px;">$${userProfile?.wallet || 0}</div>
+          <div style="font-size: 2.5rem; font-weight: bold; color: #0ea5e9; margin-top: 10px;">$${userProfile?.wallet || 0}</div>
         </div>
         
         <div style="margin-bottom: 20px;">
@@ -2158,14 +2158,14 @@ function switchDashboardTab(tab) {
   if (!activeBtn || !completedBtn || !container) return;
 
   if (tab === 'active') {
-    activeBtn.style.color = '#10b981';
-    activeBtn.style.borderBottom = '2px solid #10b981';
+    activeBtn.style.color = '#0ea5e9';
+    activeBtn.style.borderBottom = '2px solid #0ea5e9';
     completedBtn.style.color = 'var(--text-secondary)';
     completedBtn.style.borderBottom = 'none';
     container.innerHTML = typeof renderDashboardOrders === 'function' ? renderDashboardOrders(dashboardOrders.active, 'active') : '';
   } else {
-    completedBtn.style.color = '#10b981';
-    completedBtn.style.borderBottom = '2px solid #10b981';
+    completedBtn.style.color = '#0ea5e9';
+    completedBtn.style.borderBottom = '2px solid #0ea5e9';
     activeBtn.style.color = 'var(--text-secondary)';
     activeBtn.style.borderBottom = 'none';
     container.innerHTML = typeof renderDashboardOrders === 'function' ? renderDashboardOrders(dashboardOrders.completed, 'completed') : '';
@@ -2189,7 +2189,7 @@ function renderDashboardSavedIds() {
     <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
       <div style="text-align: left;">
         <div style="font-weight: bold; font-size: 0.95rem;">${item.gameName || 'Juego'}</div>
-        <div style="font-size: 0.8rem; color: #10b981;">ID: ${item.uid} ${item.zoneId ? '(Zona: ' + item.zoneId + ')' : ''}</div>
+        <div style="font-size: 0.8rem; color: #0ea5e9;">ID: ${item.uid} ${item.zoneId ? '(Zona: ' + item.zoneId + ')' : ''}</div>
       </div>
       <button onclick="deleteSavedId(${index})" style="background:none; border:none; color: #ff5252; cursor:pointer; font-size: 1.2rem;" title="Eliminar">🗑️</button>
     </div>

@@ -14,15 +14,15 @@ let EXCHANGE_RATE = {
 // ── Site Settings ──
 let SITE_SETTINGS = {
   whatsapp: '+584120000000',
-  instagram: 'https://instagram.com/accessplay',
-  telegram: 'https://t.me/accessplay',
+  instagram: 'https://instagram.com/recargaaccessplay',
+  telegram: 'https://t.me/recargaaccessplay',
   schedule: 'Lunes a Domingo 8:00 AM – 11:00 PM',
   announcementEnabled: false,
   announcementMessage: '¡Bienvenido a AccessPlay! Estamos procesando pedidos con normalidad.',
   termsAndConditions: [
     { 
       title: 'Aceptación del Servicio', 
-      titleColor: '#00e5c3', 
+      titleColor: '#0ea5e9', 
       desc: 'Al utilizar AccessPlay, registrarte o realizar un pedido, aceptas estar de acuerdo con todos los términos aquí descritos. Nos reservamos el derecho de modificar estos términos en cualquier momento.', 
       descColor: '#e2e8f0' 
     },
@@ -46,7 +46,7 @@ let SITE_SETTINGS = {
     },
     { 
       title: 'Uso del Monedero y Revendedores', 
-      titleColor: '#10b981', 
+      titleColor: '#0ea5e9', 
       desc: 'El saldo cargado al Monedero (Wallet) no puede ser retirado en efectivo, solo puede ser utilizado para compras dentro de la tienda. Los usuarios con rol de "Revendedor" gozan de descuentos exclusivos, pero están sujetos a las mismas políticas de no-reembolso por errores de tipeo de IDs.', 
       descColor: '#e2e8f0' 
     },
@@ -92,7 +92,7 @@ let LANDING_CONFIG = {
 };
 
 // ── Messaging System ──
-let MESSAGES = JSON.parse(localStorage.getItem('accessplay_messages') || '[]');
+let MESSAGES = JSON.parse(localStorage.getItem('recargaaccessplay_messages') || '[]');
 
 // ── Payment Methods ──
 let PAYMENT_METHODS = [];
@@ -199,7 +199,7 @@ let BANNERS = [
   {
     id: 'banner-1',
     badge: 'NUEVO SERVICIO',
-    badgeColor: '#00e5c3',
+    badgeColor: '#0ea5e9',
     title: 'Recargas Mobile Legends',
     desc: 'Ya puedes recargar diamantes con tu Player ID y Zone ID. ¡Entrega rápida y segura!',
     btnText: 'Ver Paquetes 🚀',
@@ -225,7 +225,7 @@ let BANNERS = [
   {
     id: 'banner-3',
     badge: 'RÁPIDO Y SEGURO',
-    badgeColor: '#00e5c3',
+    badgeColor: '#0ea5e9',
     title: 'Atención 24/7',
     desc: 'Nuestro sistema procesa tus pedidos y estamos aquí para ayudarte en cualquier momento.',
     btnText: 'Comprar ahora 🔥',
@@ -309,7 +309,7 @@ function initFirebaseData() {
           SPAM_TRACKER.attempts = data.attempts || [];
           SPAM_TRACKER.blocked = data.blocked || [];
         }
-        else if (key === 'order_counter') localStorage.setItem('accessplay_order_counter', data.toString());
+        else if (key === 'order_counter') localStorage.setItem('recargaaccessplay_order_counter', data.toString());
         else if (key === 'banners') {
           if (!data) BANNERS = [];
           else if (Array.isArray(data)) BANNERS = data.filter(Boolean);
@@ -863,7 +863,7 @@ async function sendTelegramPhoto(photoBlob, caption, inlineKeyboard) {
 }
 
 function buildOrderTelegramMessage(order) {
-  let msg = `🎮 <b>NUEVO PEDIDO — ${order.id}</b>\n`;
+  let msg = `🤖 <b>NUEVO PEDIDO — ${order.id}</b>\n`;
   msg += `👤 <b>Jugador:</b> ${order.playerName || 'ㅤ'}\n`;
   msg += `🆔 <b>ID:</b> <code>${order.gameId || order.accountEmail || 'N/A'}</code>\n`;
   msg += `🔥 <b>Producto:</b> ${order.productName} (${order.packageLabel})\n`;
@@ -883,7 +883,7 @@ function buildOrderTelegramMessage(order) {
 }
 
 function buildOrderKeyboard(orderId) {
-  const baseUrl = (typeof window !== 'undefined' && window.location.origin) ? window.location.origin : 'https://accessplay.com';
+  const baseUrl = (typeof window !== 'undefined' && window.location.origin) ? window.location.origin : 'https://recargaaccessplay.com';
   return [
     [
       { text: '✅ Aprobar', url: `${baseUrl}/admin.html?action=approve&order=${orderId}` },

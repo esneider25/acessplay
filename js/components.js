@@ -7,8 +7,8 @@ function renderNavbar() {
     <nav class="navbar" id="navbar">
       <div class="navbar-inner">
         <div class="logo" onclick="navigateTo('home')">
-          <span class="logo-icon">🎮</span>
-          <span class="logo-text">Recarga<span>Access</span></span>
+          <span class="logo-icon">🤖</span>
+          <span class="logo-text">Access<span style="color: #fbbf24;">Play</span></span>
         </div>
         <ul class="nav-links" id="nav-links">
           <li><a onclick="navigateTo('home')" class="active" data-section="home">Inicio</a></li>
@@ -18,7 +18,7 @@ function renderNavbar() {
           <li><a onclick="navigateTo('lookup')" data-section="lookup">🔍 Mis Pedidos</a></li>
           <li id="auth-nav-item">
             ${(typeof currentUser !== 'undefined' && currentUser) 
-              ? `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer;">Mi Perfil ($${Number((typeof userProfile !== 'undefined' && userProfile && userProfile.wallet) ? userProfile.wallet : 0).toFixed(2)})</a>`
+              ? `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Mi Perfil ($${Number((typeof userProfile !== 'undefined' && userProfile && userProfile.wallet) ? userProfile.wallet : 0).toFixed(2)})</a>`
               : `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer;">Iniciar Sesión</a>`
             }
           </li>
@@ -334,8 +334,8 @@ function renderProductDetail(productId) {
     const idsToShow = relevantIds.length > 0 ? relevantIds : userProfile.savedIds;
     
     savedIdsHtml = `
-      <div style="margin-bottom: 20px; padding: 15px; background: rgba(16, 185, 129, 0.05); border: 1px dashed #10b981; border-radius: 8px;">
-        <div style="font-size: 0.85rem; color: #10b981; margin-bottom: 10px; font-weight: bold;">Autocompletar con tus cuentas guardadas:</div>
+      <div style="margin-bottom: 20px; padding: 15px; background: rgba(16, 185, 129, 0.05); border: 1px dashed #0ea5e9; border-radius: 8px;">
+        <div style="font-size: 0.85rem; color: #0ea5e9; margin-bottom: 10px; font-weight: bold;">Autocompletar con tus cuentas guardadas:</div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           ${idsToShow.map(id => `
             <button type="button" class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; background: rgba(255,255,255,0.05);" onclick="fillSavedId('${id.uid}', '${id.zoneId || ''}')">
@@ -433,7 +433,7 @@ function renderProductDetail(productId) {
     'game-id': { text: '🎮 Recarga por ID', color: '#42a5f5' },
     'game-id-zone': { text: '🎮 Recarga por ID + Zona', color: '#42a5f5' },
     'account': { text: '🔐 Recarga Interna', color: '#e040fb' },
-    'code': { text: '🎫 Entrega por Código', color: '#00e5c3' }
+    'code': { text: '🎫 Entrega por Código', color: '#0ea5e9' }
   };
   const typeInfo = typeLabels[productType] || typeLabels['game-id'];
 
@@ -485,9 +485,9 @@ function renderProductDetail(productId) {
               </div>
             `).join('')}
             ${(typeof currentUser !== 'undefined' && currentUser && typeof userProfile !== 'undefined' && userProfile && userProfile.wallet > 0) ? `
-              <div class="payment-option" onclick="selectPayment('wallet')" id="pay-wallet" style="border-color: #10b981;">
+              <div class="payment-option" onclick="selectPayment('wallet')" id="pay-wallet" style="border-color: #0ea5e9;">
                 <div class="payment-option-icon">💰</div>
-                <div class="payment-option-name" style="color: #10b981;">Monedero ($${userProfile.wallet.toFixed(2)})</div>
+                <div class="payment-option-name" style="color: #0ea5e9;">Monedero ($${userProfile.wallet.toFixed(2)})</div>
               </div>
             ` : ''}
           </div>
@@ -509,7 +509,7 @@ function renderProductDetail(productId) {
           <div class="form-hint">📷 Sube la captura de tu pago para agilizar el proceso</div>
         </div>
         <button class="btn-primary" id="btn-submit" onclick="submitOrder()" disabled>
-          🎮 Confirmar Pedido
+          🤖 Confirmar Pedido
         </button>
       </div>
     </section>
@@ -599,7 +599,7 @@ function renderOrderSummary(product, pkg, method, discount = null) {
       </div>
     `;
     totalHtml = `
-      <div class="order-summary-row total" style="color: #00e5c3;">
+      <div class="order-summary-row total" style="color: #0ea5e9;">
         <span>Total a pagar (USD)</span>
         <span>$${finalUsd.toFixed(2)} USD</span>
       </div>
@@ -942,7 +942,7 @@ function renderFooter() {
         <div class="footer-grid">
           <div class="footer-brand">
             <div class="footer-logo">
-              <span>🎮</span>
+              <span>🤖</span>
               <span class="footer-logo-text">AccessPlay</span>
             </div>
             <p class="footer-brand-desc">La plataforma #1 de recargas digitales en Venezuela. Juegos, gift cards, streaming y más.</p>
@@ -999,7 +999,7 @@ function renderTermsModal() {
   if (Array.isArray(termsData)) {
     termsHtmlContent = termsData.map((t, i) => `
       <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px dashed rgba(255,255,255,0.05);">
-        <h4 style="color: ${t.titleColor || '#00e5c3'}; margin-bottom: 10px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
+        <h4 style="color: ${t.titleColor || '#0ea5e9'}; margin-bottom: 10px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px;">
           <span style="background: rgba(0, 229, 195, 0.1); padding: 4px 10px; border-radius: 8px; font-size: 0.9rem;">${i + 1}</span> 
           ${t.title}
         </h4>
@@ -1037,7 +1037,7 @@ function renderTermsModal() {
 }
 
 window.acceptTerms = function() {
-  sessionStorage.setItem('accessplay_terms_accepted', 'true');
+  sessionStorage.setItem('recargaaccessplay_terms_accepted', 'true');
   const container = document.getElementById('terms-modal-container');
   if (container) {
     const overlay = container.querySelector('.modal-overlay');
@@ -1067,7 +1067,7 @@ function renderSupportWidget() {
       <div class="support-chat" id="support-chat">
         <div class="support-chat-header">
           <div class="support-chat-header-info">
-            <div class="support-chat-avatar">🎮</div>
+            <div class="support-chat-avatar">🤖</div>
             <div>
               <div class="support-chat-name">AccessPlay Soporte</div>
               <div class="support-chat-status"><span class="support-online-dot"></span> En línea</div>
@@ -1144,7 +1144,7 @@ function renderWalletRecharge() {
     <section class="game-detail" id="wallet-recharge-section">
       <button class="game-detail-back" onclick="navigateTo('home')">← Volver al inicio</button>
       <div class="game-detail-header" style="justify-content: center; text-align: center; display: flex; flex-direction: column; align-items: center;">
-        <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg, #10b981, #059669);display:flex;align-items:center;justify-content:center;font-size:2.5rem; margin-bottom: 15px;">💰</div>
+        <div style="width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg, #0ea5e9, #0284c7);display:flex;align-items:center;justify-content:center;font-size:2.5rem; margin-bottom: 15px;">💰</div>
         <div>
           <h2>Recargar Monedero</h2>
           <p class="game-detail-desc" style="max-width: 500px; margin: 0 auto;">Agrega saldo a tu cuenta para realizar compras más rápidas sin tener que verificar el pago cada vez.</p>
@@ -1187,7 +1187,7 @@ function renderWalletRecharge() {
           </div>
         </div>
         <button class="btn-primary" id="btn-submit" onclick="submitWalletRecharge()" disabled>
-          🎮 Confirmar Recarga
+          🤖 Confirmar Recarga
         </button>
       </div>
     </section>
@@ -1242,9 +1242,9 @@ function renderDashboard() {
         </div>
 
         <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(16, 185, 129, 0.3); padding: 25px; border-radius: 16px; position: relative; overflow: hidden;">
-          <div style="position: absolute; bottom: -50px; left: -50px; width: 100px; height: 100px; background: #10b981; filter: blur(50px); opacity: 0.2;"></div>
+          <div style="position: absolute; bottom: -50px; left: -50px; width: 100px; height: 100px; background: #0ea5e9; filter: blur(50px); opacity: 0.2;"></div>
           <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">Saldo Monedero</div>
-          <div style="font-size: 2.8rem; font-weight: 800; color: #10b981; text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);">\$${wallet.toFixed(2)}</div>
+          <div style="font-size: 2.8rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);">\$${wallet.toFixed(2)}</div>
           <div style="margin-top: 15px; display: flex; gap: 10px;">
             <button onclick="startWalletRecharge()" class="btn-primary" style="flex: 1; padding: 8px;">+ Recargar</button>
           </div>
@@ -1252,7 +1252,7 @@ function renderDashboard() {
 
         <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(59, 130, 246, 0.3); padding: 25px; border-radius: 16px; position: relative; overflow: hidden;">
           <div style="position: absolute; bottom: -50px; right: -50px; width: 100px; height: 100px; background: #3b82f6; filter: blur(50px); opacity: 0.2;"></div>
-          <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">Access Points</div>
+          <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">AccessPlay Points</div>
           <div style="font-size: 2.5rem; font-weight: 800; color: #3b82f6; text-shadow: 0 0 15px rgba(59, 130, 246, 0.3);">${points}</div>
           <div style="margin-top: 15px; display: flex; gap: 10px;">
             <button onclick="if(typeof redeemPoints==='function')redeemPoints()" class="btn-secondary" style="flex: 1; padding: 8px; border-color: #3b82f6; color: #3b82f6;">Canjear por $1</button>
@@ -1267,12 +1267,12 @@ function renderDashboard() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px;">
               <h2 style="margin: 0; font-size: 1.5rem;">Mis Pedidos</h2>
               <div style="display: flex; gap: 15px;">
-                <button id="tab-active-orders" onclick="switchDashboardTab('active')" style="background:none; border:none; color: #10b981; border-bottom: 2px solid #10b981; padding-bottom: 5px; cursor: pointer; font-weight: bold;">En Proceso</button>
+                <button id="tab-active-orders" onclick="switchDashboardTab('active')" style="background:none; border:none; color: #0ea5e9; border-bottom: 2px solid #0ea5e9; padding-bottom: 5px; cursor: pointer; font-weight: bold;">En Proceso</button>
                 <button id="tab-completed-orders" onclick="switchDashboardTab('completed')" style="background:none; border:none; color: var(--text-secondary); padding-bottom: 5px; cursor: pointer; font-weight: bold;">Completados</button>
               </div>
             </div>
             <div id="dashboard-orders-container" style="min-height: 200px;">
-              <div style="text-align:center; padding: 40px;"><span class="tracking-spinner" style="display:inline-block; width:24px; height:24px; border:3px solid #10b981; border-bottom-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></span></div>
+              <div style="text-align:center; padding: 40px;"><span class="tracking-spinner" style="display:inline-block; width:24px; height:24px; border:3px solid #0ea5e9; border-bottom-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></span></div>
             </div>
           </div>
           
@@ -1319,7 +1319,7 @@ function renderDashboardOrders(orders, type) {
   return orders.map(order => {
     let statusColor = '#f59e0b';
     if (order.status === 'processing') statusColor = '#3b82f6';
-    if (order.status === 'completed') statusColor = '#10b981';
+    if (order.status === 'completed') statusColor = '#0ea5e9';
     if (order.status === 'rejected') statusColor = '#ef4444';
 
     return `
@@ -1327,7 +1327,7 @@ function renderDashboardOrders(orders, type) {
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
         <div>
           <span style="font-weight: 800; color: #fff; font-size: 1.1rem;">${order.productName || 'Producto'}</span>
-          <div style="color: #10b981; font-weight: bold; margin-top: 5px;">${order.packageLabel || ''}</div>
+          <div style="color: #0ea5e9; font-weight: bold; margin-top: 5px;">${order.packageLabel || ''}</div>
         </div>
         <div style="text-align: right;">
            <span style="background: ${statusColor}20; color: ${statusColor}; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; border: 1px solid ${statusColor}40;">${order.status.toUpperCase()}</span>
@@ -1340,7 +1340,7 @@ function renderDashboardOrders(orders, type) {
       
       ${type === 'active' ? `
       <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px; font-weight: bold;">
-        <span style="color: ${order.status === 'pending' || order.status === 'processing' ? '#10b981' : 'var(--text-secondary)'}">1. Recibido</span>
+        <span style="color: ${order.status === 'pending' || order.status === 'processing' ? '#0ea5e9' : 'var(--text-secondary)'}">1. Recibido</span>
         <span style="color: ${order.status === 'processing' ? '#3b82f6' : 'var(--text-secondary)'}">2. Procesando</span>
         <span>3. Entregado</span>
       </div>
@@ -1365,7 +1365,7 @@ function renderDashboardTransactions() {
   
   container.innerHTML = sortedTx.map(tx => {
     let sign = tx.amount >= 0 ? '+' : '';
-    let color = tx.amount >= 0 ? '#10b981' : '#ff5252';
+    let color = tx.amount >= 0 ? '#0ea5e9' : '#ff5252';
     let icon = tx.type === 'deposit' ? '💰' : (tx.type === 'purchase' ? '🛒' : '🔄');
     return `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 8px;">
@@ -1386,5 +1386,5 @@ function renderDashboardTransactions() {
 function toggleTheme() {
   document.body.classList.toggle('light-theme');
   const isLight = document.body.classList.contains('light-theme');
-  localStorage.setItem('accessplay_theme', isLight ? 'light' : 'dark');
+  localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
 }

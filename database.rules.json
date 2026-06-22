@@ -36,6 +36,10 @@
       ".read": "auth != null",
       ".write": "auth != null"
     },
+    "withdrawals": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
     "telegram_config": { 
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
