@@ -1115,15 +1115,7 @@ function renderDynamicQuickActions() {
 }
 
 function renderBubbles() {
-  let bubbles = '';
-  for (let i = 0; i < 15; i++) {
-    const size = Math.random() * 60 + 10;
-    const left = Math.random() * 100;
-    const delay = Math.random() * 20;
-    const duration = Math.random() * 15 + 15;
-    bubbles += `<div class="bubble" style="width:${size}px;height:${size}px;left:${left}%;animation-delay:${delay}s;animation-duration:${duration}s;"></div>`;
-  }
-  return bubbles;
+  return ''; // Desactivado por diseño de AccessPlay
 }
 
 // ── Wallet Recharge Page ──
