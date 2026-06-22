@@ -8,25 +8,25 @@
 
 /* ── CSS Variables ── */
 :root {
-  --bg-deep:        #060d1a;
-  --bg-ocean:       #0a1628;
-  --bg-surface:     #0f1f38;
-  --bg-card:        rgba(15, 31, 56, 0.7);
-  --bg-card-hover:  rgba(20, 42, 75, 0.85);
-  --accent:         #0ea5e9;
-  --accent-light:   #33ffdf;
-  --accent-dim:     #00b89c;
-  --accent-glow:    rgba(0, 229, 195, 0.25);
-  --coral:          #ff6b4a;
-  --coral-light:    #ff8a6e;
-  --coral-glow:     rgba(255, 107, 74, 0.25);
-  --electric:       #3d8bfd;
-  --electric-glow:  rgba(61, 139, 253, 0.20);
-  --text-primary:   #e8f0fc;
-  --text-secondary: #8fa4c4;
-  --text-muted:     #5a7099;
-  --border:         rgba(100, 150, 220, 0.12);
-  --border-active:  rgba(0, 229, 195, 0.4);
+  --bg-deep:        #030712;
+  --bg-ocean:       #0b0f19;
+  --bg-surface:     #111827;
+  --bg-card:        rgba(17, 24, 39, 0.7);
+  --bg-card-hover:  rgba(31, 41, 55, 0.85);
+  --accent:         #3b82f6;
+  --accent-light:   #60a5fa;
+  --accent-dim:     #2563eb;
+  --accent-glow:    rgba(59, 130, 246, 0.25);
+  --coral:          #8b5cf6;
+  --coral-light:    #a78bfa;
+  --coral-glow:     rgba(139, 92, 246, 0.25);
+  --electric:       #6366f1;
+  --electric-glow:  rgba(99, 102, 241, 0.20);
+  --text-primary:   #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --border:         rgba(139, 92, 246, 0.15);
+  --border-active:  rgba(59, 130, 246, 0.4);
   --radius-sm:  8px;
   --radius-md:  14px;
   --radius-lg:  20px;
@@ -39,20 +39,20 @@
 }
 
 body.light-theme {
-  --bg-deep:        #f0f4f8;
-  --bg-ocean:       #e2e8f0;
+  --bg-deep:        #f8fafc;
+  --bg-ocean:       #f1f5f9;
   --bg-surface:     #ffffff;
   --bg-card:        rgba(255, 255, 255, 0.9);
   --bg-card-hover:  rgba(255, 255, 255, 1);
-  --text-primary:   #1a202c;
-  --text-secondary: #4a5568;
-  --text-muted:     #718096;
-  --border:         rgba(0, 0, 0, 0.1);
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #64748b;
+  --border:         rgba(15, 23, 42, 0.1);
   --shadow-card:    0 8px 32px rgba(0, 0, 0, 0.08);
-  --accent:         #00a88f;
-  --accent-light:   #00ccad;
-  --accent-dim:     #008f7a;
-  --accent-glow:    rgba(0, 168, 143, 0.2);
+  --accent:         #2563eb;
+  --accent-light:   #3b82f6;
+  --accent-dim:     #1d4ed8;
+  --accent-glow:    rgba(37, 99, 235, 0.2);
 }
 
 /* ── Reset ── */
@@ -78,14 +78,20 @@ body {
 .bg-ocean-grid {
   position: fixed; inset: 0; z-index: 0;
   overflow: hidden; pointer-events: none;
+  background-color: var(--bg-deep);
+  background-image: 
+    linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
 }
 .bg-ocean-grid::before {
   content: '';
   position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(0, 229, 195, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(61, 139, 253, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 80%, rgba(255, 107, 74, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
   animation: oceanDrift 25s ease-in-out infinite alternate;
 }
 @keyframes oceanDrift {
@@ -95,19 +101,7 @@ body {
   100% { transform: translate(-10px, 30px) rotate(0.5deg); }
 }
 
-.bubble {
-  position: fixed; border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(0, 229, 195, 0.12), transparent);
-  border: 1px solid rgba(0, 229, 195, 0.06);
-  pointer-events: none; z-index: 0;
-  animation: float linear infinite;
-}
-@keyframes float {
-  0%   { transform: translateY(100vh) scale(0); opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
-}
+/* Burbujas eliminadas */
 
 /* ── Layout ── */
 .app-container { position: relative; z-index: 1; min-height: 100vh; }
@@ -259,17 +253,17 @@ body {
 }
 .hero-orb-1 {
   width: 400px; height: 400px; top: -100px; left: -100px;
-  background: radial-gradient(circle, rgba(0, 229, 195, 0.2), transparent);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent);
   animation: orbFloat 15s ease-in-out infinite alternate;
 }
 .hero-orb-2 {
   width: 300px; height: 300px; bottom: -50px; right: -50px;
-  background: radial-gradient(circle, rgba(255, 107, 74, 0.15), transparent);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent);
   animation: orbFloat 20s ease-in-out infinite alternate-reverse;
 }
 .hero-orb-3 {
   width: 250px; height: 250px; top: 50%; left: 60%;
-  background: radial-gradient(circle, rgba(61, 139, 253, 0.12), transparent);
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent);
   animation: orbFloat 18s ease-in-out infinite alternate;
 }
 @keyframes orbFloat {
