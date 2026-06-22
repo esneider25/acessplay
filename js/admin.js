@@ -83,8 +83,8 @@ function initAdminApp() {
     <div class="admin-container">
       <aside class="admin-sidebar">
         <div class="admin-logo">
-          <span class="admin-logo-icon">🤖</span>
-          <span class="admin-logo-text">AccessPlay Admin</span>
+          <img src="img/logo.png" alt="AccessPlay Admin" style="height: 40px; width: auto; object-fit: contain; margin-right: 10px;">
+          <span class="admin-logo-text" style="font-size: 1.1rem;">Admin</span>
         </div>
         <ul class="admin-nav">
           <li class="admin-nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">

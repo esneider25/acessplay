@@ -7,8 +7,7 @@ function renderNavbar() {
     <nav class="navbar" id="navbar">
       <div class="navbar-inner">
         <div class="logo" onclick="navigateTo('home')">
-          <span class="logo-icon">🤖</span>
-          <span class="logo-text">Access<span style="color: #fbbf24;">Play</span></span>
+          <img src="img/logo.png" alt="AccessPlay" style="height: 45px; width: auto; object-fit: contain;">
         </div>
         <ul class="nav-links" id="nav-links">
           <li><a onclick="navigateTo('home')" class="active" data-section="home">Inicio</a></li>
