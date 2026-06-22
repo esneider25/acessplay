@@ -2,31 +2,31 @@
   "rules": {
     "products": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "categories": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "exchange_rate": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "payment_methods": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "settings": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "landing_config": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "banners": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "messages": { 
       ".read": "true", 
@@ -37,12 +37,12 @@
       ".write": "auth != null"
     },
     "telegram_config": { 
-      ".read": "auth != null && auth.token.email === 'adminaccess@gmail.com'",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "discounts": { 
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "spam_tracker": { 
       ".read": "true", 
@@ -54,20 +54,20 @@
     },
     "api_configs": { 
       ".read": "auth != null",
-      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "users": {
       ".read": "auth != null",
       "$uid": {
         ".write": "auth != null",
         "role": {
-          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'adminaccess@gmail.com' || (data.val() === 'influencer' && newData.val() === 'partner')"
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com' || (data.val() === 'influencer' && newData.val() === 'partner')"
         },
         "discountPercentage": {
-          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'adminaccess@gmail.com'"
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
         },
         "isBlocked": {
-          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'adminaccess@gmail.com'"
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
         }
       }
     }

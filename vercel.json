@@ -17,7 +17,7 @@
       "has": [
         {
           "type": "host",
-          "value": "admin.recargaaccess.com"
+          "value": "admin.accesplay.com"
         }
       ],
       "destination": "/admin",
