@@ -1832,11 +1832,9 @@ function initPublicAuth() {
     currentUser = user;
     const authNavItem = document.getElementById('auth-nav-item');
     
-    // If the user is the admin, don't mix them into the public UI wallet (or we can just show "Admin")
-    if (user && user.email === 'adminaccessplay@gmail.com') {
-       if (authNavItem) {
-          authNavItem.innerHTML = `<a onclick="window.location.href='/admin'" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Ir al Panel</a>`;
-       }
+    // Si es el administrador, redirigirlo automáticamente al panel de admin
+    if (user && user.email === 'admin@accesplay.com') {
+       window.location.href = '/admin';
        return;
     }
 
@@ -1977,7 +1975,7 @@ function authWithGoogle() {
     if(modal) modal.remove();
     
     const user = result.user;
-    if (user.email === 'adminaccessplay@gmail.com') return; // Admin bypass
+    if (user.email === 'admin@accesplay.com') return; // Admin bypass
     
     // Ensure user profile exists
     firebase.database().ref('users/' + user.uid).once('value', (snap) => {
