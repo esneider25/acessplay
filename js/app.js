@@ -1834,7 +1834,9 @@ function initPublicAuth() {
     
     // Si es el administrador, redirigirlo automáticamente al panel de admin
     if (user && user.email === 'admin@accesplay.com') {
-       window.location.href = '/admin';
+       if (!window.location.pathname.includes('/admin')) {
+         window.location.href = '/admin';
+       }
        return;
     }
 
