@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (typeof firebase !== 'undefined' && firebase.auth) {
     firebase.auth().onAuthStateChanged((user) => {
-      if (user && user.email === 'adminaccessplay@gmail.com') {
+      if (user && user.email === 'admin@accesplay.com') {
         adminAuthVerified = true;
         if (window.DATA_LOADED) initAdminApp();
       } else {
