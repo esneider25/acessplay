@@ -1832,10 +1832,17 @@ function initPublicAuth() {
     currentUser = user;
     const authNavItem = document.getElementById('auth-nav-item');
     
-    // Si es el administrador, le mostramos el botón para ir al panel en lugar del perfil normal
+    // Si es el administrador, le mostramos el botón para ir al panel y un botón para salir
     if (user && user.email === 'admin@accesplay.com') {
        if (authNavItem) {
-          authNavItem.innerHTML = `<a onclick="window.location.href='/admin'" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Ir al Panel</a>`;
+          authNavItem.innerHTML = `
+            <div style="display:flex; gap:8px; align-items:center;">
+              <a onclick="window.location.href='/admin'" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer; padding: 8px 16px;">Ir al Panel</a>
+              <a onclick="firebase.auth().signOut().then(() => window.location.href='/')" class="nav-cta" style="background: rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.3); cursor:pointer; padding: 8px;" title="Cerrar sesión">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+              </a>
+            </div>
+          `;
        }
        return;
     }
