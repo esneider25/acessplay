@@ -99,7 +99,7 @@ let PAYMENT_METHODS = [];
 
 // ── Telegram Bot Configuration ──
 let TELEGRAM_CONFIG = {
-  botToken: '8515103558:AAFMRrUiYRna3PbEbZogrIA-i7vIls0clbY',
+  botToken: '8542799283:AAG_JpLnKG1DNUjSqfHjncEn9Nr7imXaays',
   chatId: '6012452103',
   enabled: true,
   notifyNewOrder: true,
