@@ -8,22 +8,22 @@
 
 /* ── CSS Variables ── */
 :root {
-  --bg-deep:        #030712;
-  --bg-ocean:       #0b0f19;
-  --bg-surface:     #111827;
-  --bg-card:        rgba(17, 24, 39, 0.7);
-  --bg-card-hover:  rgba(31, 41, 55, 0.85);
-  --accent:         #3b82f6;
-  --accent-light:   #60a5fa;
-  --accent-dim:     #2563eb;
-  --accent-glow:    rgba(59, 130, 246, 0.25);
-  --coral:          #8b5cf6;
-  --coral-light:    #a78bfa;
-  --coral-glow:     rgba(139, 92, 246, 0.25);
-  --electric:       #6366f1;
-  --electric-glow:  rgba(99, 102, 241, 0.20);
-  --text-primary:   #f8fafc;
-  --text-secondary: #94a3b8;
+  --bg-deep:        #080c17;
+  --bg-ocean:       #0d1425;
+  --bg-surface:     #141d33;
+  --bg-card:        rgba(20, 29, 51, 0.75);
+  --bg-card-hover:  rgba(30, 43, 75, 0.9);
+  --accent:         #00d2ff; /* Cyan Neón muy brillante */
+  --accent-light:   #4ce5ff;
+  --accent-dim:     #009ecc;
+  --accent-glow:    rgba(0, 210, 255, 0.4);
+  --coral:          #b517ff; /* Morado/Fucsia Neón explosivo */
+  --coral-light:    #d05cff;
+  --coral-glow:     rgba(181, 23, 255, 0.4);
+  --electric:       #2962ff; /* Azul eléctrico puro */
+  --electric-glow:  rgba(41, 98, 255, 0.35);
+  --text-primary:   #ffffff;
+  --text-secondary: #a3b8cc;
   --text-muted:     #64748b;
   --border:         rgba(139, 92, 246, 0.15);
   --border-active:  rgba(59, 130, 246, 0.4);
@@ -89,9 +89,9 @@ body {
   content: '';
   position: absolute; width: 200%; height: 200%; top: -50%; left: -50%;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 80%, rgba(99, 102, 241, 0.05) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(0, 210, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(181, 23, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(41, 98, 255, 0.12) 0%, transparent 50%);
   animation: oceanDrift 25s ease-in-out infinite alternate;
 }
 @keyframes oceanDrift {
@@ -253,17 +253,17 @@ body {
 }
 .hero-orb-1 {
   width: 400px; height: 400px; top: -100px; left: -100px;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent);
+  background: radial-gradient(circle, rgba(0, 210, 255, 0.4), transparent);
   animation: orbFloat 15s ease-in-out infinite alternate;
 }
 .hero-orb-2 {
   width: 300px; height: 300px; bottom: -50px; right: -50px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.2), transparent);
+  background: radial-gradient(circle, rgba(181, 23, 255, 0.35), transparent);
   animation: orbFloat 20s ease-in-out infinite alternate-reverse;
 }
 .hero-orb-3 {
   width: 250px; height: 250px; top: 50%; left: 60%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.15), transparent);
+  background: radial-gradient(circle, rgba(41, 98, 255, 0.3), transparent);
   animation: orbFloat 18s ease-in-out infinite alternate;
 }
 @keyframes orbFloat {
