@@ -1832,10 +1832,10 @@ function initPublicAuth() {
     currentUser = user;
     const authNavItem = document.getElementById('auth-nav-item');
     
-    // Si es el administrador, redirigirlo automáticamente al panel de admin
+    // Si es el administrador, le mostramos el botón para ir al panel en lugar del perfil normal
     if (user && user.email === 'admin@accesplay.com') {
-       if (!window.location.pathname.includes('/admin')) {
-         window.location.href = '/admin';
+       if (authNavItem) {
+          authNavItem.innerHTML = `<a onclick="window.location.href='/admin'" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Ir al Panel</a>`;
        }
        return;
     }
