@@ -1484,15 +1484,10 @@ function previewScreenshot(input) {
         
         // Buscar específicamente referencias o números de operación
         let numbers = [];
-        const regexKeywords = /(?:ref(?:erencia)?|operaci[oó]n|orden|recibo)[\s:.\-]*([A-Za-z0-9]{5,})/gi;
+        const regexKeywords = /(?:ref(?:erencia)?|operaci[oó]n|orden|recibo|comprobante|autorizaci[oó]n|folio|transacci[oó]n|nro|n[uú]mero\s+de\s+operaci[oó]n)[\s:.\-#\n]*([A-Za-z0-9]{5,20})/gi;
         let match;
         while ((match = regexKeywords.exec(text)) !== null) {
           numbers.push(match[1]);
-        }
-        
-        // Si no encontró nada con las palabras claves, usar fallback a cualquier número largo
-        if (numbers.length === 0) {
-          numbers = text.match(/\b\d{6,}\b/g) || []; // Aumentamos a 6 para reducir falsos positivos
         }
         
         if (numbers.length > 0) {
