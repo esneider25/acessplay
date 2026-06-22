@@ -3048,7 +3048,9 @@ function renderCustomersTable(usersList) {
     return;
   }
 
-  tbody.innerHTML = usersList.map(user => {
+  const displayList = usersList.slice(0, 100);
+
+  let html = displayList.map(user => {
     const dateStr = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
     const wallet = user.wallet || 0;
     return `
@@ -3077,6 +3079,12 @@ function renderCustomersTable(usersList) {
       </tr>
     `;
   }).join('');
+
+  if (usersList.length > 100) {
+    html += `<tr><td colspan="8" style="text-align: center; padding: 15px; color: var(--text-muted); font-size: 0.9rem;">Mostrando 100 de ${usersList.length} clientes. Usa el buscador para encontrar a alguien específico.</td></tr>`;
+  }
+
+  tbody.innerHTML = html;
 }
 
 function filterCustomersSearch(searchTerm) {
