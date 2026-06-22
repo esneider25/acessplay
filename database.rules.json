@@ -1,0 +1,75 @@
+{
+  "rules": {
+    "products": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "categories": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "exchange_rate": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "payment_methods": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "settings": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "landing_config": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "banners": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "messages": { 
+      ".read": "true", 
+      ".write": "true" 
+    },
+    "orders": { 
+      ".read": "auth != null",
+      ".write": "auth != null"
+    },
+    "telegram_config": { 
+      ".read": "auth != null && auth.token.email === 'adminaccess@gmail.com'",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "discounts": { 
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "spam_tracker": { 
+      ".read": "true", 
+      ".write": "true" 
+    },
+    "order_counter": { 
+      ".read": "true", 
+      ".write": "auth != null" 
+    },
+    "api_configs": { 
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === 'adminaccess@gmail.com'"
+    },
+    "users": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null",
+        "role": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'adminaccess@gmail.com' || (data.val() === 'influencer' && newData.val() === 'partner')"
+        },
+        "discountPercentage": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'adminaccess@gmail.com'"
+        },
+        "isBlocked": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'adminaccess@gmail.com'"
+        }
+      }
+    }
+  }
+}
