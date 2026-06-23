@@ -50,6 +50,58 @@ function toggleTheme() {
   localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
 }
 
+window.showManualInstallModal = function() {
+  if (document.getElementById('pwa-manual-install-modal')) return;
+  const modalContainer = document.createElement('div');
+  modalContainer.id = 'pwa-manual-install-modal';
+  modalContainer.innerHTML = `
+    <div class="modal-overlay active" style="z-index: 9999; backdrop-filter: blur(8px);">
+      <div class="modal" style="text-align: center; max-width: 450px; border: 1px solid var(--border); background: var(--bg-surface); padding: 35px 25px; border-radius: var(--radius-lg); box-shadow: 0 15px 35px rgba(0,0,0,0.6);">
+        <div style="font-size: 3.5rem; margin-bottom: 15px;">📲</div>
+        <h3 style="color: var(--text-primary); margin-bottom: 15px; font-family: var(--font-display); font-size: 1.6rem;">Instalar Aplicación</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 25px; font-size: 0.95rem; line-height: 1.5;">
+          Tu dispositivo requiere instalación manual. Sigue estos rápidos pasos:
+        </p>
+        
+        <div style="text-align: left; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; margin-bottom: 25px;">
+          <div style="margin-bottom: 20px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+              <span style="font-size:1.5rem;">🍎</span>
+              <strong style="color:var(--text-primary); font-size:1.05rem;">En iPhone (Safari)</strong>
+            </div>
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-left:34px; line-height:1.5;">
+              1. Toca el botón <b>Compartir</b> (el cuadrado con la flecha hacia arriba).<br>
+              2. Selecciona <b>"Agregar a inicio"</b>.
+            </p>
+          </div>
+          <div style="height:1px; background:var(--border); margin-bottom:20px;"></div>
+          <div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+              <span style="font-size:1.5rem;">🤖</span>
+              <strong style="color:var(--text-primary); font-size:1.05rem;">En Android (Chrome)</strong>
+            </div>
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-left:34px; line-height:1.5;">
+              1. Toca el <b>Menú</b> (los 3 puntos arriba a la derecha).<br>
+              2. Selecciona <b>"Instalar aplicación"</b> o <b>"Agregar a inicio"</b>.
+            </p>
+          </div>
+        </div>
+
+        <button id="close-pwa-modal-btn" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem; justify-content:center; cursor:pointer;">
+          ¡Entendido! 👍
+        </button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modalContainer);
+
+  document.getElementById('close-pwa-modal-btn').addEventListener('click', () => {
+    const overlay = modalContainer.querySelector('.modal-overlay');
+    overlay.classList.remove('active');
+    setTimeout(() => { modalContainer.remove(); }, 300);
+  });
+};
+
 window.handleStoreInstallClick = function() {
   if (window.deferredStorePrompt) {
     window.deferredStorePrompt.prompt();
@@ -59,7 +111,7 @@ window.handleStoreInstallClick = function() {
     return;
   }
   
-  alert("📱 Para instalar la App manualmente:\\n\\n🍎 En iPhone (Safari):\\n1. Toca el icono de 'Compartir' (el cuadrado con la flecha hacia arriba).\\n2. Toca 'Agregar a inicio'.\\n\\n🤖 En Android (Chrome):\\n1. Toca el menú de los 3 puntos (arriba a la derecha).\\n2. Toca 'Instalar aplicación' o 'Agregar a la pantalla principal'.");
+  window.showManualInstallModal();
 };
 
 // ── Render ──

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'accessplay-v6';
+const CACHE_NAME = 'accessplay-v7';
 const urlsToCache = [
   '/',
   '/index.html',

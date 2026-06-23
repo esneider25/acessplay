@@ -194,7 +194,7 @@ function handleAdminInstallClick() {
     return;
   }
   
-  alert("📱 Para instalar la App manualmente:\\n\\n🍎 En iPhone (Safari):\\n1. Toca el icono de 'Compartir' (el cuadrado con la flecha hacia arriba).\\n2. Toca 'Agregar a inicio'.\\n\\n🤖 En Android (Chrome):\\n1. Toca el menú de los 3 puntos (arriba a la derecha).\\n2. Toca 'Instalar aplicación' o 'Agregar a la pantalla principal'.");
+  window.showManualInstallModal();
 }
 
 function renderAdminLogin(container) {
