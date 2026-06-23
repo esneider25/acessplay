@@ -318,15 +318,30 @@ function renderProductDetail(productId) {
   if (product.isOutofStock) {
     packages = '<div style="padding: 20px; background: rgba(239, 83, 80, 0.1); color: #ef5350; border: 1px solid rgba(239, 83, 80, 0.3); border-radius: 8px; text-align: center; width: 100%; margin-top: 15px;">Este producto se encuentra <b>agotado</b> por el momento.<br>Por favor, intenta más tarde.</div>';
   } else {
-    packages = product.packages.map((pkg, i) => `
-      <div class="package-card fade-in-up stagger-${(i % 7) + 1}"
-           onclick="selectPackage('${product.id}', ${i})"
-           id="pkg-${product.id}-${i}">
-        <div class="package-amount">${pkg.amount.toLocaleString()}</div>
-        <div class="package-label">${product.currency}</div>
-        <div class="package-price-bs">Bs. ${formatBs(usdToBs(pkg.priceUsd))}</div>
-      </div>
-    `).join('');
+    packages = product.packages.map((pkg, i) => {
+      if (pkg.isOutofStock) {
+        return `
+          <div class="package-card fade-in-up stagger-${(i % 7) + 1}"
+               style="opacity: 0.5; filter: grayscale(1); cursor: not-allowed; position: relative;"
+               onclick="alert('Este paquete está agotado por el momento.')"
+               id="pkg-${product.id}-${i}">
+            <div style="position: absolute; top: -10px; right: -10px; background: #ef5350; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;">Agotado</div>
+            <div class="package-amount">${pkg.amount.toLocaleString()}</div>
+            <div class="package-label">${product.currency}</div>
+            <div class="package-price-bs">Bs. ${formatBs(usdToBs(pkg.priceUsd))}</div>
+          </div>
+        `;
+      }
+      return `
+        <div class="package-card fade-in-up stagger-${(i % 7) + 1}"
+             onclick="selectPackage('${product.id}', ${i})"
+             id="pkg-${product.id}-${i}">
+          <div class="package-amount">${pkg.amount.toLocaleString()}</div>
+          <div class="package-label">${product.currency}</div>
+          <div class="package-price-bs">Bs. ${formatBs(usdToBs(pkg.priceUsd))}</div>
+        </div>
+      `;
+    }).join('');
   }
 
   // Saved IDs handling

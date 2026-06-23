@@ -1742,6 +1742,12 @@ function renderTempPackages() {
         <label style="font-size: 0.75rem; color: var(--text-muted);">ID API (Opc.)</label>
         <input type="text" class="admin-form-input" style="padding: 6px 10px; font-size: 0.85rem;" value="${pkg.apiServiceId || ''}" onchange="updateTempPackageField(${idx}, 'apiServiceId', this.value)" placeholder="Ej. 341">
       </div>
+      <div style="display: flex; flex-direction: column; gap: 4px; flex: 0.5; min-width: 60px; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
+        <label style="font-size: 0.75rem; color: var(--text-muted); text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px;">
+          <span>Agotado</span>
+          <input type="checkbox" ${pkg.isOutofStock ? 'checked' : ''} onchange="updateTempPackageField(${idx}, 'isOutofStock', this.checked)" style="width: 16px; height: 16px; accent-color: #ef5350; cursor: pointer;">
+        </label>
+      </div>
       <button class="btn btn-danger" onclick="removeTempPackage(${idx})" title="Eliminar" style="padding: 6px; margin-bottom: 2px; flex-shrink: 0; min-width: 40px; height: 35px; display: flex; align-items: center; justify-content: center;">🗑️</button>
     </div>
   `).join('');
@@ -1750,7 +1756,7 @@ function renderTempPackages() {
 function addTempPackage() {
   const currencyInput = document.getElementById('m-prod-currency');
   const currencyName = currencyInput ? currencyInput.value.trim() : 'Unidades';
-  adminState.tempPackages.push({ amount: 100, priceUsd: 1.00, label: `100 ${currencyName}` });
+  adminState.tempPackages.push({ amount: 100, priceUsd: 1.00, label: `100 ${currencyName}`, isOutofStock: false });
   renderTempPackages();
 }
 
@@ -1766,6 +1772,7 @@ function updateTempPackageField(index, field, value) {
   else if (field === 'priceUsd') pkg.priceUsd = parseFloat(value) || 0.0;
   else if (field === 'costUsd') pkg.costUsd = parseFloat(value) || 0.0;
   else if (field === 'apiServiceId') pkg.apiServiceId = value.trim();
+  else if (field === 'isOutofStock') pkg.isOutofStock = value;
   else pkg.label = value.trim();
 }
 
