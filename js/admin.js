@@ -180,14 +180,62 @@ function initAdminApp() {
 function renderAdminLogin(container) {
   container.innerHTML = `
     <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-deep); color: var(--text-primary); text-align: center; padding: 20px;">
-      <div style="font-size: 4rem; margin-bottom: 20px;">🔒</div>
-      <h1 style="color: #ff6b6b; margin-bottom: 10px;">Acceso Denegado</h1>
+      <div style="font-size: 4rem; margin-bottom: 20px;">🛡️</div>
+      <h1 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 10px;">Acceso Administrativo</h1>
       <p style="color: var(--text-secondary); max-width: 400px; line-height: 1.5; margin-bottom: 30px;">
-        Esta área es exclusiva para el administrador principal de AccessPlay.
+        Por favor, ingresa tus credenciales para acceder al panel.
       </p>
-      <a href="index.html" class="btn btn-primary" style="text-decoration: none;">Volver a la Tienda</a>
+      
+      <form id="admin-login-form" style="width: 100%; max-width: 320px; text-align: left; background: var(--bg-surface); padding: 30px; border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        <div class="admin-form-group" style="margin-bottom: 16px;">
+          <label class="admin-form-label" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px;">Correo Electrónico</label>
+          <input type="email" id="admin-email" class="admin-form-input" style="width: 100%; padding: 10px 14px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); outline: none;" placeholder="admin@accesplay.com" required>
+        </div>
+        <div class="admin-form-group" style="margin-bottom: 24px;">
+          <label class="admin-form-label" style="display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px;">Contraseña</label>
+          <input type="password" id="admin-pass" class="admin-form-input" style="width: 100%; padding: 10px 14px; background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); outline: none;" placeholder="********" required>
+        </div>
+        <button type="submit" id="admin-login-btn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; font-size: 1rem; border: none; border-radius: var(--radius-md); cursor: pointer;">Iniciar Sesión</button>
+        <div id="admin-login-error" style="color: #ff6b6b; font-size: 0.85rem; margin-top: 15px; text-align: center; display: none;">Credenciales incorrectas.</div>
+      </form>
+      
+      <a href="index.html" class="admin-view-store-btn" style="margin-top: 30px; border: none; background: transparent; color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Volver a la Tienda</a>
     </div>
   `;
+
+  document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('admin-email').value.trim();
+    const pass = document.getElementById('admin-pass').value.trim();
+    const btn = document.getElementById('admin-login-btn');
+    const errorDiv = document.getElementById('admin-login-error');
+    
+    if (!email || !pass) return;
+    
+    btn.innerHTML = 'Verificando... <span class="tracking-spinner" style="display:inline-block; font-size: 0.9rem;">⏳</span>';
+    btn.disabled = true;
+    errorDiv.style.display = 'none';
+
+    firebase.auth().signInWithEmailAndPassword(email, pass)
+      .then(result => {
+        if (result.user.email !== 'admin@accesplay.com') {
+          firebase.auth().signOut().then(() => {
+            errorDiv.textContent = 'Acceso denegado: No eres administrador.';
+            errorDiv.style.display = 'block';
+            btn.innerHTML = 'Iniciar Sesión';
+            btn.disabled = false;
+          });
+        }
+        // If it is admin, onAuthStateChanged in admin.js will automatically trigger initAdminApp()
+      })
+      .catch(error => {
+        console.error('Admin Login Error:', error);
+        errorDiv.textContent = 'Credenciales incorrectas o error de conexión.';
+        errorDiv.style.display = 'block';
+        btn.innerHTML = 'Iniciar Sesión';
+        btn.disabled = false;
+      });
+  });
 }
 
 // ── Tab Switching ──
