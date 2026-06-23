@@ -179,7 +179,7 @@ function initAdminApp() {
 
 function renderAdminLogin(container) {
   container.innerHTML = `
-    <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-deep); color: var(--text-primary); text-align: center; padding: 20px;">
+    <div style="position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-deep); color: var(--text-primary); text-align: center; padding: 20px;">
       <div style="font-size: 4rem; margin-bottom: 20px;">🛡️</div>
       <h1 style="font-family: var(--font-display); font-size: 2rem; margin-bottom: 10px;">Acceso Administrativo</h1>
       <p style="color: var(--text-secondary); max-width: 400px; line-height: 1.5; margin-bottom: 30px;">
