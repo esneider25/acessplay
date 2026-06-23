@@ -784,7 +784,8 @@ async function renderCustomers(container) {
       lastOrder: null,
       role: u.role || 'cliente',
       discountPercentage: u.discountPercentage || 0,
-      isBlocked: !!u.isBlocked
+      isBlocked: !!u.isBlocked,
+      wallet: u.wallet || 0
     };
   });
 
@@ -842,12 +843,22 @@ async function renderCustomers(container) {
       <div style="font-weight: bold; color: #0ea5e9;">$${c.totalSpent.toFixed(2)}</div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         ${c.uid ? `
-          <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openRoleModal('${c.uid}', '${c.role}', ${c.discountPercentage})">
-            ${c.role === 'revendedor' ? '💼 Revend (' + c.discountPercentage + '%)' : '👤 Cliente'}
-          </button>
-          <button class="btn ${c.isBlocked ? 'btn-danger' : 'btn-secondary'}" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="toggleBlockUser('${c.uid}', ${c.isBlocked})">
-            ${c.isBlocked ? '🚫 Bloqueado' : '✅ Activo'}
-          </button>
+          <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openRoleModal('${c.uid}', '${c.role}', ${c.discountPercentage})">
+              ${c.role === 'revendedor' ? '💼 Revend (' + c.discountPercentage + '%)' : '👤 Cliente'}
+            </button>
+            <button class="btn ${c.isBlocked ? 'btn-danger' : 'btn-secondary'}" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="toggleBlockUser('${c.uid}', ${c.isBlocked})">
+              ${c.isBlocked ? '🚫 Bloqueado' : '✅ Activo'}
+            </button>
+          </div>
+          <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+            <button class="btn btn-primary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openEditWalletModal('${c.uid}', '${c.contact}', ${c.wallet})">
+              💰 Saldo
+            </button>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openCustomerInfoModal('${c.uid}')">
+              ℹ️ Info
+            </button>
+          </div>
         ` : `<span style="font-size: 0.8rem; color: var(--text-muted);">Invitado</span>`}
       </div>
     </div>
