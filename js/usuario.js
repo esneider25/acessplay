@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
           userProfile.referralCode = newCode;
         }
         renderApp();
+        initNotifications();
       });
     } else {
       currentUser = null;
@@ -199,6 +200,9 @@ function renderApp() {
         <div class="nav-item" onclick="switchSection('ids')" id="nav-ids">
           <i class="ph ph-address-book"></i> <span>IDs</span>
         </div>
+        <div class="nav-item" onclick="switchSection('support')" id="nav-support">
+          <i class="ph ph-chat-circle-dots"></i> <span>Soporte</span>
+        </div>
         <div class="nav-item" onclick="switchSection('profile')" id="nav-profile">
           <i class="ph ph-user-circle-gear"></i> <span>Mi Perfil</span>
         </div>
@@ -307,6 +311,7 @@ async function loadDashboardData() {
 
   renderDashboardSavedIds();
   renderDashboardTransactions();
+  initUserChat();
 }
 
 
@@ -825,6 +830,33 @@ function renderDashboardContent() {
         </button>
       </div>
     </section>
+
+    <!-- SECTION: SOPORTE -->
+    <section id="sec-support" class="panel-section">
+      <div class="glass-card" style="max-width: 800px; margin: 0 auto; height: 600px; display: flex; flex-direction: column; padding: 0; overflow: hidden;">
+        <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); display: flex; align-items: center; gap: 15px;">
+          <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;"><i class="ph-fill ph-robot"></i></div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem;">Soporte AccessPlay</h3>
+            <div style="font-size: 0.8rem; color: #10b981; display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 5px #10b981;"></div> En línea</div>
+          </div>
+        </div>
+        
+        <div id="user-chat-messages" style="flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+          <div style="text-align: center; color: var(--text-secondary); margin-top: auto; margin-bottom: auto;">
+            <i class="ph ph-chat-circle-text" style="font-size: 3rem; opacity: 0.5; margin-bottom: 10px; display: block;"></i>
+            Envíanos un mensaje y te responderemos pronto.
+          </div>
+        </div>
+        
+        <div style="padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); display: flex; gap: 10px;">
+          <input type="text" id="user-chat-input" placeholder="Escribe tu mensaje aquí..." style="flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px 15px; border-radius: 12px; outline: none; font-size: 0.95rem;" onkeydown="if(event.key==='Enter') sendUserChatMessage()">
+          <button onclick="sendUserChatMessage()" class="btn-primary" style="border-radius: 12px; width: 45px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));">
+            <i class="ph-fill ph-paper-plane-right"></i>
+          </button>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -1182,7 +1214,7 @@ window.submitCashout = function() {
     });
     
     // Save withdrawal request
-    withdrawRef.set(withdrawalData).then(() => {
+withdrawRef.set(withdrawalData).then(() => {
       document.getElementById('cashout-modal').remove();
       usuarioToast('¡Solicitud de retiro enviada! El equipo la procesará pronto.', 'success');
       if (typeof renderDashboard === 'function') renderDashboard();
@@ -1191,3 +1223,187 @@ window.submitCashout = function() {
     usuarioToast('Error: ' + err.message, 'error');
   });
 };
+
+// ==========================================
+// CHAT DE SOPORTE
+// ==========================================
+
+let userChatLoaded = false;
+let userUnreadMessages = 0;
+
+function initUserChat() {
+  if (!currentUser || userChatLoaded) return;
+  userChatLoaded = true;
+  
+  // Escuchar a toda la rama messages, ya que el admin y data.js usan un array global
+  firebase.database().ref('messages').on('value', snap => {
+    const allMessages = snap.val();
+    const container = document.getElementById('user-chat-messages');
+    if (!container) return;
+    
+    let userConv = null;
+    if (allMessages) {
+      let msgArray = Array.isArray(allMessages) ? allMessages.filter(Boolean) : Object.values(allMessages);
+      userConv = msgArray.find(m => m.sessionId === currentUser.uid);
+    }
+    
+    if (!userConv || !userConv.messages || userConv.messages.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; color: var(--text-secondary); margin-top: auto; margin-bottom: auto;">
+          <i class="ph ph-chat-circle-text" style="font-size: 3rem; opacity: 0.5; margin-bottom: 10px; display: block;"></i>
+          Envíanos un mensaje y te responderemos pronto.
+        </div>
+      `;
+      return;
+    }
+    
+    let html = '';
+    let hasUnreadAdmin = userConv.hasUnreadUser; // In data.js, admin sets hasUnreadUser = true when sending to user
+    
+    userConv.messages.forEach(msg => {
+      const isUser = msg.sender === 'user';
+      const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      html += `
+        <div style="display: flex; flex-direction: column; align-items: ${isUser ? 'flex-end' : 'flex-start'};">
+          <div style="max-width: 80%; padding: 12px 16px; border-radius: 15px; ${isUser ? 'background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: white; border-bottom-right-radius: 4px;' : 'background: rgba(255,255,255,0.05); color: white; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.1);'}">
+            ${msg.text}
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; margin-${isUser ? 'right' : 'left'}: 5px;">
+            ${time}
+          </div>
+        </div>
+      `;
+    });
+    
+    container.innerHTML = html;
+    container.scrollTop = container.scrollHeight;
+    
+    // Mark as read if section is open
+    const secSupport = document.getElementById('sec-support');
+    if (secSupport && secSupport.classList.contains('active') && hasUnreadAdmin) {
+      markChatAsRead();
+    } else if (hasUnreadAdmin) {
+      // Show badge on nav item
+      const navSupport = document.getElementById('nav-support');
+      if (navSupport && !navSupport.innerHTML.includes('badge')) {
+        navSupport.innerHTML += '<div class="badge" style="background:#ef4444; width:10px; height:10px; border-radius:50%; margin-left:auto;"></div>';
+      }
+    }
+  });
+}
+
+function sendUserChatMessage() {
+  const input = document.getElementById('user-chat-input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text || !currentUser) return;
+  
+  input.value = '';
+  
+  // Usar la función addMessage global de data.js que administra el array MESSAGES y Firebase
+  if (typeof addMessage === 'function') {
+    const contactName = (typeof userProfile !== 'undefined' && userProfile?.name) ? userProfile.name : (currentUser.displayName || currentUser.email);
+    addMessage(currentUser.uid, 'user', text, contactName);
+  }
+}
+
+function markChatAsRead() {
+  if (!currentUser) return;
+  
+  // Usar la función markMessagesAsRead global de data.js
+  if (typeof markMessagesAsRead === 'function') {
+    markMessagesAsRead(currentUser.uid, 'user'); // user = el usuario lee los mensajes
+  }
+  
+  // Remove badge
+  const navSupport = document.getElementById('nav-support');
+  if (navSupport) {
+    const badge = navSupport.querySelector('.badge');
+    if (badge) badge.remove();
+  }
+}
+
+// Interceptar switchSection para marcar como leido si abren soporte
+const originalSwitchSection = window.switchSection;
+window.switchSection = function(sectionId) {
+  if (originalSwitchSection) originalSwitchSection(sectionId);
+  if (sectionId === 'support') {
+    markChatAsRead();
+  }
+}
+
+// ==========================================
+// NOTIFICACIONES WEB API
+// ==========================================
+
+let notificationsInitialized = false;
+let previousOrdersState = {};
+
+function initNotifications() {
+  if (notificationsInitialized || !currentUser) return;
+  
+  if (!('Notification' in window)) {
+    console.log('El navegador no soporta notificaciones');
+    return;
+  }
+  
+  // Solicitar permiso
+  if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+  
+  notificationsInitialized = true;
+  
+  // Escuchar cambios en los pedidos del usuario
+  firebase.database().ref('users/' + currentUser.uid + '/orders').on('value', async snap => {
+    const ordersMap = snap.val();
+    if (!ordersMap) return;
+    
+    // Check for status changes
+    for (const orderId of Object.keys(ordersMap)) {
+      const orderSnap = await firebase.database().ref('orders/' + orderId).once('value');
+      const orderData = orderSnap.val();
+      if (!orderData) continue;
+      
+      const prevStatus = previousOrdersState[orderId];
+      const newStatus = orderData.status;
+      
+      if (prevStatus && prevStatus !== newStatus && newStatus !== 'pending') {
+        // Status changed, trigger notification
+        triggerNotification('Actualización de Pedido', `Tu pedido de ${orderData.productName || 'producto'} ahora está: ${newStatus.toUpperCase()}`);
+      }
+      
+      previousOrdersState[orderId] = newStatus;
+    }
+  });
+  
+  // Escuchar mensajes nuevos en el chat (si está cerrado)
+  firebase.database().ref('messages').on('value', snap => {
+    const allMessages = snap.val();
+    if (!allMessages) return;
+    let msgArray = Array.isArray(allMessages) ? allMessages.filter(Boolean) : Object.values(allMessages);
+    let userConv = msgArray.find(m => m.sessionId === currentUser.uid);
+    
+    // Only notify if message is from admin and not yet read (hasUnreadUser=true)
+    if (userConv && userConv.hasUnreadUser) {
+      // Check if chat is currently open
+      const secSupport = document.getElementById('sec-support');
+      if (!(secSupport && secSupport.classList.contains('active'))) {
+         const lastMsg = userConv.messages[userConv.messages.length - 1];
+         if (lastMsg && lastMsg.sender === 'admin') {
+           triggerNotification('Nuevo mensaje de Soporte', lastMsg.text);
+         }
+      }
+    }
+  });
+}
+
+function triggerNotification(title, body) {
+  if (Notification.permission === 'granted') {
+    new Notification(title, {
+      body: body,
+      icon: '/img/favicon-192.png'
+    });
+  }
+}
