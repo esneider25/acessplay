@@ -1556,3 +1556,15 @@ select.admin-form-input {
   border-radius: 4px;
   font-family: monospace;
 }
+
+/* Fix Safari/Mobile double tap bug by disabling hover transforms on touch screens */
+@media (hover: none) {
+  .admin-nav-item:hover, .admin-view-store-btn:hover, .admin-card:hover,
+  .admin-stat-card:hover, .btn-primary:hover, .btn-secondary:hover,
+  .btn-danger:hover, .admin-game-card:hover, .admin-category-card:hover,
+  .admin-api-card:hover, .admin-order-card:hover, .admin-action-process:hover,
+  .admin-action-approve:hover, .admin-action-reject:hover, .admin-action-invalid:hover,
+  .admin-action-view:hover {
+    transform: none !important;
+  }
+}

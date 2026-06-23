@@ -135,10 +135,12 @@ function renderApp() {
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.glass-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  border-color: rgba(255, 255, 255, 0.1);
+@media (hover: hover) {
+  .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 /* Responsive */
