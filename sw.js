@@ -1,6 +1,7 @@
-const CACHE_NAME = 'accessplay-v8';
+const CACHE_NAME = 'accessplay-v9';
 const urlsToCache = [
   '/',
+  '/manifest.json',
   '/index.html',
   '/admin.html',
   '/css/styles.css',
@@ -19,6 +20,7 @@ const urlsToCache = [
 
 // Install Event
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -30,6 +32,7 @@ self.addEventListener('install', event => {
 
 // Activate Event
 self.addEventListener('activate', event => {
+  self.clients.claim();
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
