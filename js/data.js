@@ -283,38 +283,33 @@ function initFirebaseData() {
     db.ref('/' + key).off('value');
     db.ref('/' + key).on('value', (snapshot) => {
       const data = snapshot.val();
-      if (data) {
-        if (key === 'products') { PRODUCTS.length = 0; data.forEach(p => PRODUCTS.push(p)); }
-        else if (key === 'categories') { CATEGORIES.length = 0; data.forEach(c => CATEGORIES.push(c)); }
-        else if (key === 'payment_methods') { PAYMENT_METHODS.length = 0; data.forEach(p => PAYMENT_METHODS.push(p)); }
-        else if (key === 'exchange_rate') Object.assign(EXCHANGE_RATE, data);
-        else if (key === 'settings') Object.assign(SITE_SETTINGS, data);
-        else if (key === 'landing_config') Object.assign(LANDING_CONFIG, data);
-        else if (key === 'api_configs') { API_CONFIGS.length = 0; data.forEach(a => API_CONFIGS.push(a)); }
-        else if (key === 'discounts') { DISCOUNT_CODES.length = 0; data.forEach(d => DISCOUNT_CODES.push(d)); }
-        else if (key === 'messages') {
-          if (!data) MESSAGES = [];
-          else if (Array.isArray(data)) MESSAGES = data.filter(Boolean);
-          else MESSAGES = Object.values(data);
+      try {
+        if (data !== null && data !== undefined) {
+          const toArray = (d) => Array.isArray(d) ? d.filter(Boolean) : Object.values(d);
+          if (key === 'products') { PRODUCTS.length = 0; toArray(data).forEach(p => PRODUCTS.push(p)); }
+          else if (key === 'categories') { CATEGORIES.length = 0; toArray(data).forEach(c => CATEGORIES.push(c)); }
+          else if (key === 'payment_methods') { PAYMENT_METHODS.length = 0; toArray(data).forEach(p => PAYMENT_METHODS.push(p)); }
+          else if (key === 'exchange_rate') Object.assign(EXCHANGE_RATE, data);
+          else if (key === 'settings') Object.assign(SITE_SETTINGS, data);
+          else if (key === 'landing_config') Object.assign(LANDING_CONFIG, data);
+          else if (key === 'api_configs') { API_CONFIGS.length = 0; toArray(data).forEach(a => API_CONFIGS.push(a)); }
+          else if (key === 'discounts') { DISCOUNT_CODES.length = 0; toArray(data).forEach(d => DISCOUNT_CODES.push(d)); }
+          else if (key === 'messages') { MESSAGES = toArray(data); }
+          else if (key === 'orders') {
+            ORDERS = toArray(data);
+            ORDERS.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+          }
+          else if (key === 'telegram_config') Object.assign(TELEGRAM_CONFIG, data);
+          else if (key === 'quick_replies') QUICK_REPLIES = data;
+          else if (key === 'spam_tracker') {
+            SPAM_TRACKER.attempts = data.attempts || [];
+            SPAM_TRACKER.blocked = data.blocked || [];
+          }
+          else if (key === 'order_counter') localStorage.setItem('recargaaccessplay_order_counter', data.toString());
+          else if (key === 'banners') { BANNERS = toArray(data); }
         }
-        else if (key === 'orders') {
-          if (!data) ORDERS = [];
-          else if (Array.isArray(data)) ORDERS = data.filter(Boolean);
-          else ORDERS = Object.values(data);
-          ORDERS.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        }
-        else if (key === 'telegram_config') Object.assign(TELEGRAM_CONFIG, data);
-        else if (key === 'quick_replies') QUICK_REPLIES = data;
-        else if (key === 'spam_tracker') {
-          SPAM_TRACKER.attempts = data.attempts || [];
-          SPAM_TRACKER.blocked = data.blocked || [];
-        }
-        else if (key === 'order_counter') localStorage.setItem('recargaaccessplay_order_counter', data.toString());
-        else if (key === 'banners') {
-          if (!data) BANNERS = [];
-          else if (Array.isArray(data)) BANNERS = data.filter(Boolean);
-          else BANNERS = Object.values(data);
-        }
+      } catch (err) {
+        console.error('Error parsing data for key: ' + key, err);
       }
       checkLoadComplete(key);
     }, (error) => {
