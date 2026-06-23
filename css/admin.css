@@ -12,9 +12,9 @@
   --accent-light: #33ffdf;
   --accent-dim: #00b89c;
   --accent-glow: rgba(0, 229, 195, 0.25);
-  --coral: #ff6b4a;
-  --coral-light: #ff8a6e;
-  --coral-glow: rgba(255, 107, 74, 0.25);
+  --coral: #0ea5e9;
+  --coral-light: #38bdf8;
+  --coral-glow: rgba(14, 165, 233, 0.25);
   --text-primary: #e8f0fc;
   --text-secondary: #8fa4c4;
   --text-muted: #5a7099;
@@ -86,7 +86,7 @@ body {
   background:
     radial-gradient(ellipse at 20% 50%, rgba(0, 229, 195, 0.06) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 20%, rgba(61, 139, 253, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at 60% 80%, rgba(255, 107, 74, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse at 60% 80%, rgba(14, 165, 233, 0.04) 0%, transparent 50%);
   animation: oceanDrift 25s ease-in-out infinite alternate;
 }
 @keyframes oceanDrift {
