@@ -2830,7 +2830,7 @@ function checkAdminNotifications() {
 }
 
 // ── Login System ──
-function renderAdminLogin(container) {
+function renderAdminLoginOld(container) {
   container.innerHTML = `
     <div style="display:flex; justify-content:center; align-items:center; min-height:100vh; background:var(--bg-body);">
       <div style="background:var(--bg-surface); padding:40px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); width:100%; max-width:400px; text-align:center;">
@@ -2991,11 +2991,11 @@ function adminDeleteQuickReply(id) {
 // CUSTOMERS (USERS & WALLETS)
 // ════════════════════════════════════════
 
-function renderCustomers(container) {
+function renderCustomersOld(container) {
   container.innerHTML = `
     <div class="admin-header-flex">
       <h2 class="admin-page-title">👥 Gestión de Clientes</h2>
-      <button class="btn btn-secondary" onclick="renderCustomers(document.getElementById('admin-main-content'))">🔄 Refrescar</button>
+      <button class="btn btn-secondary" onclick="renderCustomersOld(document.getElementById('admin-main-content'))">🔄 Refrescar</button>
     </div>
     <div class="admin-card" style="margin-top: 20px;">
       <div style="display: flex; gap: 10px; margin-bottom: 20px;">
