@@ -19,9 +19,6 @@ const appState = {
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   window.deferredStorePrompt = e;
-  if (typeof showStoreInstallButton === 'function') {
-    showStoreInstallButton();
-  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -53,21 +50,17 @@ function toggleTheme() {
   localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
 }
 
-function showStoreInstallButton() {
-  const navItem = document.getElementById('pwa-nav-item');
-  const btn = document.getElementById('pwa-install-app-btn');
-  if (navItem && btn) {
-    navItem.style.display = 'block';
-    btn.onclick = async () => {
-      if (!window.deferredStorePrompt) return;
-      window.deferredStorePrompt.prompt();
-      const { outcome } = await window.deferredStorePrompt.userChoice;
-      console.log(`User response to the install prompt: ${outcome}`);
+window.handleStoreInstallClick = function() {
+  if (window.deferredStorePrompt) {
+    window.deferredStorePrompt.prompt();
+    window.deferredStorePrompt.userChoice.then((choice) => {
       window.deferredStorePrompt = null;
-      navItem.style.display = 'none';
-    };
+    });
+    return;
   }
-}
+  
+  alert("📱 Para instalar la App manualmente:\\n\\n🍎 En iPhone (Safari):\\n1. Toca el icono de 'Compartir' (el cuadrado con la flecha hacia arriba).\\n2. Toca 'Agregar a inicio'.\\n\\n🤖 En Android (Chrome):\\n1. Toca el menú de los 3 puntos (arriba a la derecha).\\n2. Toca 'Instalar aplicación' o 'Agregar a la pantalla principal'.");
+};
 
 // ── Render ──
 function showAnnouncementModal(message) {
@@ -217,10 +210,6 @@ function renderApp() {
       ${typeof renderSupportWidget === 'function' ? renderSupportWidget() : ''}
       ${termsHtml}
     `;
-  }
-
-  if (window.deferredStorePrompt) {
-    showStoreInstallButton();
   }
 }
 

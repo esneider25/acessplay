@@ -22,7 +22,7 @@ function renderNavbar() {
             }
           </li>
           <li><a class="nav-cta" onclick="scrollToSection('catalog')">Recargar 🎮</a></li>
-          <li id="pwa-nav-item" style="display: none;"><a id="pwa-install-app-btn" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer; color: white;">📲 Instalar App</a></li>
+          <li id="pwa-nav-item"><a id="pwa-install-app-btn" onclick="window.handleStoreInstallClick()" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer; color: white;">📲 Instalar App</a></li>
           <li><a class="theme-toggle-btn" onclick="toggleTheme()" style="cursor:pointer; font-size: 1.2rem;" title="Cambiar Tema">🌓</a></li>
         </ul>
         <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>

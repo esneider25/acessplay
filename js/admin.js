@@ -26,9 +26,6 @@ let adminAuthVerified = false;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   window.deferredAdminPrompt = e;
-  if (typeof showAdminInstallButton === 'function') {
-    showAdminInstallButton();
-  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -170,7 +167,7 @@ function initAdminApp() {
           </li>
         </ul>
         <div class="admin-sidebar-footer" style="display:flex; flex-direction:column; gap:10px;">
-          <button id="pwa-install-sidebar-btn" class="admin-view-store-btn" style="display: none; background:var(--accent); color:white; cursor:pointer;">
+          <button id="pwa-install-sidebar-btn" onclick="handleAdminInstallClick()" class="admin-view-store-btn" style="background:var(--accent); color:white; cursor:pointer;">
             📲 Instalar App
           </button>
           <button class="admin-view-store-btn" onclick="toggleAdminTheme()" style="background:var(--bg-surface); color:var(--text-primary); cursor:pointer;">
@@ -185,35 +182,19 @@ function initAdminApp() {
     </div>
   `;
 
-  if (window.deferredAdminPrompt) {
-    showAdminInstallButton();
-  }
-
   renderActiveTab();
 }
 
-function showAdminInstallButton() {
-  const loginBtn = document.getElementById('pwa-install-btn');
-  const sidebarBtn = document.getElementById('pwa-install-sidebar-btn');
-  
-  const handleInstallClick = async () => {
-    if (!window.deferredAdminPrompt) return;
+function handleAdminInstallClick() {
+  if (window.deferredAdminPrompt) {
     window.deferredAdminPrompt.prompt();
-    const { outcome } = await window.deferredAdminPrompt.userChoice;
-    console.log(`User response to the install prompt: ${outcome}`);
-    window.deferredAdminPrompt = null;
-    if (loginBtn) loginBtn.style.display = 'none';
-    if (sidebarBtn) sidebarBtn.style.display = 'none';
-  };
-
-  if (loginBtn) {
-    loginBtn.style.display = 'flex';
-    loginBtn.onclick = handleInstallClick;
+    window.deferredAdminPrompt.userChoice.then((choice) => {
+      window.deferredAdminPrompt = null;
+    });
+    return;
   }
-  if (sidebarBtn) {
-    sidebarBtn.style.display = 'flex';
-    sidebarBtn.onclick = handleInstallClick;
-  }
+  
+  alert("📱 Para instalar la App manualmente:\\n\\n🍎 En iPhone (Safari):\\n1. Toca el icono de 'Compartir' (el cuadrado con la flecha hacia arriba).\\n2. Toca 'Agregar a inicio'.\\n\\n🤖 En Android (Chrome):\\n1. Toca el menú de los 3 puntos (arriba a la derecha).\\n2. Toca 'Instalar aplicación' o 'Agregar a la pantalla principal'.");
 }
 
 function renderAdminLogin(container) {
@@ -238,15 +219,11 @@ function renderAdminLogin(container) {
         <div id="admin-login-error" style="color: #ff6b6b; font-size: 0.85rem; margin-top: 15px; text-align: center; display: none;">Credenciales incorrectas.</div>
       </form>
       
-      <button id="pwa-install-btn" class="btn btn-secondary" style="display: none; margin-top: 15px; width: 100%; max-width: 320px; justify-content: center; background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 12px; border-radius: var(--radius-md); font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease;">📲 Instalar App Admin</button>
+      <button id="pwa-install-btn" onclick="handleAdminInstallClick()" class="btn btn-secondary" style="margin-top: 15px; width: 100%; max-width: 320px; justify-content: center; background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 12px; border-radius: var(--radius-md); font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease;">📲 Instalar App Admin</button>
       
       <a href="index.html" class="admin-view-store-btn" style="margin-top: 30px; border: none; background: transparent; color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Volver a la Tienda</a>
     </div>
   `;
-
-  if (window.deferredAdminPrompt) {
-    showAdminInstallButton();
-  }
 
   document.getElementById('admin-login-form').addEventListener('submit', function(e) {
     e.preventDefault();
