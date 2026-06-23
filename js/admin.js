@@ -762,6 +762,7 @@ async function renderCustomers(container) {
     if (snap.exists()) {
       const data = snap.val();
       users = Object.keys(data).map(uid => ({ uid, ...data[uid] }));
+      window.ADMIN_CUSTOMERS = users;
     }
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -839,8 +840,13 @@ async function renderCustomers(container) {
           ${c.whatsapp ? `<span style="font-size: 0.8rem; color: #25D366; margin-top: 2px;">WhatsApp: ${c.whatsapp}</span>` : ''}
         </div>
       </div>
-      <div style="color: var(--text-secondary);">Pedidos: <b>${c.totalOrders}</b></div>
-      <div style="font-weight: bold; color: #0ea5e9;">$${c.totalSpent.toFixed(2)}</div>
+      <div style="color: var(--text-secondary);">
+        Pedidos: <b>${c.totalOrders}</b><br>
+        <span style="font-size: 0.8rem; color: #0ea5e9;">Gasto: $${c.totalSpent.toFixed(2)}</span>
+      </div>
+      <div style="font-weight: bold; color: #10b981; font-size: 1.1rem;">
+        $${(parseFloat(c.wallet) || 0).toFixed(2)}
+      </div>
       <div style="display: flex; flex-direction: column; gap: 8px;">
         ${c.uid ? `
           <div style="display: flex; gap: 5px; flex-wrap: wrap;">
@@ -874,8 +880,8 @@ async function renderCustomers(container) {
       <div class="admin-card" style="padding: 0; overflow: hidden;">
         <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 15px; background: rgba(0,0,0,0.2); padding: 16px; font-weight: 600; color: var(--text-muted); border-bottom: 1px solid var(--border);">
           <div>Cliente</div>
-          <div>Total Pedidos</div>
-          <div>Gastado (USD)</div>
+          <div>Pedidos / Gasto</div>
+          <div>Saldo (Monedero)</div>
           <div>Gestión</div>
         </div>
         <div style="padding: 16px;">
