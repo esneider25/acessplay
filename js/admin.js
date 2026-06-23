@@ -199,9 +199,15 @@ function renderAdminLogin(container) {
         <div id="admin-login-error" style="color: #ff6b6b; font-size: 0.85rem; margin-top: 15px; text-align: center; display: none;">Credenciales incorrectas.</div>
       </form>
       
+      <button id="pwa-install-btn" class="btn btn-secondary" style="display: none; margin-top: 15px; width: 100%; max-width: 320px; justify-content: center; background: rgba(14, 165, 233, 0.1); border: 1px solid var(--accent); color: var(--accent); padding: 12px; border-radius: var(--radius-md); font-size: 0.95rem; cursor: pointer; transition: all 0.3s ease;">📲 Instalar App Admin</button>
+      
       <a href="index.html" class="admin-view-store-btn" style="margin-top: 30px; border: none; background: transparent; color: var(--text-muted); text-decoration: none; font-size: 0.9rem;">← Volver a la Tienda</a>
     </div>
   `;
+
+  if (window.deferredAdminPrompt) {
+    showAdminInstallButton();
+  }
 
   document.getElementById('admin-login-form').addEventListener('submit', function(e) {
     e.preventDefault();
