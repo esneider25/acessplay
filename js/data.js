@@ -52,7 +52,7 @@ let SITE_SETTINGS = {
     },
     { 
       title: 'Prevención de Fraude y Bloqueos', 
-      titleColor: '#a855f7', 
+      titleColor: '#ef4444', 
       desc: 'Contamos con sistemas Anti-Spam. Cualquier intento de enviar comprobantes falsos, comprobantes reciclados, o hacer múltiples pedidos falsos resultará en el BLOQUEO PERMANENTE de la IP, número de WhatsApp y cuenta del usuario, perdiendo acceso a su Monedero sin derecho a reclamo.', 
       descColor: '#e2e8f0' 
     }

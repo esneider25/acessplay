@@ -2829,44 +2829,6 @@ function checkAdminNotifications() {
   lastUnreadMessages = currentUnread;
 }
 
-// ── Login System ──
-function renderAdminLoginOld(container) {
-  container.innerHTML = `
-    <div style="display:flex; justify-content:center; align-items:center; min-height:100vh; background:var(--bg-body);">
-      <div style="background:var(--bg-surface); padding:40px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.5); width:100%; max-width:400px; text-align:center;">
-        <div style="font-size:3rem; margin-bottom:10px;">🤖</div>
-        <h2 style="color:var(--text-primary); margin-bottom:30px;">AccessPlay Admin</h2>
-        <input type="email" id="admin-user" class="admin-input" placeholder="Correo de Administrador" style="margin-bottom:15px; text-align:center;">
-        <input type="password" id="admin-pass" class="admin-input" placeholder="Contraseña" style="margin-bottom:20px; text-align:center;" onkeydown="if(event.key==='Enter')adminLogin()">
-        <button class="admin-btn-primary" style="width:100%;" onclick="adminLogin()">Iniciar Sesión</button>
-      </div>
-    </div>
-  `;
-}
-
-function adminLogin() {
-  const user = document.getElementById('admin-user').value;
-  const pass = document.getElementById('admin-pass').value;
-  const btn = document.querySelector('.admin-btn-primary');
-
-  if (!user || !pass) {
-    alert('Ingresa correo y contraseña');
-    return;
-  }
-
-  btn.innerHTML = '<span class="tracking-spinner"></span>';
-  btn.disabled = true;
-
-  firebase.auth().signInWithEmailAndPassword(user, pass)
-    .then((userCredential) => {
-      // The onAuthStateChanged listener will handle initAdminApp
-    })
-    .catch((error) => {
-      alert('Error de inicio de sesión: ' + error.message);
-      btn.innerHTML = 'Iniciar Sesión';
-      btn.disabled = false;
-    });
-}
 
 // ════════════════════════════════════════
 // QUICK REPLIES
@@ -2987,57 +2949,6 @@ function adminDeleteQuickReply(id) {
   }
 }
 
-// ════════════════════════════════════════
-// CUSTOMERS (USERS & WALLETS)
-// ════════════════════════════════════════
-
-function renderCustomersOld(container) {
-  container.innerHTML = `
-    <div class="admin-header-flex">
-      <h2 class="admin-page-title">👥 Gestión de Clientes</h2>
-      <button class="btn btn-secondary" onclick="renderCustomersOld(document.getElementById('admin-main-content'))">🔄 Refrescar</button>
-    </div>
-    <div class="admin-card" style="margin-top: 20px;">
-      <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-        <input type="text" id="admin-customers-search" class="admin-form-input" style="flex: 1; margin-bottom: 0;" placeholder="Buscar por Email, Nombre o WhatsApp..." onkeyup="filterCustomersSearch(this.value)">
-      </div>
-      <div style="overflow-x: auto; padding-bottom: 15px;">
-        <table class="admin-table" style="width: 100%; border-collapse: collapse; min-width: 1000px;">
-          <thead>
-            <tr>
-              <th style="text-align: left; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">Email</th>
-              <th style="text-align: left; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">Nombre</th>
-              <th style="text-align: left; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">WhatsApp</th>
-              <th style="text-align: left; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">Fecha Registro</th>
-              <th style="text-align: right; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">Monedero</th>
-              <th style="text-align: center; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">Rol / Descuento</th>
-              <th style="text-align: center; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">Estado</th>
-              <th style="text-align: center; padding: 12px; border-bottom: 1px solid var(--border-color); color: var(--text-secondary); white-space: nowrap;">Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="customers-table-body">
-            <tr><td colspan="8" style="text-align: center; padding: 20px;">Cargando clientes...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
-
-  firebase.database().ref('users').once('value').then(snap => {
-    const usersData = snap.val() || {};
-    const usersList = Object.keys(usersData).map(uid => ({
-      uid: uid,
-      ...usersData[uid]
-    })).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-
-    // Store in global state for search filtering
-    window.ADMIN_CUSTOMERS = usersList;
-    renderCustomersTable(usersList);
-  }).catch(err => {
-    console.error(err);
-    document.getElementById('customers-table-body').innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: red;">Error cargando clientes</td></tr>`;
-  });
-}
 
 function renderCustomersTable(usersList) {
   const tbody = document.getElementById('customers-table-body');

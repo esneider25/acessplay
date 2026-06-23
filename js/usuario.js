@@ -623,7 +623,7 @@ function renderDashboardContent() {
   if (currentRole === 'revendedor') {
     roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-star"></i> REVENDEDOR</span>`;
   } else if (currentRole === 'partner') {
-    roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #a855f7, #6366f1); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(168, 85, 247, 0.6), 0 0 20px rgba(168, 85, 247, 0.4); border: 1px solid #d8b4fe; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-crown"></i> SHARK PARTNER</span>`;
+    roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(14, 165, 233, 0.6), 0 0 20px rgba(14, 165, 233, 0.4); border: 1px solid #7dd3fc; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-crown"></i> SHARK PARTNER</span>`;
   } else if (currentRole === 'influencer') {
     roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(59, 130, 246, 0.4); border: 1px solid #93c5fd; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-sparkle"></i> INFLUENCER SHARK</span>`;
   } else {
@@ -669,12 +669,12 @@ function renderDashboardContent() {
         </div>
 
         <!-- Saldo Gastado Card -->
-        <div class="glass-card" style="border-color: rgba(139, 92, 246, 0.2);">
-          <div style="position: absolute; bottom: -50px; right: -50px; width: 150px; height: 150px; background: #8b5cf6; filter: blur(60px); opacity: 0.15;"></div>
+        <div class="glass-card" style="border-color: rgba(14, 165, 233, 0.2);">
+          <div style="position: absolute; bottom: -50px; right: -50px; width: 150px; height: 150px; background: #0ea5e9; filter: blur(60px); opacity: 0.15;"></div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;"><i class="ph ph-chart-line-up"></i> Total Gastado</div>
-              <div style="font-size: 2.5rem; font-weight: 800; color: #8b5cf6; text-shadow: 0 0 20px rgba(139, 92, 246, 0.4);">\$${spent.toFixed(2)}</div>
+              <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 20px rgba(14, 165, 233, 0.4);">\$${spent.toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -724,7 +724,7 @@ function renderDashboardContent() {
                 Canjear
               </button>
               ${(currentRole === 'cliente' || currentRole === 'influencer' || currentRole === 'partner') ? `
-              <button onclick="requestCashout()" class="btn-primary" style="padding: 10px 15px; border-radius: 12px; font-size: 0.85rem; background: linear-gradient(135deg, #a855f7, #6366f1);" title="Retirar a Binance o Pago Móvil">
+              <button onclick="requestCashout()" class="btn-primary" style="padding: 10px 15px; border-radius: 12px; font-size: 0.85rem; background: linear-gradient(135deg, #0ea5e9, #0284c7);" title="Retirar a Binance o Pago Móvil">
                 Retirar Dinero
               </button>
               ` : ''}
