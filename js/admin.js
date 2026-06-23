@@ -56,8 +56,28 @@ function initAdminApp() {
       <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-deep);">
         <div class="tracking-spinner" style="font-size: 3rem;">🤖</div>
         <h2 style="margin-top: 20px; color: var(--accent);">Conectando con la base de datos...</h2>
+        <div id="diagnostic-info" style="margin-top: 20px; color: #ffb74d; font-family: monospace; text-align: center; max-width: 80%;">
+          Comprobando estado...
+        </div>
+        <button onclick="location.reload(true)" style="margin-top: 20px; padding: 8px 16px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer;">Forzar Recarga</button>
       </div>
     `;
+    
+    // Add a diagnostic interval
+    if (!window.diagInterval) {
+      window.diagInterval = setInterval(() => {
+        const info = document.getElementById('diagnostic-info');
+        if (info) {
+          info.innerHTML = `
+            Firebase definido: ${typeof firebase !== 'undefined'}<br>
+            Auth verificado: ${adminAuthVerified}<br>
+            Datos cargados: ${window.DATA_LOADED}<br>
+            Llaves cargadas: ${typeof loadedKeys !== 'undefined' ? loadedKeys.size : 'N/A'}/15<br>
+            Versión: 19
+          `;
+        }
+      }, 1000);
+    }
     return;
   }
 

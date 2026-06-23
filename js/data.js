@@ -317,6 +317,16 @@ function initFirebaseData() {
       checkLoadComplete(key);
     });
   });
+
+  // Fallback to prevent freezing if any key fails to load
+  setTimeout(() => {
+    if (!window.DATA_LOADED) {
+      console.warn('Forcing DATA_LOADED true after timeout');
+      window.DATA_LOADED = true;
+      if (typeof renderApp === 'function') renderApp();
+      if (typeof initAdminApp === 'function') initAdminApp();
+    }
+  }, 4000);
 }
 
 initFirebaseData();
