@@ -1805,7 +1805,7 @@ function renderOrders(container) {
   // Then, filter by search term if provided
   if (searchTerm) {
     filteredOrders = filteredOrders.filter(o =>
-      o.id.toLowerCase().includes(searchTerm) ||
+      (o.id && o.id.toLowerCase().includes(searchTerm)) ||
       (o.customerContact && o.customerContact.toLowerCase().includes(searchTerm)) ||
       (o.accountEmail && o.accountEmail.toLowerCase().includes(searchTerm)) ||
       (o.gameId && o.gameId.toLowerCase().includes(searchTerm)) ||
