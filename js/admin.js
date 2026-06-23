@@ -23,6 +23,14 @@ const notifySound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/
 let adminAuthVerified = false;
 
 // ── Initialization ──
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.deferredAdminPrompt = e;
+  if (typeof showAdminInstallButton === 'function') {
+    showAdminInstallButton();
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('recargaaccessplay_theme') === 'light') {
     document.body.classList.add('light-theme');
@@ -162,6 +170,9 @@ function initAdminApp() {
           </li>
         </ul>
         <div class="admin-sidebar-footer" style="display:flex; flex-direction:column; gap:10px;">
+          <button id="pwa-install-sidebar-btn" class="admin-view-store-btn" style="display: none; background:var(--accent); color:white; cursor:pointer;">
+            📲 Instalar App
+          </button>
           <button class="admin-view-store-btn" onclick="toggleAdminTheme()" style="background:var(--bg-surface); color:var(--text-primary); cursor:pointer;">
             🌓 Alternar Tema
           </button>
@@ -174,7 +185,35 @@ function initAdminApp() {
     </div>
   `;
 
+  if (window.deferredAdminPrompt) {
+    showAdminInstallButton();
+  }
+
   renderActiveTab();
+}
+
+function showAdminInstallButton() {
+  const loginBtn = document.getElementById('pwa-install-btn');
+  const sidebarBtn = document.getElementById('pwa-install-sidebar-btn');
+  
+  const handleInstallClick = async () => {
+    if (!window.deferredAdminPrompt) return;
+    window.deferredAdminPrompt.prompt();
+    const { outcome } = await window.deferredAdminPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    window.deferredAdminPrompt = null;
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (sidebarBtn) sidebarBtn.style.display = 'none';
+  };
+
+  if (loginBtn) {
+    loginBtn.style.display = 'flex';
+    loginBtn.onclick = handleInstallClick;
+  }
+  if (sidebarBtn) {
+    sidebarBtn.style.display = 'flex';
+    sidebarBtn.onclick = handleInstallClick;
+  }
 }
 
 function renderAdminLogin(container) {

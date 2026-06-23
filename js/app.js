@@ -16,6 +16,14 @@ const appState = {
 };
 
 // ── Init ──
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  window.deferredStorePrompt = e;
+  if (typeof showStoreInstallButton === 'function') {
+    showStoreInstallButton();
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('ref')) {
@@ -43,6 +51,22 @@ function toggleTheme() {
   document.body.classList.toggle('light-theme');
   const isLight = document.body.classList.contains('light-theme');
   localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
+}
+
+function showStoreInstallButton() {
+  const navItem = document.getElementById('pwa-nav-item');
+  const btn = document.getElementById('pwa-install-app-btn');
+  if (navItem && btn) {
+    navItem.style.display = 'block';
+    btn.onclick = async () => {
+      if (!window.deferredStorePrompt) return;
+      window.deferredStorePrompt.prompt();
+      const { outcome } = await window.deferredStorePrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
+      window.deferredStorePrompt = null;
+      navItem.style.display = 'none';
+    };
+  }
 }
 
 // ── Render ──
@@ -193,6 +217,10 @@ function renderApp() {
       ${typeof renderSupportWidget === 'function' ? renderSupportWidget() : ''}
       ${termsHtml}
     `;
+  }
+
+  if (window.deferredStorePrompt) {
+    showStoreInstallButton();
   }
 }
 
