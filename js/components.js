@@ -268,11 +268,10 @@ function renderProductCard(product, index) {
   const productType = product.type || 'game-id';
   const typeBadges = { 'account': '🔐', 'code': '🎫', 'game-id': '' };
 
-  const badge = product.popular
-    ? '<span class="game-card-badge badge-popular">🔥 Popular</span>'
-    : product.isNew
-      ? '<span class="game-card-badge badge-new">✨ Nuevo</span>'
-      : '';
+  let badge = '';
+  if (product.isOutofStock) badge = '<span class="game-card-badge" style="background: rgba(239, 83, 80, 0.9); color: white;">⛔ Agotado</span>';
+  else if (product.popular) badge = '<span class="game-card-badge badge-popular">🔥 Popular</span>';
+  else if (product.isNew) badge = '<span class="game-card-badge badge-new">✨ Nuevo</span>';
   const minPrice = Math.min(...product.packages.map(p => p.priceUsd));
   const maxPrice = Math.max(...product.packages.map(p => p.priceUsd));
 
@@ -282,7 +281,7 @@ function renderProductCard(product, index) {
 
   return `
     <div class="game-card fade-in-up stagger-${(index % 7) + 1}"
-         style="--game-color: ${product.color}; --game-gradient: ${product.colorGradient};"
+         style="--game-color: ${product.color}; --game-gradient: ${product.colorGradient}; ${product.isOutofStock ? 'opacity: 0.7; filter: grayscale(0.6);' : ''}"
          onclick="navigateTo('product', '${product.id}')"
          id="card-${product.id}">
       <div class="game-card-banner" style="background: ${product.colorGradient};">
@@ -315,15 +314,20 @@ function renderProductDetail(productId) {
     ? `<img src="${product.imageUrl}" alt="${product.name}" class="game-detail-icon">`
     : `<div style="width:64px;height:64px;border-radius:14px;background:${product.colorGradient};display:flex;align-items:center;justify-content:center;font-size:1.8rem;">${product.currencyIcon}</div>`;
 
-  const packages = product.packages.map((pkg, i) => `
-    <div class="package-card fade-in-up stagger-${(i % 7) + 1}"
-         onclick="selectPackage('${product.id}', ${i})"
-         id="pkg-${product.id}-${i}">
-      <div class="package-amount">${pkg.amount.toLocaleString()}</div>
-      <div class="package-label">${product.currency}</div>
-      <div class="package-price-bs">Bs. ${formatBs(usdToBs(pkg.priceUsd))}</div>
-    </div>
-  `).join('');
+  let packages = '';
+  if (product.isOutofStock) {
+    packages = '<div style="padding: 20px; background: rgba(239, 83, 80, 0.1); color: #ef5350; border: 1px solid rgba(239, 83, 80, 0.3); border-radius: 8px; text-align: center; width: 100%; margin-top: 15px;">Este producto se encuentra <b>agotado</b> por el momento.<br>Por favor, intenta más tarde.</div>';
+  } else {
+    packages = product.packages.map((pkg, i) => `
+      <div class="package-card fade-in-up stagger-${(i % 7) + 1}"
+           onclick="selectPackage('${product.id}', ${i})"
+           id="pkg-${product.id}-${i}">
+        <div class="package-amount">${pkg.amount.toLocaleString()}</div>
+        <div class="package-label">${product.currency}</div>
+        <div class="package-price-bs">Bs. ${formatBs(usdToBs(pkg.priceUsd))}</div>
+      </div>
+    `).join('');
+  }
 
   // Saved IDs handling
   let savedIdsHtml = '';

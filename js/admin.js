@@ -687,7 +687,8 @@ function renderProducts(container) {
     const maxPrice = product.packages.length > 0 ? Math.max(...product.packages.map(p => p.priceUsd)) : 0;
 
     let badgeHtml = '';
-    if (product.popular) badgeHtml = `<span class="admin-badge admin-badge-popular">🔥 Popular</span>`;
+    if (product.isOutofStock) badgeHtml = `<span class="admin-badge" style="background: rgba(239, 83, 80, 0.2); color: #ef5350;">⛔ Agotado</span>`;
+    else if (product.popular) badgeHtml = `<span class="admin-badge admin-badge-popular">🔥 Popular</span>`;
     else if (product.isNew) badgeHtml = `<span class="admin-badge admin-badge-new">✨ Nuevo</span>`;
 
     const bannerContent = product.imageUrl
@@ -1549,7 +1550,7 @@ function openProductModal(productId = null) {
   let product = {
     id: '', name: '', category: 'juegos', currency: '', currencyIcon: '💎',
     imageUrl: '', color: '#00b2ff', colorGradient: 'linear-gradient(135deg, #00b2ff, #0066ff)',
-    description: '', popular: false, isNew: false, packages: []
+    description: '', popular: false, isNew: false, isOutofStock: false, packages: []
   };
 
   if (productId) {
@@ -1643,7 +1644,7 @@ function openProductModal(productId = null) {
             <label class="admin-form-label" for="m-prod-gradient">Gradiente CSS</label>
             <input type="text" class="admin-form-input" id="m-prod-gradient" value="${product.colorGradient}" placeholder="linear-gradient(135deg, #00b2ff, #0066ff)">
           </div>
-          <div class="admin-form-group" style="display: flex; gap: 20px; align-items: center; margin-top: 12px;">
+          <div class="admin-form-group" style="display: flex; gap: 20px; align-items: center; margin-top: 12px; flex-wrap: wrap;">
             <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
               <input type="checkbox" id="m-prod-popular" ${product.popular ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--accent);">
               🔥 Popular
@@ -1651,6 +1652,10 @@ function openProductModal(productId = null) {
             <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
               <input type="checkbox" id="m-prod-isnew" ${product.isNew ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--accent);">
               ✨ Nuevo
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem;">
+              <input type="checkbox" id="m-prod-out-of-stock" ${product.isOutofStock ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #ef5350;">
+              ⛔ Agotado
             </label>
           </div>
         </div>
@@ -1814,6 +1819,7 @@ function saveProduct() {
     description: descText.value.trim(),
     popular: popularCheck.checked,
     isNew: isnewCheck.checked,
+    isOutofStock: document.getElementById('m-prod-out-of-stock') ? document.getElementById('m-prod-out-of-stock').checked : false,
     position: parseInt(document.getElementById('m-prod-position').value) || 999,
     packages: [...adminState.tempPackages]
   };
