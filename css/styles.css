@@ -1548,3 +1548,13 @@ body {
   font-size: 1.6rem;
 }
 
+/* Fix Safari/Mobile double tap bug by disabling hover transforms on touch screens */
+@media (hover: none) {
+  .nav-cta:hover, .btn-primary:hover, .btn-secondary:hover, 
+  .hero-btn-primary:hover, .hero-btn-secondary:hover, 
+  .game-card:hover, .package-card:hover, .feature-card:hover, 
+  .support-send-btn:hover, .support-fab:hover, .whatsapp-fab:hover, 
+  .step-card:hover {
+    transform: none !important;
+  }
+}

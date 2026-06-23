@@ -84,10 +84,12 @@ function renderApp() {
   border: 1px solid transparent;
 }
 
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
-  transform: translateX(4px);
+@media (hover: hover) {
+  .nav-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    transform: translateX(4px);
+  }
 }
 
 .nav-item.active {
