@@ -323,7 +323,7 @@ function renderProductDetail(productId) {
         return `
           <div class="package-card fade-in-up stagger-${(i % 7) + 1}"
                style="opacity: 0.5; filter: grayscale(1); cursor: not-allowed; position: relative;"
-               onclick="alert('Este paquete está agotado por el momento.')"
+               onclick="showToast('⚠️ Este paquete está agotado por el momento.')"
                id="pkg-${product.id}-${i}">
             <div style="position: absolute; top: -10px; right: -10px; background: #ef5350; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;">Agotado</div>
             <div class="package-amount">${pkg.amount.toLocaleString()}</div>
