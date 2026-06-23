@@ -1,16 +1,20 @@
-const CACHE_NAME = 'accessplay-v3';
+const CACHE_NAME = 'accessplay-v4';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/admin.html',
   '/css/styles.css',
+  '/css/admin.css',
   '/js/data.js',
   '/js/components.js',
   '/js/app.js',
+  '/js/admin.js',
   '/img/logo.png',
   '/img/favicon-192.png',
   '/img/favicon-512.png',
   '/img/favicon-32.png',
-  '/404.html'
+  '/404.html',
+  '/admin-manifest.json'
 ];
 
 // Install Event

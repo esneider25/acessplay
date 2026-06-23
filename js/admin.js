@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.add('light-theme');
   }
 
+  // Ensure loading UI and diagnostics are shown immediately
+  initAdminApp();
+
   if (typeof firebase !== 'undefined' && firebase.auth) {
     firebase.auth().onAuthStateChanged((user) => {
       if (user && user.email === 'admin@accesplay.com') {
@@ -294,8 +297,9 @@ function renderDashboard(container) {
   // Recent orders (last 5 from the filtered set)
   const recentOrders = allOrders.slice(0, 5);
   const recentOrdersHtml = recentOrders.length > 0 ? recentOrders.map(order => {
-    const statusInfo = ORDER_STATUSES[order.status] || ORDER_STATUSES['pending'];
-    const statusClass = order.status.replace('-', '-');
+    const status = order.status || 'pending';
+    const statusInfo = ORDER_STATUSES[status] || ORDER_STATUSES['pending'];
+    const statusClass = status.replace('-', '-');
     const date = new Date(order.createdAt);
     return `
       <div class="admin-cat-row" style="cursor: pointer;" onclick="switchTab('orders'); setTimeout(() => openOrderDetailModal('${order.id}'), 100);">
