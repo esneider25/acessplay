@@ -149,19 +149,28 @@ function renderApp() {
     bottom: 0;
     top: auto;
     flex-direction: row;
-    padding: 10px;
+    padding: 10px 15px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
     z-index: 100;
     border-right: none;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(6, 13, 26, 0.95);
-    justify-content: space-around;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 10px;
   }
+  /* Hide scrollbar for a cleaner look */
+  .panel-sidebar::-webkit-scrollbar { display: none; }
+  .panel-sidebar { -ms-overflow-style: none; scrollbar-width: none; }
+  
   .nav-item {
     flex-direction: column;
-    padding: 8px 4px;
+    padding: 8px 10px;
     gap: 4px;
     font-size: 0.65rem;
     text-align: center;
+    min-width: 75px;
   }
   .nav-item:hover { transform: none; }
   #nav-spacer { display: none; }
