@@ -950,9 +950,9 @@ function renderDashboardOrders(orders, type) {
   return orders.map(order => {
     let statusColor = '#f59e0b';
     let statusIcon = 'ph-clock-countdown';
-    if (order.status === 'processing') { statusColor = '#3b82f6'; statusIcon = 'ph-spinner-gap'; }
-    if (order.status === 'completed') { statusColor = '#0ea5e9'; statusIcon = 'ph-check-circle'; }
-    if (order.status === 'rejected') { statusColor = '#ef4444'; statusIcon = 'ph-x-circle'; }
+    if (order.status === 'processing' || order.status === 'procesando') { statusColor = '#3b82f6'; statusIcon = 'ph-spinner-gap'; }
+    if (order.status === 'completed' || order.status === 'completado') { statusColor = '#0ea5e9'; statusIcon = 'ph-check-circle'; }
+    if (order.status === 'rejected' || order.status === 'rechazado') { statusColor = '#ef4444'; statusIcon = 'ph-x-circle'; }
 
     const STATUS_ES = {
       'pending': 'PENDIENTE',
