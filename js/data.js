@@ -483,7 +483,18 @@ function saveMessages() {
 
 // ── Orders CRUD ──
 function getOrders() {
-  return ORDERS;
+  return ORDERS.map(o => {
+    if (o.status === 'completado') o.status = 'completed';
+    if (o.status === 'rechazado') o.status = 'rejected';
+    if (o.status === 'pendiente') o.status = 'pending';
+    
+    if (!o.productName && o.productDetails) o.productName = o.productDetails;
+    if (!o.packageLabel) o.packageLabel = 'Migrado';
+    if (!o.paymentMethodName && o.paymentMethod) o.paymentMethodName = o.paymentMethod;
+    if (!o.customerContact && (o.userEmail || o.userPhone)) o.customerContact = o.userEmail || o.userPhone;
+    
+    return o;
+  });
 }
 
 function saveOrders(orders) {
