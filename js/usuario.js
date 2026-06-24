@@ -512,7 +512,7 @@ function redeemPoints() {
           <div style="width: 70px; height: 70px; background: rgba(59,130,246,0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 2.5rem; color: #3b82f6; margin: 0 auto 15px auto; box-shadow: 0 0 20px rgba(59,130,246,0.2);">
             <i class="ph-fill ph-star"></i>
           </div>
-          <h2 style="margin: 0; font-size: 1.5rem; color: #3b82f6;">Canjear AccessPlay Points</h2>
+          <h2 style="margin: 0; font-size: 1.5rem; color: #3b82f6;">Canjear AccessPoints</h2>
           <p style="margin: 10px 0 0 0; color: var(--text-secondary); font-size: 0.95rem;">Tienes <strong style="color: white;">${currentPoints}</strong> puntos disponibles.</p>
         </div>
         
@@ -543,7 +543,7 @@ function redeemPoints() {
           ` : `
           <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 25px; color: #ef4444;">
             <i class="ph ph-warning" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
-            Necesitas al menos <strong>100 AccessPlay Points</strong> para realizar un canje. (100 PTS = $1)
+            Necesitas al menos <strong>100 AccessPoints</strong> para realizar un canje. (100 PTS = $1)
           </div>
           <button onclick="this.closest('#redeem-points-modal').remove()" class="btn-secondary" style="width: 100%; padding: 14px; border-radius: 12px;">
             Entendido
@@ -592,7 +592,7 @@ window.confirmRedeemPoints = function() {
       id: Date.now().toString(),
       type: 'deposit',
       amount: dollars,
-      description: `Canje de ${cost} AccessPlay Points`,
+      description: `Canje de ${cost} AccessPoints`,
       date: Date.now()
     });
     
@@ -641,9 +641,9 @@ function renderDashboardContent() {
   if (currentRole === 'revendedor') {
     roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-star"></i> REVENDEDOR</span>`;
   } else if (currentRole === 'partner') {
-    roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(14, 165, 233, 0.6), 0 0 20px rgba(14, 165, 233, 0.4); border: 1px solid #7dd3fc; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-crown"></i> SHARK PARTNER</span>`;
+    roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(14, 165, 233, 0.6), 0 0 20px rgba(14, 165, 233, 0.4); border: 1px solid #7dd3fc; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-crown"></i> ACCESS PARTNER</span>`;
   } else if (currentRole === 'influencer') {
-    roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(59, 130, 246, 0.4); border: 1px solid #93c5fd; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-sparkle"></i> INFLUENCER SHARK</span>`;
+    roleBadge = `<span style="font-size: 0.8rem; background: linear-gradient(135deg, #1d4ed8, #3b82f6); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; box-shadow: 0 0 10px rgba(59, 130, 246, 0.6), 0 0 20px rgba(59, 130, 246, 0.4); border: 1px solid #93c5fd; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-sparkle"></i> INFLUENCER ACCESSPLAY</span>`;
   } else {
     roleBadge = `<span style="font-size: 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); padding: 4px 12px; border-radius: 20px; font-weight: bold; letter-spacing: 0.5px; display: flex; align-items: center; gap: 4px;"><i class="ph-fill ph-user"></i> CLIENTE</span>`;
   }
@@ -734,7 +734,7 @@ function renderDashboardContent() {
           <div style="position: absolute; bottom: -50px; right: -50px; width: 150px; height: 150px; background: #3b82f6; filter: blur(60px); opacity: 0.15;"></div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;"><i class="ph ph-star"></i> AccessPlay Points</div>
+              <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;"><i class="ph ph-star"></i> AccessPoints</div>
               <div style="font-size: 2.5rem; font-weight: 800; color: #3b82f6; text-shadow: 0 0 20px rgba(59, 130, 246, 0.4);">${points}</div>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -757,7 +757,7 @@ function renderDashboardContent() {
       <div class="glass-card" style="background: linear-gradient(90deg, rgba(15,31,56,0.8), rgba(0,229,195,0.1)); border-color: var(--accent); padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
         <div style="flex: 1; min-width: 250px;">
           <h3 style="margin: 0 0 5px 0; color: var(--accent); display: flex; align-items: center; gap: 8px;"><i class="ph-fill ph-users-three"></i> ¡Invita y Gana!</h3>
-          <p style="margin: 0 0 10px 0; color: var(--text-secondary); font-size: 0.9rem;">Gana AccessPlay Points cada vez que tus invitados realicen compras.</p>
+          <p style="margin: 0 0 10px 0; color: var(--text-secondary); font-size: 0.9rem;">Gana AccessPoints cada vez que tus invitados realicen compras.</p>
           <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85rem;">
             <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: var(--accent); font-weight: bold;">${userProfile.referralsCount || 0} / ${(currentRole === 'influencer' || currentRole === 'partner') ? (userProfile.referralLimit || 100) : 10}</span> Amigos</div>
             <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: #3b82f6; font-weight: bold;">${userProfile.referralsEarnedPoints || 0}</span> Puntos Ganados</div>
@@ -1056,7 +1056,7 @@ function showVipBenefits() {
         </div>
         
         <div style="padding: 30px; max-height: 60vh; overflow-y: auto;">
-          <h3 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; color: #3b82f6;"><i class="ph-fill ph-coin"></i> AccessPlay Points por Compra</h3>
+          <h3 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; color: #3b82f6;"><i class="ph-fill ph-coin"></i> AccessPoints por Compra</h3>
           <ul style="list-style: none; padding: 0; margin: 0 0 25px 0; display: grid; gap: 10px;">
             <li style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; font-size: 0.9rem;">
               <span>Recargas menores a $6</span> <strong style="color: #3b82f6;">8 Puntos</strong>
@@ -1105,7 +1105,7 @@ window.requestCashout = function() {
   if (!userProfile) return;
   const currentPoints = userProfile.points || 0;
   if (currentPoints < 100) {
-    usuarioToast('Necesitas al menos 100 AccessPlay Points para retirar.', 'error');
+    usuarioToast('Necesitas al menos 100 AccessPoints para retirar.', 'error');
     return;
   }
   
