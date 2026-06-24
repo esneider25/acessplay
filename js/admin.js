@@ -2878,6 +2878,18 @@ function renderSettings(container) {
         </div>
       </div>
 
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">🔄 Herramientas de Sistema</h3>
+        </div>
+        <div class="admin-form-group">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Repara automáticamente todos los pedidos antiguos y recalcula el gasto total de los clientes migrados para que la plataforma funcione perfectamente al 100%.</p>
+          <button id="btn-normalize" class="btn btn-primary" onclick="normalizeLegacyData()" style="width: 100%; background: #ab47bc;">
+            ✨ Normalizar Base de Datos de Migración
+          </button>
+        </div>
+      </div>
+
       <div class="admin-card" style="grid-column: 1 / -1;">
         <div class="admin-card-header">
           <h3 class="admin-card-title">📢 Mensaje Emergente (Aviso Inicial)</h3>
@@ -3906,3 +3918,95 @@ function adminSaveLanding() {
 
 
 
+window.normalizeLegacyData = async function() {
+  if (!confirm("¿Deseas normalizar y actualizar todos los datos antiguos al nuevo formato? Esto puede tardar unos segundos y solo debe hacerse una vez.")) return;
+  
+  const btn = document.getElementById('btn-normalize');
+  if(btn) { btn.innerText = "Normalizando..."; btn.disabled = true; }
+
+  try {
+    const ordersSnap = await firebase.database().ref('orders').once('value');
+    const ordersData = ordersSnap.val() || {};
+    
+    let updatedOrders = 0;
+    
+    for (const key in ordersData) {
+      let changed = false;
+      const o = ordersData[key];
+      
+      // 1. Fix Status History
+      if (!o.statusHistory || !Array.isArray(o.statusHistory)) {
+        o.statusHistory = [{ status: o.status || 'pending', timestamp: o.createdAt || new Date().toISOString() }];
+        changed = true;
+      }
+      
+      // 2. Fix legacy product and cost
+      if (o.productId === 'legacy' || !o.packageLabel || o.costUsd === undefined || o.costUsd === 0) {
+        let pkg = null;
+        let prod = null;
+        const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
+        const orderPrice = Number(o.priceUsd) || 0;
+
+        for (let i = 0; i < PRODUCTS.length; i++) {
+          if (PRODUCTS[i].packages) {
+            pkg = PRODUCTS[i].packages.find(p => Number(p.priceUsd) === orderPrice);
+            if (pkg) { prod = PRODUCTS[i]; break; }
+          }
+        }
+        if (!pkg) {
+          const nums = searchLabel.match(/\d+/g);
+          if (nums && nums.length > 0) {
+            const targetNum = nums[0];
+            for (let i = 0; i < PRODUCTS.length; i++) {
+              if (PRODUCTS[i].packages) {
+                pkg = PRODUCTS[i].packages.find(p => String(p.amount) === targetNum || String(p.label).includes(targetNum));
+                if (pkg) { prod = PRODUCTS[i]; break; }
+              }
+            }
+          }
+        }
+        
+        if (prod && pkg) {
+          if (o.productId === 'legacy') o.productId = prod.id;
+          if (!o.packageLabel) o.packageLabel = pkg.label;
+          if (o.costUsd === undefined || o.costUsd === 0) o.costUsd = parseFloat(pkg.costUsd) || 0;
+          if (!o.productName) o.productName = prod.name;
+          changed = true;
+        }
+      }
+      
+      if (changed) {
+        await firebase.database().ref('orders/' + key).set(o);
+        updatedOrders++;
+      }
+    }
+    
+    // 3. Fix Users totalSpent
+    const usersSnap = await firebase.database().ref('users').once('value');
+    const usersData = usersSnap.val() || {};
+    
+    const freshOrdersSnap = await firebase.database().ref('orders').once('value');
+    const freshOrders = Object.values(freshOrdersSnap.val() || {});
+    
+    const spentMap = {};
+    freshOrders.filter(o => o.status === 'completed' || o.status === 'completado').forEach(o => {
+      if (o.userId) spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+    });
+    
+    let updatedUsers = 0;
+    for (const uid in usersData) {
+      const actualSpent = spentMap[uid] || 0;
+      if (usersData[uid].totalSpent !== actualSpent) {
+        await firebase.database().ref('users/' + uid + '/totalSpent').set(actualSpent);
+        updatedUsers++;
+      }
+    }
+    
+    alert(`¡Normalización completada con éxito!\n\nPedidos actualizados: ${updatedOrders}\nUsuarios actualizados: ${updatedUsers}`);
+    location.reload();
+  } catch (err) {
+    console.error(err);
+    alert("Hubo un error normalizando la base de datos. Revisa la consola.");
+    if(btn) { btn.innerText = "Error - Reintentar"; btn.disabled = false; }
+  }
+};
