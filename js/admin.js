@@ -335,7 +335,7 @@ function renderDashboard(container) {
   completedOrders.forEach(o => {
     totalRevenue += Number(o.priceUsd) || 0;
     let cost = 0;
-    if (o.costUsd !== undefined && o.costUsd !== null) {
+    if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
       cost = parseFloat(o.costUsd) || 0;
     } else {
       const prod = PRODUCTS.find(p => p.id === o.productId);
