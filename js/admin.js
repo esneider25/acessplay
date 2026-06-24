@@ -793,6 +793,11 @@ async function renderCustomers(container) {
         <span>📥</span> Exportar a CSV
       </button>
     </div>
+    
+    <div style="margin-bottom: 20px;">
+      <input type="text" id="customers-search-input" onkeyup="filterCrmTable(this.value)" placeholder="🔍 Buscar por nombre, correo o teléfono..." style="width: 100%; padding: 14px 20px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff; font-size: 1rem; outline: none;">
+    </div>
+
     <div id="customers-loading" style="padding: 40px; text-align: center; color: var(--text-muted);">Cargando clientes...</div>
     <div id="customers-content" style="display: none;"></div>
   `;
@@ -872,7 +877,7 @@ async function renderCustomers(container) {
   }
 
   const customersHtml = customers.map(c => `
-    <div class="admin-crm-row">
+    <div class="admin-crm-row" data-search="${(c.name || '').toLowerCase()} ${(c.contact || '').toLowerCase()} ${(c.whatsapp || '').toLowerCase()}">
       <div style="font-weight: 500; display: flex; align-items: center; gap: 10px;">
         <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: var(--bg-deep); font-weight: bold; flex-shrink: 0;">
           ${(c.name || c.contact || '?').charAt(0).toUpperCase()}
@@ -928,6 +933,7 @@ async function renderCustomers(container) {
         </div>
         <div style="padding: 16px;">
           ${customersHtml}
+          <div id="crm-no-results" style="display: none; text-align: center; padding: 40px; color: var(--text-muted);">No se encontró ningún cliente con esa búsqueda.</div>
         </div>
       </div>
     `;
@@ -3944,11 +3950,25 @@ window.normalizeLegacyData = async function() {
         batchUpdates['orders/' + key] = null; // Delete old key
         changed = true;
       }
+
+      // 0. Translate old statuses
+      if (o.status === 'completado') { o.status = 'completed'; changed = true; }
+      if (o.status === 'rechazado') { o.status = 'rejected'; changed = true; }
+      if (o.status === 'pendiente') { o.status = 'pending'; changed = true; }
+      if (o.status === 'procesando') { o.status = 'processing'; changed = true; }
       
       // 1. Fix Status History
       if (!o.statusHistory || !Array.isArray(o.statusHistory)) {
         o.statusHistory = [{ status: o.status || 'pending', timestamp: o.createdAt || new Date().toISOString() }];
         changed = true;
+      } else {
+        // Also fix inside history
+        o.statusHistory.forEach(h => {
+          if (h.status === 'completado') { h.status = 'completed'; changed = true; }
+          if (h.status === 'rechazado') { h.status = 'rejected'; changed = true; }
+          if (h.status === 'pendiente') { h.status = 'pending'; changed = true; }
+          if (h.status === 'procesando') { h.status = 'processing'; changed = true; }
+        });
       }
       
       // 2. Fix legacy product and cost
@@ -4035,5 +4055,26 @@ window.normalizeLegacyData = async function() {
     console.error(err);
     alert("Hubo un error normalizando la base de datos. Revisa la consola.");
     if(btn) { btn.innerText = "Error - Reintentar"; btn.disabled = false; }
+  }
+};
+
+
+window.filterCrmTable = function(val) {
+  const query = val.toLowerCase().trim();
+  const rows = document.querySelectorAll('.admin-crm-row');
+  let visibleCount = 0;
+  
+  rows.forEach(row => {
+    if (row.getAttribute('data-search').includes(query)) {
+      row.style.display = 'grid'; // because admin-crm-row uses CSS grid
+      visibleCount++;
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  
+  const noRes = document.getElementById('crm-no-results');
+  if (noRes) {
+    noRes.style.display = visibleCount === 0 ? 'block' : 'none';
   }
 };
