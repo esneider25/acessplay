@@ -159,7 +159,7 @@ def run_migration():
                 pass
 
             orders.append({
-                "id": f"RS-OLD-{p['id']}",
+                "id": f"AP-OLD-{p['id']}",
                 "userId": f"uid-{p['usuario_id']}",
                 "userEmail": p['correo'] or "",
                 "userPhone": p['whatsapp'] or "",
@@ -208,7 +208,7 @@ def run_migration():
                 "email": u['correo'],
                 "displayName": u['nombre'],
                 "phone": u['whatsapp'],
-                "role": "reseller" if u['rol'] == 'reseller' else ("admin" if u['rol'] == 'admin' else "user"),
+                "role": "revendedor" if u['rol'] == 'reseller' else ("admin" if u['rol'] == 'admin' else "cliente"),
                 "createdAt": u['fecha_registro'] + "T00:00:00.000Z" if len(u['fecha_registro']) == 10 else u['fecha_registro'],
                 "walletBalance": 0,
                 "totalSpent": user_spent.get(u['id'], 0)

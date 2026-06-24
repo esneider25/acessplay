@@ -703,7 +703,7 @@ function renderDashboard(container) {
                       <div style="font-size: 0.75rem; color: var(--text-muted);">${u.email}</div>
                     </td>
                     <td style="padding: 12px 10px;">
-                      <span class="admin-badge" style="background: ${u.role === 'revendedor' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(0, 229, 195, 0.15)'}; color: ${u.role === 'revendedor' ? '#d8b4fe' : '#0ea5e9'};">${u.role.toUpperCase()}</span>
+                      <span class="admin-badge" style="background: ${u.role === 'revendedor' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(0, 229, 195, 0.15)'}; color: ${u.role === 'revendedor' ? '#d8b4fe' : '#0ea5e9'};">${(u.role === 'user' ? 'cliente' : u.role).toUpperCase()}</span>
                     </td>
                     <td style="padding: 12px 10px; text-align: right; font-weight: bold; color: #42a5f5;">$${u.spent.toFixed(2)}</td>
                   </tr>
@@ -3934,7 +3934,16 @@ window.normalizeLegacyData = async function() {
     
     for (const key in ordersData) {
       let changed = false;
-      const o = ordersData[key];
+      let o = ordersData[key];
+      
+      // Migrate RS-OLD keys to AP-OLD
+      let newKey = key;
+      if (key.startsWith("RS-OLD-")) {
+        newKey = key.replace("RS-OLD-", "AP-OLD-");
+        o.id = newKey;
+        batchUpdates['orders/' + key] = null; // Delete old key
+        changed = true;
+      }
       
       // 1. Fix Status History
       if (!o.statusHistory || !Array.isArray(o.statusHistory)) {
@@ -3978,12 +3987,12 @@ window.normalizeLegacyData = async function() {
       }
       
       if (changed) {
-        batchUpdates['orders/' + key] = o;
+        batchUpdates['orders/' + newKey] = o;
         updatedOrders++;
       }
     }
     
-    // 3. Fix Users totalSpent and role
+    // 3. Fix Users totalSpent and roles (user -> cliente, reseller -> revendedor)
     const usersSnap = await firebase.database().ref('users').once('value');
     const usersData = usersSnap.val() || {};
     
@@ -3997,14 +4006,22 @@ window.normalizeLegacyData = async function() {
     for (const uid in usersData) {
       let uChanged = false;
       const actualSpent = spentMap[uid] || 0;
+      
       if (usersData[uid].totalSpent !== actualSpent) {
         batchUpdates['users/' + uid + '/totalSpent'] = actualSpent;
         uChanged = true;
       }
-      if (!usersData[uid].role) {
+      
+      // Translate old English roles
+      const currentRole = usersData[uid].role;
+      if (!currentRole || currentRole === 'user') {
         batchUpdates['users/' + uid + '/role'] = 'cliente';
         uChanged = true;
+      } else if (currentRole === 'reseller') {
+        batchUpdates['users/' + uid + '/role'] = 'revendedor';
+        uChanged = true;
       }
+      
       if (uChanged) updatedUsers++;
     }
     
@@ -4012,7 +4029,7 @@ window.normalizeLegacyData = async function() {
       await firebase.database().ref().update(batchUpdates);
     }
     
-    alert(`¡Normalización completada con éxito!\n\nPedidos reparados: ${updatedOrders}\nUsuarios actualizados: ${updatedUsers}`);
+    alert(`¡Normalización completada con éxito!\n\nPedidos reparados/renombrados: ${updatedOrders}\nUsuarios actualizados: ${updatedUsers}`);
     location.reload();
   } catch (err) {
     console.error(err);
