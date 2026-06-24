@@ -548,6 +548,7 @@ function createOrder(data) {
     apiProvider: data.apiProvider,
     priceUsd: data.priceUsd,
     priceBs: data.priceBs,
+    costUsd: data.costUsd || 0,
     paymentMethodId: data.paymentMethodId,
     paymentMethodName: data.paymentMethodName,
     customerContact: data.customerContact || '',

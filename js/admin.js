@@ -335,11 +335,15 @@ function renderDashboard(container) {
   completedOrders.forEach(o => {
     totalRevenue += (o.priceUsd || 0);
     let cost = 0;
-    const prod = PRODUCTS.find(p => p.id === o.productId);
-    if (prod && prod.packages) {
-      const pkg = prod.packages.find(pkg => pkg.label === o.packageLabel || pkg.priceUsd === o.priceUsd);
-      if (pkg && pkg.costUsd) {
-        cost = pkg.costUsd;
+    if (o.costUsd !== undefined && o.costUsd !== null) {
+      cost = parseFloat(o.costUsd) || 0;
+    } else {
+      const prod = PRODUCTS.find(p => p.id === o.productId);
+      if (prod && prod.packages) {
+        const pkg = prod.packages.find(pkg => pkg.label === o.packageLabel || pkg.priceUsd === o.priceUsd);
+        if (pkg && pkg.costUsd) {
+          cost = parseFloat(pkg.costUsd) || 0;
+        }
       }
     }
     totalCost += cost;
