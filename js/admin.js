@@ -338,12 +338,49 @@ function renderDashboard(container) {
     if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
       cost = parseFloat(o.costUsd) || 0;
     } else {
-      const prod = PRODUCTS.find(p => p.id === o.productId);
+      let prod = PRODUCTS.find(p => p.id === o.productId);
+      let pkg = null;
+      
+      const searchLabel = o.packageLabel || o.productDetails || '';
+
       if (prod && prod.packages) {
-        const pkg = prod.packages.find(pkg => pkg.label === o.packageLabel || Number(pkg.priceUsd) === Number(o.priceUsd));
-        if (pkg && pkg.costUsd) {
-          cost = parseFloat(pkg.costUsd) || 0;
+        pkg = prod.packages.find(p => p.label === searchLabel || Number(p.priceUsd) === Number(o.priceUsd));
+      }
+
+      // Aggressive fallback: If product was deleted/recreated or package not found, search ALL products
+      if (!pkg) {
+        for (let i = 0; i < PRODUCTS.length; i++) {
+          const currentProd = PRODUCTS[i];
+          if (currentProd.packages) {
+            pkg = currentProd.packages.find(p => p.label === searchLabel || Number(p.priceUsd) === Number(o.priceUsd));
+            if (pkg) {
+              prod = currentProd;
+              break;
+            }
+          }
         }
+      }
+
+      // Fuzzy matching fallback using numbers in the label if still not found
+      if (!pkg && searchLabel) {
+        const orderNums = String(searchLabel).match(/\d+/g);
+        if (orderNums && orderNums.length > 0) {
+          const targetNum = orderNums[0];
+          for (let i = 0; i < PRODUCTS.length; i++) {
+            const currentProd = PRODUCTS[i];
+            if (currentProd.packages) {
+              pkg = currentProd.packages.find(p => {
+                const pNums = String(p.label).match(/\d+/g);
+                return pNums && pNums[0] === targetNum && Number(p.priceUsd) === Number(o.priceUsd);
+              });
+              if (pkg) break;
+            }
+          }
+        }
+      }
+
+      if (pkg && pkg.costUsd) {
+        cost = parseFloat(pkg.costUsd) || 0;
       }
     }
     totalCost += cost;
