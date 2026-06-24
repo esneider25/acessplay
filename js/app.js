@@ -528,6 +528,33 @@ function updateOrderSummary() {
 
 // ── Submit Order — Creates real order + redirects to tracking ──
 async function submitOrder() {
+  const btnSubmit = document.getElementById('btn-submit');
+  if (btnSubmit && btnSubmit.dataset.processing === 'true') {
+    return;
+  }
+  if (btnSubmit) {
+    btnSubmit.dataset.processing = 'true';
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '⏳ Procesando...';
+  }
+  try {
+    const success = await _submitOrderLogic();
+    if (!success && btnSubmit) {
+      btnSubmit.dataset.processing = 'false';
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '🦈 Confirmar Pedido';
+    }
+  } catch (err) {
+    console.error("Error en el pedido:", err);
+    if (btnSubmit) {
+      btnSubmit.dataset.processing = 'false';
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '🦈 Confirmar Pedido';
+    }
+  }
+}
+
+async function _submitOrderLogic() {
   const product = PRODUCTS.find(g => g.id === appState.selectedProductId);
   if (!product) return;
   const productType = product.type || 'game-id';
@@ -761,6 +788,7 @@ async function submitOrder() {
   }
   // Show success animation then redirect to tracking using the last order created
   showOrderConfirmation(lastOrder);
+  return true;
 }
 
 let isProcessingOrder = false;
