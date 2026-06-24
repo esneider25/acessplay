@@ -294,7 +294,11 @@ function initFirebaseData() {
           else if (key === 'landing_config') Object.assign(LANDING_CONFIG, data);
           else if (key === 'api_configs') { API_CONFIGS.length = 0; toArray(data).forEach(a => API_CONFIGS.push(a)); }
           else if (key === 'discounts') { DISCOUNT_CODES.length = 0; toArray(data).forEach(d => DISCOUNT_CODES.push(d)); }
-          else if (key === 'messages') { MESSAGES = toArray(data); }
+          else if (key === 'messages') { 
+            MESSAGES = toArray(data); 
+            if (typeof updateAdminMessagesUI === 'function') updateAdminMessagesUI();
+            if (typeof updateAdminSidebarBadges === 'function') updateAdminSidebarBadges();
+          }
           else if (key === 'orders') {
             ORDERS = toArray(data);
             ORDERS.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
