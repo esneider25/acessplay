@@ -1,4 +1,4 @@
-const CACHE_NAME = 'accessplay-v16';
+const CACHE_NAME = 'accessplay-v17';
 const urlsToCache = [
   '/',
   '/manifest.json',

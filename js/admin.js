@@ -3916,19 +3916,21 @@ function adminSaveLanding() {
   }
 }
 
-
-
 window.normalizeLegacyData = async function() {
   if (!confirm("¿Deseas normalizar y actualizar todos los datos antiguos al nuevo formato? Esto puede tardar unos segundos y solo debe hacerse una vez.")) return;
   
   const btn = document.getElementById('btn-normalize');
-  if(btn) { btn.innerText = "Normalizando..."; btn.disabled = true; }
+  if(btn) { 
+    btn.innerHTML = `<span style="display:inline-block; width:16px; height:16px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-right:8px; vertical-align:middle;"></span> Normalizando...`; 
+    btn.disabled = true; 
+  }
 
   try {
     const ordersSnap = await firebase.database().ref('orders').once('value');
     const ordersData = ordersSnap.val() || {};
     
     let updatedOrders = 0;
+    const batchUpdates = {};
     
     for (const key in ordersData) {
       let changed = false;
@@ -3976,18 +3978,16 @@ window.normalizeLegacyData = async function() {
       }
       
       if (changed) {
-        await firebase.database().ref('orders/' + key).set(o);
+        batchUpdates['orders/' + key] = o;
         updatedOrders++;
       }
     }
     
-    // 3. Fix Users totalSpent
+    // 3. Fix Users totalSpent and role
     const usersSnap = await firebase.database().ref('users').once('value');
     const usersData = usersSnap.val() || {};
     
-    const freshOrdersSnap = await firebase.database().ref('orders').once('value');
-    const freshOrders = Object.values(freshOrdersSnap.val() || {});
-    
+    const freshOrders = Object.values(ordersData);
     const spentMap = {};
     freshOrders.filter(o => o.status === 'completed' || o.status === 'completado').forEach(o => {
       if (o.userId) spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
@@ -3995,14 +3995,24 @@ window.normalizeLegacyData = async function() {
     
     let updatedUsers = 0;
     for (const uid in usersData) {
+      let uChanged = false;
       const actualSpent = spentMap[uid] || 0;
       if (usersData[uid].totalSpent !== actualSpent) {
-        await firebase.database().ref('users/' + uid + '/totalSpent').set(actualSpent);
-        updatedUsers++;
+        batchUpdates['users/' + uid + '/totalSpent'] = actualSpent;
+        uChanged = true;
       }
+      if (!usersData[uid].role) {
+        batchUpdates['users/' + uid + '/role'] = 'cliente';
+        uChanged = true;
+      }
+      if (uChanged) updatedUsers++;
     }
     
-    alert(`¡Normalización completada con éxito!\n\nPedidos actualizados: ${updatedOrders}\nUsuarios actualizados: ${updatedUsers}`);
+    if (Object.keys(batchUpdates).length > 0) {
+      await firebase.database().ref().update(batchUpdates);
+    }
+    
+    alert(`¡Normalización completada con éxito!\n\nPedidos reparados: ${updatedOrders}\nUsuarios actualizados: ${updatedUsers}`);
     location.reload();
   } catch (err) {
     console.error(err);
