@@ -320,9 +320,9 @@ function renderDashboard(container) {
     allOrders = allOrders.filter(o => o.createdAt <= end.getTime());
   }
 
-  const completedOrders = allOrders.filter(o => o.status === 'completed');
-  const rejectedOrders = allOrders.filter(o => o.status === 'rejected' || o.status === 'invalid-id');
-  const pendingCount = allOrders.filter(o => o.status === 'pending' || o.status === 'processing').length;
+  const completedOrders = allOrders.filter(o => o.status === 'completed' || o.status === 'completado');
+  const rejectedOrders = allOrders.filter(o => o.status === 'rejected' || o.status === 'invalid-id' || o.status === 'rechazado');
+  const pendingCount = allOrders.filter(o => o.status === 'pending' || o.status === 'processing' || o.status === 'pendiente').length;
   const completedCount = completedOrders.length;
   const totalProcessed = completedCount + rejectedOrders.length;
   const rejectionRate = totalProcessed > 0 ? ((rejectedOrders.length / totalProcessed) * 100).toFixed(1) : 0;
@@ -521,7 +521,7 @@ function renderDashboard(container) {
   // Initialize Chart.js
   setTimeout(() => {
     if (window.Chart) {
-      const completedOrders = allOrders.filter(o => o.status === 'completed');
+      const completedOrders = allOrders.filter(o => o.status === 'completed' || o.status === 'completado');
       
       // 1. Orders Chart Data
       const ctxOrders = document.getElementById('ordersChart');
@@ -770,7 +770,7 @@ async function renderCustomers(container) {
   }
 
   const allOrders = getOrders();
-  const completedOrders = allOrders.filter(o => o.status === 'completed');
+  const completedOrders = allOrders.filter(o => o.status === 'completed' || o.status === 'completado');
 
   const customersMap = {};
 
@@ -782,6 +782,7 @@ async function renderCustomers(container) {
       name: u.name || '',
       totalOrders: 0,
       totalSpent: u.totalSpent || 0,
+      hasTotalSpent: !!u.totalSpent,
       firstOrder: null,
       lastOrder: null,
       role: u.role || 'cliente',
@@ -811,8 +812,8 @@ async function renderCustomers(container) {
       };
     }
     customersMap[key].totalOrders += 1;
-    // Si no tiene UID (guest), sumar lo gastado aquí
-    if (!customersMap[key].uid) {
+    // Si no tiene UID (guest) o no se migró el totalSpent, sumar lo gastado aquí
+    if (!customersMap[key].uid || !customersMap[key].hasTotalSpent) {
       customersMap[key].totalSpent += (o.priceUsd || 0);
     }
     if (!customersMap[key].firstOrder || o.createdAt < customersMap[key].firstOrder) customersMap[key].firstOrder = o.createdAt;
@@ -906,7 +907,7 @@ async function exportCustomersCSV() {
   }
 
   const allOrders = getOrders();
-  const completedOrders = allOrders.filter(o => o.status === 'completed');
+  const completedOrders = allOrders.filter(o => o.status === 'completed' || o.status === 'completado');
   const customersMap = {};
 
   users.forEach(u => {
@@ -917,6 +918,7 @@ async function exportCustomersCSV() {
       name: u.name || '',
       totalOrders: 0,
       totalSpent: u.totalSpent || 0,
+      hasTotalSpent: !!u.totalSpent,
       lastOrder: null
     };
   });
@@ -940,7 +942,7 @@ async function exportCustomersCSV() {
       };
     }
     customersMap[key].totalOrders += 1;
-    if (!customersMap[key].uid) {
+    if (!customersMap[key].uid || !customersMap[key].hasTotalSpent) {
       customersMap[key].totalSpent += (o.priceUsd || 0);
     }
     if (!customersMap[key].lastOrder || o.createdAt > customersMap[key].lastOrder) customersMap[key].lastOrder = o.createdAt;

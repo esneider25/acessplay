@@ -130,6 +130,13 @@ def run_migration():
                 "active": bool(d['activo'])
             })
 
+        # Calculate totalSpent for each user
+        cursor.execute("SELECT usuario_id, SUM(precio) as total_spent FROM pedidos WHERE estado='completado' GROUP BY usuario_id")
+        spent_rows = cursor.fetchall()
+        user_spent = {}
+        for row in spent_rows:
+            user_spent[row['usuario_id']] = float(row['total_spent'])
+
         # 5. Pedidos -> Orders
         cursor.execute("SELECT p.*, u.correo, u.whatsapp FROM pedidos p LEFT JOIN usuarios u ON p.usuario_id = u.id")
         pedido_rows = cursor.fetchall()
@@ -166,7 +173,7 @@ def run_migration():
                 "currency": p['moneda_pago'],
                 "paymentMethod": p['metodo_pago'],
                 "reference": p['referencia'] or "",
-                "status": "completado" if p['estado'] == 'completado' else ("rechazado" if p['estado'] == 'rechazado' else "pendiente"),
+                "status": "completed" if p['estado'] == 'completado' else ("rejected" if p['estado'] == 'rechazado' else "pending"),
                 "createdAt": date_str,
                 "updatedAt": date_str,
                 "apiData": {
@@ -203,7 +210,8 @@ def run_migration():
                 "phone": u['whatsapp'],
                 "role": "reseller" if u['rol'] == 'reseller' else ("admin" if u['rol'] == 'admin' else "user"),
                 "createdAt": u['fecha_registro'] + "T00:00:00.000Z" if len(u['fecha_registro']) == 10 else u['fecha_registro'],
-                "walletBalance": 0
+                "walletBalance": 0,
+                "totalSpent": user_spent.get(u['id'], 0)
             }
 
             # Werkzeug scrypt format: scrypt:32768:8:1$<salt>$<hash>
