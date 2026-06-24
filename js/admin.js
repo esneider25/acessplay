@@ -333,14 +333,14 @@ function renderDashboard(container) {
   let totalCost = 0;
 
   completedOrders.forEach(o => {
-    totalRevenue += (o.priceUsd || 0);
+    totalRevenue += Number(o.priceUsd) || 0;
     let cost = 0;
     if (o.costUsd !== undefined && o.costUsd !== null) {
       cost = parseFloat(o.costUsd) || 0;
     } else {
       const prod = PRODUCTS.find(p => p.id === o.productId);
       if (prod && prod.packages) {
-        const pkg = prod.packages.find(pkg => pkg.label === o.packageLabel || pkg.priceUsd === o.priceUsd);
+        const pkg = prod.packages.find(pkg => pkg.label === o.packageLabel || Number(pkg.priceUsd) === Number(o.priceUsd));
         if (pkg && pkg.costUsd) {
           cost = parseFloat(pkg.costUsd) || 0;
         }
