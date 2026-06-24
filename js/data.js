@@ -485,8 +485,9 @@ function saveMessages() {
 function getOrders() {
   return ORDERS.map(o => {
     if (o.status === 'completado') o.status = 'completed';
-    if (o.status === 'rechazado') o.status = 'rejected';
+    if (o.status === 'rechazado' || o.status === 'cancelado') o.status = 'rejected';
     if (o.status === 'pendiente') o.status = 'pending';
+    if (o.status === 'procesando') o.status = 'processing';
     
     if (!o.productName && o.productDetails) o.productName = o.productDetails;
     if (!o.packageLabel) o.packageLabel = 'Migrado';
