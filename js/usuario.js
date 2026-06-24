@@ -764,8 +764,8 @@ function renderDashboardContent() {
           </div>
         </div>
         <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
-          <input type="text" readonly value="https://recargaaccessplay.com/?ref=${userProfile.referralCode || ''}" style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 10px; font-size: 0.9rem; outline: none;">
-          <button onclick="navigator.clipboard.writeText('https://recargaaccessplay.com/?ref=${userProfile.referralCode || ''}'); usuarioToast('¡Enlace copiado!', 'success')" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 10px; display: flex; align-items: center; gap: 6px;">
+          <input type="text" readonly value="${window.location.origin}/?ref=${userProfile.referralCode || ''}" style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 10px; font-size: 0.9rem; outline: none;">
+          <button onclick="navigator.clipboard.writeText('${window.location.origin}/?ref=${userProfile.referralCode || ''}'); usuarioToast('¡Enlace copiado!', 'success')" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 10px; display: flex; align-items: center; gap: 6px;">
             <i class="ph ph-copy"></i> Copiar
           </button>
         </div>

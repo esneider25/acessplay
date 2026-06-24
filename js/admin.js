@@ -1158,7 +1158,7 @@ function deleteCategory(catId) {
 function renderPayments(container) {
   const paymentCardsHtml = PAYMENT_METHODS.map(method => {
     let detailFieldsHtml = '';
-    Object.entries(method.details).forEach(([key, val]) => {
+    Object.entries(method.details || {}).forEach(([key, val]) => {
       detailFieldsHtml += `
         <div class="admin-form-group">
           <label class="admin-form-label">${formatPaymentLabel(key)}</label>
@@ -1170,13 +1170,16 @@ function renderPayments(container) {
 
     return `
       <div class="admin-card">
-        <div class="admin-card-header">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span class="admin-payment-icon">${method.icon}</span>
-            <h2 class="admin-card-title">${method.name}</h2>
+        <div class="admin-card-header" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+            <input type="text" class="admin-form-input payment-icon-input" data-method-id="${method.id}" value="${method.icon}" style="width: 60px; text-align: center; font-size: 1.2rem; padding: 8px;" title="Icono / Emoji">
+            <input type="text" class="admin-form-input payment-name-input" data-method-id="${method.id}" value="${method.name}" style="flex: 1; font-weight: bold; font-size: 1.1rem; padding: 8px;" title="Nombre del Método">
           </div>
+          <button class="btn btn-secondary" onclick="deletePaymentMethod('${method.id}')" style="padding: 6px 12px; color: #ef4444; border-color: rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.1);" title="Eliminar Método">
+            🗑️
+          </button>
         </div>
-        <div class="admin-payment-details-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+        <div class="admin-payment-details-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 15px;">
           ${detailFieldsHtml}
         </div>
         <div class="admin-form-group" style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
@@ -1194,11 +1197,16 @@ function renderPayments(container) {
     <div class="admin-header">
       <div>
         <h1 class="admin-title">Métodos de Pago</h1>
-        <p class="admin-subtitle">Modifica los datos bancarios y cuentas de destino</p>
+        <p class="admin-subtitle">Modifica los datos bancarios, nombres, iconos y monedas de destino</p>
       </div>
-      <button class="btn btn-primary" onclick="savePaymentMethods()">
-        <span>💾</span> Guardar Cambios
-      </button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="addPaymentMethod()" style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; border-color: rgba(14, 165, 233, 0.3);">
+          <span>➕</span> Añadir Método
+        </button>
+        <button class="btn btn-primary" onclick="savePaymentMethods()">
+          <span>💾</span> Guardar Cambios
+        </button>
+      </div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 24px;">
       ${paymentCardsHtml}
@@ -1216,8 +1224,20 @@ function formatPaymentLabel(key) {
 }
 
 function savePaymentMethods() {
-  const inputs = document.querySelectorAll('.payment-detail-input');
-  inputs.forEach(input => {
+  const nameInputs = document.querySelectorAll('.payment-name-input');
+  nameInputs.forEach(input => {
+    const m = PAYMENT_METHODS.find(x => x.id === input.getAttribute('data-method-id'));
+    if (m) m.name = input.value.trim();
+  });
+
+  const iconInputs = document.querySelectorAll('.payment-icon-input');
+  iconInputs.forEach(input => {
+    const m = PAYMENT_METHODS.find(x => x.id === input.getAttribute('data-method-id'));
+    if (m) m.icon = input.value.trim();
+  });
+
+  const detailInputs = document.querySelectorAll('.payment-detail-input');
+  detailInputs.forEach(input => {
     const methodId = input.getAttribute('data-method-id');
     const detailKey = input.getAttribute('data-detail-key');
     const value = input.value.trim();
@@ -1233,7 +1253,78 @@ function savePaymentMethods() {
   });
 
   saveToDb('payment_methods', PAYMENT_METHODS);
-  showAdminToast('✅ Métodos de pago actualizados', 'success');
+  showAdminToast('✅ Métodos de pago guardados', 'success');
+}
+
+function addPaymentMethod() {
+  const modalHtml = `
+    <div class="admin-modal-content" style="max-width: 500px; text-align: left;">
+      <h3 style="margin-bottom: 20px; color: var(--text-primary);">➕ Añadir Método de Pago</h3>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Nombre del Método</label>
+        <input type="text" id="new-pm-name" class="admin-form-input" placeholder="Ej: Zinli">
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Icono (Emoji)</label>
+        <input type="text" id="new-pm-icon" class="admin-form-input" placeholder="Ej: 🟣">
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Moneda a cobrar</label>
+        <select id="new-pm-currency" class="admin-form-input">
+          <option value="usd">Dólares (USD)</option>
+          <option value="bs">Bolívares (Bs.)</option>
+        </select>
+      </div>
+      <div class="admin-form-group">
+        <label class="admin-form-label">Campos de detalle requeridos (separados por coma)</label>
+        <input type="text" id="new-pm-fields" class="admin-form-input" placeholder="Ej: titular, nota" value="titular, nota">
+        <small style="color: var(--text-muted); display: block; margin-top: 8px;">Claves comunes: banco, telefono, cedula, cuenta, titular, binanceId, wallet, nota</small>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveNewPaymentMethod()">Añadir</button>
+      </div>
+    </div>
+  `;
+  showAdminModal(modalHtml);
+}
+
+function saveNewPaymentMethod() {
+  const name = document.getElementById('new-pm-name').value.trim();
+  const icon = document.getElementById('new-pm-icon').value.trim();
+  const currency = document.getElementById('new-pm-currency').value;
+  const fieldsStr = document.getElementById('new-pm-fields').value;
+  const fields = fieldsStr.split(',').map(s => s.trim()).filter(Boolean);
+  
+  if (!name || !icon) {
+    showAdminToast('❌ Nombre e Icono son obligatorios', 'error');
+    return;
+  }
+  
+  const id = 'pm-' + Date.now();
+  const details = {};
+  fields.forEach(f => details[f] = "");
+  
+  PAYMENT_METHODS.push({
+    id, name, icon, currency, details, active: true
+  });
+  
+  saveToDb('payment_methods', PAYMENT_METHODS);
+  closeAdminModal();
+  renderActiveTab();
+  showAdminToast('✅ Método añadido con éxito', 'success');
+}
+
+function deletePaymentMethod(id) {
+  if (confirm("¿Seguro que deseas eliminar este método de pago por completo?")) {
+    const idx = PAYMENT_METHODS.findIndex(m => m.id === id);
+    if (idx !== -1) {
+      PAYMENT_METHODS.splice(idx, 1);
+      saveToDb('payment_methods', PAYMENT_METHODS);
+      renderActiveTab();
+      showAdminToast('🗑️ Método eliminado', 'success');
+    }
+  }
 }
 
 // ════════════════════════════════════════
@@ -3895,35 +3986,44 @@ function renderLanding(container) {
 }
 
 function adminSaveLanding() {
-  const newConfig = {
-    heroStats: [0, 1, 2, 3].map(i => ({
-      value: document.getElementById(`landing-hero-val-${i}`).value,
-      label: document.getElementById(`landing-hero-lbl-${i}`).value
-    })),
-    howItWorks: [0, 1, 2].map(i => ({
-      icon: document.getElementById(`landing-how-icon-${i}`).value,
-      title: document.getElementById(`landing-how-title-${i}`).value,
-      desc: document.getElementById(`landing-how-desc-${i}`).value
-    })),
-    features: [0, 1, 2, 3, 4, 5].map(i => ({
-      icon: document.getElementById(`landing-feat-icon-${i}`).value,
-      title: document.getElementById(`landing-feat-title-${i}`).value,
-      desc: document.getElementById(`landing-feat-desc-${i}`).value
-    })),
-    faq: [0, 1, 2, 3].map(i => ({
-      q: document.getElementById(`landing-faq-q-${i}`).value,
-      a: document.getElementById(`landing-faq-a-${i}`).value
-    })),
-    footer: {
-      disclaimer: document.getElementById('landing-footer-disc').value
+  try {
+    const newConfig = {
+      heroStats: [0, 1, 2, 3].map(i => {
+        const valEl = document.getElementById(`landing-hero-val-${i}`);
+        const lblEl = document.getElementById(`landing-hero-lbl-${i}`);
+        return { value: valEl ? valEl.value : '', label: lblEl ? lblEl.value : '' };
+      }),
+      howItWorks: [0, 1, 2].map(i => {
+        const icEl = document.getElementById(`landing-how-icon-${i}`);
+        const titEl = document.getElementById(`landing-how-title-${i}`);
+        const descEl = document.getElementById(`landing-how-desc-${i}`);
+        return { icon: icEl ? icEl.value : '', title: titEl ? titEl.value : '', desc: descEl ? descEl.value : '' };
+      }),
+      features: [0, 1, 2, 3, 4, 5].map(i => {
+        const icEl = document.getElementById(`landing-feat-icon-${i}`);
+        const titEl = document.getElementById(`landing-feat-title-${i}`);
+        const descEl = document.getElementById(`landing-feat-desc-${i}`);
+        return { icon: icEl ? icEl.value : '', title: titEl ? titEl.value : '', desc: descEl ? descEl.value : '' };
+      }),
+      faq: [0, 1, 2, 3].map(i => {
+        const qEl = document.getElementById(`landing-faq-q-${i}`);
+        const aEl = document.getElementById(`landing-faq-a-${i}`);
+        return { q: qEl ? qEl.value : '', a: aEl ? aEl.value : '' };
+      }),
+      footer: {
+        disclaimer: document.getElementById('landing-footer-disc') ? document.getElementById('landing-footer-disc').value : ''
+      }
+    };
+    
+    if (typeof saveLandingConfig === 'function') {
+      saveLandingConfig(newConfig);
+      showAdminToast('✅ Diseño Web guardado', 'success');
+    } else {
+      showAdminToast('❌ Error: Función de guardado no encontrada', 'error');
     }
-  };
-  
-  if (typeof saveLandingConfig === 'function') {
-    saveLandingConfig(newConfig);
-    showAdminToast('✅ Diseño Web guardado', 'success');
-  } else {
-    showAdminToast('❌ Error: Función de guardado no encontrada', 'error');
+  } catch (err) {
+    console.error("Error en adminSaveLanding:", err);
+    alert("Error al guardar: " + err.message);
   }
 }
 
