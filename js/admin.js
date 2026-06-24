@@ -2759,6 +2759,32 @@ function updateAdminMessagesUI() {
   }
 }
 
+window.openAdminChat = function(sessionId) {
+  currentChatSessionId = sessionId;
+  if (typeof markMessagesAsRead === 'function') {
+    markMessagesAsRead(sessionId, 'admin');
+  }
+  updateAdminMessagesUI();
+};
+
+window.adminReplyMessage = function() {
+  if (!currentChatSessionId) return;
+  const input = document.getElementById('admin-chat-input');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  
+  if (typeof addMessage === 'function') {
+    const allConversations = typeof getMessages === 'function' ? getMessages() : [];
+    const conv = allConversations.find(m => m.sessionId === currentChatSessionId);
+    const contact = conv ? conv.contact : 'Soporte Admin';
+    
+    addMessage(currentChatSessionId, 'admin', text, contact);
+    input.value = '';
+    updateAdminMessagesUI();
+  }
+};
+
 function renderSettings(container) {
   const config = getSettings();
   container.innerHTML = `
