@@ -835,7 +835,7 @@ async function renderCustomers(container) {
     <div class="admin-crm-row">
       <div style="font-weight: 500; display: flex; align-items: center; gap: 10px;">
         <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: var(--bg-deep); font-weight: bold; flex-shrink: 0;">
-          ${(c.name || c.contact).charAt(0).toUpperCase()}
+          ${(c.name || c.contact || '?').charAt(0).toUpperCase()}
         </div>
         <div style="display: flex; flex-direction: column;">
           <span style="word-break: break-all;">${c.name ? c.name + ' (' + c.contact + ')' : c.contact}</span>
