@@ -673,6 +673,7 @@ function renderDashboard(container) {
             uid,
             name: u.name || u.displayName || fallbackOrder.userEmail || 'Usuario',
             email: u.email || fallbackOrder.userEmail || '',
+            role: u.role || 'cliente',
             spent: userSpentMap[uid] || 0
           };
         }).filter(u => u.spent > 0);
