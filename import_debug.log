@@ -1,0 +1,22 @@
+[2026-06-24T05:11:31.871Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[2026-06-24T05:11:31.873Z] > authorizing via signed-in user (esneiderbencomo@gmail.com)
+[2026-06-24T05:11:31.873Z] [iam] checking project accesplay-8bf5d for permissions ["firebase.projects.get","firebaseauth.users.create","firebaseauth.users.update"]
+[2026-06-24T05:11:31.875Z] Checked if tokens are valid: true, expires at: 1782281431060
+[2026-06-24T05:11:31.875Z] Checked if tokens are valid: true, expires at: 1782281431060
+[2026-06-24T05:11:31.877Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/accesplay-8bf5d:testIamPermissions [none]
+[2026-06-24T05:11:31.878Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/accesplay-8bf5d:testIamPermissions  x-goog-user-project=accesplay-8bf5d
+[2026-06-24T05:11:31.878Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/accesplay-8bf5d:testIamPermissions {"permissions":["firebase.projects.get","firebaseauth.users.create","firebaseauth.users.update"]}
+[2026-06-24T05:11:32.364Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/accesplay-8bf5d:testIamPermissions 200
+[2026-06-24T05:11:32.365Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/accesplay-8bf5d:testIamPermissions {"permissions":["firebase.projects.get","firebaseauth.users.create","firebaseauth.users.update"]}
+Processing users_cli.json (88281 bytes)
+[2026-06-24T05:11:32.421Z] Preparing to import 308 user records in 1 batches.
+Starting importing 308 account(s).
+[2026-06-24T05:11:32.425Z] Checked if tokens are valid: true, expires at: 1782281431060
+[2026-06-24T05:11:32.425Z] Checked if tokens are valid: true, expires at: 1782281431060
+[2026-06-24T05:11:32.426Z] >>> [apiv2][query] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/uploadAccount [none]
+[2026-06-24T05:11:32.427Z] >>> [apiv2][body] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/uploadAccount [omitted]
+[2026-06-24T05:11:33.395Z] <<< [apiv2][status] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/uploadAccount 200
+[2026-06-24T05:11:33.395Z] <<< [apiv2][body] POST https://www.googleapis.com/identitytoolkit/v3/relyingparty/uploadAccount {"kind":"identitytoolkit#UploadAccountResponse","error":[{"index":218,"message":"email is invalid"}]}
+Encountered problems while importing accounts. Details:
+[{"account":"{\n  \"localId\": \"uid-219\",\n  \"email\": \"isaacfernava2004@gmail\",\n  \"displayName\": \"Isaac fernando\",\n  \"passwordHash\": \"whc2P6LWTfgG9JmHBNLOaQIi7kS6CRw-dStM-zBaKz2PoTT1Ye2Ct90pTOpfR9yyfNHYXT_Bqo2w_m62il_nbA==\",\n  \"salt\": \"OHZ3VWNzUTZCS0t5cUxBNA==\"\n}","reason":"email is invalid"}]
+
