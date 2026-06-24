@@ -338,40 +338,28 @@ function renderDashboard(container) {
     if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
       cost = parseFloat(o.costUsd) || 0;
     } else {
-      let prod = PRODUCTS.find(p => p.id === o.productId);
       let pkg = null;
-      
-      const searchLabel = o.packageLabel || o.productDetails || '';
+      const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
+      const orderPrice = Number(o.priceUsd) || 0;
 
-      if (prod && prod.packages) {
-        pkg = prod.packages.find(p => p.label === searchLabel || Number(p.priceUsd) === Number(o.priceUsd));
-      }
-
-      // Aggressive fallback: If product was deleted/recreated or package not found, search ALL products
-      if (!pkg) {
-        for (let i = 0; i < PRODUCTS.length; i++) {
-          const currentProd = PRODUCTS[i];
-          if (currentProd.packages) {
-            pkg = currentProd.packages.find(p => p.label === searchLabel || Number(p.priceUsd) === Number(o.priceUsd));
-            if (pkg) {
-              prod = currentProd;
-              break;
-            }
-          }
+      // First pass: try to find a package that matches the exact sales price (as requested by user)
+      for (let i = 0; i < PRODUCTS.length; i++) {
+        if (PRODUCTS[i].packages) {
+          pkg = PRODUCTS[i].packages.find(p => Number(p.priceUsd) === orderPrice);
+          if (pkg) break;
         }
       }
 
-      // Fuzzy matching fallback using numbers in the label if still not found
-      if (!pkg && searchLabel) {
-        const orderNums = String(searchLabel).match(/\d+/g);
-        if (orderNums && orderNums.length > 0) {
-          const targetNum = orderNums[0];
+      // Second pass: if price doesn't match (e.g. because of discounts), try to extract the amount number (e.g. "1166")
+      if (!pkg) {
+        const nums = searchLabel.match(/\d+/g);
+        // Find the most prominent number (usually the first large number)
+        if (nums && nums.length > 0) {
+          const targetNum = nums[0];
           for (let i = 0; i < PRODUCTS.length; i++) {
-            const currentProd = PRODUCTS[i];
-            if (currentProd.packages) {
-              pkg = currentProd.packages.find(p => {
-                const pNums = String(p.label).match(/\d+/g);
-                return pNums && pNums[0] === targetNum && Number(p.priceUsd) === Number(o.priceUsd);
+            if (PRODUCTS[i].packages) {
+              pkg = PRODUCTS[i].packages.find(p => {
+                return String(p.amount) === targetNum || String(p.label).includes(targetNum);
               });
               if (pkg) break;
             }
