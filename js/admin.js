@@ -659,13 +659,23 @@ function renderDashboard(container) {
 
       const elTopClients = document.getElementById('dash-top-clients');
       if (elTopClients) {
-        const usersArray = Object.keys(usersData).map(uid => ({
-          uid,
-          name: usersData[uid].name || 'Usuario',
-          email: usersData[uid].email || '',
-          role: usersData[uid].role || 'cliente',
-          spent: usersData[uid].totalSpent || 0
-        })).filter(u => u.spent > 0);
+        const userSpentMap = {};
+        completedOrders.forEach(o => {
+          if (o.userId) {
+            userSpentMap[o.userId] = (userSpentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+          }
+        });
+
+        const usersArray = Object.keys(userSpentMap).map(uid => {
+          const u = usersData[uid] || {};
+          const fallbackOrder = completedOrders.find(o => o.userId === uid) || {};
+          return {
+            uid,
+            name: u.name || u.displayName || fallbackOrder.userEmail || 'Usuario',
+            email: u.email || fallbackOrder.userEmail || '',
+            spent: userSpentMap[uid] || 0
+          };
+        }).filter(u => u.spent > 0);
 
         usersArray.sort((a, b) => b.spent - a.spent);
         const top5 = usersArray.slice(0, 5);
