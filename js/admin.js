@@ -2216,7 +2216,7 @@ function openOrderDetailModal(orderId) {
   }
 
   // Status history
-  const historyHtml = order.statusHistory.slice().reverse().map(h => {
+  const historyHtml = (order.statusHistory || []).slice().reverse().map(h => {
     const s = ORDER_STATUSES[h.status] || {};
     const hDate = new Date(h.timestamp);
     return `
@@ -2670,7 +2670,7 @@ function renderMessages(main) {
 
 function updateAdminMessagesUI() {
   const allConversations = getMessages();
-  allConversations.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+  allConversations.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
 
   const listContainer = document.getElementById('admin-chat-list');
   const chatContainer = document.getElementById('admin-chat-container');
@@ -2684,7 +2684,7 @@ function updateAdminMessagesUI() {
     allConversations.forEach(conv => {
       const isUnread = conv.hasUnreadAdmin;
       const unreadBadge = isUnread ? '<span style="background:var(--error); width:10px; height:10px; border-radius:50%; display:inline-block; margin-left:10px;"></span>' : '';
-      const lastMsg = conv.messages.length > 0 ? conv.messages[conv.messages.length - 1].text : '';
+      const lastMsg = (conv.messages && conv.messages.length > 0) ? conv.messages[conv.messages.length - 1].text : '';
       const selectedStr = (currentChatSessionId === conv.sessionId) ? 'background: rgba(0, 229, 195, 0.1); border-left: 3px solid var(--accent);' : 'background: var(--bg-deep); border-left: 3px solid transparent;';
 
       const contactLabel = conv.contact || `Anónimo (${conv.sessionId.substring(0, 8)})`;
@@ -2715,7 +2715,7 @@ function updateAdminMessagesUI() {
   const conv = allConversations.find(m => m.sessionId === currentChatSessionId);
   if (conv) {
     let messagesHtml = '';
-    conv.messages.forEach(msg => {
+    (conv.messages || []).forEach(msg => {
       const isAdmin = msg.sender === 'admin';
       const align = isAdmin ? 'flex-end' : 'flex-start';
       const bg = isAdmin ? 'var(--accent)' : 'var(--bg-surface)';

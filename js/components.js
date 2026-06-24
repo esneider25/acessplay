@@ -721,7 +721,7 @@ function renderOrderTracking(orderId) {
     `;
   }).join('');
 
-  const historyHtml = order.statusHistory.slice().reverse().map(h => {
+  const historyHtml = (order.statusHistory || []).slice().reverse().map(h => {
     const s = ORDER_STATUSES[h.status] || {};
     const date = new Date(h.timestamp);
     return `

@@ -724,6 +724,7 @@ function updateOrderStatus(orderId, newStatus, note) {
 
   order.status = newStatus;
   if (note) order.adminNote = note;
+  if (!order.statusHistory) order.statusHistory = [];
   order.statusHistory.push({
     status: newStatus,
     timestamp: new Date().toISOString(),
