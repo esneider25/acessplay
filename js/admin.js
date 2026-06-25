@@ -1258,31 +1258,61 @@ function savePaymentMethods() {
 
 function addPaymentMethod() {
   const modalHtml = `
-    <div class="admin-modal-content" style="max-width: 500px; text-align: left;">
+    <div class="admin-modal-content" style="max-width: 600px; text-align: left;">
       <h3 style="margin-bottom: 20px; color: var(--text-primary);">➕ Añadir Método de Pago</h3>
-      <div class="admin-form-group">
-        <label class="admin-form-label">Nombre del Método</label>
-        <input type="text" id="new-pm-name" class="admin-form-input" placeholder="Ej: Zinli">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+        <div class="admin-form-group">
+          <label class="admin-form-label">Nombre del Método</label>
+          <input type="text" id="new-pm-name" class="admin-form-input" placeholder="Ej: Zinli">
+        </div>
+        <div class="admin-form-group">
+          <label class="admin-form-label">Icono (Emoji)</label>
+          <input type="text" id="new-pm-icon" class="admin-form-input" placeholder="Ej: 🟣">
+        </div>
       </div>
       <div class="admin-form-group">
-        <label class="admin-form-label">Icono (Emoji)</label>
-        <input type="text" id="new-pm-icon" class="admin-form-input" placeholder="Ej: 🟣">
-      </div>
-      <div class="admin-form-group">
-        <label class="admin-form-label">Moneda a cobrar</label>
+        <label class="admin-form-label">Moneda a cobrar al cliente</label>
         <select id="new-pm-currency" class="admin-form-input">
           <option value="usd">Dólares (USD)</option>
           <option value="bs">Bolívares (Bs.)</option>
         </select>
       </div>
-      <div class="admin-form-group">
-        <label class="admin-form-label">Campos de detalle requeridos (separados por coma)</label>
-        <input type="text" id="new-pm-fields" class="admin-form-input" placeholder="Ej: titular, nota" value="titular, nota">
-        <small style="color: var(--text-muted); display: block; margin-top: 8px;">Claves comunes: banco, telefono, cedula, cuenta, titular, binanceId, wallet, nota</small>
+      
+      <div class="admin-form-group" style="margin-top: 20px;">
+        <label class="admin-form-label" style="margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+          ¿Qué datos le pedirás al cliente para este pago? (Selecciona los necesarios)
+        </label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="titular" checked> Titular de la cuenta
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="cedula"> Cédula / Rif
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="telefono"> Teléfono
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="banco"> Banco de origen
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="cuenta"> Nro. de Cuenta
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="nota" checked> Nota / Referencia
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="binanceId"> Binance Pay ID
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="checkbox" class="new-pm-field-cb" value="wallet"> Wallet (USDT)
+          </label>
+        </div>
       </div>
+      
       <div style="display: flex; gap: 10px; margin-top: 25px; justify-content: flex-end;">
         <button class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
-        <button class="btn btn-primary" onclick="saveNewPaymentMethod()">Añadir</button>
+        <button class="btn btn-primary" onclick="saveNewPaymentMethod()">Añadir Método</button>
       </div>
     </div>
   `;
@@ -1293,8 +1323,9 @@ function saveNewPaymentMethod() {
   const name = document.getElementById('new-pm-name').value.trim();
   const icon = document.getElementById('new-pm-icon').value.trim();
   const currency = document.getElementById('new-pm-currency').value;
-  const fieldsStr = document.getElementById('new-pm-fields').value;
-  const fields = fieldsStr.split(',').map(s => s.trim()).filter(Boolean);
+  
+  const fieldCheckboxes = document.querySelectorAll('.new-pm-field-cb:checked');
+  const fields = Array.from(fieldCheckboxes).map(cb => cb.value);
   
   if (!name || !icon) {
     showAdminToast('❌ Nombre e Icono son obligatorios', 'error');
