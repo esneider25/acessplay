@@ -3705,6 +3705,25 @@ window.openCustomerInfoModal = function (uid) {
           </div>
         </div>
 
+        <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-bottom: 20px;">
+          <h4 style="margin-bottom: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
+            <i class="ph ph-lock-key"></i> Forzar Cambio de Contraseña
+          </h4>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="position: relative;">
+              <input type="password" id="admin-force-pass-${uid}" class="admin-form-input" placeholder="Nueva contraseña (mínimo 6)" style="width: 100%; padding-right: 40px; background: rgba(0,0,0,0.2);">
+              <i class="ph ph-eye" id="toggle-force-pwd-${uid}" onclick="togglePasswordVisibility('admin-force-pass-${uid}', 'toggle-force-pwd-${uid}')" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: var(--text-secondary);"></i>
+            </div>
+            <div style="position: relative;">
+              <input type="password" id="admin-force-confirm-${uid}" class="admin-form-input" placeholder="Confirmar contraseña" style="width: 100%; padding-right: 40px; background: rgba(0,0,0,0.2);">
+              <i class="ph ph-eye" id="toggle-force-confirm-${uid}" onclick="togglePasswordVisibility('admin-force-confirm-${uid}', 'toggle-force-confirm-${uid}')" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: var(--text-secondary);"></i>
+            </div>
+            <button class="btn btn-primary" onclick="forceCustomerPassword('${uid}')" style="width: 100%; justify-content: center; margin-top: 5px;">
+              💾 Actualizar Contraseña del Cliente
+            </button>
+          </div>
+        </div>
+
         <div style="text-align: right;">
           <button class="btn btn-primary" onclick="document.getElementById('customer-info-modal-overlay').remove()">Cerrar</button>
         </div>
@@ -3713,6 +3732,34 @@ window.openCustomerInfoModal = function (uid) {
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 };
+
+window.forceCustomerPassword = async function(uid) {
+  const pass = document.getElementById(`admin-force-pass-${uid}`).value.trim();
+  const confirm = document.getElementById(`admin-force-confirm-${uid}`).value.trim();
+  
+  if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
+  if (pass !== confirm) return alert("Las contraseñas no coinciden.");
+  
+  const btn = event.target;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Actualizando...';
+  btn.disabled = true;
+
+  try {
+    await firebase.database().ref('users/' + uid).update({
+      password: pass
+    });
+    alert("Contraseña actualizada con éxito.");
+    document.getElementById(`admin-force-pass-${uid}`).value = '';
+    document.getElementById(`admin-force-confirm-${uid}`).value = '';
+  } catch (error) {
+    alert("Error guardando la contraseña: " + error.message);
+  } finally {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+};
+
 window.openRoleModal = function (uid, currentRole, currentDiscount, currentReferralLimit) {
   const modalHTML = `
     <div class="modal-overlay active" id="role-modal-overlay">
