@@ -109,6 +109,7 @@ def run_migration():
                 packages_list.append({
                     "amount": amount,
                     "priceUsd": float(p['precio']),
+                    "costUsd": float(p['precio_original']) if p['precio_original'] else 0.0,
                     "label": p['nombre'],
                     "apiServiceId": str(p['api_monto']) if p['api_monto'] else "",
                     "isOutofStock": not bool(p['activo'])
@@ -118,7 +119,7 @@ def run_migration():
                 "id": prod_id,
                 "name": s['nombre'],
                 "category": s['categoria'].lower() if s['categoria'] else "otros",
-                "type": "game",
+                "type": "",
                 "currency": "DIAMANTES",
                 "currencyIcon": "💎",
                 "imageUrl": s['imagen_url'] if s['imagen_url'] else "",
@@ -186,6 +187,26 @@ def run_migration():
             else:
                 status_mapped = 'pending'
 
+            tipo_entrega = p['tipo_entrega']
+            product_type = 'game-id'
+            player_id = ""
+            account_email = ""
+            account_password = ""
+
+            if tipo_entrega == 'credenciales':
+                product_type = 'account'
+                # Find common keys for email/password in JSON
+                for k, v in data_cli.items():
+                    kl = k.lower()
+                    if 'correo' in kl or 'email' in kl or 'usuario' in kl:
+                        account_email = v
+                    if 'contra' in kl or 'clave' in kl or 'pass' in kl:
+                        account_password = v
+            else:
+                product_type = 'game-id'
+                if data_cli:
+                    player_id = list(data_cli.values())[0]
+
             orders.append({
                 "id": f"AP-OLD-{p['id']}",
                 "userId": f"uid-{p['usuario_id']}",
@@ -193,8 +214,12 @@ def run_migration():
                 "userPhone": p['whatsapp'] or "",
                 "productDetails": p['producto'],
                 "productId": "legacy",
+                "productType": product_type,
                 "packageAmount": 0,
-                "playerId": list(data_cli.values())[0] if data_cli else "",
+                "playerId": player_id,
+                "gameId": player_id,
+                "accountEmail": account_email,
+                "accountPassword": account_password,
                 "zoneId": "",
                 "priceUsd": float(p['precio']),
                 "priceBs": float(p['precio_pagado']) if p['moneda_pago'] == 'VES' else 0,
