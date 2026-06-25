@@ -2061,15 +2061,20 @@ function registerWithEmail() {
 }
 
 function resetPassword() {
-  const email = document.getElementById('auth-email').value.trim();
-  if(!email) return showToast('⚠️ Ingresa tu correo arriba primero');
+  let email = document.getElementById('auth-email').value.trim();
+  if(!email) {
+    email = prompt('Por favor, ingresa el correo electrónico de tu cuenta para recuperar la contraseña:');
+    if (!email) return;
+    email = email.trim();
+  }
   
   firebase.auth().sendPasswordResetEmail(email).then(() => {
     showToast('📩 Te hemos enviado un enlace para restablecer tu contraseña');
     const modal = document.getElementById('auth-modal-container');
     if(modal) modal.remove();
   }).catch(err => {
-    showToast('❌ Correo no encontrado o inválido');
+    console.error("Reset Password Error: ", err);
+    showToast('❌ Error: Verifica que el correo esté registrado');
   });
 }
 
