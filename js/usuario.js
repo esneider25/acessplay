@@ -836,10 +836,18 @@ function renderDashboardContent() {
 
         <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
         <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; color: var(--text-secondary);"><i class="ph ph-lock-key"></i> Cambiar Contraseña</h3>
-        <div class="profile-form-group" style="margin-bottom: 15px;">
-          <input type="password" id="setting-new-password" class="profile-input" placeholder="Nueva contraseña (mínimo 6 caracteres)">
+        
+        <div class="profile-form-group" style="position: relative; margin-bottom: 15px;">
+          <input type="password" id="setting-new-password" class="profile-input" placeholder="Nueva contraseña (mínimo 6 caracteres)" style="padding-right: 40px;">
+          <i class="ph ph-eye" id="toggle-pwd" onclick="togglePasswordVisibility('setting-new-password', 'toggle-pwd')" style="position: absolute; right: 15px; top: 14px; font-size: 1.2rem; color: var(--text-secondary); cursor: pointer; transition: 0.3s;" title="Mostrar/Ocultar contraseña"></i>
         </div>
-        <button class="btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;" id="btn-change-password" onclick="changeUserPassword()">
+
+        <div class="profile-form-group" style="position: relative; margin-bottom: 25px;">
+          <input type="password" id="setting-confirm-password" class="profile-input" placeholder="Confirmar nueva contraseña" style="padding-right: 40px;">
+          <i class="ph ph-eye" id="toggle-confirm-pwd" onclick="togglePasswordVisibility('setting-confirm-password', 'toggle-confirm-pwd')" style="position: absolute; right: 15px; top: 14px; font-size: 1.2rem; color: var(--text-secondary); cursor: pointer; transition: 0.3s;" title="Mostrar/Ocultar contraseña"></i>
+        </div>
+
+        <button class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.05rem;" id="btn-change-password" onclick="changeUserPassword()">
           <i class="ph ph-key"></i> Actualizar Contraseña
         </button>
       </div>
@@ -878,14 +886,39 @@ function renderDashboardContent() {
 
 
 
+window.togglePasswordVisibility = function(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (!input || !icon) return;
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('ph-eye');
+    icon.classList.add('ph-eye-slash');
+    icon.style.color = 'var(--accent, #0ea5e9)';
+  } else {
+    input.type = 'password';
+    icon.classList.remove('ph-eye-slash');
+    icon.classList.add('ph-eye');
+    icon.style.color = 'var(--text-secondary)';
+  }
+};
+
 window.changeUserPassword = async function() {
   if (!currentUser) return;
   const btn = document.getElementById('btn-change-password');
   const newPass = document.getElementById('setting-new-password').value.trim();
+  const confirmPass = document.getElementById('setting-confirm-password').value.trim();
   
   if (newPass.length < 6) {
     if (typeof usuarioToast === 'function') usuarioToast('La contraseña debe tener al menos 6 caracteres', 'error');
     else alert('La contraseña debe tener al menos 6 caracteres');
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    if (typeof usuarioToast === 'function') usuarioToast('Las contraseñas no coinciden', 'error');
+    else alert('Las contraseñas no coinciden');
     return;
   }
 
@@ -897,6 +930,7 @@ window.changeUserPassword = async function() {
     if (typeof usuarioToast === 'function') usuarioToast('Contraseña actualizada con éxito', 'success');
     else alert('Contraseña actualizada con éxito');
     document.getElementById('setting-new-password').value = '';
+    document.getElementById('setting-confirm-password').value = '';
   } catch (error) {
     console.error(error);
     let msg = 'Error al actualizar contraseña. Es posible que debas cerrar sesión y volver a entrar.';
