@@ -801,8 +801,10 @@ async function renderCustomers(container) {
       </button>
     </div>
     
-    <div style="margin-bottom: 20px;">
-      <input type="text" id="customers-search-input" onkeyup="filterCrmTable(this.value)" placeholder="🔍 Buscar por nombre, correo o teléfono..." style="width: 100%; padding: 14px 20px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff; font-size: 1rem; outline: none;">
+    <div style="margin-bottom: 20px; display: flex; gap: 8px;">
+      <input type="text" id="customers-search-input" value="${adminState.customersSearch || ''}" onkeyup="if(event.key==='Enter') filterCrmSearch(this.value)" placeholder="🔍 Buscar por nombre, correo o teléfono... (Presiona Enter)" style="flex: 1; padding: 14px 20px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.2); color: #fff; font-size: 1rem; outline: none;">
+      <button class="btn btn-secondary" onclick="filterCrmSearch(document.getElementById('customers-search-input').value)" style="padding: 0 20px;">Buscar</button>
+      ${adminState.customersSearch ? `<button class="btn btn-danger" onclick="filterCrmSearch('')" style="padding: 0 20px;">✕</button>` : ''}
     </div>
 
     <div id="customers-loading" style="padding: 40px; text-align: center; color: var(--text-muted);">Cargando clientes...</div>
@@ -883,7 +885,17 @@ async function renderCustomers(container) {
     );
   }
 
-  const customersHtml = customers.map(c => `
+  // Pagination Logic
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(customers.length / itemsPerPage) || 1;
+  if (!adminState.crmVipPage) adminState.crmVipPage = 1;
+  if (adminState.crmVipPage > totalPages) adminState.crmVipPage = totalPages;
+  if (adminState.crmVipPage < 1) adminState.crmVipPage = 1;
+
+  const startIndex = (adminState.crmVipPage - 1) * itemsPerPage;
+  const paginatedCustomers = customers.slice(startIndex, startIndex + itemsPerPage);
+
+  const customersHtml = paginatedCustomers.map(c => `
     <div class="admin-crm-row" data-search="${(c.name || '').toLowerCase()} ${(c.contact || '').toLowerCase()} ${(c.whatsapp || '').toLowerCase()}">
       <div style="font-weight: 500; display: flex; align-items: center; gap: 10px;">
         <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; color: var(--bg-deep); font-weight: bold; flex-shrink: 0;">
@@ -927,6 +939,14 @@ async function renderCustomers(container) {
   const loadingEl = document.getElementById('customers-loading');
   if (loadingEl) loadingEl.style.display = 'none';
 
+  const paginationHtml = totalPages > 1 ? `
+    <div style="display: flex; justify-content: center; align-items: center; gap: 16px; padding: 16px; background: var(--bg-surface); border-top: 1px solid var(--border);">
+      <button class="btn btn-secondary" onclick="changeCrmPage(-1)" ${adminState.crmVipPage === 1 ? 'disabled style="opacity:0.5"' : ''}>Anterior</button>
+      <span style="font-size: 0.9rem; color: var(--text-secondary);">Página <strong>${adminState.crmVipPage}</strong> de ${totalPages}</span>
+      <button class="btn btn-secondary" onclick="changeCrmPage(1)" ${adminState.crmVipPage === totalPages ? 'disabled style="opacity:0.5"' : ''}>Siguiente</button>
+    </div>
+  ` : '';
+
   const contentEl = document.getElementById('customers-content');
   if (contentEl) {
     contentEl.style.display = 'block';
@@ -940,12 +960,28 @@ async function renderCustomers(container) {
         </div>
         <div style="padding: 16px;">
           ${customersHtml}
-          <div id="crm-no-results" style="display: none; text-align: center; padding: 40px; color: var(--text-muted);">No se encontró ningún cliente con esa búsqueda.</div>
         </div>
+        ${paginationHtml}
       </div>
     `;
   }
 }
+
+window.filterCrmSearch = function(query) {
+  adminState.customersSearch = query.trim();
+  adminState.crmVipPage = 1;
+  const main = document.getElementById('admin-main-content');
+  if (main) renderCustomers(main);
+};
+
+window.changeCrmPage = function(delta) {
+  adminState.crmVipPage += delta;
+  const main = document.getElementById('admin-main-content');
+  if (main) {
+    renderCustomers(main);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
 
 async function exportCustomersCSV() {
   let users = [];
@@ -2138,7 +2174,7 @@ function renderOrders(container) {
   `;
 
   // Pagination Logic
-  const itemsPerPage = 50;
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage) || 1;
   if (adminState.ordersPage > totalPages) adminState.ordersPage = totalPages;
   if (adminState.ordersPage < 1) adminState.ordersPage = 1;
