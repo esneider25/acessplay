@@ -339,6 +339,9 @@ function renderDashboard(container) {
     if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
       cost = parseFloat(o.costUsd) || 0;
     } else {
+      let pkg = null;
+      const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
+      const orderPrice = Number(o.priceUsd) || 0;
       let prodList = o.productId && o.productId !== 'legacy' ? PRODUCTS.filter(p => p.id === o.productId) : PRODUCTS;
 
       // First pass: try to find a package that matches the exact sales price (as requested by user)
