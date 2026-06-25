@@ -1127,13 +1127,13 @@ function showVipBenefits() {
           <h3 style="margin: 0 0 15px 0; display: flex; align-items: center; gap: 8px; color: #3b82f6;"><i class="ph-fill ph-coin"></i> AccessPoints por Compra</h3>
           <ul style="list-style: none; padding: 0; margin: 0 0 25px 0; display: grid; gap: 10px;">
             <li style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; font-size: 0.9rem;">
-              <span>Recargas menores a $6</span> <strong style="color: #3b82f6;">8 Puntos</strong>
+              <span>Recargas menores a $5</span> <strong style="color: #3b82f6;">2 Puntos</strong>
             </li>
             <li style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; font-size: 0.9rem;">
-              <span>Recargas entre $6 y $12</span> <strong style="color: #3b82f6;">10 Puntos</strong>
+              <span>Recargas entre $5 y $12</span> <strong style="color: #3b82f6;">4 Puntos</strong>
             </li>
             <li style="display: flex; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; font-size: 0.9rem;">
-              <span>Recargas mayores a $12</span> <strong style="color: #3b82f6;">15 Puntos</strong>
+              <span>Recargas mayores a $12</span> <strong style="color: #3b82f6;">7 Puntos</strong>
             </li>
           </ul>
 
