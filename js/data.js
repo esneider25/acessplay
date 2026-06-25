@@ -2,6 +2,46 @@
 // AccessPlay — Data Layer: Products, Categories, APIs & Config
 // ============================================================
 
+const VIP_TIERS = [
+  { max: 1, name: 'Novato', cashback: 0, color: '#888', gradient: 'linear-gradient(135deg, #aaa, #666)' },
+  { max: 15, name: 'BRONCE I', cashback: 0.2, color: '#cd7f32', gradient: 'linear-gradient(135deg, #d4a373, #a68a64)' },
+  { max: 30, name: 'BRONCE II', cashback: 0.4, color: '#cd7f32', gradient: 'linear-gradient(135deg, #d4a373, #a68a64)' },
+  { max: 45, name: 'BRONCE III', cashback: 0.6, color: '#cd7f32', gradient: 'linear-gradient(135deg, #d4a373, #a68a64)' },
+  { max: 60, name: 'BRONCE IV', cashback: 0.8, color: '#cd7f32', gradient: 'linear-gradient(135deg, #d4a373, #a68a64)' },
+  { max: 75, name: 'BRONCE V', cashback: 1.0, color: '#cd7f32', gradient: 'linear-gradient(135deg, #d4a373, #a68a64)' },
+  { max: 90, name: 'PLATA I', cashback: 1.2, color: '#c0c0c0', gradient: 'linear-gradient(135deg, #e0e0e0, #a0a0a0)' },
+  { max: 105, name: 'PLATA II', cashback: 1.4, color: '#c0c0c0', gradient: 'linear-gradient(135deg, #e0e0e0, #a0a0a0)' },
+  { max: 120, name: 'PLATA III', cashback: 1.6, color: '#c0c0c0', gradient: 'linear-gradient(135deg, #e0e0e0, #a0a0a0)' },
+  { max: 135, name: 'PLATA IV', cashback: 1.8, color: '#c0c0c0', gradient: 'linear-gradient(135deg, #e0e0e0, #a0a0a0)' },
+  { max: 150, name: 'PLATA V', cashback: 2.0, color: '#c0c0c0', gradient: 'linear-gradient(135deg, #e0e0e0, #a0a0a0)' },
+  { max: 165, name: 'ORO I', cashback: 2.2, color: '#ffd700', gradient: 'linear-gradient(135deg, #ffe066, #f5af19)' },
+  { max: 180, name: 'ORO II', cashback: 2.4, color: '#ffd700', gradient: 'linear-gradient(135deg, #ffe066, #f5af19)' },
+  { max: 195, name: 'ORO III', cashback: 2.6, color: '#ffd700', gradient: 'linear-gradient(135deg, #ffe066, #f5af19)' },
+  { max: 210, name: 'ORO IV', cashback: 2.8, color: '#ffd700', gradient: 'linear-gradient(135deg, #ffe066, #f5af19)' },
+  { max: 225, name: 'ORO V', cashback: 3.0, color: '#ffd700', gradient: 'linear-gradient(135deg, #ffe066, #f5af19)' },
+  { max: 240, name: 'DIAMANTE I', cashback: 3.2, color: '#b9f2ff', gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)' },
+  { max: 255, name: 'DIAMANTE II', cashback: 3.4, color: '#b9f2ff', gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)' },
+  { max: 270, name: 'DIAMANTE III', cashback: 3.6, color: '#b9f2ff', gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)' },
+  { max: 285, name: 'DIAMANTE IV', cashback: 3.8, color: '#b9f2ff', gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)' },
+  { max: Infinity, name: 'DIAMANTE V', cashback: 4.0, color: '#b9f2ff', gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)' }
+];
+
+function getVipLevel(spent) {
+  for (let i = 0; i < VIP_TIERS.length; i++) {
+    if (spent < VIP_TIERS[i].max) {
+      let tier = VIP_TIERS[i];
+      return {
+        name: tier.name,
+        color: tier.color,
+        gradient: tier.gradient,
+        nextThreshold: tier.max === Infinity ? null : tier.max,
+        cashback: tier.cashback
+      };
+    }
+  }
+  return { name: 'DIAMANTE V', color: '#b9f2ff', gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)', nextThreshold: null, cashback: 4.0 };
+}
+
 // ── Categories ──
 let CATEGORIES = [];
 

@@ -10,6 +10,7 @@ const adminState = {
   tempPackages: [],
   ordersFilter: 'all',
   ordersPage: 1,
+  crmPage: 1,
   ordersSearch: '',
   customersSearch: '',
   dashboardStartDate: '',
@@ -3296,7 +3297,14 @@ function renderCustomersTable(usersList) {
     return;
   }
 
-  const displayList = usersList.slice(0, 100);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(usersList.length / itemsPerPage);
+  
+  if (adminState.crmPage < 1) adminState.crmPage = 1;
+  if (adminState.crmPage > totalPages && totalPages > 0) adminState.crmPage = totalPages;
+
+  const startIndex = (adminState.crmPage - 1) * itemsPerPage;
+  const displayList = usersList.slice(startIndex, startIndex + itemsPerPage);
 
   let html = displayList.map(user => {
     const dateStr = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
@@ -3328,8 +3336,18 @@ function renderCustomersTable(usersList) {
     `;
   }).join('');
 
-  if (usersList.length > 100) {
-    html += `<tr><td colspan="8" style="text-align: center; padding: 15px; color: var(--text-muted); font-size: 0.9rem;">Mostrando 100 de ${usersList.length} clientes. Usa el buscador para encontrar a alguien específico.</td></tr>`;
+  if (totalPages > 1) {
+    html += `
+      <tr>
+        <td colspan="8" style="padding: 15px; text-align: center; background: var(--card-bg);">
+          <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
+            <button class="btn btn-secondary" onclick="adminState.crmPage--; filterCustomersSearch(adminState.customersSearch)" ${adminState.crmPage === 1 ? 'disabled' : ''}>Anterior</button>
+            <span style="color: var(--text-color); font-weight: bold;">Página ${adminState.crmPage} de ${totalPages}</span>
+            <button class="btn btn-secondary" onclick="adminState.crmPage++; filterCustomersSearch(adminState.customersSearch)" ${adminState.crmPage === totalPages ? 'disabled' : ''}>Siguiente</button>
+          </div>
+        </td>
+      </tr>
+    `;
   }
 
   tbody.innerHTML = html;

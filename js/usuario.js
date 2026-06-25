@@ -283,14 +283,6 @@ function logout() {
   });
 }
 
-function getVipLevel(spent) {
-  if (spent < 50) return { name: 'Bronce', color: '#cd7f32', gradient: 'linear-gradient(135deg, #d4a373 0%, #a68a64 100%)', nextThreshold: 50 };
-  if (spent < 150) return { name: 'Plata', color: '#c0c0c0', gradient: 'linear-gradient(135deg, #e0e0e0 0%, #a0a0a0 100%)', nextThreshold: 150 };
-  if (spent < 500) return { name: 'Oro', color: '#ffd700', gradient: 'linear-gradient(135deg, #ffe066 0%, #f5af19 100%)', nextThreshold: 500 };
-  if (spent < 1000) return { name: 'Platino', color: '#e5e4e2', gradient: 'linear-gradient(135deg, #e0f7fa 0%, #80deea 100%)', nextThreshold: 1000 };
-  return { name: 'Diamante', color: '#b9f2ff', gradient: 'linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)', nextThreshold: null };
-}
-
 async function loadDashboardData() {
   if (!currentUser) return;
   
