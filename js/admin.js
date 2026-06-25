@@ -3652,7 +3652,7 @@ window.openCustomerInfoModal = function (uid) {
 
   const modalHTML = `
     <div class="modal-overlay active" id="customer-info-modal-overlay">
-      <div class="modal" style="max-width: 500px;">
+      <div class="modal" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
         <h3 style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
           <span>Detalles del Cliente</span>
           <button onclick="document.getElementById('customer-info-modal-overlay').remove()" style="background:none; border:none; color: white; cursor: pointer; font-size: 1.2rem;">✕</button>
