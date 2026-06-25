@@ -40,13 +40,23 @@ export default async function handler(req, res) {
 
     // Perform the actual request to TiendaGiftVen
     const response = await fetch(url, fetchOptions);
-    const result = await response.json();
+    const textResult = await response.text();
+    
+    let result;
+    try {
+      result = JSON.parse(textResult);
+    } catch (e) {
+      // If the API returns HTML (e.g. 500 error page from Cloudflare/Nginx)
+      return res.status(response.ok ? 500 : response.status).json({ 
+        error: "El servicio de verificación está temporalmente caído continúa tu compra sin problemas-" 
+      });
+    }
 
     // Return exact status and result to the frontend
     res.status(response.status).json(result);
 
   } catch (error) {
     console.error("Proxy error:", error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Error interno de conexión con la API externa." });
   }
 }
