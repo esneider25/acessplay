@@ -339,14 +339,12 @@ function renderDashboard(container) {
     if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
       cost = parseFloat(o.costUsd) || 0;
     } else {
-      let pkg = null;
-      const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
-      const orderPrice = Number(o.priceUsd) || 0;
+      let prodList = o.productId && o.productId !== 'legacy' ? PRODUCTS.filter(p => p.id === o.productId) : PRODUCTS;
 
       // First pass: try to find a package that matches the exact sales price (as requested by user)
-      for (let i = 0; i < PRODUCTS.length; i++) {
-        if (PRODUCTS[i].packages) {
-          pkg = PRODUCTS[i].packages.find(p => Number(p.priceUsd) === orderPrice);
+      for (let i = 0; i < prodList.length; i++) {
+        if (prodList[i].packages) {
+          pkg = prodList[i].packages.find(p => Number(p.priceUsd) === orderPrice);
           if (pkg) break;
         }
       }
@@ -357,9 +355,9 @@ function renderDashboard(container) {
         // Find the most prominent number (usually the first large number)
         if (nums && nums.length > 0) {
           const targetNum = nums[0];
-          for (let i = 0; i < PRODUCTS.length; i++) {
-            if (PRODUCTS[i].packages) {
-              pkg = PRODUCTS[i].packages.find(p => {
+          for (let i = 0; i < prodList.length; i++) {
+            if (prodList[i].packages) {
+              pkg = prodList[i].packages.find(p => {
                 return String(p.amount) === targetNum || String(p.label).includes(targetNum);
               });
               if (pkg) break;
@@ -4126,38 +4124,47 @@ window.normalizeLegacyData = async function() {
       }
       
       // 2. Fix legacy product and cost
-      if (o.productId === 'legacy' || !o.packageLabel || o.costUsd === undefined || o.costUsd === 0) {
-        let pkg = null;
-        let prod = null;
-        const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
-        const orderPrice = Number(o.priceUsd) || 0;
+      let pkg = null;
+      let prod = null;
+      const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
+      const orderPrice = Number(o.priceUsd) || 0;
 
-        for (let i = 0; i < PRODUCTS.length; i++) {
-          if (PRODUCTS[i].packages) {
-            pkg = PRODUCTS[i].packages.find(p => Number(p.priceUsd) === orderPrice);
-            if (pkg) { prod = PRODUCTS[i]; break; }
-          }
+      let prodList = o.productId && o.productId !== 'legacy' ? PRODUCTS.filter(p => p.id === o.productId) : PRODUCTS;
+
+      for (let i = 0; i < prodList.length; i++) {
+        if (prodList[i].packages) {
+          pkg = prodList[i].packages.find(p => Number(p.priceUsd) === orderPrice);
+          if (pkg) { prod = prodList[i]; break; }
         }
-        if (!pkg) {
-          const nums = searchLabel.match(/\d+/g);
-          if (nums && nums.length > 0) {
-            const targetNum = nums[0];
-            for (let i = 0; i < PRODUCTS.length; i++) {
-              if (PRODUCTS[i].packages) {
-                pkg = PRODUCTS[i].packages.find(p => String(p.amount) === targetNum || String(p.label).includes(targetNum));
-                if (pkg) { prod = PRODUCTS[i]; break; }
-              }
+      }
+      
+      if (!pkg) {
+        const nums = searchLabel.match(/\d+/g);
+        if (nums && nums.length > 0) {
+          const targetNum = nums[0];
+          for (let i = 0; i < prodList.length; i++) {
+            if (prodList[i].packages) {
+              pkg = prodList[i].packages.find(p => String(p.amount) === targetNum || String(p.label).includes(targetNum));
+              if (pkg) { prod = prodList[i]; break; }
             }
           }
         }
+      }
+      
+      if (prod && pkg) {
+        if (o.productId === 'legacy') { o.productId = prod.id; changed = true; }
+        if (!o.packageLabel) { o.packageLabel = pkg.label; changed = true; }
         
-        if (prod && pkg) {
-          if (o.productId === 'legacy') o.productId = prod.id;
-          if (!o.packageLabel) o.packageLabel = pkg.label;
-          if (o.costUsd === undefined || o.costUsd === 0) o.costUsd = parseFloat(pkg.costUsd) || 0;
-          if (!o.productName) o.productName = prod.name;
-          changed = true;
+        // Fix costs: assign cost if missing or if the previous buggy run assigned a cost higher than the price
+        const correctCost = parseFloat(pkg.costUsd) || 0;
+        if (o.costUsd === undefined || o.costUsd === 0 || o.costUsd > orderPrice) {
+          if (o.costUsd !== correctCost) {
+            o.costUsd = correctCost;
+            changed = true;
+          }
         }
+        
+        if (!o.productName) { o.productName = prod.name; changed = true; }
       }
       
       if (changed) {
