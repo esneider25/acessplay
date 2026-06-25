@@ -2066,6 +2066,8 @@ function resetPassword() {
   
   firebase.auth().sendPasswordResetEmail(email).then(() => {
     showToast('📩 Te hemos enviado un enlace para restablecer tu contraseña');
+    const modal = document.getElementById('auth-modal-container');
+    if(modal) modal.remove();
   }).catch(err => {
     showToast('❌ Correo no encontrado o inválido');
   });
