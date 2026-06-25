@@ -1173,10 +1173,10 @@ function lookupOrder() {
   }
   const val = input.value.trim();
   
-  // Allow tracking by digits (which we prepend RS- to) or full RS- code
+  // Allow tracking by digits (which we prepend AP- to) or full AP- code
   if (/^\d{1,6}$/.test(val)) {
-    navigateTo('tracking', 'RS-' + val);
-  } else if (/^RS-\d{1,6}$/i.test(val)) {
+    navigateTo('tracking', 'AP-' + val);
+  } else if (/^AP-\d{1,6}$/i.test(val)) {
     navigateTo('tracking', val.toUpperCase());
   } else {
     // Treat as contact search (email or phone)

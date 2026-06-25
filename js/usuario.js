@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       firebase.database().ref('users/' + user.uid).on('value', snap => {
         userProfile = snap.val() || {};
         if (!userProfile.referralCode) {
-          const newCode = 'RS-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+          const newCode = 'AP-' + Math.random().toString(36).substring(2, 8).toUpperCase();
           firebase.database().ref('users/' + user.uid).update({ referralCode: newCode });
           userProfile.referralCode = newCode;
         }

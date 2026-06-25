@@ -927,7 +927,7 @@ function renderFAQ() {
               { q: '⏱️ ¿Cuánto tiempo tarda en llegar mi recarga?', a: 'Por lo general, las recargas se procesan en un tiempo de <strong>5 a 15 minutos</strong> una vez que tu pago ha sido confirmado. En algunos casos excepcionales o durante mantenimientos del juego, puede demorar un poco más.' },
               { q: '⚠️ ¿Qué pasa si me equivoco al poner mi ID del juego?', a: 'Si notas un error en tu ID, contáctanos inmediatamente a través de nuestro botón de soporte en WhatsApp o Telegram. Si la recarga <strong>aún no ha sido procesada</strong>, podemos corregirlo. Si ya fue enviada al ID erróneo, lamentablemente no podemos revertir la transacción.' },
               { q: '💳 ¿Cuáles son los métodos de pago aceptados?', a: 'Aceptamos pagos a través de <strong>Pago Móvil</strong>, <strong>Transferencia Bancaria Nacional</strong> y también criptomonedas como USDT a través de <strong>Binance Pay</strong>.' },
-              { q: '✅ ¿Cómo sé si mi pedido fue exitoso?', a: 'Al finalizar tu compra, recibirás un número de referencia (Ej: RS-1234). Puedes ingresar ese código en la sección de <strong>"🔍 Mis Pedidos"</strong> en el menú superior para ver el estado en tiempo real.' }
+              { q: '✅ ¿Cómo sé si mi pedido fue exitoso?', a: 'Al finalizar tu compra, recibirás un número de referencia (Ej: AP-1234). Puedes ingresar ese código en la sección de <strong>"🔍 Mis Pedidos"</strong> en el menú superior para ver el estado en tiempo real.' }
             ];
             return faq.map(item => `
               <details style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s ease;">
