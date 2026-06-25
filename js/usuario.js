@@ -833,6 +833,15 @@ function renderDashboardContent() {
         <button class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.05rem;" id="btn-save-settings" onclick="saveProfileSettings()">
           <i class="ph ph-floppy-disk"></i> Guardar Cambios
         </button>
+
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
+        <h3 style="margin: 0 0 15px 0; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; color: var(--text-secondary);"><i class="ph ph-lock-key"></i> Cambiar Contraseña</h3>
+        <div class="profile-form-group" style="margin-bottom: 15px;">
+          <input type="password" id="setting-new-password" class="profile-input" placeholder="Nueva contraseña (mínimo 6 caracteres)">
+        </div>
+        <button class="btn-secondary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1rem; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;" id="btn-change-password" onclick="changeUserPassword()">
+          <i class="ph ph-key"></i> Actualizar Contraseña
+        </button>
       </div>
     </section>
 
@@ -868,6 +877,39 @@ function renderDashboardContent() {
 
 
 
+
+window.changeUserPassword = async function() {
+  if (!currentUser) return;
+  const btn = document.getElementById('btn-change-password');
+  const newPass = document.getElementById('setting-new-password').value.trim();
+  
+  if (newPass.length < 6) {
+    if (typeof usuarioToast === 'function') usuarioToast('La contraseña debe tener al menos 6 caracteres', 'error');
+    else alert('La contraseña debe tener al menos 6 caracteres');
+    return;
+  }
+
+  btn.innerHTML = 'Actualizando...';
+  btn.disabled = true;
+
+  try {
+    await currentUser.updatePassword(newPass);
+    if (typeof usuarioToast === 'function') usuarioToast('Contraseña actualizada con éxito', 'success');
+    else alert('Contraseña actualizada con éxito');
+    document.getElementById('setting-new-password').value = '';
+  } catch (error) {
+    console.error(error);
+    let msg = 'Error al actualizar contraseña. Es posible que debas cerrar sesión y volver a entrar.';
+    if (error.code === 'auth/requires-recent-login') {
+      msg = 'Por seguridad, debes cerrar sesión y volver a iniciarla para cambiar tu contraseña.';
+    }
+    if (typeof usuarioToast === 'function') usuarioToast(msg, 'error');
+    else alert(msg);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ph ph-key"></i> Actualizar Contraseña';
+  }
+};
 
 async function saveProfileSettings() {
   if (!currentUser) return;
