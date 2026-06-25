@@ -930,6 +930,9 @@ async function renderCustomers(container) {
             <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openCustomerInfoModal('${c.uid}')">
               ℹ️ Info
             </button>
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="sendCustomerPasswordReset('${c.contact}')" title="Enviar enlace de restablecimiento de contraseña">
+              🔑 Restablecer Clave
+            </button>
           </div>
         ` : `<span style="font-size: 0.8rem; color: var(--text-muted);">Invitado</span>`}
       </div>
@@ -980,6 +983,22 @@ window.changeCrmPage = function(delta) {
   if (main) {
     renderCustomers(main);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
+window.sendCustomerPasswordReset = async function(email) {
+  if (!email || !email.includes('@')) {
+    alert('El cliente no tiene un correo válido registrado. Si se registró con WhatsApp o un correo falso, no es posible enviarle el enlace.');
+    return;
+  }
+  if (!confirm(`¿Enviar enlace de recuperación de contraseña a ${email}?`)) return;
+  
+  try {
+    await firebase.auth().sendPasswordResetEmail(email);
+    alert(`Correo de restablecimiento enviado exitosamente a ${email}`);
+  } catch (error) {
+    console.error("Error enviando reset:", error);
+    alert("Hubo un error al intentar enviar el correo. Asegúrate de que el usuario exista en Auth.");
   }
 };
 
