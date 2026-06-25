@@ -1,0 +1,270 @@
+import sqlite3
+import json
+import base64
+import binascii
+
+db_path = r'C:\Users\IK\Downloads\accesplay.db'
+
+def run_migration():
+    try:
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        master_db = {}
+
+        # 1. Monedas -> Exchange Rate
+        cursor.execute("SELECT * FROM monedas WHERE codigo='VES'")
+        ves_row = cursor.fetchone()
+        master_db['exchange_rate'] = {
+            "usdToBs": float(ves_row['tasa']) if ves_row else 58.0,
+            "lastUpdated": "2026-06-24"
+        }
+
+        # 2. Metodos de pago
+        cursor.execute("SELECT * FROM metodos_pago")
+        pago_rows = cursor.fetchall()
+        payment_methods = []
+        for r in pago_rows:
+            try:
+                datos = json.loads(r['datos']) if r['datos'] else []
+                details = {}
+                for d in datos:
+                    label = d.get('label', '').lower()
+                    val = d.get('valor', '')
+                    if 'telefono' in label or 'tel' in label:
+                        details['telefono'] = val
+                    elif 'cedula' in label or 'rif' in label:
+                        details['cedula'] = val
+                    elif 'id' in label:
+                        details['binanceId'] = val
+                    elif 'usuario' in label:
+                        details['titular'] = val
+                    else:
+                        details['nota'] = val
+                
+                currency = 'VES'
+                if r['moneda_id'] == 1: currency = 'USD'
+                elif r['moneda_id'] == 3: currency = 'COP'
+                
+                icon_map = {
+                    'fas fa-mobile-alt': '📱',
+                    'fas fa-credit-card': '💳',
+                    'fas fa-university': '🏦',
+                    'fas fa-money-bill': '💵',
+                    'fas fa-wallet': '🪙',
+                    'fab fa-bitcoin': '₿'
+                }
+                icon = r['icono']
+                if icon in icon_map:
+                    icon = icon_map[icon]
+                elif not icon:
+                    icon = '💵'
+
+                payment_methods.append({
+                    "id": f"pm-{r['id']}",
+                    "name": r['nombre'],
+                    "currency": currency,
+                    "icon": icon,
+                    "details": details,
+                    "active": bool(r['activo'])
+                })
+            except Exception as e:
+                print(f"Error parseando metodo de pago {r['id']}: {e}")
+        master_db['payment_methods'] = payment_methods
+
+        # 3. Servicios y Productos -> Categories y Products
+        cursor.execute("SELECT DISTINCT categoria FROM servicios WHERE categoria != ''")
+        cat_rows = cursor.fetchall()
+        categories = []
+        for i, c in enumerate(cat_rows):
+            cat_name = c['categoria']
+            categories.append({
+                "id": cat_name.lower(),
+                "name": cat_name.capitalize(),
+                "icon": "🎮",
+                "position": i + 1
+            })
+        master_db['categories'] = categories
+
+        cursor.execute("SELECT * FROM servicios")
+        servicios = cursor.fetchall()
+        products = []
+        for s in servicios:
+            prod_id = s['nombre'].lower().replace(' ', '-').replace('+', '').replace('(', '').replace(')', '')
+            if not prod_id: prod_id = f"prod-{s['id']}"
+
+            cursor.execute("SELECT * FROM productos WHERE servicio_id=?", (s['id'],))
+            paquetes = cursor.fetchall()
+            packages_list = []
+            for idx, p in enumerate(paquetes):
+                amount = 0
+                import re
+                nums = re.findall(r'\d+', p['nombre'])
+                if nums:
+                    amount = int(nums[0])
+                if amount == 0:
+                    amount = idx + 1
+                
+                packages_list.append({
+                    "amount": amount,
+                    "priceUsd": float(p['precio']),
+                    "label": p['nombre'],
+                    "apiServiceId": str(p['api_monto']) if p['api_monto'] else "",
+                    "isOutofStock": not bool(p['activo'])
+                })
+
+            products.append({
+                "id": prod_id,
+                "name": s['nombre'],
+                "category": s['categoria'].lower() if s['categoria'] else "otros",
+                "type": "game",
+                "currency": "DIAMANTES",
+                "currencyIcon": "💎",
+                "imageUrl": s['imagen_url'] if s['imagen_url'] else "",
+                "color": s['color'] if s['color'] else "#0ea5e9",
+                "colorGradient": f"linear-gradient(135deg, {s['color'] or '#0ea5e9'}, #111)",
+                "description": s['descripcion'] or "",
+                "position": s['orden'] or 999,
+                "popular": bool(s['destacado']),
+                "isNew": False,
+                "apiProvider": "api-1" if s['api_tipo'] == "freefire" else "",
+                "packages": packages_list
+            })
+        master_db['products'] = products
+
+        # 4. Codigos Descuento
+        cursor.execute("SELECT * FROM codigos_descuento")
+        desc_rows = cursor.fetchall()
+        discounts = []
+        for d in desc_rows:
+            discounts.append({
+                "id": f"discount-{d['id']}",
+                "code": d['codigo'],
+                "type": d['tipo'],
+                "value": float(d['valor']),
+                "maxUses": d['uso_maximo'] or 0,
+                "currentUses": d['usos'] or 0,
+                "expirationDate": d['fecha_expiracion'] or "",
+                "active": bool(d['activo'])
+            })
+        master_db['discounts'] = discounts
+
+        # Calculate totalSpent for each user
+        cursor.execute("SELECT usuario_id, SUM(precio) as total_spent FROM pedidos WHERE estado='completado' GROUP BY usuario_id")
+        spent_rows = cursor.fetchall()
+        user_spent = {}
+        for row in spent_rows:
+            user_spent[row['usuario_id']] = float(row['total_spent'])
+
+        # 5. Pedidos -> Orders
+        cursor.execute("SELECT p.*, u.correo, u.whatsapp FROM pedidos p LEFT JOIN usuarios u ON p.usuario_id = u.id")
+        pedido_rows = cursor.fetchall()
+        orders = []
+        for p in pedido_rows:
+            date_str = p['fecha']
+            if len(date_str) == 16:
+                date_str += ":00.000Z"
+            elif len(date_str) == 19:
+                date_str += ".000Z"
+            date_str = date_str.replace(' ', 'T')
+
+            data_cli = {}
+            try:
+                if p['datos_cliente']:
+                    data_cli = json.loads(p['datos_cliente'])
+            except:
+                pass
+
+            status_raw = p['estado']
+            if status_raw == 'completado':
+                status_mapped = 'completed'
+            elif status_raw in ('cancelado', 'rechazado'):
+                status_mapped = 'rejected'
+            elif status_raw == 'procesando':
+                status_mapped = 'processing'
+            else:
+                status_mapped = 'pending'
+
+            orders.append({
+                "id": f"AP-OLD-{p['id']}",
+                "userId": f"uid-{p['usuario_id']}",
+                "userEmail": p['correo'] or "",
+                "userPhone": p['whatsapp'] or "",
+                "productDetails": p['producto'],
+                "productId": "legacy",
+                "packageAmount": 0,
+                "playerId": list(data_cli.values())[0] if data_cli else "",
+                "zoneId": "",
+                "priceUsd": float(p['precio']),
+                "priceBs": float(p['precio_pagado']) if p['moneda_pago'] == 'VES' else 0,
+                "currency": p['moneda_pago'],
+                "paymentMethod": p['metodo_pago'],
+                "reference": p['referencia'] or "",
+                "status": status_mapped,
+                "createdAt": date_str,
+                "updatedAt": date_str,
+                "apiData": {
+                    "result": p['api_resultado'] or "",
+                    "ref": p['api_referencia'] or ""
+                }
+            })
+        master_db['orders'] = orders
+
+        # 6. Usuarios
+        cursor.execute("SELECT * FROM usuarios")
+        usuarios = cursor.fetchall()
+        firebase_users_list = []
+        rtdb_users = {}
+
+        for u in usuarios:
+            uid = f"uid-{u['id']}"
+            rtdb_users[uid] = {
+                "uid": uid,
+                "email": u['correo'],
+                "displayName": u['nombre'],
+                "phone": u['whatsapp'],
+                "role": "revendedor" if u['rol'] == 'reseller' else ("admin" if u['rol'] == 'admin' else "cliente"),
+                "createdAt": u['fecha_registro'] + "T00:00:00.000Z" if len(u['fecha_registro']) == 10 else u['fecha_registro'],
+                "walletBalance": 0,
+                "totalSpent": user_spent.get(u['id'], 0)
+            }
+
+            pwd = u['password']
+            if pwd and pwd.startswith("scrypt:32768:8:1$"):
+                parts = pwd.split("$")
+                if len(parts) == 3:
+                    salt_raw = parts[1]
+                    hash_hex = parts[2]
+                    try:
+                        hash_bytes = binascii.unhexlify(hash_hex)
+                        hash_b64 = base64.b64encode(hash_bytes).decode('utf-8')
+                        salt_b64 = base64.b64encode(salt_raw.encode('utf-8')).decode('utf-8')
+                    except:
+                        continue
+
+                    firebase_users_list.append({
+                        "localId": uid,
+                        "email": u['correo'],
+                        "displayName": u['nombre'],
+                        "passwordHash": hash_b64,
+                        "salt": salt_b64
+                    })
+        master_db['users'] = rtdb_users
+
+        # Write merged RTDB database
+        with open("acessplay_firebase_import_new.json", "w", encoding="utf-8") as f:
+            json.dump(master_db, f, ensure_ascii=False, indent=2)
+
+        # Write Auth CLI file
+        with open("users_cli_new.json", "w", encoding="utf-8") as f:
+            json.dump({"users": firebase_users_list}, f, ensure_ascii=False, indent=2)
+
+        print("SUCCESS")
+
+    except Exception as e:
+        print(f"Error during migration: {e}")
+        import traceback
+        traceback.print_exc()
+
+run_migration()
