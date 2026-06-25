@@ -610,20 +610,16 @@ function updateOrderStatus(orderId, newStatus, note) {
         if (role !== 'revendedor') {
           // 1. Calculate Points
           let earnedPoints = 0;
-          if (price < 6) earnedPoints = 8;
-          else if (price <= 12) earnedPoints = 10;
-          else earnedPoints = 15;
+          if (price < 5) earnedPoints = 3;
+          else if (price <= 12) earnedPoints = 5;
+          else earnedPoints = 8;
 
           updates.points = currentPoints + earnedPoints;
 
           // 2. Calculate Cashback (if no discount code used)
           if (!order.discountCode) {
-            let cashbackPercent = 0;
-            if (totalSpent < 50) cashbackPercent = 0; // Bronce
-            else if (totalSpent < 150) cashbackPercent = 1; // Plata
-            else if (totalSpent < 500) cashbackPercent = 2; // Oro
-            else if (totalSpent < 1000) cashbackPercent = 3; // Platino
-            else cashbackPercent = 4; // Diamante
+            let vip = typeof getVipLevel === 'function' ? getVipLevel(newSpent) : { cashback: 0 };
+            let cashbackPercent = vip.cashback || 0;
 
             if (cashbackPercent > 0) {
               let cashbackAmount = price * (cashbackPercent / 100);
@@ -634,7 +630,7 @@ function updateOrderStatus(orderId, newStatus, note) {
                 id: Date.now().toString(),
                 type: 'deposit',
                 amount: cashbackAmount,
-                description: `Cashback VIP (${cashbackPercent}%) por pedido #${order.id}`,
+                description: `Cashback VIP (${cashbackPercent.toFixed(1)}%) por pedido #${order.id}`,
                 date: Date.now()
               });
             }

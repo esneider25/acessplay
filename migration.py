@@ -43,12 +43,27 @@ def run_migration():
                 currency = 'VES'
                 if r['moneda_id'] == 1: currency = 'USD'
                 elif r['moneda_id'] == 3: currency = 'COP'
+                
+                # Map old FontAwesome classes to Emojis
+                icon_map = {
+                    'fas fa-mobile-alt': '📱',
+                    'fas fa-credit-card': '💳',
+                    'fas fa-university': '🏦',
+                    'fas fa-money-bill': '💵',
+                    'fas fa-wallet': '🪙',
+                    'fab fa-bitcoin': '₿'
+                }
+                icon = r['icono']
+                if icon in icon_map:
+                    icon = icon_map[icon]
+                elif not icon:
+                    icon = '💵'
 
                 payment_methods.append({
                     "id": f"pm-{r['id']}",
                     "name": r['nombre'],
                     "currency": currency,
-                    "icon": r['icono'] or 'fas fa-money-bill',
+                    "icon": icon,
                     "details": details,
                     "active": bool(r['activo'])
                 })
@@ -182,18 +197,21 @@ def run_migration():
                 }
             })
 
-        # Generate Realtime DB Object
-        db_export = {
-            "exchange_rate": exchange_rate,
-            "payment_methods": payment_methods,
-            "categories": categories,
-            "products": products,
-            "discounts": discounts,
-            "orders": orders
-        }
+        # 5. Guardar cada nodo en un archivo separado para evitar sobreescribir configs nuevas
+        with open("migration_exchange_rate.json", "w", encoding="utf-8") as f:
+            json.dump(exchange_rate, f, ensure_ascii=False, indent=2)
 
-        with open("migration_db.json", "w", encoding="utf-8") as f:
-            json.dump(db_export, f, ensure_ascii=False, indent=2)
+        with open("migration_payment_methods.json", "w", encoding="utf-8") as f:
+            json.dump(payment_methods, f, ensure_ascii=False, indent=2)
+
+        with open("migration_categories.json", "w", encoding="utf-8") as f:
+            json.dump(categories, f, ensure_ascii=False, indent=2)
+
+        with open("migration_products.json", "w", encoding="utf-8") as f:
+            json.dump(products, f, ensure_ascii=False, indent=2)
+
+        with open("migration_orders.json", "w", encoding="utf-8") as f:
+            json.dump(orders, f, ensure_ascii=False, indent=2)
 
         # 6. Usuarios
         cursor.execute("SELECT * FROM usuarios")
