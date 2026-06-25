@@ -41,36 +41,57 @@ new_func = """window.normalizeLegacyData = async function() {
       }
       
       // 2. Fix legacy product and cost
-      if (o.productId === 'legacy' || !o.packageLabel || o.costUsd === undefined || o.costUsd === 0) {
-        let pkg = null;
-        let prod = null;
-        const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
-        const orderPrice = Number(o.priceUsd) || 0;
+      let correctPkg = null;
+      let correctProd = null;
+      const searchLabel = String(o.packageLabel || o.productDetails || o.productName || '').toLowerCase();
+      const orderPrice = Number(o.priceUsd) || 0;
 
-        for (let i = 0; i < PRODUCTS.length; i++) {
-          if (PRODUCTS[i].packages) {
-            pkg = PRODUCTS[i].packages.find(p => Number(p.priceUsd) === orderPrice);
-            if (pkg) { prod = PRODUCTS[i]; break; }
-          }
+      // Try to find the real product by matching name in the label
+      let matchedProds = PRODUCTS.filter(p => searchLabel.includes(p.name.toLowerCase()));
+      if (matchedProds.length === 0) {
+         if (o.productId && o.productId !== 'legacy') {
+            matchedProds = PRODUCTS.filter(p => p.id === o.productId);
+         } else {
+            matchedProds = PRODUCTS;
+         }
+      }
+
+      for (let i = 0; i < matchedProds.length; i++) {
+        if (matchedProds[i].packages) {
+          // STRICT: Cost must be less than or equal to price to prevent bug
+          correctPkg = matchedProds[i].packages.find(p => Number(p.priceUsd) === orderPrice && (parseFloat(p.costUsd) || 0) <= orderPrice);
+          if (correctPkg) { correctProd = matchedProds[i]; break; }
         }
-        if (!pkg) {
-          const nums = searchLabel.match(/\\d+/g);
-          if (nums && nums.length > 0) {
-            const targetNum = nums[0];
-            for (let i = 0; i < PRODUCTS.length; i++) {
-              if (PRODUCTS[i].packages) {
-                pkg = PRODUCTS[i].packages.find(p => String(p.amount) === targetNum || String(p.label).includes(targetNum));
-                if (pkg) { prod = PRODUCTS[i]; break; }
-              }
+      }
+      
+      if (!correctPkg) {
+        const nums = searchLabel.match(/\d+/g);
+        if (nums && nums.length > 0) {
+          const targetNum = nums[0];
+          for (let i = 0; i < matchedProds.length; i++) {
+            if (matchedProds[i].packages) {
+              correctPkg = matchedProds[i].packages.find(p => (String(p.amount) === targetNum || String(p.label).includes(targetNum)) && (parseFloat(p.costUsd) || 0) <= orderPrice);
+              if (correctPkg) { correctProd = matchedProds[i]; break; }
             }
           }
         }
+      }
+      
+      if (correctProd && correctPkg) {
+        const correctCost = parseFloat(correctPkg.costUsd) || 0;
         
-        if (prod && pkg) {
-          if (o.productId === 'legacy') o.productId = prod.id;
-          if (!o.packageLabel) o.packageLabel = pkg.label;
-          if (o.costUsd === undefined || o.costUsd === 0) o.costUsd = parseFloat(pkg.costUsd) || 0;
-          if (!o.productName) o.productName = prod.name;
+        // If we found a valid package, update details
+        if (o.productId === 'legacy' || o.costUsd > orderPrice || o.costUsd === undefined || o.costUsd === 0) {
+          if (o.productId !== correctProd.id) { o.productId = correctProd.id; changed = true; }
+          if (!o.packageLabel || o.packageLabel !== correctPkg.label) { o.packageLabel = correctPkg.label; changed = true; }
+          if (o.costUsd !== correctCost) { o.costUsd = correctCost; changed = true; }
+          if (o.productName !== correctProd.name) { o.productName = correctProd.name; changed = true; }
+        }
+      } else {
+        // Fallback for severely corrupted orders where no valid package is found
+        if (o.costUsd === undefined || o.costUsd === 0 || o.costUsd > orderPrice) {
+          // Set a safe fallback cost (e.g., 85% of price)
+          o.costUsd = orderPrice * 0.85; 
           changed = true;
         }
       }
