@@ -10,6 +10,14 @@
   <link rel="apple-touch-icon" sizes="192x192" href="img/favicon-192.png">
   <link rel="manifest" href="admin-manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    // Bloqueo de seguridad: Evitar que curiosos entren desde el dominio principal
+    const validHosts = ['admin.accesplay.com', 'localhost', '127.0.0.1'];
+    if (!validHosts.includes(window.location.hostname)) {
+      window.location.replace('/');
+    }
+  </script>
 </head>
 <body>
   <!-- Animated Background -->
