@@ -389,7 +389,7 @@ function renderProductDetail(productId) {
       `;
     }
     
-    typeFieldsHtml = `
+    typeFieldsHtml = savedIdsHtml + `
       <div class="form-group">
         <label for="game-uid">🎮 ID del juego</label>
         ${uidInputHtml}
@@ -409,7 +409,7 @@ function renderProductDetail(productId) {
         </div>
       `;
     }
-    typeFieldsHtml = `
+    typeFieldsHtml = savedIdsHtml + `
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
         <div class="form-group">
           <label for="game-uid">🎮 Player ID</label>
@@ -425,7 +425,7 @@ function renderProductDetail(productId) {
       </div>
     `;
   } else if (productType === 'account') {
-    typeFieldsHtml = `
+    typeFieldsHtml = savedIdsHtml + `
       <div class="form-section-label">🔐 Datos de la Cuenta (Recarga Interna)</div>
       <div class="form-group">
         <label for="account-email">📧 Correo o usuario de la cuenta</label>
@@ -1399,3 +1399,17 @@ function toggleTheme() {
   const isLight = document.body.classList.contains('light-theme');
   localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
 }
+// Helper function to fill saved ID in the modal
+window.fillSavedId = function(uid, zoneId) {
+  const uidInput = document.getElementById('game-uid');
+  const zoneInput = document.getElementById('game-zone');
+  if (uidInput) {
+    uidInput.value = uid;
+    // Trigger input event to update any listeners
+    uidInput.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  if (zoneInput && zoneId && zoneId !== 'undefined' && zoneId !== 'null') {
+    zoneInput.value = zoneId;
+    zoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+};
