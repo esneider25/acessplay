@@ -1573,8 +1573,23 @@ function previewScreenshot(input) {
     const imageHash = 'img-' + Math.abs(imgHashNum).toString(36) + '-' + file.size;
     appState.selectedScreenshotHash = imageHash;
 
-    const orders = getOrders();
-    let duplicateFound = orders.some(o => o.status !== 'rejected' && o.imageHash === imageHash);
+    let duplicateFound = false;
+    let numbers = [];
+    
+    // Fetch recent orders from Firebase for global duplicate checking
+    let recentOrders = [];
+    if (typeof firebase !== 'undefined') {
+      try {
+        const recentSnap = await firebase.database().ref('orders').orderByChild('createdAt').limitToLast(500).once('value');
+        if (recentSnap.exists()) {
+          recentOrders = Object.values(recentSnap.val());
+        }
+      } catch (err) {
+        console.error("Error fetching recent orders for anti-fraud:", err);
+      }
+    }
+
+    duplicateFound = recentOrders.some(o => o.status !== 'rejected' && o.imageHash === imageHash);
     
     // OCR Check for duplicates (Catches cropped/compressed images)
     if (!duplicateFound && window.Tesseract) {
@@ -1582,7 +1597,6 @@ function previewScreenshot(input) {
         const { data: { text } } = await Tesseract.recognize(dataUrl, 'spa');
         
         // Buscar específicamente referencias o números de operación
-        let numbers = [];
         const regexKeywords = /(?:ref(?:erencia)?|operaci[oó]n|orden|recibo|comprobante|autorizaci[oó]n|folio|transacci[oó]n|nro|n[uú]mero\s+de\s+operaci[oó]n)[\s:.\-#\n]*([A-Za-z0-9]{5,20})/gi;
         let match;
         while ((match = regexKeywords.exec(text)) !== null) {
@@ -1591,8 +1605,7 @@ function previewScreenshot(input) {
         
         if (numbers.length > 0) {
           for (const num of numbers) {
-            // Check if any previous order (not rejected) has this exact number string in its OCR data
-            if (orders.some(o => o.status !== 'rejected' && o.ocrNumbers && o.ocrNumbers.includes(num))) {
+            if (recentOrders.some(o => o.status !== 'rejected' && o.ocrNumbers && o.ocrNumbers.includes(num))) {
               duplicateFound = true;
               break;
             }
