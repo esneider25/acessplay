@@ -4289,14 +4289,21 @@ window.normalizeLegacyData = async function () {
       }
     }
 
-    // 3. Fix Users totalSpent and roles (user -> cliente, reseller -> revendedor)
+    // 3. Fix Users totalSpent, roles and order associations
     const usersSnap = await firebase.database().ref('users').once('value');
     const usersData = usersSnap.val() || {};
 
     const freshOrders = Object.values(ordersData);
     const spentMap = {};
-    freshOrders.filter(o => o.status === 'completed' || o.status === 'completado').forEach(o => {
-      if (o.userId) spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+    
+    // Also explicitly link all orders to their respective users
+    freshOrders.forEach(o => {
+      if (o.userId && o.id) {
+        batchUpdates['users/' + o.userId + '/orders/' + o.id] = true;
+      }
+      if (o.status === 'completed' || o.status === 'completado') {
+        if (o.userId) spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+      }
     });
 
     let updatedUsers = 0;
@@ -4317,6 +4324,16 @@ window.normalizeLegacyData = async function () {
       } else if (currentRole === 'reseller') {
         batchUpdates['users/' + uid + '/role'] = 'revendedor';
         uChanged = true;
+      }
+      
+      // Clean up legacy RS-OLD order keys from user profile
+      if (usersData[uid].orders) {
+        for (const orderKey in usersData[uid].orders) {
+          if (orderKey.startsWith("RS-OLD-")) {
+            batchUpdates['users/' + uid + '/orders/' + orderKey] = null;
+            uChanged = true;
+          }
+        }
       }
 
       if (uChanged) updatedUsers++;
