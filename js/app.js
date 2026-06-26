@@ -199,7 +199,7 @@ function renderApp() {
       initCounters();
       initScrollObserver();
       initCarousel();
-      if (config.announcementEnabled && config.announcementMessage) {
+      if (config.announcementEnabled && config.announcementMessage && termsAccepted) {
         setTimeout(() => showAnnouncementModal(config.announcementMessage), 500);
       }
     });

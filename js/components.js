@@ -1069,7 +1069,16 @@ window.acceptTerms = function() {
   if (container) {
     const overlay = container.querySelector('.modal-overlay');
     if (overlay) overlay.classList.remove('active');
-    setTimeout(() => container.remove(), 300);
+    setTimeout(() => {
+      container.remove();
+      // Show announcement if exists
+      const config = typeof getSettings === 'function' ? getSettings() : {};
+      if (config.announcementEnabled && config.announcementMessage) {
+        if (typeof showAnnouncementModal === 'function') {
+          showAnnouncementModal(config.announcementMessage);
+        }
+      }
+    }, 300);
   }
 };
 
