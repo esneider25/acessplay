@@ -364,7 +364,8 @@ function renderProductDetail(productId) {
                     style="background: linear-gradient(145deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.8)); border: 1px solid rgba(56, 189, 248, 0.3); color: #f8fafc; padding: 10px 14px; border-radius: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; transition: all 0.2s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"
                     onmouseover="this.style.borderColor='#38bdf8'; this.style.boxShadow='0 4px 12px rgba(56,189,248,0.2)'; this.style.transform='translateY(-1px)';"
                     onmouseout="this.style.borderColor='rgba(56, 189, 248, 0.3)'; this.style.boxShadow='0 2px 5px rgba(0,0,0,0.2)'; this.style.transform='translateY(0)';">
-              <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">${id.alias || id.gameName}</span>
+              <span style="font-size: 0.70rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">${id.gameName}</span>
+              ${id.alias ? `<span style="font-size: 0.85rem; color: #e2e8f0; font-weight: 600;">${id.alias}</span>` : ''}
               <span style="font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; color: #38bdf8;">${id.uid}</span>
             </button>
           `).join('')}
