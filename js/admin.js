@@ -1917,7 +1917,7 @@ function openProductModal(productId = null) {
 function previewProductImage(url) {
   const preview = document.getElementById('admin-image-preview');
   if (!preview) return;
-  if (url && url.startsWith('http')) {
+  if (url && (url.startsWith('http') || url.startsWith('data:image'))) {
     preview.innerHTML = `<img src="${url}" alt="Preview" onerror="this.parentElement.innerHTML='<span>Error al cargar imagen</span>'">`;
   } else {
     preview.innerHTML = '<span>Sin imagen</span>';
