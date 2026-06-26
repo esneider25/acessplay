@@ -4296,8 +4296,25 @@ window.normalizeLegacyData = async function () {
     const freshOrders = Object.values(ordersData);
     const spentMap = {};
     
+    // Create an email-to-UID map for legacy orders that might only have an email
+    const emailToUid = {};
+    for (const uid in usersData) {
+      if (usersData[uid].email) {
+        emailToUid[usersData[uid].email.toLowerCase().trim()] = uid;
+      }
+    }
+    
     // Also explicitly link all orders to their respective users
     freshOrders.forEach(o => {
+      // Find userId if missing but we have contact info/email
+      if (!o.userId) {
+        const orderEmail = (o.userEmail || o.contactInfo || '').toLowerCase().trim();
+        if (orderEmail && emailToUid[orderEmail]) {
+          o.userId = emailToUid[orderEmail];
+          batchUpdates['orders/' + o.id + '/userId'] = o.userId;
+        }
+      }
+
       if (o.userId && o.id) {
         batchUpdates['users/' + o.userId + '/orders/' + o.id] = true;
       }
