@@ -11,28 +11,17 @@
       ]
     }
   ],
-  "rewrites": {
-    "beforeFiles": [
-      {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "admin.accesplay.com"
-          }
-        ],
-        "destination": "/admin"
-      },
-      {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "admin.acessplay.com"
-          }
-        ],
-        "destination": "/admin"
-      }
-    ]
-  }
+  "redirects": [
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.accesplay.com"
+        }
+      ],
+      "destination": "/admin",
+      "permanent": true
+    }
+  ]
 }

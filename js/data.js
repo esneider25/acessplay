@@ -949,13 +949,14 @@ function buildOrderTelegramMessage(order) {
 }
 
 function buildOrderKeyboard(orderId) {
+  const baseUrl = (typeof window !== 'undefined' && window.location.origin) ? window.location.origin : 'https://recargaaccessplay.com';
   return [
     [
-      { text: '✅ Aprobar', url: `https://admin.accesplay.com/?action=approve&order=${orderId}` },
-      { text: '❌ Rechazar', url: `https://admin.accesplay.com/?action=reject&order=${orderId}` }
+      { text: '✅ Aprobar', url: `${baseUrl}/admin.html?action=approve&order=${orderId}` },
+      { text: '❌ Rechazar', url: `${baseUrl}/admin.html?action=reject&order=${orderId}` }
     ],
     [
-      { text: '🔍 Ver en Panel Admin', url: `https://admin.accesplay.com/` }
+      { text: '🔍 Ver en Panel Admin', url: `${baseUrl}/admin.html` }
     ]
   ];
 }
