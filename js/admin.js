@@ -1677,12 +1677,12 @@ async function processAutomaticTopup(orderId, fromModal = false) {
     } else {
       const refundMsg = data.reembolsado ? ' (Reembolsado al saldo)' : '';
       showAdminToast(`❌ API Error: ${data.error}${refundMsg}`, 'error');
-      updateOrderStatus(orderId, 'rejected', `Error API: ${data.error}${refundMsg}`);
+      updateOrderStatus(orderId, 'invalid-id', `Verifica que el ID o la cuenta sean correctos. El proveedor rechazó la recarga. (${data.error}${refundMsg})`);
       refreshOrdersView();
       if (fromModal) closeAdminModal();
 
       // Notify Admin via Telegram about the API error
-      sendTelegramMessage(`❌ <b>ERROR API — Pedido #${orderId}</b>\nLa API rechazó la recarga automática.\n\n<b>Motivo:</b> ${data.error}${refundMsg}\n\n<i>Estado cambiado a Rechazado. Verifica el ID o saldo.</i>`);
+      sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — Pedido #${orderId}</b>\nLa API rechazó la recarga automática.\n\n<b>Motivo:</b> ${data.error}${refundMsg}\n\n<i>Estado cambiado a ID Inválido. El cliente debe corregir los datos.</i>`);
     }
   } catch (error) {
     console.error('Error API Comprar:', error);
