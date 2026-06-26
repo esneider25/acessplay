@@ -11,28 +11,28 @@
       ]
     }
   ],
-  "rewrites": {
-    "beforeFiles": [
-      {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "admin.accesplay.com"
-          }
-        ],
-        "destination": "/accesplay-admin-secure.html"
-      },
-      {
-        "source": "/",
-        "has": [
-          {
-            "type": "host",
-            "value": "admin.acessplay.com"
-          }
-        ],
-        "destination": "/accesplay-admin-secure.html"
-      }
-    ]
-  }
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.accesplay.com"
+        }
+      ],
+      "destination": "/accesplay-admin-secure.html",
+      "permanent": false
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.acessplay.com"
+        }
+      ],
+      "destination": "/accesplay-admin-secure.html",
+      "permanent": false
+    }
+  ]
 }
