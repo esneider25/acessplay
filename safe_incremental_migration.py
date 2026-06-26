@@ -4,6 +4,7 @@ import base64
 import binascii
 import os
 import sys
+import re
 
 # Buscar la base de datos automáticamente en las rutas más comunes de tu PC
 possible_paths = [
@@ -265,7 +266,7 @@ def safe_migration():
                     elif 'clave' in k_lower or 'contraseña' in k_lower or 'password' in k_lower: acc_pass = v_str
             except: pass
 
-        old_paquete_id = p['producto_id']
+        old_paquete_id = p['producto_id'] if 'producto_id' in p.keys() else p['producto'] if 'producto' in p.keys() else None
         pkg_info = sqlite_product_map.get(old_paquete_id)
         
         # Corrección: la columna en SQLite se llama precio (no monto)
