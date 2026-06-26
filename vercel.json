@@ -21,7 +21,7 @@
             "value": "admin.accesplay.com"
           }
         ],
-        "destination": "/admin.html"
+        "destination": "/admin"
       },
       {
         "source": "/",
@@ -31,7 +31,7 @@
             "value": "admin.acessplay.com"
           }
         ],
-        "destination": "/admin.html"
+        "destination": "/admin"
       }
     ]
   }

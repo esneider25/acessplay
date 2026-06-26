@@ -6,12 +6,20 @@
   <meta name="description" content="AccessPlay — Tu tienda digital todo en un solo lugar. Recargas de videojuegos, gift cards, streaming y billeteras digitales en Venezuela. Pago Móvil, transferencia y Binance.">
   <meta name="keywords" content="recargas, videojuegos, diamantes, Free Fire, PUBG, Roblox, gift cards, Netflix, Spotify, Venezuela, pago móvil, Binance">
   <meta name="author" content="AccessPlay">
+
   <meta name="theme-color" content="#060d1a">
   <title>AccessPlay 🤖 — Tu Tienda Digital</title>
   <!-- Favicon & PWA -->
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
   <link rel="apple-touch-icon" sizes="192x192" href="img/favicon-192.png">
   <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffb74d">
+  <!-- Fallback routing for admin subdomain -->
+  <script>
+    if (window.location.hostname.includes('admin.accesplay') && window.location.pathname === '/') {
+      window.location.replace('/admin');
+    }
+  </script>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- Styles -->
