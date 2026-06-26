@@ -3,7 +3,7 @@ const urlsToCache = [
   '/',
   '/manifest.json',
   '/index.html',
-  '/accesplay-admin-secure.html',
+  '/admin.html',
   '/css/styles.css',
   '/css/admin.css',
   '/js/data.js',
