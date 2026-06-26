@@ -818,6 +818,11 @@ function renderDashboardContent() {
         <h2 style="margin: 0 0 24px 0; font-size: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; display: flex; align-items: center; gap: 10px;"><i class="ph ph-user-circle-gear"></i> Ajustes de Cuenta</h2>
         
         <div class="profile-form-group">
+          <label><i class="ph ph-envelope"></i> Correo Electrónico</label>
+          <input type="email" class="profile-input" value="${currentUser.email || ''}" disabled style="opacity: 0.7; cursor: not-allowed; background: rgba(0,0,0,0.2);" title="El correo electrónico no se puede cambiar">
+        </div>
+        
+        <div class="profile-form-group">
           <label><i class="ph ph-user"></i> Nombre a Mostrar</label>
           <input type="text" id="setting-name" class="profile-input" value="${currentName}" placeholder="Tu nombre">
         </div>
