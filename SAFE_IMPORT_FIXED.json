@@ -179,9 +179,10 @@
     ]
   },
   "orders": {
-    "0": {
+    "AP-OLD-1": {
       "accountEmail": "",
       "accountPassword": "",
+      "adminNote": "Aprobado y entregado",
       "apiData": {
         "ref": "",
         "result": ""
@@ -189,33 +190,36 @@
       "costUsd": 0.77,
       "createdAt": "2026-05-31T14:28:00.000Z",
       "currency": "VES",
+      "customerContact": "cositaslindas9988@gmail.com",
       "gameId": "278935585124",
       "id": "AP-OLD-1",
       "packageAmount": 0,
-      "packageLabel": "100+5 GOLD",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "278935585124",
       "priceBs": 693.5,
       "priceUsd": 0.95,
       "productDetails": "BLOODSTRIKE - 100+5 GOLD",
       "productId": "bloodstrike",
-      "productName": "BLOODSTRIKE",
+      "productName": "BLOODSTRIKE - 100+5 GOLD",
       "productType": "game-id",
       "reference": "006215362760",
-      "status": "processing",
+      "status": "completed",
       "statusHistory": [
         {
-          "status": "processing",
-          "timestamp": "2026-05-31T14:28:00.000Z"
+          "note": "Aprobado y entregado",
+          "status": "completed",
+          "timestamp": "2026-06-25T03:09:11.178Z"
         }
       ],
-      "updatedAt": "2026-05-31T14:28:00.000Z",
+      "updatedAt": "2026-06-25T03:09:11.178Z",
       "userEmail": "cositaslindas9988@gmail.com",
       "userId": "uid-16",
       "userPhone": "+58 4164865398",
       "zoneId": ""
     },
-    "1": {
+    "AP-OLD-2": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -251,7 +255,7 @@
       "userPhone": "queso.72.compu@gmail.com",
       "zoneId": ""
     },
-    "2": {
+    "AP-OLD-3": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -287,7 +291,7 @@
       "userPhone": "04241608770",
       "zoneId": ""
     },
-    "3": {
+    "AP-OLD-4": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -323,7 +327,7 @@
       "userPhone": "04128980610",
       "zoneId": ""
     },
-    "4": {
+    "AP-OLD-5": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -359,7 +363,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "5": {
+    "AP-OLD-6": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -395,7 +399,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "6": {
+    "AP-OLD-7": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -431,7 +435,7 @@
       "userPhone": "4123828398",
       "zoneId": ""
     },
-    "7": {
+    "AP-OLD-8": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -467,7 +471,7 @@
       "userPhone": "04161180529",
       "zoneId": ""
     },
-    "8": {
+    "AP-OLD-9": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -503,7 +507,7 @@
       "userPhone": "04226600044",
       "zoneId": ""
     },
-    "9": {
+    "AP-OLD-10": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -539,7 +543,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "10": {
+    "AP-OLD-11": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -575,7 +579,7 @@
       "userPhone": "04147564552",
       "zoneId": ""
     },
-    "11": {
+    "AP-OLD-12": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -611,7 +615,7 @@
       "userPhone": "04123395113",
       "zoneId": ""
     },
-    "12": {
+    "AP-OLD-13": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -647,7 +651,7 @@
       "userPhone": "04147564552",
       "zoneId": ""
     },
-    "13": {
+    "AP-OLD-14": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -683,7 +687,7 @@
       "userPhone": "04123395113",
       "zoneId": ""
     },
-    "14": {
+    "AP-OLD-15": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -719,7 +723,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "15": {
+    "AP-OLD-16": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -755,7 +759,7 @@
       "userPhone": "04127000526",
       "zoneId": ""
     },
-    "16": {
+    "AP-OLD-17": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -791,7 +795,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "17": {
+    "AP-OLD-18": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -827,7 +831,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "18": {
+    "AP-OLD-19": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -863,7 +867,7 @@
       "userPhone": "+58 412-0556356",
       "zoneId": ""
     },
-    "19": {
+    "AP-OLD-20": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -899,7 +903,7 @@
       "userPhone": "+58 412-0556356",
       "zoneId": ""
     },
-    "20": {
+    "AP-OLD-21": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -935,7 +939,7 @@
       "userPhone": "04245058326",
       "zoneId": ""
     },
-    "21": {
+    "AP-OLD-22": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -971,7 +975,7 @@
       "userPhone": "04120533174",
       "zoneId": ""
     },
-    "22": {
+    "AP-OLD-23": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1007,7 +1011,7 @@
       "userPhone": "+584246462155",
       "zoneId": ""
     },
-    "23": {
+    "AP-OLD-24": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1043,7 +1047,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "24": {
+    "AP-OLD-25": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1079,7 +1083,7 @@
       "userPhone": "04125458518",
       "zoneId": ""
     },
-    "25": {
+    "AP-OLD-26": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1115,7 +1119,7 @@
       "userPhone": "+584142152808",
       "zoneId": ""
     },
-    "26": {
+    "AP-OLD-27": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1151,7 +1155,7 @@
       "userPhone": "04221234028",
       "zoneId": ""
     },
-    "27": {
+    "AP-OLD-28": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1187,7 +1191,7 @@
       "userPhone": "04221234028",
       "zoneId": ""
     },
-    "28": {
+    "AP-OLD-29": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1223,7 +1227,7 @@
       "userPhone": "otoniel21d@gmail.com",
       "zoneId": ""
     },
-    "29": {
+    "AP-OLD-30": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1259,7 +1263,7 @@
       "userPhone": "04123395113",
       "zoneId": ""
     },
-    "30": {
+    "AP-OLD-31": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1295,7 +1299,7 @@
       "userPhone": "yeinnervargas11@gmail.com",
       "zoneId": ""
     },
-    "31": {
+    "AP-OLD-32": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1331,7 +1335,7 @@
       "userPhone": "yeinnervargas11@gmail.com",
       "zoneId": ""
     },
-    "32": {
+    "AP-OLD-33": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1367,7 +1371,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "33": {
+    "AP-OLD-34": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1403,7 +1407,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "34": {
+    "AP-OLD-35": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1439,7 +1443,7 @@
       "userPhone": "+5804167321211",
       "zoneId": ""
     },
-    "35": {
+    "AP-OLD-36": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1475,7 +1479,7 @@
       "userPhone": "04148535725",
       "zoneId": ""
     },
-    "36": {
+    "AP-OLD-37": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1511,7 +1515,7 @@
       "userPhone": "+584126371348",
       "zoneId": ""
     },
-    "37": {
+    "AP-OLD-38": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1547,7 +1551,7 @@
       "userPhone": "+584160849589",
       "zoneId": ""
     },
-    "38": {
+    "AP-OLD-39": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1583,7 +1587,7 @@
       "userPhone": "+584160849589",
       "zoneId": ""
     },
-    "39": {
+    "AP-OLD-40": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1619,7 +1623,7 @@
       "userPhone": "+584245174044",
       "zoneId": ""
     },
-    "40": {
+    "AP-OLD-41": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1655,7 +1659,7 @@
       "userPhone": "vjfranciscoburgos01@gmail.com",
       "zoneId": ""
     },
-    "41": {
+    "AP-OLD-42": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1691,7 +1695,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "42": {
+    "AP-OLD-43": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1727,7 +1731,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "43": {
+    "AP-OLD-44": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1763,7 +1767,7 @@
       "userPhone": "0414684885",
       "zoneId": ""
     },
-    "44": {
+    "AP-OLD-45": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1799,7 +1803,7 @@
       "userPhone": "04247574465",
       "zoneId": ""
     },
-    "45": {
+    "AP-OLD-46": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1835,7 +1839,7 @@
       "userPhone": "04249200123",
       "zoneId": ""
     },
-    "46": {
+    "AP-OLD-47": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1871,7 +1875,7 @@
       "userPhone": "04249200123",
       "zoneId": ""
     },
-    "47": {
+    "AP-OLD-48": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1907,7 +1911,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "48": {
+    "AP-OLD-49": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1943,7 +1947,7 @@
       "userPhone": "0414684885",
       "zoneId": ""
     },
-    "49": {
+    "AP-OLD-50": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -1977,7 +1981,7 @@
       "userPhone": "0414684885",
       "zoneId": ""
     },
-    "50": {
+    "AP-OLD-51": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2013,7 +2017,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "51": {
+    "AP-OLD-52": {
       "accountEmail": "@0tocinoo",
       "accountPassword": "12jhair34",
       "apiData": {
@@ -2049,7 +2053,7 @@
       "userPhone": "04125811772",
       "zoneId": ""
     },
-    "52": {
+    "AP-OLD-53": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2085,7 +2089,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "53": {
+    "AP-OLD-54": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2121,7 +2125,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "54": {
+    "AP-OLD-55": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2157,7 +2161,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "55": {
+    "AP-OLD-56": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2193,7 +2197,7 @@
       "userPhone": "yeinnervargas11@gmail.com",
       "zoneId": ""
     },
-    "56": {
+    "AP-OLD-57": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2229,7 +2233,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "57": {
+    "AP-OLD-58": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2265,7 +2269,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "58": {
+    "AP-OLD-59": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2301,7 +2305,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "59": {
+    "AP-OLD-60": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2337,7 +2341,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "60": {
+    "AP-OLD-61": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2373,7 +2377,7 @@
       "userPhone": "04249693708",
       "zoneId": ""
     },
-    "61": {
+    "AP-OLD-62": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2409,7 +2413,7 @@
       "userPhone": "0414684885",
       "zoneId": ""
     },
-    "62": {
+    "AP-OLD-63": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2445,7 +2449,7 @@
       "userPhone": "0414684885",
       "zoneId": ""
     },
-    "63": {
+    "AP-OLD-64": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2481,7 +2485,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "64": {
+    "AP-OLD-65": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2517,7 +2521,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "65": {
+    "AP-OLD-66": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2553,7 +2557,7 @@
       "userPhone": "04167374009",
       "zoneId": ""
     },
-    "66": {
+    "AP-OLD-67": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2589,7 +2593,7 @@
       "userPhone": "04120134843",
       "zoneId": ""
     },
-    "67": {
+    "AP-OLD-68": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2625,7 +2629,7 @@
       "userPhone": "04122405997",
       "zoneId": ""
     },
-    "68": {
+    "AP-OLD-69": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2661,7 +2665,7 @@
       "userPhone": "+58 412-4100202",
       "zoneId": ""
     },
-    "69": {
+    "AP-OLD-70": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2697,7 +2701,7 @@
       "userPhone": "04126886954",
       "zoneId": ""
     },
-    "70": {
+    "AP-OLD-71": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2733,7 +2737,7 @@
       "userPhone": "04124935528",
       "zoneId": ""
     },
-    "71": {
+    "AP-OLD-72": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2769,7 +2773,7 @@
       "userPhone": "04120134843",
       "zoneId": ""
     },
-    "72": {
+    "AP-OLD-73": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2805,7 +2809,7 @@
       "userPhone": "04248561098",
       "zoneId": ""
     },
-    "73": {
+    "AP-OLD-74": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2841,7 +2845,7 @@
       "userPhone": "04147603342",
       "zoneId": ""
     },
-    "74": {
+    "AP-OLD-75": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2877,7 +2881,7 @@
       "userPhone": "ninad8022@gmail.com",
       "zoneId": ""
     },
-    "75": {
+    "AP-OLD-76": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2913,7 +2917,7 @@
       "userPhone": "04161381737",
       "zoneId": ""
     },
-    "76": {
+    "AP-OLD-77": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2949,7 +2953,7 @@
       "userPhone": "+584241790657",
       "zoneId": ""
     },
-    "77": {
+    "AP-OLD-78": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -2985,7 +2989,7 @@
       "userPhone": "04141856011",
       "zoneId": ""
     },
-    "78": {
+    "AP-OLD-79": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3021,7 +3025,7 @@
       "userPhone": "04248561098",
       "zoneId": ""
     },
-    "79": {
+    "AP-OLD-80": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3057,7 +3061,7 @@
       "userPhone": "04248561098",
       "zoneId": ""
     },
-    "80": {
+    "AP-OLD-81": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3093,7 +3097,7 @@
       "userPhone": "04248800337",
       "zoneId": ""
     },
-    "81": {
+    "AP-OLD-82": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3129,7 +3133,7 @@
       "userPhone": "04248800337",
       "zoneId": ""
     },
-    "82": {
+    "AP-OLD-83": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3165,7 +3169,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "83": {
+    "AP-OLD-84": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3201,7 +3205,7 @@
       "userPhone": "04248800337",
       "zoneId": ""
     },
-    "84": {
+    "AP-OLD-85": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3237,7 +3241,7 @@
       "userPhone": "04248800337",
       "zoneId": ""
     },
-    "85": {
+    "AP-OLD-86": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3273,7 +3277,7 @@
       "userPhone": "04248800337",
       "zoneId": ""
     },
-    "86": {
+    "AP-OLD-87": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3307,7 +3311,7 @@
       "userPhone": "04141856011",
       "zoneId": ""
     },
-    "87": {
+    "AP-OLD-88": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3343,7 +3347,7 @@
       "userPhone": "04248800337",
       "zoneId": ""
     },
-    "88": {
+    "AP-OLD-89": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3379,7 +3383,7 @@
       "userPhone": "+584245863098",
       "zoneId": ""
     },
-    "89": {
+    "AP-OLD-90": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3415,7 +3419,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "90": {
+    "AP-OLD-91": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3451,7 +3455,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "91": {
+    "AP-OLD-92": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3487,7 +3491,7 @@
       "userPhone": "+584241790657",
       "zoneId": ""
     },
-    "92": {
+    "AP-OLD-93": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3523,7 +3527,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "93": {
+    "AP-OLD-94": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3559,7 +3563,7 @@
       "userPhone": "04145116394",
       "zoneId": ""
     },
-    "94": {
+    "AP-OLD-95": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3595,7 +3599,7 @@
       "userPhone": "04127000526",
       "zoneId": ""
     },
-    "95": {
+    "AP-OLD-96": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3631,7 +3635,7 @@
       "userPhone": "04125458518",
       "zoneId": ""
     },
-    "96": {
+    "AP-OLD-97": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3667,7 +3671,7 @@
       "userPhone": "4129051122",
       "zoneId": ""
     },
-    "97": {
+    "AP-OLD-98": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3703,7 +3707,7 @@
       "userPhone": "+584145421523",
       "zoneId": ""
     },
-    "98": {
+    "AP-OLD-99": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3739,7 +3743,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "99": {
+    "AP-OLD-100": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3775,7 +3779,7 @@
       "userPhone": "+58 412-4100202",
       "zoneId": ""
     },
-    "100": {
+    "AP-OLD-101": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3811,7 +3815,7 @@
       "userPhone": "*583806138",
       "zoneId": ""
     },
-    "101": {
+    "AP-OLD-102": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3847,7 +3851,7 @@
       "userPhone": "otoniel21d@gmail.com",
       "zoneId": ""
     },
-    "102": {
+    "AP-OLD-103": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3883,7 +3887,7 @@
       "userPhone": "04123828398",
       "zoneId": ""
     },
-    "103": {
+    "AP-OLD-104": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3919,7 +3923,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "104": {
+    "AP-OLD-105": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3955,7 +3959,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "105": {
+    "AP-OLD-106": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -3991,7 +3995,7 @@
       "userPhone": "04241296481",
       "zoneId": ""
     },
-    "106": {
+    "AP-OLD-107": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4027,7 +4031,7 @@
       "userPhone": "04241296481",
       "zoneId": ""
     },
-    "107": {
+    "AP-OLD-108": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4063,7 +4067,7 @@
       "userPhone": "04146808274",
       "zoneId": ""
     },
-    "108": {
+    "AP-OLD-109": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4099,7 +4103,7 @@
       "userPhone": "04241296481",
       "zoneId": ""
     },
-    "109": {
+    "AP-OLD-110": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4135,7 +4139,7 @@
       "userPhone": "4248320530",
       "zoneId": ""
     },
-    "110": {
+    "AP-OLD-111": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4171,7 +4175,7 @@
       "userPhone": "04123828398",
       "zoneId": ""
     },
-    "111": {
+    "AP-OLD-112": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4207,7 +4211,7 @@
       "userPhone": "04242402962",
       "zoneId": ""
     },
-    "112": {
+    "AP-OLD-113": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4243,7 +4247,7 @@
       "userPhone": "04242402962",
       "zoneId": ""
     },
-    "113": {
+    "AP-OLD-114": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4279,7 +4283,7 @@
       "userPhone": "04125187951",
       "zoneId": ""
     },
-    "114": {
+    "AP-OLD-115": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4315,7 +4319,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "115": {
+    "AP-OLD-116": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4351,7 +4355,7 @@
       "userPhone": "+58 412-4100202",
       "zoneId": ""
     },
-    "116": {
+    "AP-OLD-117": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4387,7 +4391,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "117": {
+    "AP-OLD-118": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4423,7 +4427,7 @@
       "userPhone": "04120533174",
       "zoneId": ""
     },
-    "118": {
+    "AP-OLD-119": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4459,7 +4463,7 @@
       "userPhone": "04241296481",
       "zoneId": ""
     },
-    "119": {
+    "AP-OLD-120": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4495,7 +4499,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "120": {
+    "AP-OLD-121": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4531,7 +4535,7 @@
       "userPhone": "04121861886",
       "zoneId": ""
     },
-    "121": {
+    "AP-OLD-122": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4567,7 +4571,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "122": {
+    "AP-OLD-123": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4603,7 +4607,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "123": {
+    "AP-OLD-124": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4639,7 +4643,7 @@
       "userPhone": "+584124246459",
       "zoneId": ""
     },
-    "124": {
+    "AP-OLD-125": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4675,7 +4679,7 @@
       "userPhone": "04120546480",
       "zoneId": ""
     },
-    "125": {
+    "AP-OLD-126": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4711,7 +4715,7 @@
       "userPhone": "04120546480",
       "zoneId": ""
     },
-    "126": {
+    "AP-OLD-127": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4747,7 +4751,7 @@
       "userPhone": "04226600044",
       "zoneId": ""
     },
-    "127": {
+    "AP-OLD-128": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4783,7 +4787,7 @@
       "userPhone": "04120546480",
       "zoneId": ""
     },
-    "128": {
+    "AP-OLD-129": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4819,7 +4823,7 @@
       "userPhone": "04120546480",
       "zoneId": ""
     },
-    "129": {
+    "AP-OLD-130": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4855,7 +4859,7 @@
       "userPhone": "04120546480",
       "zoneId": ""
     },
-    "130": {
+    "AP-OLD-131": {
       "accountEmail": "Jonathan208005",
       "accountPassword": "27799766N",
       "apiData": {
@@ -4891,7 +4895,7 @@
       "userPhone": "04243387111",
       "zoneId": ""
     },
-    "131": {
+    "AP-OLD-132": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4927,7 +4931,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "132": {
+    "AP-OLD-133": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4963,7 +4967,7 @@
       "userPhone": "otoniel21d@gmail.com",
       "zoneId": ""
     },
-    "133": {
+    "AP-OLD-134": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -4999,7 +5003,7 @@
       "userPhone": "0412561881",
       "zoneId": ""
     },
-    "134": {
+    "AP-OLD-135": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5035,7 +5039,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "135": {
+    "AP-OLD-136": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5071,7 +5075,7 @@
       "userPhone": "04167213175",
       "zoneId": ""
     },
-    "136": {
+    "AP-OLD-137": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5107,7 +5111,7 @@
       "userPhone": "yeinnervargas11@gmail.com",
       "zoneId": ""
     },
-    "137": {
+    "AP-OLD-138": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5143,7 +5147,7 @@
       "userPhone": "04167213175",
       "zoneId": ""
     },
-    "138": {
+    "AP-OLD-139": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5179,7 +5183,7 @@
       "userPhone": "04249200123",
       "zoneId": ""
     },
-    "139": {
+    "AP-OLD-140": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5215,7 +5219,7 @@
       "userPhone": "04249200123",
       "zoneId": ""
     },
-    "140": {
+    "AP-OLD-141": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5251,7 +5255,7 @@
       "userPhone": "+58 4164865398",
       "zoneId": ""
     },
-    "141": {
+    "AP-OLD-142": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5287,43 +5291,47 @@
       "userPhone": "4129051122",
       "zoneId": ""
     },
-    "142": {
+    "AP-OLD-143": {
       "accountEmail": "",
       "accountPassword": "",
+      "adminNote": "Aprobado y entregado",
       "apiData": {
         "ref": "",
         "result": ""
       },
-      "costUsd": 0.77,
+      "costUsd": 0.765,
       "createdAt": "2026-06-06T10:20:00.000Z",
       "currency": "VES",
+      "customerContact": "cositaslindas9988@gmail.com",
       "gameId": "277313558786",
       "id": "AP-OLD-143",
       "packageAmount": 0,
-      "packageLabel": "100+5 GOLD",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "277313558786",
       "priceBs": 667.85,
       "priceUsd": 0.9,
       "productDetails": "BLOODSTRIKE - 100+5 GOLD",
-      "productId": "bloodstrike",
-      "productName": "BLOODSTRIKE",
+      "productId": "legacy",
+      "productName": "BLOODSTRIKE - 100+5 GOLD",
       "productType": "game-id",
       "reference": "006279046339",
-      "status": "processing",
+      "status": "completed",
       "statusHistory": [
         {
-          "status": "processing",
-          "timestamp": "2026-06-06T10:20:00.000Z"
+          "note": "Aprobado y entregado",
+          "status": "completed",
+          "timestamp": "2026-06-25T03:09:10.603Z"
         }
       ],
-      "updatedAt": "2026-06-06T10:20:00.000Z",
+      "updatedAt": "2026-06-25T03:09:10.603Z",
       "userEmail": "cositaslindas9988@gmail.com",
       "userId": "uid-16",
       "userPhone": "+58 4164865398",
       "zoneId": ""
     },
-    "143": {
+    "AP-OLD-144": {
       "accountEmail": "Carlitos79914",
       "accountPassword": "Emely2008$",
       "apiData": {
@@ -5359,7 +5367,7 @@
       "userPhone": "+58 412 193 3635",
       "zoneId": ""
     },
-    "144": {
+    "AP-OLD-145": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5395,7 +5403,7 @@
       "userPhone": "+584121896888",
       "zoneId": ""
     },
-    "145": {
+    "AP-OLD-146": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5431,7 +5439,7 @@
       "userPhone": "04221004731",
       "zoneId": ""
     },
-    "146": {
+    "AP-OLD-147": {
       "accountEmail": "0tocinoo",
       "accountPassword": "12jhair34",
       "apiData": {
@@ -5467,7 +5475,7 @@
       "userPhone": "04125811772",
       "zoneId": ""
     },
-    "147": {
+    "AP-OLD-148": {
       "accountEmail": "0tocinoo",
       "accountPassword": "12jhair34",
       "apiData": {
@@ -5503,7 +5511,7 @@
       "userPhone": "04125811772",
       "zoneId": ""
     },
-    "148": {
+    "AP-OLD-149": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5539,7 +5547,7 @@
       "userPhone": "04126432587",
       "zoneId": ""
     },
-    "149": {
+    "AP-OLD-150": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5575,7 +5583,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "150": {
+    "AP-OLD-151": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5611,7 +5619,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "151": {
+    "AP-OLD-152": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5647,7 +5655,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "152": {
+    "AP-OLD-153": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5683,7 +5691,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "153": {
+    "AP-OLD-154": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5719,7 +5727,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "154": {
+    "AP-OLD-155": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5755,7 +5763,7 @@
       "userPhone": "04242728937",
       "zoneId": ""
     },
-    "155": {
+    "AP-OLD-156": {
       "accountEmail": "Jonathan208005",
       "accountPassword": "27799766N",
       "apiData": {
@@ -5791,7 +5799,7 @@
       "userPhone": "04243387111",
       "zoneId": ""
     },
-    "156": {
+    "AP-OLD-157": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5827,7 +5835,7 @@
       "userPhone": "+4247814686",
       "zoneId": ""
     },
-    "157": {
+    "AP-OLD-158": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5863,7 +5871,7 @@
       "userPhone": "04221004731",
       "zoneId": ""
     },
-    "158": {
+    "AP-OLD-159": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5899,7 +5907,7 @@
       "userPhone": "04221004731",
       "zoneId": ""
     },
-    "159": {
+    "AP-OLD-160": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5935,7 +5943,7 @@
       "userPhone": "04123651479",
       "zoneId": ""
     },
-    "160": {
+    "AP-OLD-161": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -5971,7 +5979,7 @@
       "userPhone": "04128246768",
       "zoneId": ""
     },
-    "161": {
+    "AP-OLD-162": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6007,7 +6015,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "162": {
+    "AP-OLD-163": {
       "accountEmail": "alejandro223368",
       "accountPassword": "alejandro@2212",
       "apiData": {
@@ -6043,7 +6051,7 @@
       "userPhone": "04121594649",
       "zoneId": ""
     },
-    "163": {
+    "AP-OLD-164": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6079,7 +6087,7 @@
       "userPhone": "+584142152808",
       "zoneId": ""
     },
-    "164": {
+    "AP-OLD-165": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6115,7 +6123,7 @@
       "userPhone": "04128246768",
       "zoneId": ""
     },
-    "165": {
+    "AP-OLD-166": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6151,7 +6159,7 @@
       "userPhone": "04247701352",
       "zoneId": ""
     },
-    "166": {
+    "AP-OLD-167": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6187,7 +6195,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "167": {
+    "AP-OLD-168": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6223,7 +6231,7 @@
       "userPhone": "04247701352",
       "zoneId": ""
     },
-    "168": {
+    "AP-OLD-169": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6259,7 +6267,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "169": {
+    "AP-OLD-170": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6295,7 +6303,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "170": {
+    "AP-OLD-171": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6331,7 +6339,7 @@
       "userPhone": "04125214115",
       "zoneId": ""
     },
-    "171": {
+    "AP-OLD-172": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6367,7 +6375,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "172": {
+    "AP-OLD-173": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6403,7 +6411,7 @@
       "userPhone": "04125214115",
       "zoneId": ""
     },
-    "173": {
+    "AP-OLD-174": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6439,7 +6447,7 @@
       "userPhone": "queso.72.compu@gmail.com",
       "zoneId": ""
     },
-    "174": {
+    "AP-OLD-175": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6475,7 +6483,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "175": {
+    "AP-OLD-176": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6511,7 +6519,7 @@
       "userPhone": "04127000526",
       "zoneId": ""
     },
-    "176": {
+    "AP-OLD-177": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6547,7 +6555,7 @@
       "userPhone": "04128980610",
       "zoneId": ""
     },
-    "177": {
+    "AP-OLD-178": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6583,7 +6591,7 @@
       "userPhone": "04123070125",
       "zoneId": ""
     },
-    "178": {
+    "AP-OLD-179": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6619,7 +6627,7 @@
       "userPhone": "+58246487698",
       "zoneId": ""
     },
-    "179": {
+    "AP-OLD-180": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6655,7 +6663,7 @@
       "userPhone": "+58246487698",
       "zoneId": ""
     },
-    "180": {
+    "AP-OLD-181": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6691,7 +6699,7 @@
       "userPhone": "josemiguelgonzalezdiaz666@gmail.com",
       "zoneId": ""
     },
-    "181": {
+    "AP-OLD-182": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6727,7 +6735,7 @@
       "userPhone": "04123070125",
       "zoneId": ""
     },
-    "182": {
+    "AP-OLD-183": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6763,7 +6771,7 @@
       "userPhone": "+584126992549",
       "zoneId": ""
     },
-    "183": {
+    "AP-OLD-184": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6799,7 +6807,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "184": {
+    "AP-OLD-185": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6835,7 +6843,7 @@
       "userPhone": "04242402962",
       "zoneId": ""
     },
-    "185": {
+    "AP-OLD-186": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6871,7 +6879,7 @@
       "userPhone": "04120533174",
       "zoneId": ""
     },
-    "186": {
+    "AP-OLD-187": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6907,7 +6915,7 @@
       "userPhone": "+584121896888",
       "zoneId": ""
     },
-    "187": {
+    "AP-OLD-188": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6943,7 +6951,7 @@
       "userPhone": "04146808274",
       "zoneId": ""
     },
-    "188": {
+    "AP-OLD-189": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -6979,7 +6987,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "189": {
+    "AP-OLD-190": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7015,7 +7023,7 @@
       "userPhone": "+584243753021",
       "zoneId": ""
     },
-    "190": {
+    "AP-OLD-191": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7051,7 +7059,7 @@
       "userPhone": "04123651479",
       "zoneId": ""
     },
-    "191": {
+    "AP-OLD-192": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7087,7 +7095,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "192": {
+    "AP-OLD-193": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7123,7 +7131,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "193": {
+    "AP-OLD-194": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7159,7 +7167,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "194": {
+    "AP-OLD-195": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7195,7 +7203,7 @@
       "userPhone": "04164898942",
       "zoneId": ""
     },
-    "195": {
+    "AP-OLD-196": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7231,7 +7239,7 @@
       "userPhone": "+5842247151606",
       "zoneId": ""
     },
-    "196": {
+    "AP-OLD-197": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7267,7 +7275,7 @@
       "userPhone": "+584121896888",
       "zoneId": ""
     },
-    "197": {
+    "AP-OLD-198": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7303,7 +7311,7 @@
       "userPhone": "04242842767",
       "zoneId": ""
     },
-    "198": {
+    "AP-OLD-199": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7339,7 +7347,7 @@
       "userPhone": "04242842767",
       "zoneId": ""
     },
-    "199": {
+    "AP-OLD-200": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7375,7 +7383,7 @@
       "userPhone": "04167213175",
       "zoneId": ""
     },
-    "200": {
+    "AP-OLD-201": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7411,7 +7419,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "201": {
+    "AP-OLD-202": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7447,7 +7455,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "202": {
+    "AP-OLD-203": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7483,7 +7491,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "203": {
+    "AP-OLD-204": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7519,7 +7527,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "204": {
+    "AP-OLD-205": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7555,7 +7563,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "205": {
+    "AP-OLD-206": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7591,7 +7599,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "206": {
+    "AP-OLD-207": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7627,7 +7635,7 @@
       "userPhone": "04262251700",
       "zoneId": ""
     },
-    "207": {
+    "AP-OLD-208": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7663,7 +7671,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "208": {
+    "AP-OLD-209": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7699,7 +7707,7 @@
       "userPhone": "josemiguelgonzalezdiaz666@gmail.com",
       "zoneId": ""
     },
-    "209": {
+    "AP-OLD-210": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7735,7 +7743,7 @@
       "userPhone": "4221551525",
       "zoneId": ""
     },
-    "210": {
+    "AP-OLD-211": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7771,7 +7779,7 @@
       "userPhone": "+584246462155",
       "zoneId": ""
     },
-    "211": {
+    "AP-OLD-212": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7807,7 +7815,7 @@
       "userPhone": "+584246462155",
       "zoneId": ""
     },
-    "212": {
+    "AP-OLD-213": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7843,7 +7851,7 @@
       "userPhone": "04242842767",
       "zoneId": ""
     },
-    "213": {
+    "AP-OLD-214": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7879,7 +7887,7 @@
       "userPhone": "+584121896888",
       "zoneId": ""
     },
-    "214": {
+    "AP-OLD-215": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7915,7 +7923,7 @@
       "userPhone": "+584140178677",
       "zoneId": ""
     },
-    "215": {
+    "AP-OLD-216": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7951,7 +7959,7 @@
       "userPhone": "+584120216974",
       "zoneId": ""
     },
-    "216": {
+    "AP-OLD-217": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -7987,7 +7995,7 @@
       "userPhone": "04128246768",
       "zoneId": ""
     },
-    "217": {
+    "AP-OLD-218": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8023,7 +8031,7 @@
       "userPhone": "+584124496992",
       "zoneId": ""
     },
-    "218": {
+    "AP-OLD-219": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8059,7 +8067,7 @@
       "userPhone": "+584124496992",
       "zoneId": ""
     },
-    "219": {
+    "AP-OLD-220": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8095,7 +8103,7 @@
       "userPhone": "+584124496992",
       "zoneId": ""
     },
-    "220": {
+    "AP-OLD-221": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8131,7 +8139,7 @@
       "userPhone": "+584124100853",
       "zoneId": ""
     },
-    "221": {
+    "AP-OLD-222": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8167,7 +8175,7 @@
       "userPhone": "04126432587",
       "zoneId": ""
     },
-    "222": {
+    "AP-OLD-223": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8203,7 +8211,7 @@
       "userPhone": "04242680306",
       "zoneId": ""
     },
-    "223": {
+    "AP-OLD-224": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8239,7 +8247,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "224": {
+    "AP-OLD-225": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8275,7 +8283,7 @@
       "userPhone": "4129051122",
       "zoneId": ""
     },
-    "225": {
+    "AP-OLD-226": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8311,7 +8319,7 @@
       "userPhone": "04246511513",
       "zoneId": ""
     },
-    "226": {
+    "AP-OLD-227": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8347,7 +8355,7 @@
       "userPhone": "04246456081",
       "zoneId": ""
     },
-    "227": {
+    "AP-OLD-228": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8383,7 +8391,7 @@
       "userPhone": "+584220470772",
       "zoneId": ""
     },
-    "228": {
+    "AP-OLD-229": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8419,7 +8427,7 @@
       "userPhone": "+584245863098",
       "zoneId": ""
     },
-    "229": {
+    "AP-OLD-230": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8455,7 +8463,7 @@
       "userPhone": "+584245863098",
       "zoneId": ""
     },
-    "230": {
+    "AP-OLD-231": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8491,7 +8499,7 @@
       "userPhone": "04124800194",
       "zoneId": ""
     },
-    "231": {
+    "AP-OLD-232": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8527,7 +8535,7 @@
       "userPhone": "04124800194",
       "zoneId": ""
     },
-    "232": {
+    "AP-OLD-233": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8563,7 +8571,7 @@
       "userPhone": "+58 412-0556356",
       "zoneId": ""
     },
-    "233": {
+    "AP-OLD-234": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8599,7 +8607,7 @@
       "userPhone": "04148535725",
       "zoneId": ""
     },
-    "234": {
+    "AP-OLD-235": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8635,43 +8643,47 @@
       "userPhone": "+584245213253",
       "zoneId": ""
     },
-    "235": {
+    "AP-OLD-236": {
       "accountEmail": "",
       "accountPassword": "",
+      "adminNote": "Aprobado y entregado",
       "apiData": {
         "ref": "",
         "result": ""
       },
-      "costUsd": 3.83,
+      "costUsd": 3.9439999999999995,
       "createdAt": "2026-06-08T21:17:00.000Z",
       "currency": "VES",
+      "customerContact": "lismarcastillo862@gmail.com",
       "gameId": "276779596598",
       "id": "AP-OLD-236",
       "packageAmount": 0,
-      "packageLabel": "500+40 GOLD",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "276779596598",
       "priceBs": 3500.18,
       "priceUsd": 4.64,
       "productDetails": "BLOODSTRIKE - 500+40 GOLD",
-      "productId": "bloodstrike",
-      "productName": "BLOODSTRIKE",
+      "productId": "legacy",
+      "productName": "BLOODSTRIKE - 500+40 GOLD",
       "productType": "game-id",
       "reference": "933885",
-      "status": "processing",
+      "status": "completed",
       "statusHistory": [
         {
-          "status": "processing",
-          "timestamp": "2026-06-08T21:17:00.000Z"
+          "note": "Aprobado y entregado",
+          "status": "completed",
+          "timestamp": "2026-06-25T03:09:09.803Z"
         }
       ],
-      "updatedAt": "2026-06-08T21:17:00.000Z",
+      "updatedAt": "2026-06-25T03:09:09.803Z",
       "userEmail": "lismarcastillo862@gmail.com",
       "userId": "uid-170",
       "userPhone": "+584245213253",
       "zoneId": ""
     },
-    "236": {
+    "AP-OLD-237": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8707,7 +8719,7 @@
       "userPhone": "04148535725",
       "zoneId": ""
     },
-    "237": {
+    "AP-OLD-238": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8743,7 +8755,7 @@
       "userPhone": "04148535725",
       "zoneId": ""
     },
-    "238": {
+    "AP-OLD-239": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8779,7 +8791,7 @@
       "userPhone": "04246456081",
       "zoneId": ""
     },
-    "239": {
+    "AP-OLD-240": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8815,7 +8827,7 @@
       "userPhone": "+584128940813",
       "zoneId": ""
     },
-    "240": {
+    "AP-OLD-241": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8851,7 +8863,7 @@
       "userPhone": "4241358163",
       "zoneId": ""
     },
-    "241": {
+    "AP-OLD-242": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8887,7 +8899,7 @@
       "userPhone": "84267820449",
       "zoneId": ""
     },
-    "242": {
+    "AP-OLD-243": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8923,7 +8935,7 @@
       "userPhone": "0424 1497231",
       "zoneId": ""
     },
-    "243": {
+    "AP-OLD-244": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -8959,7 +8971,7 @@
       "userPhone": "04260359365",
       "zoneId": ""
     },
-    "244": {
+    "AP-OLD-245": {
       "accountEmail": "sequerasebastian65@gmail.com",
       "accountPassword": "Arantzamiamor",
       "apiData": {
@@ -8995,7 +9007,7 @@
       "userPhone": "04128314681",
       "zoneId": ""
     },
-    "245": {
+    "AP-OLD-246": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9031,7 +9043,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "246": {
+    "AP-OLD-247": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9067,7 +9079,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "247": {
+    "AP-OLD-248": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9103,7 +9115,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "248": {
+    "AP-OLD-249": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9139,7 +9151,7 @@
       "userPhone": "+584245437415",
       "zoneId": ""
     },
-    "249": {
+    "AP-OLD-250": {
       "accountEmail": "sequerasebastian65@gmail.com",
       "accountPassword": "Arantzamiamor",
       "apiData": {
@@ -9175,7 +9187,7 @@
       "userPhone": "04128314681",
       "zoneId": ""
     },
-    "250": {
+    "AP-OLD-251": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9211,7 +9223,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "251": {
+    "AP-OLD-252": {
       "accountEmail": "LeonelRMPRO",
       "accountPassword": "Leonel563901",
       "apiData": {
@@ -9247,7 +9259,7 @@
       "userPhone": "04221433632",
       "zoneId": ""
     },
-    "252": {
+    "AP-OLD-253": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9283,7 +9295,7 @@
       "userPhone": "4241358163",
       "zoneId": ""
     },
-    "253": {
+    "AP-OLD-254": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9319,7 +9331,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "254": {
+    "AP-OLD-255": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9355,7 +9367,7 @@
       "userPhone": "+584245174044",
       "zoneId": ""
     },
-    "255": {
+    "AP-OLD-256": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9391,7 +9403,7 @@
       "userPhone": "04247574465",
       "zoneId": ""
     },
-    "256": {
+    "AP-OLD-257": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9427,7 +9439,7 @@
       "userPhone": "04242402962",
       "zoneId": ""
     },
-    "257": {
+    "AP-OLD-258": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9463,7 +9475,7 @@
       "userPhone": "58+145542796",
       "zoneId": ""
     },
-    "258": {
+    "AP-OLD-259": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9499,7 +9511,7 @@
       "userPhone": "04126757183",
       "zoneId": ""
     },
-    "259": {
+    "AP-OLD-260": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9535,7 +9547,7 @@
       "userPhone": "+58 412-0556356",
       "zoneId": ""
     },
-    "260": {
+    "AP-OLD-261": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9571,7 +9583,7 @@
       "userPhone": "yeinnervargas11@gmail.com",
       "zoneId": ""
     },
-    "261": {
+    "AP-OLD-262": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9607,7 +9619,7 @@
       "userPhone": "04226600044",
       "zoneId": ""
     },
-    "262": {
+    "AP-OLD-263": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9643,7 +9655,7 @@
       "userPhone": "04144703867",
       "zoneId": ""
     },
-    "263": {
+    "AP-OLD-264": {
       "accountEmail": "alejandro88418",
       "accountPassword": "josue20$$",
       "apiData": {
@@ -9679,7 +9691,7 @@
       "userPhone": "04123651479",
       "zoneId": ""
     },
-    "264": {
+    "AP-OLD-265": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9715,7 +9727,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "265": {
+    "AP-OLD-266": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9751,7 +9763,7 @@
       "userPhone": "+584142152808",
       "zoneId": ""
     },
-    "266": {
+    "AP-OLD-267": {
       "accountEmail": "Juanchotlo65",
       "accountPassword": "31734213D",
       "apiData": {
@@ -9787,7 +9799,7 @@
       "userPhone": "+584247526819",
       "zoneId": ""
     },
-    "267": {
+    "AP-OLD-268": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9823,7 +9835,7 @@
       "userPhone": "04244098530",
       "zoneId": ""
     },
-    "268": {
+    "AP-OLD-269": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9859,7 +9871,7 @@
       "userPhone": "4241358163",
       "zoneId": ""
     },
-    "269": {
+    "AP-OLD-270": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9895,7 +9907,7 @@
       "userPhone": "otoniel21d@gmail.com",
       "zoneId": ""
     },
-    "270": {
+    "AP-OLD-271": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9931,7 +9943,7 @@
       "userPhone": "+584248830001",
       "zoneId": ""
     },
-    "271": {
+    "AP-OLD-272": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -9967,7 +9979,7 @@
       "userPhone": "04127788076",
       "zoneId": ""
     },
-    "272": {
+    "AP-OLD-273": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10003,7 +10015,7 @@
       "userPhone": "04120978842",
       "zoneId": ""
     },
-    "273": {
+    "AP-OLD-274": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10039,7 +10051,7 @@
       "userPhone": "4124906413",
       "zoneId": ""
     },
-    "274": {
+    "AP-OLD-275": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10075,7 +10087,7 @@
       "userPhone": "04120978842",
       "zoneId": ""
     },
-    "275": {
+    "AP-OLD-276": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10111,7 +10123,7 @@
       "userPhone": "04123041642",
       "zoneId": ""
     },
-    "276": {
+    "AP-OLD-277": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10147,7 +10159,7 @@
       "userPhone": "04123041642",
       "zoneId": ""
     },
-    "277": {
+    "AP-OLD-278": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10183,7 +10195,7 @@
       "userPhone": "04124800194",
       "zoneId": ""
     },
-    "278": {
+    "AP-OLD-279": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10219,7 +10231,7 @@
       "userPhone": "04122405997",
       "zoneId": ""
     },
-    "279": {
+    "AP-OLD-280": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10255,7 +10267,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "280": {
+    "AP-OLD-281": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10291,7 +10303,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "281": {
+    "AP-OLD-282": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10327,7 +10339,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "282": {
+    "AP-OLD-283": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10363,7 +10375,7 @@
       "userPhone": "+584268913024",
       "zoneId": ""
     },
-    "283": {
+    "AP-OLD-284": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10399,7 +10411,7 @@
       "userPhone": "04248491497",
       "zoneId": ""
     },
-    "284": {
+    "AP-OLD-285": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10435,7 +10447,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "285": {
+    "AP-OLD-286": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10471,7 +10483,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "286": {
+    "AP-OLD-287": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10507,7 +10519,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "287": {
+    "AP-OLD-288": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10543,7 +10555,7 @@
       "userPhone": "04268913024",
       "zoneId": ""
     },
-    "288": {
+    "AP-OLD-289": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10579,7 +10591,7 @@
       "userPhone": "04164659671",
       "zoneId": ""
     },
-    "289": {
+    "AP-OLD-290": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10615,7 +10627,7 @@
       "userPhone": "+584121896888",
       "zoneId": ""
     },
-    "290": {
+    "AP-OLD-291": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10651,7 +10663,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "291": {
+    "AP-OLD-292": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10687,7 +10699,7 @@
       "userPhone": "+584241790657",
       "zoneId": ""
     },
-    "292": {
+    "AP-OLD-293": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10723,7 +10735,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "293": {
+    "AP-OLD-294": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10759,7 +10771,7 @@
       "userPhone": "04120533174",
       "zoneId": ""
     },
-    "294": {
+    "AP-OLD-295": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10795,7 +10807,7 @@
       "userPhone": "04161771299",
       "zoneId": ""
     },
-    "295": {
+    "AP-OLD-296": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10831,7 +10843,7 @@
       "userPhone": "04161771299",
       "zoneId": ""
     },
-    "296": {
+    "AP-OLD-297": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10867,7 +10879,7 @@
       "userPhone": "4124906413",
       "zoneId": ""
     },
-    "297": {
+    "AP-OLD-298": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10903,7 +10915,7 @@
       "userPhone": "4241358163",
       "zoneId": ""
     },
-    "298": {
+    "AP-OLD-299": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10939,7 +10951,7 @@
       "userPhone": "04221004731",
       "zoneId": ""
     },
-    "299": {
+    "AP-OLD-300": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -10975,7 +10987,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "300": {
+    "AP-OLD-301": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11011,7 +11023,7 @@
       "userPhone": "4129051122",
       "zoneId": ""
     },
-    "301": {
+    "AP-OLD-302": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11047,7 +11059,7 @@
       "userPhone": "4129051122",
       "zoneId": ""
     },
-    "302": {
+    "AP-OLD-303": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11083,7 +11095,7 @@
       "userPhone": "04125923362",
       "zoneId": ""
     },
-    "303": {
+    "AP-OLD-304": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11119,7 +11131,7 @@
       "userPhone": "04248561098",
       "zoneId": ""
     },
-    "304": {
+    "AP-OLD-305": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11155,7 +11167,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "305": {
+    "AP-OLD-306": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11191,7 +11203,7 @@
       "userPhone": "04244098530",
       "zoneId": ""
     },
-    "306": {
+    "AP-OLD-307": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11227,7 +11239,7 @@
       "userPhone": "04164659671",
       "zoneId": ""
     },
-    "307": {
+    "AP-OLD-308": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11263,7 +11275,7 @@
       "userPhone": "04247574465",
       "zoneId": ""
     },
-    "308": {
+    "AP-OLD-309": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11299,7 +11311,7 @@
       "userPhone": "santisanti190190@gmail.com",
       "zoneId": ""
     },
-    "309": {
+    "AP-OLD-310": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11335,7 +11347,7 @@
       "userPhone": "04244098530",
       "zoneId": ""
     },
-    "310": {
+    "AP-OLD-311": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11371,7 +11383,7 @@
       "userPhone": "04244098530",
       "zoneId": ""
     },
-    "311": {
+    "AP-OLD-312": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11407,7 +11419,7 @@
       "userPhone": "+584124100853",
       "zoneId": ""
     },
-    "312": {
+    "AP-OLD-313": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11443,7 +11455,7 @@
       "userPhone": "+58 414 1855146",
       "zoneId": ""
     },
-    "313": {
+    "AP-OLD-314": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11479,7 +11491,7 @@
       "userPhone": "04127580693",
       "zoneId": ""
     },
-    "314": {
+    "AP-OLD-315": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11515,7 +11527,7 @@
       "userPhone": "04248491497",
       "zoneId": ""
     },
-    "315": {
+    "AP-OLD-316": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11551,7 +11563,7 @@
       "userPhone": "4241358163",
       "zoneId": ""
     },
-    "316": {
+    "AP-OLD-317": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11587,7 +11599,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "317": {
+    "AP-OLD-318": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11623,7 +11635,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "318": {
+    "AP-OLD-319": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11659,7 +11671,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "319": {
+    "AP-OLD-320": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11695,7 +11707,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "320": {
+    "AP-OLD-321": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11731,7 +11743,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "321": {
+    "AP-OLD-322": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11767,7 +11779,7 @@
       "userPhone": "04248561098",
       "zoneId": ""
     },
-    "322": {
+    "AP-OLD-323": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11803,7 +11815,7 @@
       "userPhone": "04248561098",
       "zoneId": ""
     },
-    "323": {
+    "AP-OLD-324": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11839,7 +11851,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "324": {
+    "AP-OLD-325": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11875,7 +11887,7 @@
       "userPhone": "04220014694",
       "zoneId": ""
     },
-    "325": {
+    "AP-OLD-326": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11911,7 +11923,7 @@
       "userPhone": "04247574465",
       "zoneId": ""
     },
-    "326": {
+    "AP-OLD-327": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -11947,7 +11959,7 @@
       "userPhone": "04121374599",
       "zoneId": ""
     },
-    "327": {
+    "AP-OLD-328": {
       "accountEmail": "Ctistianoronaldocr",
       "accountPassword": "Manchester United",
       "apiData": {
@@ -11983,7 +11995,7 @@
       "userPhone": "04128314681",
       "zoneId": ""
     },
-    "328": {
+    "AP-OLD-329": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12019,7 +12031,7 @@
       "userPhone": "04220413000",
       "zoneId": ""
     },
-    "329": {
+    "AP-OLD-330": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12055,7 +12067,7 @@
       "userPhone": "+58 412-2274386",
       "zoneId": ""
     },
-    "330": {
+    "AP-OLD-331": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12091,7 +12103,7 @@
       "userPhone": "+584129661013",
       "zoneId": ""
     },
-    "331": {
+    "AP-OLD-332": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12127,7 +12139,7 @@
       "userPhone": "+584129661013",
       "zoneId": ""
     },
-    "332": {
+    "AP-OLD-333": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12163,7 +12175,7 @@
       "userPhone": "04226424620",
       "zoneId": ""
     },
-    "333": {
+    "AP-OLD-334": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12199,7 +12211,7 @@
       "userPhone": "04248488507",
       "zoneId": ""
     },
-    "334": {
+    "AP-OLD-335": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12235,7 +12247,7 @@
       "userPhone": "04248488507",
       "zoneId": ""
     },
-    "335": {
+    "AP-OLD-336": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12271,7 +12283,7 @@
       "userPhone": "04129718252",
       "zoneId": ""
     },
-    "336": {
+    "AP-OLD-337": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12307,7 +12319,7 @@
       "userPhone": "04124783899",
       "zoneId": ""
     },
-    "337": {
+    "AP-OLD-338": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12343,7 +12355,7 @@
       "userPhone": "santisanti190190@gmail.com",
       "zoneId": ""
     },
-    "338": {
+    "AP-OLD-339": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12379,7 +12391,7 @@
       "userPhone": "+584241790657",
       "zoneId": ""
     },
-    "339": {
+    "AP-OLD-340": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12415,7 +12427,7 @@
       "userPhone": "+584241790657",
       "zoneId": ""
     },
-    "340": {
+    "AP-OLD-341": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12451,7 +12463,7 @@
       "userPhone": "+584120449252",
       "zoneId": ""
     },
-    "341": {
+    "AP-OLD-342": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12487,7 +12499,7 @@
       "userPhone": "04246456081",
       "zoneId": ""
     },
-    "342": {
+    "AP-OLD-343": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12523,7 +12535,7 @@
       "userPhone": "04161771299",
       "zoneId": ""
     },
-    "343": {
+    "AP-OLD-344": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12559,7 +12571,7 @@
       "userPhone": "04161771299",
       "zoneId": ""
     },
-    "344": {
+    "AP-OLD-345": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12595,7 +12607,7 @@
       "userPhone": "04161771299",
       "zoneId": ""
     },
-    "345": {
+    "AP-OLD-346": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12631,7 +12643,7 @@
       "userPhone": "04167374009",
       "zoneId": ""
     },
-    "346": {
+    "AP-OLD-347": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12667,7 +12679,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "347": {
+    "AP-OLD-348": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12703,7 +12715,7 @@
       "userPhone": "04163727293",
       "zoneId": ""
     },
-    "348": {
+    "AP-OLD-349": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12739,7 +12751,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "349": {
+    "AP-OLD-350": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12775,7 +12787,7 @@
       "userPhone": "04163727293",
       "zoneId": ""
     },
-    "350": {
+    "AP-OLD-351": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12811,7 +12823,7 @@
       "userPhone": "04246456081",
       "zoneId": ""
     },
-    "351": {
+    "AP-OLD-352": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12847,7 +12859,7 @@
       "userPhone": "04245213253",
       "zoneId": ""
     },
-    "352": {
+    "AP-OLD-353": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12883,7 +12895,7 @@
       "userPhone": "04247522485",
       "zoneId": ""
     },
-    "353": {
+    "AP-OLD-354": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12919,7 +12931,7 @@
       "userPhone": "04247522485",
       "zoneId": ""
     },
-    "354": {
+    "AP-OLD-355": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12955,7 +12967,7 @@
       "userPhone": "04127610131",
       "zoneId": ""
     },
-    "355": {
+    "AP-OLD-356": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -12991,7 +13003,7 @@
       "userPhone": "04127610131",
       "zoneId": ""
     },
-    "356": {
+    "AP-OLD-357": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13027,7 +13039,7 @@
       "userPhone": "04226436378",
       "zoneId": ""
     },
-    "357": {
+    "AP-OLD-358": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13063,7 +13075,7 @@
       "userPhone": "04242680306",
       "zoneId": ""
     },
-    "358": {
+    "AP-OLD-359": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13099,7 +13111,7 @@
       "userPhone": "04121374599",
       "zoneId": ""
     },
-    "359": {
+    "AP-OLD-360": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13135,7 +13147,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "360": {
+    "AP-OLD-361": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13171,7 +13183,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "361": {
+    "AP-OLD-362": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13207,7 +13219,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "362": {
+    "AP-OLD-363": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13243,9 +13255,10 @@
       "userPhone": "04129718252",
       "zoneId": ""
     },
-    "363": {
+    "AP-OLD-364": {
       "accountEmail": "farrs_edu",
       "accountPassword": "Edamila200392",
+      "adminNote": "1",
       "apiData": {
         "ref": "",
         "result": ""
@@ -13253,33 +13266,36 @@
       "costUsd": 1,
       "createdAt": "2026-06-15T20:52:00.000Z",
       "currency": "VES",
+      "customerContact": "ivimaseduardo99@gmail.com",
       "gameId": "",
       "id": "AP-OLD-364",
       "packageAmount": 0,
-      "packageLabel": "80 RB",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "",
       "priceBs": 1185,
       "priceUsd": 1.5,
       "productDetails": "ROBLOX - 80 RB",
       "productId": "roblox",
-      "productName": "ROBLOX",
+      "productName": "ROBLOX - 80 RB",
       "productType": "account",
       "reference": "0000773737666",
-      "status": "completed",
+      "status": "rejected",
       "statusHistory": [
         {
-          "status": "completed",
-          "timestamp": "2026-06-15T20:52:00.000Z"
+          "note": "1",
+          "status": "rejected",
+          "timestamp": "2026-06-25T03:10:19.463Z"
         }
       ],
-      "updatedAt": "2026-06-15T20:52:00.000Z",
+      "updatedAt": "2026-06-25T03:10:19.463Z",
       "userEmail": "ivimaseduardo99@gmail.com",
       "userId": "uid-235",
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "364": {
+    "AP-OLD-365": {
       "accountEmail": "jesus_231579",
       "accountPassword": "jesus2026",
       "apiData": {
@@ -13315,7 +13331,7 @@
       "userPhone": "+5804121638724",
       "zoneId": ""
     },
-    "365": {
+    "AP-OLD-366": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13351,7 +13367,7 @@
       "userPhone": "+5804121638724",
       "zoneId": ""
     },
-    "366": {
+    "AP-OLD-367": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13387,7 +13403,7 @@
       "userPhone": "04147603342",
       "zoneId": ""
     },
-    "367": {
+    "AP-OLD-368": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13423,43 +13439,47 @@
       "userPhone": "+58 412-4100202",
       "zoneId": ""
     },
-    "368": {
+    "AP-OLD-369": {
       "accountEmail": "",
       "accountPassword": "",
+      "adminNote": "Aprobado y entregado",
       "apiData": {
         "ref": "",
         "result": ""
       },
-      "costUsd": 7.42,
+      "costUsd": 7.2675,
       "createdAt": "2026-06-15T23:39:00.000Z",
       "currency": "VES",
+      "customerContact": "agentegato47@gmail.com",
       "gameId": "4907076364",
       "id": "AP-OLD-369",
       "packageAmount": 0,
-      "packageLabel": "1166 💎",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "4907076364",
       "priceBs": 6754.5,
       "priceUsd": 8.55,
       "productDetails": "FREEFIRE LATAM - 1166 💎",
-      "productId": "freefire-latam",
-      "productName": "FREEFIRE LATAM",
+      "productId": "legacy",
+      "productName": "FREEFIRE LATAM - 1166 💎",
       "productType": "game-id",
       "reference": "006380919211",
-      "status": "processing",
+      "status": "completed",
       "statusHistory": [
         {
-          "status": "processing",
-          "timestamp": "2026-06-15T23:39:00.000Z"
+          "note": "Aprobado y entregado",
+          "status": "completed",
+          "timestamp": "2026-06-25T03:09:07.139Z"
         }
       ],
-      "updatedAt": "2026-06-15T23:39:00.000Z",
+      "updatedAt": "2026-06-25T03:09:07.139Z",
       "userEmail": "agentegato47@gmail.com",
       "userId": "uid-202",
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "369": {
+    "AP-OLD-370": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13495,7 +13515,7 @@
       "userPhone": "04163727293",
       "zoneId": ""
     },
-    "370": {
+    "AP-OLD-371": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13531,7 +13551,7 @@
       "userPhone": "04142347789",
       "zoneId": ""
     },
-    "371": {
+    "AP-OLD-372": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13567,7 +13587,7 @@
       "userPhone": "04146981259",
       "zoneId": ""
     },
-    "372": {
+    "AP-OLD-373": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13603,7 +13623,7 @@
       "userPhone": "04146981259",
       "zoneId": ""
     },
-    "373": {
+    "AP-OLD-374": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13639,7 +13659,7 @@
       "userPhone": "+581829192212",
       "zoneId": ""
     },
-    "374": {
+    "AP-OLD-375": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13675,7 +13695,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "375": {
+    "AP-OLD-376": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13711,7 +13731,7 @@
       "userPhone": "04128246768",
       "zoneId": ""
     },
-    "376": {
+    "AP-OLD-377": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13747,7 +13767,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "377": {
+    "AP-OLD-378": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13783,7 +13803,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "378": {
+    "AP-OLD-379": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13819,7 +13839,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "379": {
+    "AP-OLD-380": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13855,7 +13875,7 @@
       "userPhone": "04223750292",
       "zoneId": ""
     },
-    "380": {
+    "AP-OLD-381": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13891,7 +13911,7 @@
       "userPhone": "04245055139",
       "zoneId": ""
     },
-    "381": {
+    "AP-OLD-382": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13927,7 +13947,7 @@
       "userPhone": "04161180529",
       "zoneId": ""
     },
-    "382": {
+    "AP-OLD-383": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13963,7 +13983,7 @@
       "userPhone": "04161180529",
       "zoneId": ""
     },
-    "383": {
+    "AP-OLD-384": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -13999,7 +14019,7 @@
       "userPhone": "+584129661013",
       "zoneId": ""
     },
-    "384": {
+    "AP-OLD-385": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14035,7 +14055,7 @@
       "userPhone": "+584129661013",
       "zoneId": ""
     },
-    "385": {
+    "AP-OLD-386": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14071,7 +14091,7 @@
       "userPhone": "+584129661013",
       "zoneId": ""
     },
-    "386": {
+    "AP-OLD-387": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14107,7 +14127,7 @@
       "userPhone": "04246511513",
       "zoneId": ""
     },
-    "387": {
+    "AP-OLD-388": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14143,7 +14163,7 @@
       "userPhone": "04246511513",
       "zoneId": ""
     },
-    "388": {
+    "AP-OLD-389": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14179,7 +14199,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "389": {
+    "AP-OLD-390": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14215,7 +14235,7 @@
       "userPhone": "04123573026",
       "zoneId": ""
     },
-    "390": {
+    "AP-OLD-391": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14251,7 +14271,7 @@
       "userPhone": "04147603342",
       "zoneId": ""
     },
-    "391": {
+    "AP-OLD-392": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14287,7 +14307,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "392": {
+    "AP-OLD-393": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14323,7 +14343,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "393": {
+    "AP-OLD-394": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14359,7 +14379,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "394": {
+    "AP-OLD-395": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14395,7 +14415,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "395": {
+    "AP-OLD-396": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14431,7 +14451,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "396": {
+    "AP-OLD-397": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14467,7 +14487,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "397": {
+    "AP-OLD-398": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14503,7 +14523,7 @@
       "userPhone": "04245178622",
       "zoneId": ""
     },
-    "398": {
+    "AP-OLD-399": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14539,7 +14559,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "399": {
+    "AP-OLD-400": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14575,7 +14595,7 @@
       "userPhone": "04247862469",
       "zoneId": ""
     },
-    "400": {
+    "AP-OLD-401": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14611,7 +14631,7 @@
       "userPhone": "04247862469",
       "zoneId": ""
     },
-    "401": {
+    "AP-OLD-402": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14647,7 +14667,7 @@
       "userPhone": "+584124100853",
       "zoneId": ""
     },
-    "402": {
+    "AP-OLD-403": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14683,7 +14703,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "403": {
+    "AP-OLD-404": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14719,7 +14739,7 @@
       "userPhone": "+584241790657",
       "zoneId": ""
     },
-    "404": {
+    "AP-OLD-405": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14755,7 +14775,7 @@
       "userPhone": "04126886954",
       "zoneId": ""
     },
-    "405": {
+    "AP-OLD-406": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14791,7 +14811,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "406": {
+    "AP-OLD-407": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14827,7 +14847,7 @@
       "userPhone": "+1 000 000 000",
       "zoneId": ""
     },
-    "407": {
+    "AP-OLD-408": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14863,7 +14883,7 @@
       "userPhone": "+584160849589",
       "zoneId": ""
     },
-    "408": {
+    "AP-OLD-409": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14899,7 +14919,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "409": {
+    "AP-OLD-410": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14935,7 +14955,7 @@
       "userPhone": "+584125916156",
       "zoneId": ""
     },
-    "410": {
+    "AP-OLD-411": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -14971,7 +14991,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "411": {
+    "AP-OLD-412": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15007,7 +15027,7 @@
       "userPhone": "+584245174044",
       "zoneId": ""
     },
-    "412": {
+    "AP-OLD-413": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15043,7 +15063,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "413": {
+    "AP-OLD-414": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15079,7 +15099,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "414": {
+    "AP-OLD-415": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15115,7 +15135,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "415": {
+    "AP-OLD-416": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15151,7 +15171,7 @@
       "userPhone": "04161180529",
       "zoneId": ""
     },
-    "416": {
+    "AP-OLD-417": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15187,7 +15207,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "417": {
+    "AP-OLD-418": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15223,7 +15243,7 @@
       "userPhone": "04167230805",
       "zoneId": ""
     },
-    "418": {
+    "AP-OLD-419": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15259,7 +15279,7 @@
       "userPhone": "04148535725",
       "zoneId": ""
     },
-    "419": {
+    "AP-OLD-420": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15295,7 +15315,7 @@
       "userPhone": "+584161280928",
       "zoneId": ""
     },
-    "420": {
+    "AP-OLD-421": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15331,7 +15351,7 @@
       "userPhone": "+584161280928",
       "zoneId": ""
     },
-    "421": {
+    "AP-OLD-422": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15367,7 +15387,7 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "422": {
+    "AP-OLD-423": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15403,7 +15423,7 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "423": {
+    "AP-OLD-424": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15439,7 +15459,7 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "424": {
+    "AP-OLD-425": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15475,7 +15495,7 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "425": {
+    "AP-OLD-426": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15511,7 +15531,7 @@
       "userPhone": "04127580693",
       "zoneId": ""
     },
-    "426": {
+    "AP-OLD-427": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15547,7 +15567,7 @@
       "userPhone": "+584161381737",
       "zoneId": ""
     },
-    "427": {
+    "AP-OLD-428": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15583,7 +15603,7 @@
       "userPhone": "04226600044",
       "zoneId": ""
     },
-    "428": {
+    "AP-OLD-429": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15619,7 +15639,7 @@
       "userPhone": "+584124246459",
       "zoneId": ""
     },
-    "429": {
+    "AP-OLD-430": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15655,7 +15675,7 @@
       "userPhone": "0424263669",
       "zoneId": ""
     },
-    "430": {
+    "AP-OLD-431": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15691,7 +15711,7 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "431": {
+    "AP-OLD-432": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15727,7 +15747,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "432": {
+    "AP-OLD-433": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15763,7 +15783,7 @@
       "userPhone": "04129592904",
       "zoneId": ""
     },
-    "433": {
+    "AP-OLD-434": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15799,7 +15819,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "434": {
+    "AP-OLD-435": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15835,7 +15855,7 @@
       "userPhone": "+584145744504",
       "zoneId": ""
     },
-    "435": {
+    "AP-OLD-436": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15871,7 +15891,7 @@
       "userPhone": "04124783899",
       "zoneId": ""
     },
-    "436": {
+    "AP-OLD-437": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15907,7 +15927,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "437": {
+    "AP-OLD-438": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15943,7 +15963,7 @@
       "userPhone": "04127580693",
       "zoneId": ""
     },
-    "438": {
+    "AP-OLD-439": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -15979,7 +15999,7 @@
       "userPhone": "04226424620",
       "zoneId": ""
     },
-    "439": {
+    "AP-OLD-440": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16015,7 +16035,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "440": {
+    "AP-OLD-441": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16051,7 +16071,7 @@
       "userPhone": "04122405997",
       "zoneId": ""
     },
-    "441": {
+    "AP-OLD-442": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16087,7 +16107,7 @@
       "userPhone": "+584245174044",
       "zoneId": ""
     },
-    "442": {
+    "AP-OLD-443": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16123,7 +16143,7 @@
       "userPhone": "+584245174044",
       "zoneId": ""
     },
-    "443": {
+    "AP-OLD-444": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16159,7 +16179,7 @@
       "userPhone": "04164659671",
       "zoneId": ""
     },
-    "444": {
+    "AP-OLD-445": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16195,7 +16215,7 @@
       "userPhone": "+58 424 659 2586",
       "zoneId": ""
     },
-    "445": {
+    "AP-OLD-446": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16231,7 +16251,7 @@
       "userPhone": "04129718252",
       "zoneId": ""
     },
-    "446": {
+    "AP-OLD-447": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16267,7 +16287,7 @@
       "userPhone": "04142347789",
       "zoneId": ""
     },
-    "447": {
+    "AP-OLD-448": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16303,7 +16323,7 @@
       "userPhone": "04125923362",
       "zoneId": ""
     },
-    "448": {
+    "AP-OLD-449": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16339,7 +16359,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "449": {
+    "AP-OLD-450": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16375,7 +16395,7 @@
       "userPhone": "04120533174",
       "zoneId": ""
     },
-    "450": {
+    "AP-OLD-451": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16411,7 +16431,7 @@
       "userPhone": "+584145744504",
       "zoneId": ""
     },
-    "451": {
+    "AP-OLD-452": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16447,7 +16467,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "452": {
+    "AP-OLD-453": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16483,7 +16503,7 @@
       "userPhone": "04248491497",
       "zoneId": ""
     },
-    "453": {
+    "AP-OLD-454": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16519,7 +16539,7 @@
       "userPhone": "04248491497",
       "zoneId": ""
     },
-    "454": {
+    "AP-OLD-455": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16555,7 +16575,7 @@
       "userPhone": "+584127819320",
       "zoneId": ""
     },
-    "455": {
+    "AP-OLD-456": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16591,7 +16611,7 @@
       "userPhone": "04247114634",
       "zoneId": ""
     },
-    "456": {
+    "AP-OLD-457": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16627,7 +16647,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "457": {
+    "AP-OLD-458": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16663,7 +16683,7 @@
       "userPhone": "04165598241",
       "zoneId": ""
     },
-    "458": {
+    "AP-OLD-459": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16699,7 +16719,7 @@
       "userPhone": "04246341822",
       "zoneId": ""
     },
-    "459": {
+    "AP-OLD-460": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16735,7 +16755,7 @@
       "userPhone": "04242842767",
       "zoneId": ""
     },
-    "460": {
+    "AP-OLD-461": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16771,7 +16791,7 @@
       "userPhone": "04142347789",
       "zoneId": ""
     },
-    "461": {
+    "AP-OLD-462": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16807,7 +16827,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "462": {
+    "AP-OLD-463": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16843,7 +16863,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "463": {
+    "AP-OLD-464": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16879,7 +16899,7 @@
       "userPhone": "04126432587",
       "zoneId": ""
     },
-    "464": {
+    "AP-OLD-465": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16915,7 +16935,7 @@
       "userPhone": "04242842767",
       "zoneId": ""
     },
-    "465": {
+    "AP-OLD-466": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16951,7 +16971,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "466": {
+    "AP-OLD-467": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -16987,7 +17007,7 @@
       "userPhone": "+584124100853",
       "zoneId": ""
     },
-    "467": {
+    "AP-OLD-468": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17023,7 +17043,7 @@
       "userPhone": "04142347789",
       "zoneId": ""
     },
-    "468": {
+    "AP-OLD-469": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17059,7 +17079,7 @@
       "userPhone": "04142347789",
       "zoneId": ""
     },
-    "469": {
+    "AP-OLD-470": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17095,7 +17115,7 @@
       "userPhone": "santisanti190190@gmail.com",
       "zoneId": ""
     },
-    "470": {
+    "AP-OLD-471": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
       "apiData": {
@@ -17131,7 +17151,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "471": {
+    "AP-OLD-472": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila200392",
       "apiData": {
@@ -17167,7 +17187,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "472": {
+    "AP-OLD-473": {
       "accountEmail": "farrs_ddu",
       "accountPassword": "edamila200392",
       "apiData": {
@@ -17203,7 +17223,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "473": {
+    "AP-OLD-474": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17239,7 +17259,7 @@
       "userPhone": "04145652307",
       "zoneId": ""
     },
-    "474": {
+    "AP-OLD-475": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17275,9 +17295,10 @@
       "userPhone": "4129051122",
       "zoneId": ""
     },
-    "475": {
+    "AP-OLD-476": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila200392",
+      "adminNote": "1",
       "apiData": {
         "ref": "",
         "result": ""
@@ -17285,35 +17306,39 @@
       "costUsd": 20,
       "createdAt": "2026-06-21T09:21:00.000Z",
       "currency": "VES",
+      "customerContact": "ivimaseduardo99@gmail.com",
       "gameId": "",
       "id": "AP-OLD-476",
       "packageAmount": 0,
-      "packageLabel": "1700 RB",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "",
       "priceBs": 20540,
       "priceUsd": 26,
       "productDetails": "ROBLOX - 1700 RB",
       "productId": "roblox",
-      "productName": "ROBLOX",
+      "productName": "ROBLOX - 1700 RB",
       "productType": "account",
       "reference": "00012345678",
-      "status": "completed",
+      "status": "rejected",
       "statusHistory": [
         {
-          "status": "completed",
-          "timestamp": "2026-06-21T09:21:00.000Z"
+          "note": "1",
+          "status": "rejected",
+          "timestamp": "2026-06-25T03:10:17.541Z"
         }
       ],
-      "updatedAt": "2026-06-21T09:21:00.000Z",
+      "updatedAt": "2026-06-25T03:10:17.541Z",
       "userEmail": "ivimaseduardo99@gmail.com",
       "userId": "uid-235",
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "476": {
+    "AP-OLD-477": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
+      "adminNote": "1",
       "apiData": {
         "ref": "",
         "result": ""
@@ -17321,33 +17346,36 @@
       "costUsd": 20,
       "createdAt": "2026-06-21T09:42:00.000Z",
       "currency": "VES",
+      "customerContact": "ivimaseduardo99@gmail.com",
       "gameId": "",
       "id": "AP-OLD-477",
       "packageAmount": 0,
-      "packageLabel": "1700 RB",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "",
       "priceBs": 20540,
       "priceUsd": 26,
       "productDetails": "ROBLOX - 1700 RB",
       "productId": "roblox",
-      "productName": "ROBLOX",
+      "productName": "ROBLOX - 1700 RB",
       "productType": "account",
       "reference": "00012345668",
-      "status": "completed",
+      "status": "rejected",
       "statusHistory": [
         {
-          "status": "completed",
-          "timestamp": "2026-06-21T09:42:00.000Z"
+          "note": "1",
+          "status": "rejected",
+          "timestamp": "2026-06-25T03:10:15.709Z"
         }
       ],
-      "updatedAt": "2026-06-21T09:42:00.000Z",
+      "updatedAt": "2026-06-25T03:10:15.709Z",
       "userEmail": "ivimaseduardo99@gmail.com",
       "userId": "uid-235",
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "477": {
+    "AP-OLD-478": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
       "apiData": {
@@ -17383,9 +17411,10 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "478": {
+    "AP-OLD-479": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
+      "adminNote": "1",
       "apiData": {
         "ref": "",
         "result": ""
@@ -17393,33 +17422,36 @@
       "costUsd": 20,
       "createdAt": "2026-06-21T10:22:00.000Z",
       "currency": "USD",
+      "customerContact": "ivimaseduardo99@gmail.com",
       "gameId": "",
       "id": "AP-OLD-479",
       "packageAmount": 0,
-      "packageLabel": "1700 RB",
+      "packageLabel": "Migrado",
       "paymentMethod": "USD|BINANCE",
+      "paymentMethodName": "USD|BINANCE",
       "playerId": "",
       "priceBs": 0,
       "priceUsd": 26,
       "productDetails": "ROBLOX - 1700 RB",
       "productId": "roblox",
-      "productName": "ROBLOX",
+      "productName": "ROBLOX - 1700 RB",
       "productType": "account",
       "reference": "00012345778",
-      "status": "completed",
+      "status": "rejected",
       "statusHistory": [
         {
-          "status": "completed",
-          "timestamp": "2026-06-21T10:22:00.000Z"
+          "note": "1",
+          "status": "rejected",
+          "timestamp": "2026-06-25T03:10:13.877Z"
         }
       ],
-      "updatedAt": "2026-06-21T10:22:00.000Z",
+      "updatedAt": "2026-06-25T03:10:13.877Z",
       "userEmail": "ivimaseduardo99@gmail.com",
       "userId": "uid-235",
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "479": {
+    "AP-OLD-480": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17455,9 +17487,10 @@
       "userPhone": "04127680117",
       "zoneId": ""
     },
-    "480": {
+    "AP-OLD-481": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
+      "adminNote": "1",
       "apiData": {
         "ref": "",
         "result": ""
@@ -17465,33 +17498,36 @@
       "costUsd": 10,
       "createdAt": "2026-06-21T10:34:00.000Z",
       "currency": "VES",
+      "customerContact": "ivimaseduardo99@gmail.com",
       "gameId": "",
       "id": "AP-OLD-481",
       "packageAmount": 0,
-      "packageLabel": "800 RB",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "",
       "priceBs": 10270,
       "priceUsd": 13,
       "productDetails": "ROBLOX - 800 RB",
       "productId": "roblox",
-      "productName": "ROBLOX",
+      "productName": "ROBLOX - 800 RB",
       "productType": "account",
       "reference": "00009866756",
-      "status": "completed",
+      "status": "rejected",
       "statusHistory": [
         {
-          "status": "completed",
-          "timestamp": "2026-06-21T10:34:00.000Z"
+          "note": "1",
+          "status": "rejected",
+          "timestamp": "2026-06-25T03:10:11.749Z"
         }
       ],
-      "updatedAt": "2026-06-21T10:34:00.000Z",
+      "updatedAt": "2026-06-25T03:10:11.749Z",
       "userEmail": "ivimaseduardo99@gmail.com",
       "userId": "uid-235",
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "481": {
+    "AP-OLD-482": {
       "accountEmail": "Amazgames55",
       "accountPassword": "Amo a Dios y mi Familia",
       "apiData": {
@@ -17527,7 +17563,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "482": {
+    "AP-OLD-483": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17563,7 +17599,7 @@
       "userPhone": "04124036908",
       "zoneId": ""
     },
-    "483": {
+    "AP-OLD-484": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17599,7 +17635,7 @@
       "userPhone": "0422007654",
       "zoneId": ""
     },
-    "484": {
+    "AP-OLD-485": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17635,7 +17671,7 @@
       "userPhone": "+58.04129528707",
       "zoneId": ""
     },
-    "485": {
+    "AP-OLD-486": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17671,7 +17707,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "486": {
+    "AP-OLD-487": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17707,7 +17743,7 @@
       "userPhone": "+58.04129528707",
       "zoneId": ""
     },
-    "487": {
+    "AP-OLD-488": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17743,7 +17779,7 @@
       "userPhone": "04161294936",
       "zoneId": ""
     },
-    "488": {
+    "AP-OLD-489": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17779,7 +17815,7 @@
       "userPhone": "04161294936",
       "zoneId": ""
     },
-    "489": {
+    "AP-OLD-490": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17815,7 +17851,7 @@
       "userPhone": "+584124100853",
       "zoneId": ""
     },
-    "490": {
+    "AP-OLD-491": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17851,7 +17887,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "491": {
+    "AP-OLD-492": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17887,7 +17923,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "492": {
+    "AP-OLD-493": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17923,7 +17959,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "493": {
+    "AP-OLD-494": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17959,7 +17995,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "494": {
+    "AP-OLD-495": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -17995,7 +18031,7 @@
       "userPhone": "+584142152808",
       "zoneId": ""
     },
-    "495": {
+    "AP-OLD-496": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18031,7 +18067,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "496": {
+    "AP-OLD-497": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18067,7 +18103,7 @@
       "userPhone": "04127538122",
       "zoneId": ""
     },
-    "497": {
+    "AP-OLD-498": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18103,7 +18139,7 @@
       "userPhone": "04127000526",
       "zoneId": ""
     },
-    "498": {
+    "AP-OLD-499": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18139,7 +18175,7 @@
       "userPhone": "+58 412-0556356",
       "zoneId": ""
     },
-    "499": {
+    "AP-OLD-500": {
       "accountEmail": "Andreinazzz_roblox",
       "accountPassword": "andreina1236",
       "apiData": {
@@ -18175,7 +18211,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "500": {
+    "AP-OLD-501": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18211,7 +18247,7 @@
       "userPhone": "04127359676",
       "zoneId": ""
     },
-    "501": {
+    "AP-OLD-502": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18247,7 +18283,7 @@
       "userPhone": "+58 424 659 2586",
       "zoneId": ""
     },
-    "502": {
+    "AP-OLD-503": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
       "apiData": {
@@ -18283,7 +18319,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "503": {
+    "AP-OLD-504": {
       "accountEmail": "AlexxCraz666",
       "accountPassword": "KhD32jvsp76AO.",
       "apiData": {
@@ -18319,7 +18355,7 @@
       "userPhone": "04120477243",
       "zoneId": ""
     },
-    "504": {
+    "AP-OLD-505": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
       "apiData": {
@@ -18355,7 +18391,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "505": {
+    "AP-OLD-506": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18391,7 +18427,7 @@
       "userPhone": "+584127819320",
       "zoneId": ""
     },
-    "506": {
+    "AP-OLD-507": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18427,7 +18463,7 @@
       "userPhone": "+584127819320",
       "zoneId": ""
     },
-    "507": {
+    "AP-OLD-508": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18463,7 +18499,7 @@
       "userPhone": "otoniel21d@gmail.com",
       "zoneId": ""
     },
-    "508": {
+    "AP-OLD-509": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18499,7 +18535,7 @@
       "userPhone": "ninad8022@gmail.com",
       "zoneId": ""
     },
-    "509": {
+    "AP-OLD-510": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18535,7 +18571,7 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "510": {
+    "AP-OLD-511": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18571,7 +18607,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "511": {
+    "AP-OLD-512": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18607,7 +18643,7 @@
       "userPhone": "+587705439",
       "zoneId": ""
     },
-    "512": {
+    "AP-OLD-513": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18643,7 +18679,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "513": {
+    "AP-OLD-514": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18679,7 +18715,7 @@
       "userPhone": "04242929976",
       "zoneId": ""
     },
-    "514": {
+    "AP-OLD-515": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18715,7 +18751,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "515": {
+    "AP-OLD-516": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18751,7 +18787,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "516": {
+    "AP-OLD-517": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
       "apiData": {
@@ -18787,7 +18823,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "517": {
+    "AP-OLD-518": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18823,9 +18859,10 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "518": {
+    "AP-OLD-519": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
+      "adminNote": "webon",
       "apiData": {
         "ref": "",
         "result": ""
@@ -18833,33 +18870,36 @@
       "costUsd": 5,
       "createdAt": "2026-06-22T09:47:00.000Z",
       "currency": "VES",
+      "customerContact": "ivimaseduardo99@gmail.com",
       "gameId": "",
       "id": "AP-OLD-519",
       "packageAmount": 0,
-      "packageLabel": "400 RB",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "",
       "priceBs": 5134,
       "priceUsd": 6.8,
       "productDetails": "ROBLOX - 400 RB",
       "productId": "roblox",
-      "productName": "ROBLOX",
+      "productName": "ROBLOX - 400 RB",
       "productType": "account",
       "reference": "0001654789657",
-      "status": "pending",
+      "status": "rejected",
       "statusHistory": [
         {
-          "status": "pending",
-          "timestamp": "2026-06-22T09:47:00.000Z"
+          "note": "webon",
+          "status": "rejected",
+          "timestamp": "2026-06-25T03:09:33.037Z"
         }
       ],
-      "updatedAt": "2026-06-22T09:47:00.000Z",
+      "updatedAt": "2026-06-25T03:09:33.037Z",
       "userEmail": "ivimaseduardo99@gmail.com",
       "userId": "uid-235",
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "519": {
+    "AP-OLD-520": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18895,7 +18935,7 @@
       "userPhone": "04120106714",
       "zoneId": ""
     },
-    "520": {
+    "AP-OLD-521": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18931,7 +18971,7 @@
       "userPhone": "04127580693",
       "zoneId": ""
     },
-    "521": {
+    "AP-OLD-522": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -18967,7 +19007,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "522": {
+    "AP-OLD-523": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19003,7 +19043,7 @@
       "userPhone": "04146808274",
       "zoneId": ""
     },
-    "523": {
+    "AP-OLD-524": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19039,7 +19079,7 @@
       "userPhone": "+58 4164865398",
       "zoneId": ""
     },
-    "524": {
+    "AP-OLD-525": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19075,7 +19115,7 @@
       "userPhone": "+58 4164865398",
       "zoneId": ""
     },
-    "525": {
+    "AP-OLD-526": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19111,7 +19151,7 @@
       "userPhone": "04123359164",
       "zoneId": ""
     },
-    "526": {
+    "AP-OLD-527": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19147,7 +19187,7 @@
       "userPhone": "+58 4164865398",
       "zoneId": ""
     },
-    "527": {
+    "AP-OLD-528": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19183,7 +19223,7 @@
       "userPhone": "04146808274",
       "zoneId": ""
     },
-    "528": {
+    "AP-OLD-529": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19219,7 +19259,7 @@
       "userPhone": "04248561098",
       "zoneId": ""
     },
-    "529": {
+    "AP-OLD-530": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19255,7 +19295,7 @@
       "userPhone": "pc2ayr@gmail.com",
       "zoneId": ""
     },
-    "530": {
+    "AP-OLD-531": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19291,7 +19331,7 @@
       "userPhone": "+58 4164865398",
       "zoneId": ""
     },
-    "531": {
+    "AP-OLD-532": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19327,7 +19367,7 @@
       "userPhone": "04128246768",
       "zoneId": ""
     },
-    "532": {
+    "AP-OLD-533": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19363,7 +19403,7 @@
       "userPhone": "04248367784",
       "zoneId": ""
     },
-    "533": {
+    "AP-OLD-534": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19399,7 +19439,7 @@
       "userPhone": "04248367784",
       "zoneId": ""
     },
-    "534": {
+    "AP-OLD-535": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19435,7 +19475,7 @@
       "userPhone": "04146808274",
       "zoneId": ""
     },
-    "535": {
+    "AP-OLD-536": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19471,7 +19511,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "536": {
+    "AP-OLD-537": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19507,7 +19547,7 @@
       "userPhone": "+58 4127573122",
       "zoneId": ""
     },
-    "537": {
+    "AP-OLD-538": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19543,7 +19583,7 @@
       "userPhone": "+584121286102",
       "zoneId": ""
     },
-    "538": {
+    "AP-OLD-539": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19579,7 +19619,7 @@
       "userPhone": "yanfrancoyafrate@gmail.com",
       "zoneId": ""
     },
-    "539": {
+    "AP-OLD-540": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19615,7 +19655,7 @@
       "userPhone": "+58 412-0556356",
       "zoneId": ""
     },
-    "540": {
+    "AP-OLD-541": {
       "accountEmail": "ale1223409",
       "accountPassword": "debora30$",
       "apiData": {
@@ -19651,7 +19691,7 @@
       "userPhone": "04123651479",
       "zoneId": ""
     },
-    "541": {
+    "AP-OLD-542": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19687,7 +19727,7 @@
       "userPhone": "0424263669",
       "zoneId": ""
     },
-    "542": {
+    "AP-OLD-543": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19723,7 +19763,7 @@
       "userPhone": "04167213175",
       "zoneId": ""
     },
-    "543": {
+    "AP-OLD-544": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19759,7 +19799,7 @@
       "userPhone": "+584149035035",
       "zoneId": ""
     },
-    "544": {
+    "AP-OLD-545": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19795,7 +19835,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "545": {
+    "AP-OLD-546": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19831,7 +19871,7 @@
       "userPhone": "04127377726",
       "zoneId": ""
     },
-    "546": {
+    "AP-OLD-547": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19867,7 +19907,7 @@
       "userPhone": "04127000526",
       "zoneId": ""
     },
-    "547": {
+    "AP-OLD-548": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19903,7 +19943,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "548": {
+    "AP-OLD-549": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19939,7 +19979,7 @@
       "userPhone": "+58 412-4100202",
       "zoneId": ""
     },
-    "549": {
+    "AP-OLD-550": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -19975,7 +20015,7 @@
       "userPhone": "04222007 530",
       "zoneId": ""
     },
-    "550": {
+    "AP-OLD-551": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20011,7 +20051,7 @@
       "userPhone": "04245055139",
       "zoneId": ""
     },
-    "551": {
+    "AP-OLD-552": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20047,7 +20087,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "552": {
+    "AP-OLD-553": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20083,7 +20123,7 @@
       "userPhone": "+584264094203",
       "zoneId": ""
     },
-    "553": {
+    "AP-OLD-554": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20119,7 +20159,7 @@
       "userPhone": "+58 04124465311",
       "zoneId": ""
     },
-    "554": {
+    "AP-OLD-555": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20155,7 +20195,7 @@
       "userPhone": "04121160813",
       "zoneId": ""
     },
-    "555": {
+    "AP-OLD-556": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20191,7 +20231,7 @@
       "userPhone": "+584241790657",
       "zoneId": ""
     },
-    "556": {
+    "AP-OLD-557": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20227,7 +20267,7 @@
       "userPhone": "04121594649",
       "zoneId": ""
     },
-    "557": {
+    "AP-OLD-558": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20263,7 +20303,7 @@
       "userPhone": "yanfrancoyafrate@gmail.com",
       "zoneId": ""
     },
-    "558": {
+    "AP-OLD-559": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20299,7 +20339,7 @@
       "userPhone": "+584126332656",
       "zoneId": ""
     },
-    "559": {
+    "AP-OLD-560": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20335,7 +20375,7 @@
       "userPhone": "04242402962",
       "zoneId": ""
     },
-    "560": {
+    "AP-OLD-561": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20371,7 +20411,7 @@
       "userPhone": "04242402962",
       "zoneId": ""
     },
-    "561": {
+    "AP-OLD-562": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20407,7 +20447,7 @@
       "userPhone": "04242402962",
       "zoneId": ""
     },
-    "562": {
+    "AP-OLD-563": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
       "apiData": {
@@ -20443,7 +20483,7 @@
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "563": {
+    "AP-OLD-564": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20479,7 +20519,7 @@
       "userPhone": "04247522485",
       "zoneId": ""
     },
-    "564": {
+    "AP-OLD-565": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20515,7 +20555,7 @@
       "userPhone": "04121681006",
       "zoneId": ""
     },
-    "565": {
+    "AP-OLD-566": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20551,7 +20591,7 @@
       "userPhone": "04247522485",
       "zoneId": ""
     },
-    "566": {
+    "AP-OLD-567": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20587,7 +20627,7 @@
       "userPhone": "+584241727104",
       "zoneId": ""
     },
-    "567": {
+    "AP-OLD-568": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20623,7 +20663,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "568": {
+    "AP-OLD-569": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20659,7 +20699,7 @@
       "userPhone": "04146981259",
       "zoneId": ""
     },
-    "569": {
+    "AP-OLD-570": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20695,7 +20735,7 @@
       "userPhone": "04124800194",
       "zoneId": ""
     },
-    "570": {
+    "AP-OLD-571": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20731,7 +20771,7 @@
       "userPhone": "04121681006",
       "zoneId": ""
     },
-    "571": {
+    "AP-OLD-572": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20767,7 +20807,7 @@
       "userPhone": "04124800194",
       "zoneId": ""
     },
-    "572": {
+    "AP-OLD-573": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20803,7 +20843,7 @@
       "userPhone": "+584129661013",
       "zoneId": ""
     },
-    "573": {
+    "AP-OLD-574": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20839,7 +20879,7 @@
       "userPhone": "04148535725",
       "zoneId": ""
     },
-    "574": {
+    "AP-OLD-575": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20875,7 +20915,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "575": {
+    "AP-OLD-576": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20911,7 +20951,7 @@
       "userPhone": "04226404010",
       "zoneId": ""
     },
-    "576": {
+    "AP-OLD-577": {
       "accountEmail": "",
       "accountPassword": "",
       "apiData": {
@@ -20947,9 +20987,10 @@
       "userPhone": "04121681006",
       "zoneId": ""
     },
-    "577": {
+    "AP-OLD-578": {
       "accountEmail": "farrs_edu",
       "accountPassword": "edamila2003",
+      "adminNote": "webon",
       "apiData": {
         "ref": "",
         "result": ""
@@ -20957,55 +20998,50 @@
       "costUsd": 10,
       "createdAt": "2026-06-24T22:10:00.000Z",
       "currency": "VES",
+      "customerContact": "ivimaseduardo99@gmail.com",
       "gameId": "",
       "id": "AP-OLD-578",
       "packageAmount": 0,
-      "packageLabel": "800 RB",
+      "packageLabel": "Migrado",
       "paymentMethod": "VES|Pago Móvil",
+      "paymentMethodName": "VES|Pago Móvil",
       "playerId": "",
       "priceBs": 9815,
       "priceUsd": 13,
       "productDetails": "ROBLOX - 800 RB",
       "productId": "roblox",
-      "productName": "ROBLOX",
+      "productName": "ROBLOX - 800 RB",
       "productType": "account",
       "reference": "0009878456",
-      "status": "pending",
+      "status": "rejected",
       "statusHistory": [
         {
-          "status": "pending",
-          "timestamp": "2026-06-24T22:10:00.000Z"
+          "note": "webon",
+          "status": "rejected",
+          "timestamp": "2026-06-25T03:09:27.301Z"
         }
       ],
-      "updatedAt": "2026-06-24T22:10:00.000Z",
+      "updatedAt": "2026-06-25T03:09:27.301Z",
       "userEmail": "ivimaseduardo99@gmail.com",
       "userId": "uid-235",
       "userPhone": "04121185606",
       "zoneId": ""
     },
-    "578": {
-      "accountEmail": "",
-      "accountPassword": "",
-      "apiData": {
-        "ref": "177870",
-        "result": "{\"alerta\": \"green\", \"mensaje\": \"1 recarga(s) aplicada(s) a *Diver... (ID: 15914562710)\", \"referencia\": \"\", \"aprobacion\": \"177870\", \"merchant_ref\": \"\", \"Nickname\": \"*Diver...\", \"estado_api\": \"completado\", \"saldo_restante\": 116.4706835699873, \"codigos\": [], \"cantidad_entregada\": 0, \"canjes_realizados\": 1}"
-      },
-      "costUsd": 0.85,
-      "createdAt": "2026-06-24T22:11:00.000Z",
-      "currency": "VES",
-      "gameId": "15914562710",
+    "AP-OLD-579": {
       "id": "AP-OLD-579",
-      "packageAmount": 0,
-      "packageLabel": "110 💎",
-      "paymentMethod": "VES|Pago Móvil",
-      "playerId": "15914562710",
-      "priceBs": 753.11,
-      "priceUsd": 1,
-      "productDetails": "FREEFIRE LATAM - 110 💎",
+      "userId": "uid-136",
+      "userName": "Enrrique",
+      "userEmail": "enrrique2409delgado@gmail.com",
+      "userPhone": "",
+      "customerContact": "",
       "productId": "freefire-latam",
-      "productName": "FREEFIRE LATAM",
+      "productName": "110 💎",
+      "packageLabel": "110 💎",
       "productType": "game-id",
-      "reference": "917531632361",
+      "gameId": "15914562710",
+      "priceUsd": 1.0,
+      "priceBs": 753.11,
+      "costUsd": 0.8925,
       "status": "completed",
       "statusHistory": [
         {
@@ -21013,11 +21049,19 @@
           "timestamp": "2026-06-24T22:11:00.000Z"
         }
       ],
+      "createdAt": "2026-06-24T22:11:00.000Z",
       "updatedAt": "2026-06-24T22:11:00.000Z",
-      "userEmail": "enrrique2409delgado@gmail.com",
-      "userId": "uid-136",
-      "userPhone": "04226404010",
-      "zoneId": ""
+      "accountId": "15914562710",
+      "accountZone": "",
+      "accountEmail": "",
+      "accountPassword": "",
+      "paymentMethodName": "VES|Pago Móvil",
+      "paymentCurrency": "VES",
+      "reference": "917531632361",
+      "apiData": {
+        "result": "{\"alerta\": \"green\", \"mensaje\": \"1 recarga(s) aplicada(s) a *Diver... (ID: 15914562710)\", \"referencia\": \"\", \"aprobacion\": \"177870\", \"merchant_ref\": \"\", \"Nickname\": \"*Diver...\", \"estado_api\": \"completado\", \"saldo_restante\": 116.4706835699873, \"codigos\": [], \"cantidad_entregada\": 0, \"canjes_realizados\": 1}",
+        "ref": "177870"
+      }
     },
     "AP-21694": {
       "accountEmail": "",
@@ -21215,446 +21259,6 @@
       "userId": "5aB8FGItAMO7bzta9O0frO6r6vj1",
       "userName": "Esneider Jesus Bencomo Viloria"
     },
-    "AP-OLD-1": {
-      "accountEmail": "",
-      "accountPassword": "",
-      "adminNote": "Aprobado y entregado",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 0.77,
-      "createdAt": "2026-05-31T14:28:00.000Z",
-      "currency": "VES",
-      "customerContact": "cositaslindas9988@gmail.com",
-      "gameId": "278935585124",
-      "id": "AP-OLD-1",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "278935585124",
-      "priceBs": 693.5,
-      "priceUsd": 0.95,
-      "productDetails": "BLOODSTRIKE - 100+5 GOLD",
-      "productId": "bloodstrike",
-      "productName": "BLOODSTRIKE - 100+5 GOLD",
-      "productType": "game-id",
-      "reference": "006215362760",
-      "status": "completed",
-      "statusHistory": [
-        {
-          "note": "Aprobado y entregado",
-          "status": "completed",
-          "timestamp": "2026-06-25T03:09:11.178Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:09:11.178Z",
-      "userEmail": "cositaslindas9988@gmail.com",
-      "userId": "uid-16",
-      "userPhone": "+58 4164865398",
-      "zoneId": ""
-    },
-    "AP-OLD-143": {
-      "accountEmail": "",
-      "accountPassword": "",
-      "adminNote": "Aprobado y entregado",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 0.765,
-      "createdAt": "2026-06-06T10:20:00.000Z",
-      "currency": "VES",
-      "customerContact": "cositaslindas9988@gmail.com",
-      "gameId": "277313558786",
-      "id": "AP-OLD-143",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "277313558786",
-      "priceBs": 667.85,
-      "priceUsd": 0.9,
-      "productDetails": "BLOODSTRIKE - 100+5 GOLD",
-      "productId": "legacy",
-      "productName": "BLOODSTRIKE - 100+5 GOLD",
-      "productType": "game-id",
-      "reference": "006279046339",
-      "status": "completed",
-      "statusHistory": [
-        {
-          "note": "Aprobado y entregado",
-          "status": "completed",
-          "timestamp": "2026-06-25T03:09:10.603Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:09:10.603Z",
-      "userEmail": "cositaslindas9988@gmail.com",
-      "userId": "uid-16",
-      "userPhone": "+58 4164865398",
-      "zoneId": ""
-    },
-    "AP-OLD-236": {
-      "accountEmail": "",
-      "accountPassword": "",
-      "adminNote": "Aprobado y entregado",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 3.9439999999999995,
-      "createdAt": "2026-06-08T21:17:00.000Z",
-      "currency": "VES",
-      "customerContact": "lismarcastillo862@gmail.com",
-      "gameId": "276779596598",
-      "id": "AP-OLD-236",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "276779596598",
-      "priceBs": 3500.18,
-      "priceUsd": 4.64,
-      "productDetails": "BLOODSTRIKE - 500+40 GOLD",
-      "productId": "legacy",
-      "productName": "BLOODSTRIKE - 500+40 GOLD",
-      "productType": "game-id",
-      "reference": "933885",
-      "status": "completed",
-      "statusHistory": [
-        {
-          "note": "Aprobado y entregado",
-          "status": "completed",
-          "timestamp": "2026-06-25T03:09:09.803Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:09:09.803Z",
-      "userEmail": "lismarcastillo862@gmail.com",
-      "userId": "uid-170",
-      "userPhone": "+584245213253",
-      "zoneId": ""
-    },
-    "AP-OLD-364": {
-      "accountEmail": "farrs_edu",
-      "accountPassword": "Edamila200392",
-      "adminNote": "1",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 1,
-      "createdAt": "2026-06-15T20:52:00.000Z",
-      "currency": "VES",
-      "customerContact": "ivimaseduardo99@gmail.com",
-      "gameId": "",
-      "id": "AP-OLD-364",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "",
-      "priceBs": 1185,
-      "priceUsd": 1.5,
-      "productDetails": "ROBLOX - 80 RB",
-      "productId": "roblox",
-      "productName": "ROBLOX - 80 RB",
-      "productType": "account",
-      "reference": "0000773737666",
-      "status": "rejected",
-      "statusHistory": [
-        {
-          "note": "1",
-          "status": "rejected",
-          "timestamp": "2026-06-25T03:10:19.463Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:10:19.463Z",
-      "userEmail": "ivimaseduardo99@gmail.com",
-      "userId": "uid-235",
-      "userPhone": "04121185606",
-      "zoneId": ""
-    },
-    "AP-OLD-369": {
-      "accountEmail": "",
-      "accountPassword": "",
-      "adminNote": "Aprobado y entregado",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 7.2675,
-      "createdAt": "2026-06-15T23:39:00.000Z",
-      "currency": "VES",
-      "customerContact": "agentegato47@gmail.com",
-      "gameId": "4907076364",
-      "id": "AP-OLD-369",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "4907076364",
-      "priceBs": 6754.5,
-      "priceUsd": 8.55,
-      "productDetails": "FREEFIRE LATAM - 1166 💎",
-      "productId": "legacy",
-      "productName": "FREEFIRE LATAM - 1166 💎",
-      "productType": "game-id",
-      "reference": "006380919211",
-      "status": "completed",
-      "statusHistory": [
-        {
-          "note": "Aprobado y entregado",
-          "status": "completed",
-          "timestamp": "2026-06-25T03:09:07.139Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:09:07.139Z",
-      "userEmail": "agentegato47@gmail.com",
-      "userId": "uid-202",
-      "userPhone": "04121160813",
-      "zoneId": ""
-    },
-    "AP-OLD-476": {
-      "accountEmail": "farrs_edu",
-      "accountPassword": "edamila200392",
-      "adminNote": "1",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 20,
-      "createdAt": "2026-06-21T09:21:00.000Z",
-      "currency": "VES",
-      "customerContact": "ivimaseduardo99@gmail.com",
-      "gameId": "",
-      "id": "AP-OLD-476",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "",
-      "priceBs": 20540,
-      "priceUsd": 26,
-      "productDetails": "ROBLOX - 1700 RB",
-      "productId": "roblox",
-      "productName": "ROBLOX - 1700 RB",
-      "productType": "account",
-      "reference": "00012345678",
-      "status": "rejected",
-      "statusHistory": [
-        {
-          "note": "1",
-          "status": "rejected",
-          "timestamp": "2026-06-25T03:10:17.541Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:10:17.541Z",
-      "userEmail": "ivimaseduardo99@gmail.com",
-      "userId": "uid-235",
-      "userPhone": "04121185606",
-      "zoneId": ""
-    },
-    "AP-OLD-477": {
-      "accountEmail": "farrs_edu",
-      "accountPassword": "edamila2003",
-      "adminNote": "1",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 20,
-      "createdAt": "2026-06-21T09:42:00.000Z",
-      "currency": "VES",
-      "customerContact": "ivimaseduardo99@gmail.com",
-      "gameId": "",
-      "id": "AP-OLD-477",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "",
-      "priceBs": 20540,
-      "priceUsd": 26,
-      "productDetails": "ROBLOX - 1700 RB",
-      "productId": "roblox",
-      "productName": "ROBLOX - 1700 RB",
-      "productType": "account",
-      "reference": "00012345668",
-      "status": "rejected",
-      "statusHistory": [
-        {
-          "note": "1",
-          "status": "rejected",
-          "timestamp": "2026-06-25T03:10:15.709Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:10:15.709Z",
-      "userEmail": "ivimaseduardo99@gmail.com",
-      "userId": "uid-235",
-      "userPhone": "04121185606",
-      "zoneId": ""
-    },
-    "AP-OLD-479": {
-      "accountEmail": "farrs_edu",
-      "accountPassword": "edamila2003",
-      "adminNote": "1",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 20,
-      "createdAt": "2026-06-21T10:22:00.000Z",
-      "currency": "USD",
-      "customerContact": "ivimaseduardo99@gmail.com",
-      "gameId": "",
-      "id": "AP-OLD-479",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "USD|BINANCE",
-      "paymentMethodName": "USD|BINANCE",
-      "playerId": "",
-      "priceBs": 0,
-      "priceUsd": 26,
-      "productDetails": "ROBLOX - 1700 RB",
-      "productId": "roblox",
-      "productName": "ROBLOX - 1700 RB",
-      "productType": "account",
-      "reference": "00012345778",
-      "status": "rejected",
-      "statusHistory": [
-        {
-          "note": "1",
-          "status": "rejected",
-          "timestamp": "2026-06-25T03:10:13.877Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:10:13.877Z",
-      "userEmail": "ivimaseduardo99@gmail.com",
-      "userId": "uid-235",
-      "userPhone": "04121185606",
-      "zoneId": ""
-    },
-    "AP-OLD-481": {
-      "accountEmail": "farrs_edu",
-      "accountPassword": "edamila2003",
-      "adminNote": "1",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 10,
-      "createdAt": "2026-06-21T10:34:00.000Z",
-      "currency": "VES",
-      "customerContact": "ivimaseduardo99@gmail.com",
-      "gameId": "",
-      "id": "AP-OLD-481",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "",
-      "priceBs": 10270,
-      "priceUsd": 13,
-      "productDetails": "ROBLOX - 800 RB",
-      "productId": "roblox",
-      "productName": "ROBLOX - 800 RB",
-      "productType": "account",
-      "reference": "00009866756",
-      "status": "rejected",
-      "statusHistory": [
-        {
-          "note": "1",
-          "status": "rejected",
-          "timestamp": "2026-06-25T03:10:11.749Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:10:11.749Z",
-      "userEmail": "ivimaseduardo99@gmail.com",
-      "userId": "uid-235",
-      "userPhone": "04121185606",
-      "zoneId": ""
-    },
-    "AP-OLD-519": {
-      "accountEmail": "farrs_edu",
-      "accountPassword": "edamila2003",
-      "adminNote": "webon",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 5,
-      "createdAt": "2026-06-22T09:47:00.000Z",
-      "currency": "VES",
-      "customerContact": "ivimaseduardo99@gmail.com",
-      "gameId": "",
-      "id": "AP-OLD-519",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "",
-      "priceBs": 5134,
-      "priceUsd": 6.8,
-      "productDetails": "ROBLOX - 400 RB",
-      "productId": "roblox",
-      "productName": "ROBLOX - 400 RB",
-      "productType": "account",
-      "reference": "0001654789657",
-      "status": "rejected",
-      "statusHistory": [
-        {
-          "note": "webon",
-          "status": "rejected",
-          "timestamp": "2026-06-25T03:09:33.037Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:09:33.037Z",
-      "userEmail": "ivimaseduardo99@gmail.com",
-      "userId": "uid-235",
-      "userPhone": "04121185606",
-      "zoneId": ""
-    },
-    "AP-OLD-578": {
-      "accountEmail": "farrs_edu",
-      "accountPassword": "edamila2003",
-      "adminNote": "webon",
-      "apiData": {
-        "ref": "",
-        "result": ""
-      },
-      "costUsd": 10,
-      "createdAt": "2026-06-24T22:10:00.000Z",
-      "currency": "VES",
-      "customerContact": "ivimaseduardo99@gmail.com",
-      "gameId": "",
-      "id": "AP-OLD-578",
-      "packageAmount": 0,
-      "packageLabel": "Migrado",
-      "paymentMethod": "VES|Pago Móvil",
-      "paymentMethodName": "VES|Pago Móvil",
-      "playerId": "",
-      "priceBs": 9815,
-      "priceUsd": 13,
-      "productDetails": "ROBLOX - 800 RB",
-      "productId": "roblox",
-      "productName": "ROBLOX - 800 RB",
-      "productType": "account",
-      "reference": "0009878456",
-      "status": "rejected",
-      "statusHistory": [
-        {
-          "note": "webon",
-          "status": "rejected",
-          "timestamp": "2026-06-25T03:09:27.301Z"
-        }
-      ],
-      "updatedAt": "2026-06-25T03:09:27.301Z",
-      "userEmail": "ivimaseduardo99@gmail.com",
-      "userId": "uid-235",
-      "userPhone": "04121185606",
-      "zoneId": ""
-    },
     "RS-66783": {
       "accountEmail": "",
       "accountPassword": "",
@@ -21698,42 +21302,6 @@
       "updatedAt": "2026-06-25T20:43:28.097Z",
       "userId": "5aB8FGItAMO7bzta9O0frO6r6vj1",
       "userName": "Esneider Jesus Bencomo Viloria"
-    },
-    "AP-OLD-579": {
-      "id": "AP-OLD-579",
-      "userId": "uid-136",
-      "userName": "Enrrique",
-      "userEmail": "enrrique2409delgado@gmail.com",
-      "userPhone": "",
-      "customerContact": "",
-      "productId": "freefire-latam",
-      "productName": "110 💎",
-      "packageLabel": "110 💎",
-      "productType": "game-id",
-      "gameId": "15914562710",
-      "priceUsd": 1.0,
-      "priceBs": 753.11,
-      "costUsd": 0.8925,
-      "status": "completed",
-      "statusHistory": [
-        {
-          "status": "completed",
-          "timestamp": "2026-06-24T22:11:00.000Z"
-        }
-      ],
-      "createdAt": "2026-06-24T22:11:00.000Z",
-      "updatedAt": "2026-06-24T22:11:00.000Z",
-      "accountId": "15914562710",
-      "accountZone": "",
-      "accountEmail": "",
-      "accountPassword": "",
-      "paymentMethodName": "VES|Pago Móvil",
-      "paymentCurrency": "VES",
-      "reference": "917531632361",
-      "apiData": {
-        "result": "{\"alerta\": \"green\", \"mensaje\": \"1 recarga(s) aplicada(s) a *Diver... (ID: 15914562710)\", \"referencia\": \"\", \"aprobacion\": \"177870\", \"merchant_ref\": \"\", \"Nickname\": \"*Diver...\", \"estado_api\": \"completado\", \"saldo_restante\": 116.4706835699873, \"codigos\": [], \"cantidad_entregada\": 0, \"canjes_realizados\": 1}",
-        "ref": "177870"
-      }
     },
     "AP-OLD-580": {
       "id": "AP-OLD-580",

@@ -71,7 +71,7 @@ function initAdminApp() {
         <button onclick="location.reload(true)" style="margin-top: 20px; padding: 8px 16px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer;">Forzar Recarga</button>
       </div>
     `;
-    
+
     // Add a diagnostic interval
     if (!window.diagInterval) {
       window.diagInterval = setInterval(() => {
@@ -194,7 +194,7 @@ function handleAdminInstallClick() {
     });
     return;
   }
-  
+
   window.showManualInstallModal();
 }
 
@@ -226,15 +226,15 @@ function renderAdminLogin(container) {
     </div>
   `;
 
-  document.getElementById('admin-login-form').addEventListener('submit', function(e) {
+  document.getElementById('admin-login-form').addEventListener('submit', function (e) {
     e.preventDefault();
     const email = document.getElementById('admin-email').value.trim();
     const pass = document.getElementById('admin-pass').value.trim();
     const btn = document.getElementById('admin-login-btn');
     const errorDiv = document.getElementById('admin-login-error');
-    
+
     if (!email || !pass) return;
-    
+
     btn.innerHTML = 'Verificando... <span class="tracking-spinner" style="display:inline-block; font-size: 0.9rem;">⏳</span>';
     btn.disabled = true;
     errorDiv.style.display = 'none';
@@ -553,7 +553,7 @@ function renderDashboard(container) {
   setTimeout(() => {
     if (window.Chart) {
       const completedOrders = allOrders.filter(o => o.status === 'completed' || o.status === 'completado');
-      
+
       // 1. Orders Chart Data
       const ctxOrders = document.getElementById('ordersChart');
       if (ctxOrders) {
@@ -705,12 +705,11 @@ function renderDashboard(container) {
                       <div style="font-size: 0.75rem; color: var(--text-muted);">${u.email}</div>
                     </td>
                     <td style="padding: 12px 10px;">
-                      <span class="admin-badge" style="${
-  u.role === 'revendedor' ? 'background: rgba(168, 85, 247, 0.2); color: #d8b4fe;' : 
-  (u.role === 'influencer' ? 'background: rgba(239, 68, 68, 0.2); color: #f87171;' : 
-  (u.role === 'admin' ? 'background: rgba(234, 179, 8, 0.2); color: #facc15;' : 
-  'background: rgba(0, 229, 195, 0.15); color: #0ea5e9;'))
-}">${(u.role === 'user' ? 'cliente' : u.role).toUpperCase()}</span>
+                      <span class="admin-badge" style="${u.role === 'revendedor' ? 'background: rgba(168, 85, 247, 0.2); color: #d8b4fe;' :
+              (u.role === 'influencer' ? 'background: rgba(239, 68, 68, 0.2); color: #f87171;' :
+                (u.role === 'admin' ? 'background: rgba(234, 179, 8, 0.2); color: #facc15;' :
+                  'background: rgba(0, 229, 195, 0.15); color: #0ea5e9;'))
+            }">${(u.role === 'user' ? 'cliente' : u.role).toUpperCase()}</span>
                     </td>
                     <td style="padding: 12px 10px; text-align: right; font-weight: bold; color: #42a5f5;">$${u.spent.toFixed(2)}</td>
                   </tr>
@@ -970,14 +969,14 @@ async function renderCustomers(container) {
   }
 }
 
-window.filterCrmSearch = function(query) {
+window.filterCrmSearch = function (query) {
   adminState.customersSearch = query.trim();
   adminState.crmVipPage = 1;
   const main = document.getElementById('admin-main-content');
   if (main) renderCustomers(main);
 };
 
-window.changeCrmPage = function(delta) {
+window.changeCrmPage = function (delta) {
   adminState.crmVipPage += delta;
   const main = document.getElementById('admin-main-content');
   if (main) {
@@ -986,13 +985,13 @@ window.changeCrmPage = function(delta) {
   }
 };
 
-window.sendCustomerPasswordReset = async function(email) {
+window.sendCustomerPasswordReset = async function (email) {
   if (!email || !email.includes('@')) {
     alert('El cliente no tiene un correo válido registrado. Si se registró con WhatsApp o un correo falso, no es posible enviarle el enlace.');
     return;
   }
   if (!confirm(`¿Enviar enlace de recuperación de contraseña a ${email}?`)) return;
-  
+
   try {
     await firebase.auth().sendPasswordResetEmail(email);
     alert(`Correo de restablecimiento enviado exitosamente a ${email}`);
@@ -1380,23 +1379,23 @@ function saveNewPaymentMethod() {
   const name = document.getElementById('new-pm-name').value.trim();
   const icon = document.getElementById('new-pm-icon').value.trim();
   const currency = document.getElementById('new-pm-currency').value;
-  
+
   const fieldCheckboxes = document.querySelectorAll('.new-pm-field-cb:checked');
   const fields = Array.from(fieldCheckboxes).map(cb => cb.value);
-  
+
   if (!name || !icon) {
     showAdminToast('❌ Nombre e Icono son obligatorios', 'error');
     return;
   }
-  
+
   const id = 'pm-' + Date.now();
   const details = {};
   fields.forEach(f => details[f] = "");
-  
+
   PAYMENT_METHODS.push({
     id, name, icon, currency, details, active: true
   });
-  
+
   saveToDb('payment_methods', PAYMENT_METHODS);
   closeAdminModal();
   renderActiveTab();
@@ -2989,7 +2988,7 @@ function updateAdminMessagesUI() {
   }
 }
 
-window.openAdminChat = function(sessionId) {
+window.openAdminChat = function (sessionId) {
   currentChatSessionId = sessionId;
   if (typeof markMessagesAsRead === 'function') {
     markMessagesAsRead(sessionId, 'admin');
@@ -2997,18 +2996,18 @@ window.openAdminChat = function(sessionId) {
   updateAdminMessagesUI();
 };
 
-window.adminReplyMessage = function() {
+window.adminReplyMessage = function () {
   if (!currentChatSessionId) return;
   const input = document.getElementById('admin-chat-input');
   if (!input) return;
   const text = input.value.trim();
   if (!text) return;
-  
+
   if (typeof addMessage === 'function') {
     const allConversations = typeof getMessages === 'function' ? getMessages() : [];
     const conv = allConversations.find(m => m.sessionId === currentChatSessionId);
     const contact = conv ? conv.contact : 'Soporte Admin';
-    
+
     addMessage(currentChatSessionId, 'admin', text, contact);
     input.value = '';
     updateAdminMessagesUI();
@@ -3109,7 +3108,7 @@ function renderSettings(container) {
   try {
     const savedTerms = config.termsAndConditions;
     const isOldHtmlString = typeof savedTerms === 'string' && savedTerms.includes('<h4>');
-    
+
     const defaultTerms = [
       { title: 'Aceptación del Servicio', titleColor: '#0ea5e9', desc: 'Al utilizar AccessPlay, registrarte o realizar un pedido, aceptas estar de acuerdo con todos los términos aquí descritos. Nos reservamos el derecho de modificar estos términos en cualquier momento.', descColor: '#e2e8f0' },
       { title: 'Responsabilidad de Datos (IDs y Cuentas)', titleColor: '#facc15', desc: 'El cliente es el único responsable de proporcionar correctamente su ID de jugador, Zona o datos de cuenta. AccessPlay no se hace responsable por recargas enviadas a cuentas equivocadas debido a errores tipográficos por parte del usuario.', descColor: '#e2e8f0' },
@@ -3119,33 +3118,33 @@ function renderSettings(container) {
       { title: 'Prevención de Fraude y Bloqueos', titleColor: '#a855f7', desc: 'Contamos con sistemas Anti-Spam. Cualquier intento de enviar comprobantes falsos, comprobantes reciclados, o hacer múltiples pedidos falsos resultará en el BLOQUEO PERMANENTE de la IP, número de WhatsApp y cuenta del usuario, perdiendo acceso a su Monedero sin derecho a reclamo.', descColor: '#e2e8f0' }
     ];
 
-    window.currentTermsEditorData = Array.isArray(savedTerms) 
-      ? savedTerms 
+    window.currentTermsEditorData = Array.isArray(savedTerms)
+      ? savedTerms
       : typeof savedTerms === 'string' && !isOldHtmlString
         ? [{ title: 'Términos', titleColor: '#0ea5e9', desc: savedTerms, descColor: '#e2e8f0' }]
         : defaultTerms;
-    
+
     if (!window.currentTermsEditorData) window.currentTermsEditorData = defaultTerms;
-    
+
     setTimeout(() => {
       if (typeof window.renderTermsEditor === 'function') {
         window.renderTermsEditor();
       }
     }, 50);
-  } catch(e) {
+  } catch (e) {
     console.error('Error in terms init:', e);
     window.currentTermsEditorData = [];
   }
 }
 
-window.renderTermsEditor = function() {
+window.renderTermsEditor = function () {
   const container = document.getElementById('terms-editor-container');
-  if(!container) return;
+  if (!container) return;
   container.innerHTML = window.currentTermsEditorData.map((t, i) => `
     <div style="border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-bottom: 10px; background: rgba(0,0,0,0.2);">
       <div style="display: flex; gap: 10px; margin-bottom: 10px;">
         <div style="flex: 1;">
-          <label class="admin-form-label">Título ${i+1}</label>
+          <label class="admin-form-label">Título ${i + 1}</label>
           <input type="text" class="admin-form-input" value="${t.title || ''}" onchange="window.currentTermsEditorData[${i}].title = this.value">
         </div>
         <div style="width: 80px;">
@@ -3355,7 +3354,7 @@ function renderCustomersTable(usersList) {
 
   const itemsPerPage = 10;
   const totalPages = Math.ceil(usersList.length / itemsPerPage);
-  
+
   if (adminState.crmPage < 1) adminState.crmPage = 1;
   if (adminState.crmPage > totalPages && totalPages > 0) adminState.crmPage = totalPages;
 
@@ -3733,13 +3732,13 @@ window.openCustomerInfoModal = function (uid) {
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 };
 
-window.forceCustomerPassword = async function(uid) {
+window.forceCustomerPassword = async function (uid) {
   const pass = document.getElementById(`admin-force-pass-${uid}`).value.trim();
   const confirm = document.getElementById(`admin-force-confirm-${uid}`).value.trim();
-  
+
   if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
   if (pass !== confirm) return alert("Las contraseñas no coinciden.");
-  
+
   const btn = event.target;
   const originalText = btn.innerHTML;
   btn.innerHTML = 'Actualizando...';
@@ -4041,10 +4040,10 @@ function executeDeleteBanner(id) {
 // ════════════════════════════════════════
 function renderLanding(container) {
   const config = (typeof getLandingConfig === 'function') ? getLandingConfig() : {};
-  const hero = config.heroStats || [{},{},{},{}];
-  const how = config.howItWorks || [{},{},{}];
-  const features = config.features || [{},{},{},{},{},{}];
-  const faq = config.faq || [{},{},{},{}];
+  const hero = config.heroStats || [{}, {}, {}, {}];
+  const how = config.howItWorks || [{}, {}, {}];
+  const features = config.features || [{}, {}, {}, {}, {}, {}];
+  const faq = config.faq || [{}, {}, {}, {}];
   const footer = config.footer || {};
 
   container.innerHTML = `
@@ -4065,9 +4064,9 @@ function renderLanding(container) {
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
         ${[0, 1, 2, 3].map(i => `
           <div class="admin-form-group" style="background: var(--bg-deep); padding: 10px; border-radius: 8px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Valor ${i+1}</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Valor ${i + 1}</label>
             <input type="text" id="landing-hero-val-${i}" class="admin-form-input" value="${hero[i] && hero[i].value ? hero[i].value : ''}" placeholder="Ej: 15000">
-            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Texto ${i+1}</label>
+            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Texto ${i + 1}</label>
             <input type="text" id="landing-hero-lbl-${i}" class="admin-form-input" value="${hero[i] && hero[i].label ? hero[i].label : ''}" placeholder="Ej: Recargas realizadas">
           </div>
         `).join('')}
@@ -4083,9 +4082,9 @@ function renderLanding(container) {
           <div class="admin-form-group" style="background: var(--bg-deep); padding: 15px; border-radius: 8px;">
             <label style="font-size: 0.8rem; color: var(--text-secondary);">Icono (Emoji)</label>
             <input type="text" id="landing-how-icon-${i}" class="admin-form-input" value="${how[i] && how[i].icon ? how[i].icon : ''}" placeholder="Ej: 🛒">
-            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Título Paso ${i+1}</label>
+            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Título Paso ${i + 1}</label>
             <input type="text" id="landing-how-title-${i}" class="admin-form-input" value="${how[i] && how[i].title ? how[i].title : ''}" placeholder="Ej: Elige tu Producto">
-            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Descripción Paso ${i+1}</label>
+            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Descripción Paso ${i + 1}</label>
             <textarea id="landing-how-desc-${i}" class="admin-form-textarea" rows="2">${how[i] && how[i].desc ? how[i].desc : ''}</textarea>
           </div>
         `).join('')}
@@ -4099,11 +4098,11 @@ function renderLanding(container) {
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
         ${[0, 1, 2, 3, 4, 5].map(i => `
           <div class="admin-form-group" style="background: var(--bg-deep); padding: 15px; border-radius: 8px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Icono (Emoji) ${i+1}</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Icono (Emoji) ${i + 1}</label>
             <input type="text" id="landing-feat-icon-${i}" class="admin-form-input" value="${features[i] && features[i].icon ? features[i].icon : ''}" placeholder="Ej: ⚡">
-            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Título Ventaja ${i+1}</label>
+            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Título Ventaja ${i + 1}</label>
             <input type="text" id="landing-feat-title-${i}" class="admin-form-input" value="${features[i] && features[i].title ? features[i].title : ''}">
-            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Descripción Ventaja ${i+1}</label>
+            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Descripción Ventaja ${i + 1}</label>
             <textarea id="landing-feat-desc-${i}" class="admin-form-textarea" rows="2">${features[i] && features[i].desc ? features[i].desc : ''}</textarea>
           </div>
         `).join('')}
@@ -4117,9 +4116,9 @@ function renderLanding(container) {
       <div style="display: flex; flex-direction: column; gap: 15px;">
         ${[0, 1, 2, 3].map(i => `
           <div class="admin-form-group" style="background: var(--bg-deep); padding: 15px; border-radius: 8px;">
-            <label style="font-size: 0.8rem; color: var(--text-secondary);">Pregunta ${i+1}</label>
+            <label style="font-size: 0.8rem; color: var(--text-secondary);">Pregunta ${i + 1}</label>
             <input type="text" id="landing-faq-q-${i}" class="admin-form-input" value="${faq[i] && faq[i].q ? faq[i].q : ''}">
-            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Respuesta ${i+1}</label>
+            <label style="margin-top: 10px; font-size: 0.8rem; color: var(--text-secondary);">Respuesta ${i + 1}</label>
             <textarea id="landing-faq-a-${i}" class="admin-form-textarea" rows="2">${faq[i] && faq[i].a ? faq[i].a : ''}</textarea>
           </div>
         `).join('')}
@@ -4166,7 +4165,7 @@ function adminSaveLanding() {
         disclaimer: document.getElementById('landing-footer-disc') ? document.getElementById('landing-footer-disc').value : ''
       }
     };
-    
+
     if (typeof saveLandingConfig === 'function') {
       saveLandingConfig(newConfig);
       showAdminToast('✅ Diseño Web guardado', 'success');
@@ -4179,26 +4178,26 @@ function adminSaveLanding() {
   }
 }
 
-window.normalizeLegacyData = async function() {
+window.normalizeLegacyData = async function () {
   if (!confirm("¿Deseas normalizar y actualizar todos los datos antiguos al nuevo formato? Esto puede tardar unos segundos y solo debe hacerse una vez.")) return;
-  
+
   const btn = document.getElementById('btn-normalize');
-  if(btn) { 
-    btn.innerHTML = `<span style="display:inline-block; width:16px; height:16px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-right:8px; vertical-align:middle;"></span> Normalizando...`; 
-    btn.disabled = true; 
+  if (btn) {
+    btn.innerHTML = `<span style="display:inline-block; width:16px; height:16px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-right:8px; vertical-align:middle;"></span> Normalizando...`;
+    btn.disabled = true;
   }
 
   try {
     const ordersSnap = await firebase.database().ref('orders').once('value');
     const ordersData = ordersSnap.val() || {};
-    
+
     let updatedOrders = 0;
     const batchUpdates = {};
-    
+
     for (const key in ordersData) {
       let changed = false;
       let o = ordersData[key];
-      
+
       // Migrate RS-OLD keys to AP-OLD
       let newKey = key;
       if (key.startsWith("RS-OLD-")) {
@@ -4213,7 +4212,7 @@ window.normalizeLegacyData = async function() {
       if (o.status === 'rechazado') { o.status = 'rejected'; changed = true; }
       if (o.status === 'pendiente') { o.status = 'pending'; changed = true; }
       if (o.status === 'procesando') { o.status = 'processing'; changed = true; }
-      
+
       // 1. Fix Status History
       if (!o.statusHistory || !Array.isArray(o.statusHistory)) {
         o.statusHistory = [{ status: o.status || 'pending', timestamp: o.createdAt || new Date().toISOString() }];
@@ -4227,7 +4226,7 @@ window.normalizeLegacyData = async function() {
           if (h.status === 'procesando') { h.status = 'processing'; changed = true; }
         });
       }
-      
+
       // 2. Fix legacy product and cost
       let correctPkg = null;
       let correctProd = null;
@@ -4237,11 +4236,11 @@ window.normalizeLegacyData = async function() {
       // Try to find the real product by matching name in the label
       let matchedProds = PRODUCTS.filter(p => searchLabel.includes(p.name.toLowerCase()));
       if (matchedProds.length === 0) {
-         if (o.productId && o.productId !== 'legacy') {
-            matchedProds = PRODUCTS.filter(p => p.id === o.productId);
-         } else {
-            matchedProds = PRODUCTS;
-         }
+        if (o.productId && o.productId !== 'legacy') {
+          matchedProds = PRODUCTS.filter(p => p.id === o.productId);
+        } else {
+          matchedProds = PRODUCTS;
+        }
       }
 
       for (let i = 0; i < matchedProds.length; i++) {
@@ -4251,7 +4250,7 @@ window.normalizeLegacyData = async function() {
           if (correctPkg) { correctProd = matchedProds[i]; break; }
         }
       }
-      
+
       if (!correctPkg) {
         const nums = searchLabel.match(/\d+/g);
         if (nums && nums.length > 0) {
@@ -4264,10 +4263,10 @@ window.normalizeLegacyData = async function() {
           }
         }
       }
-      
+
       if (correctProd && correctPkg) {
         const correctCost = parseFloat(correctPkg.costUsd) || 0;
-        
+
         // If we found a valid package, update details
         if (o.productId === 'legacy' || o.costUsd > orderPrice || o.costUsd === undefined || o.costUsd === 0) {
           if (o.productId !== correctProd.id) { o.productId = correctProd.id; changed = true; }
@@ -4279,37 +4278,37 @@ window.normalizeLegacyData = async function() {
         // Fallback for severely corrupted orders where no valid package is found
         if (o.costUsd === undefined || o.costUsd === 0 || o.costUsd > orderPrice) {
           // Set a safe fallback cost (e.g., 85% of price)
-          o.costUsd = orderPrice * 0.85; 
+          o.costUsd = orderPrice * 0.85;
           changed = true;
         }
       }
-      
+
       if (changed) {
         batchUpdates['orders/' + newKey] = o;
         updatedOrders++;
       }
     }
-    
+
     // 3. Fix Users totalSpent and roles (user -> cliente, reseller -> revendedor)
     const usersSnap = await firebase.database().ref('users').once('value');
     const usersData = usersSnap.val() || {};
-    
+
     const freshOrders = Object.values(ordersData);
     const spentMap = {};
     freshOrders.filter(o => o.status === 'completed' || o.status === 'completado').forEach(o => {
       if (o.userId) spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
     });
-    
+
     let updatedUsers = 0;
     for (const uid in usersData) {
       let uChanged = false;
       const actualSpent = spentMap[uid] || 0;
-      
+
       if (usersData[uid].totalSpent !== actualSpent) {
         batchUpdates['users/' + uid + '/totalSpent'] = actualSpent;
         uChanged = true;
       }
-      
+
       // Translate old English roles
       const currentRole = usersData[uid].role;
       if (!currentRole || currentRole === 'user') {
@@ -4319,29 +4318,29 @@ window.normalizeLegacyData = async function() {
         batchUpdates['users/' + uid + '/role'] = 'revendedor';
         uChanged = true;
       }
-      
+
       if (uChanged) updatedUsers++;
     }
-    
+
     if (Object.keys(batchUpdates).length > 0) {
       await firebase.database().ref().update(batchUpdates);
     }
-    
+
     alert(`¡Normalización completada con éxito!\n\nPedidos reparados/renombrados: ${updatedOrders}\nUsuarios actualizados: ${updatedUsers}`);
     location.reload();
   } catch (err) {
     console.error(err);
     alert("Hubo un error normalizando la base de datos. Revisa la consola.");
-    if(btn) { btn.innerText = "Error - Reintentar"; btn.disabled = false; }
+    if (btn) { btn.innerText = "Error - Reintentar"; btn.disabled = false; }
   }
 };
 
 
-window.filterCrmTable = function(val) {
+window.filterCrmTable = function (val) {
   const query = val.toLowerCase().trim();
   const rows = document.querySelectorAll('.admin-crm-row');
   let visibleCount = 0;
-  
+
   rows.forEach(row => {
     if (row.getAttribute('data-search').includes(query)) {
       row.style.display = 'grid'; // because admin-crm-row uses CSS grid
@@ -4350,7 +4349,7 @@ window.filterCrmTable = function(val) {
       row.style.display = 'none';
     }
   });
-  
+
   const noRes = document.getElementById('crm-no-results');
   if (noRes) {
     noRes.style.display = visibleCount === 0 ? 'block' : 'none';

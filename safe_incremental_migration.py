@@ -8,8 +8,9 @@ import re
 
 # Buscar la base de datos automáticamente en las rutas más comunes de tu PC
 possible_paths = [
-    'accesplay.db',
     r'C:\Users\IK\Downloads\accesplay.db',
+    r'C:\Users\IK\Documents\GitHub\recargashark\accesplay.db',
+    'accesplay.db',
     r'C:\Users\IK\Documents\accesplay.db',
     r'C:\Users\IK\Desktop\accesplay.db'
 ]
@@ -67,6 +68,7 @@ def safe_migration():
 
     firebase_users_auth_list = []
     sqlite_product_map = {}
+    sqlite_services = {}
     
     # Extraemos info de base antigua para mapear
     cursor.execute("SELECT * FROM servicios")
@@ -75,15 +77,22 @@ def safe_migration():
         s_nombre = str(s['nombre'] or '')
         prod_firebase_id = s_nombre.lower().replace(' ', '-').replace('+', '').replace('(', '').replace(')', '')
         if not prod_firebase_id: prod_firebase_id = f"prod-{s['id']}"
+        sqlite_services[s['id']] = {'nombre': s_nombre, 'firebase_id': prod_firebase_id}
 
         cursor.execute("SELECT * FROM productos WHERE servicio_id=?", (s['id'],))
         paquetes = cursor.fetchall()
         
         packages_list = []
         for idx, p in enumerate(paquetes):
-            p_nombre = str(p['nombre'] or '')
-            p_precio = float(p['precio']) if p['precio'] else 0.0
-            p_cost = float(p['precio_original']) if p['precio_original'] else 0.0
+            s_id = p['servicio_id']
+            s_info = sqlite_services.get(s_id, {'nombre': 'Servicio Desconocido', 'firebase_id': 'legacy'})
+            s_nombre = s_info['nombre']
+            p_nombre = p['nombre']
+            
+            p_precio = float(p['precio']) if ('precio' in p.keys() and p['precio']) else 0.0
+            p_cost = float(p['costo']) if ('costo' in p.keys() and p['costo']) else (p_precio * 0.85)
+
+            prod_firebase_id = s_info['firebase_id']
 
             sqlite_product_map[p['id']] = {
                 "firebase_product_id": prod_firebase_id,
@@ -92,6 +101,9 @@ def safe_migration():
                 "price": p_precio,
                 "costUsd": p_cost
             }
+            
+            combo_name = f"{s_nombre} - {p_nombre}"
+            sqlite_product_map[combo_name] = sqlite_product_map[p['id']]
 
             amount = 0
             nums = re.findall(r'\d+', p_nombre)
