@@ -704,7 +704,7 @@ function updateOrderStatus(orderId, newStatus, note) {
                     db.ref('users/' + order.userId).update({ referredBy: null, hasMadeFirstPurchase: true });
                     return;
                   }
-                  referrerReward = 15;
+                  referrerReward = 12;
                   isFirst = true;
                   db.ref('users/' + order.userId).update({ hasMadeFirstPurchase: true });
                 } else {
