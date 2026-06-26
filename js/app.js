@@ -2296,7 +2296,7 @@ function renderDashboardSavedIds() {
   container.innerHTML = savedIds.map((item, index) => `
     <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
       <div style="text-align: left;">
-        <div style="font-weight: bold; font-size: 0.95rem;">${item.gameName || 'Juego'}</div>
+        <div style="font-weight: bold; font-size: 0.95rem;">${item.alias || item.gameName || 'Juego'} ${item.alias ? `<span style="font-size: 0.8rem; font-weight: normal; color: var(--text-secondary);">(${item.gameName})</span>` : ''}</div>
         <div style="font-size: 0.8rem; color: #0ea5e9;">ID: ${item.uid} ${item.zoneId ? '(Zona: ' + item.zoneId + ')' : ''}</div>
       </div>
       <button onclick="deleteSavedId(${index})" style="background:none; border:none; color: #ff5252; cursor:pointer; font-size: 1.2rem;" title="Eliminar">🗑️</button>
@@ -2316,6 +2316,10 @@ function showAddIdModal() {
         <div class="form-group" style="margin-bottom: 15px;">
           <label>Nombre del Juego / Plataforma</label>
           <input type="text" id="new-id-game" placeholder="Ej: Free Fire, Mobile Legends" class="form-input">
+        </div>
+        <div class="form-group" style="margin-bottom: 15px;">
+          <label>Nombre / Alias (Opcional)</label>
+          <input type="text" id="new-id-alias" placeholder="Ej: Mi cuenta" class="form-input">
         </div>
         <div class="form-group" style="margin-bottom: 15px;">
           <label>Player ID / Correo</label>
@@ -2338,6 +2342,7 @@ function showAddIdModal() {
 async function saveNewId() {
   if (!currentUser) return;
   const game = document.getElementById('new-id-game').value.trim();
+  const alias = document.getElementById('new-id-alias').value.trim();
   const uid = document.getElementById('new-id-uid').value.trim();
   const zone = document.getElementById('new-id-zone').value.trim();
   
@@ -2347,7 +2352,7 @@ async function saveNewId() {
   }
   
   const savedIds = (userProfile && userProfile.savedIds) ? userProfile.savedIds : [];
-  savedIds.push({ gameName: game, uid: uid, zoneId: zone || null });
+  savedIds.push({ gameName: game, uid: uid, zoneId: zone || null, alias: alias || null });
   
   try {
     await firebase.database().ref('users/' + currentUser.uid + '/savedIds').set(savedIds);

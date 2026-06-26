@@ -362,16 +362,17 @@ function renderDashboardSavedIds() {
       </div>`;
     return;
   }
-  container.innerHTML = idsList.map((id, index) => `
+  container.innerHTML = idsList.map((item, index) => `
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; margin-bottom: 10px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='rgba(0,0,0,0.2)'">
       <div style="display: flex; gap: 15px; align-items: center;">
         <div style="width: 40px; height: 40px; border-radius: 10px; background: var(--accent-glow); display: flex; align-items: center; justify-content: center; color: var(--accent); font-size: 1.4rem;">
           <i class="ph ph-game-controller"></i>
         </div>
         <div>
-          <div style="font-weight: bold; font-size: 1rem;">${id.gameName}</div>
-          <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">
-            <span style="color: white; font-family: monospace;">UID: ${id.uid}</span> ${id.zoneId ? '<span style="margin: 0 5px;">|</span> <span style="color: white; font-family: monospace;">Zona: ' + id.zoneId + '</span>' : ''}
+          <div style="font-weight: bold; margin-bottom: 5px;">${item.alias || item.gameName}</div>
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">
+            ${item.alias ? `<span style="color: var(--accent); font-size: 0.8rem; margin-right: 5px;">${item.gameName}</span> ` : ''}
+            UID: <span style="color: white;">${item.uid}</span> ${item.zoneId ? `| Zona: <span style="color: white;">${item.zoneId}</span>` : ''}
           </div>
         </div>
       </div>
@@ -405,6 +406,11 @@ function showAddIdModal() {
           <option value="Call of Duty Mobile">Call of Duty Mobile</option>
           <option value="Otro">Otro</option>
         </select>
+      </div>
+      
+      <div class="form-group" style="margin-top: 15px;">
+        <label style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; display: block;">Nombre / Alias (Opcional)</label>
+        <input type="text" id="new-id-alias" class="form-input" style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 12px;" placeholder="Ej. Mi cuenta principal">
       </div>
       
       <div class="form-group" style="margin-top: 15px;">
@@ -447,6 +453,7 @@ function submitAddId() {
   const game = document.getElementById('new-id-game').value;
   const uid = document.getElementById('new-id-uid').value.trim();
   const zone = document.getElementById('new-id-zone').value.trim();
+  const alias = document.getElementById('new-id-alias').value.trim();
   
   if (!uid) { alert('El UID es obligatorio'); return; }
   
@@ -455,7 +462,7 @@ function submitAddId() {
     currentIds = Array.isArray(userProfile.savedIds) ? [...userProfile.savedIds] : Object.values(userProfile.savedIds);
   }
   
-  currentIds.push({ gameName: game, uid: uid, zoneId: zone });
+  currentIds.push({ gameName: game, uid: uid, zoneId: zone, alias: alias || null });
   
   firebase.database().ref('users/' + currentUser.uid + '/savedIds').set(currentIds).then(() => {
     closeAddIdModal();
