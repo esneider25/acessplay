@@ -13,15 +13,29 @@
   ],
   "redirects": [
     {
-      "source": "/",
+      "source": "/admin(.*)",
       "has": [
         {
           "type": "host",
-          "value": "admin.accesplay.com"
+          "value": "accesplay.com"
         }
       ],
-      "destination": "/admin",
-      "permanent": true
+      "destination": "/404.html",
+      "permanent": false
     }
-  ]
+  ],
+  "rewrites": {
+    "beforeFiles": [
+      {
+        "source": "/",
+        "has": [
+          {
+            "type": "host",
+            "value": "admin.accesplay.com"
+          }
+        ],
+        "destination": "/admin"
+      }
+    ]
+  }
 }
