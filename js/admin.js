@@ -3372,7 +3372,7 @@ function renderCustomersTable(usersList) {
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${dateStr}</td>
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: right; color: #0ea5e9; font-weight: bold; white-space: nowrap;">${wallet.toFixed(2)}</td>
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; white-space: nowrap;">
-          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openRoleModal('${user.uid}', '${user.role || 'cliente'}', ${user.discountPercentage || 0}, ${user.referralLimit || 30})">
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openRoleModal('${user.uid}', '${user.role || 'cliente'}', ${user.discountPercentage || 0}, ${user.referralLimit || 30}, ${!!user.autoProcessExternal})">
             ${(user.role === 'revendedor') ? '💼 Revend (+' + (user.discountPercentage || 0) + '%)' : (user.role === 'influencer' ? '✨ Influencer' : '👤 Cliente')}
           </button>
         </td>
@@ -3759,7 +3759,7 @@ window.forceCustomerPassword = async function (uid) {
   }
 };
 
-window.openRoleModal = function (uid, currentRole, currentDiscount, currentReferralLimit) {
+window.openRoleModal = function (uid, currentRole, currentDiscount, currentReferralLimit, currentAutoProcess) {
   const modalHTML = `
     <div class="modal-overlay active" id="role-modal-overlay">
       <div class="modal">
@@ -3776,6 +3776,14 @@ window.openRoleModal = function (uid, currentRole, currentDiscount, currentRefer
           <label>Margen de Ganancia sobre Costo (%)</label>
           <input type="number" id="discount-input" class="form-input" value="${currentDiscount || 0}" min="0" max="1000">
           <div class="form-hint">El precio para este revendedor será: Costo del Producto + Este Porcentaje. (Si el producto no tiene costo configurado, se usará el precio normal).</div>
+          
+          <div style="margin-top: 15px; background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(14, 165, 233, 0.2);">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" id="auto-process-input" ${currentAutoProcess ? 'checked' : ''} style="width: 18px; height: 18px;">
+              <span style="font-size: 0.9rem; font-weight: 500;">Auto-procesar pagos externos</span>
+            </label>
+            <div class="form-hint" style="margin-top: 5px;">Si está activo, los Pagos Móviles y Binance de este revendedor se completarán solos SIN tu aprobación. Actívalo solo para revendedores de total confianza.</div>
+          </div>
         </div>
         <div class="form-group" id="referral-limit-group" style="display: ${currentRole === 'influencer' ? 'block' : 'none'}; margin-top: 15px;">
           <label>Límite de Referidos (Cupos)</label>
@@ -3796,11 +3804,13 @@ window.saveUserRole = function (uid) {
   const role = document.getElementById('role-select').value;
   const discount = parseFloat(document.getElementById('discount-input').value) || 0;
   const referralLimit = parseInt(document.getElementById('referral-limit-input').value) || 30;
+  const autoProcessExternal = document.getElementById('auto-process-input') ? document.getElementById('auto-process-input').checked : false;
 
   firebase.database().ref('users/' + uid).update({
     role: role,
     discountPercentage: role === 'revendedor' ? discount : 0,
-    referralLimit: role === 'influencer' ? referralLimit : null
+    referralLimit: role === 'influencer' ? referralLimit : null,
+    autoProcessExternal: role === 'revendedor' ? autoProcessExternal : false
   }).then(() => {
     showAdminToast('✅ Rol actualizado', 'success');
     document.getElementById('role-modal-overlay').remove();

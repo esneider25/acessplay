@@ -779,9 +779,10 @@ async function _submitOrderLogic() {
     lastOrder = order;
 
     const isReseller = typeof userProfile !== 'undefined' && userProfile && userProfile.role === 'revendedor';
+    const autoProcessExternal = isReseller && userProfile.autoProcessExternal === true;
 
-    // Auto-process if paid with wallet or is a reseller
-    if ((order.paymentMethodId === 'wallet' || isReseller) && typeof window !== 'undefined') {
+    // Auto-process if paid with wallet, or if it's a reseller with autoProcessExternal enabled
+    if ((order.paymentMethodId === 'wallet' || autoProcessExternal) && typeof window !== 'undefined') {
       if (typeof processWalletOrderAuto === 'function') {
         processWalletOrderAuto(order, isReseller);
       }
