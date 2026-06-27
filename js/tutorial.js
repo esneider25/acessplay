@@ -66,6 +66,35 @@ class WalkthroughTutorial {
   createElements() {
     if (document.getElementById('tutorial-overlay')) return;
 
+    // Eliminar cualquier botón flotante hardcodeado viejo que haya quedado en caché
+    document.querySelectorAll('button').forEach(b => {
+      if (b.innerHTML.includes('Tutorial') && b.style.position === 'fixed') {
+        b.remove();
+      }
+    });
+
+    // Crear el botón flotante dinámicamente
+    const floatBtn = document.createElement('button');
+    floatBtn.id = 'floating-tutorial-btn';
+    floatBtn.innerHTML = '<span style="font-size: 1.2rem;">🎓</span> Tutorial';
+    floatBtn.style.cssText = `
+      position: fixed; left: 20px; bottom: 20px; z-index: 9999;
+      background: linear-gradient(135deg, #0ea5e9, #3b82f6); color: white; border: none;
+      padding: 12px 24px; border-radius: 30px; box-shadow: 0 4px 15px rgba(14,165,233,0.4);
+      cursor: pointer; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1rem;
+      display: flex; align-items: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s;
+    `;
+    floatBtn.onmouseover = () => {
+      floatBtn.style.transform = 'translateY(-3px)';
+      floatBtn.style.boxShadow = '0 6px 20px rgba(14,165,233,0.6)';
+    };
+    floatBtn.onmouseout = () => {
+      floatBtn.style.transform = 'translateY(0)';
+      floatBtn.style.boxShadow = '0 4px 15px rgba(14,165,233,0.4)';
+    };
+    floatBtn.onclick = () => this.start();
+    document.body.appendChild(floatBtn);
+
     this.blocker = document.createElement('div');
     this.blocker.id = 'tutorial-blocker';
     this.blocker.style.cssText = `
