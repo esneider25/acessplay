@@ -6,16 +6,41 @@
   backdrop-filter: blur(10px);
   z-index: 10000;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px;
 }
+.roulette-modal-content {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+  max-width: 400px;
+  width: 100%;
+}
+.roulette-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.roulette-close-btn:hover {
+  background: rgba(255,255,255,0.2);
+}
 .roulette-container {
   position: relative;
-  width: 320px;
-  height: 320px;
-  margin-top: 20px;
+  width: 280px;
+  height: 280px;
+  margin: 30px auto;
 }
 .roulette-wheel {
   width: 100%;
@@ -31,9 +56,10 @@
     var(--accent) 300deg 360deg
   );
   box-shadow: 0 0 30px rgba(0,0,0,0.5);
-  transition: transform 6s cubic-bezier(0.15, 0.9, 0.15, 1);
   position: relative;
   overflow: hidden;
+  /* Rotate -90deg so 0 CSS deg matches conic 0deg (top) */
+  transform: rotate(-90deg); 
 }
 .roulette-wheel::after {
   content: "";
@@ -46,25 +72,52 @@
   background: var(--bg-deep);
   border: 4px solid var(--border);
   border-radius: 50%;
-  z-index: 2;
+  z-index: 5;
 }
+.roulette-wheel .sec {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 130px; /* From center to edge */
+  height: 30px;
+  margin-top: -15px;
+  transform-origin: left center;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 15px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 2px #000;
+  box-sizing: border-box;
+  z-index: 3;
+}
+/* Center angles for conic gradient slices (which start at top) */
+/* sec-0: 0-60 -> middle 30. CSS rotate 30. */
+.sec-0 { transform: rotate(30deg); }
+.sec-1 { transform: rotate(90deg); }
+.sec-2 { transform: rotate(150deg); }
+.sec-3 { transform: rotate(210deg); }
+.sec-4 { transform: rotate(270deg); }
+.sec-5 { transform: rotate(330deg); color: #000 !important; text-shadow: none !important; font-size: 1rem !important;}
+
 .roulette-pointer {
   position: absolute;
-  top: -20px;
+  top: -15px;
   left: 50%;
   transform: translateX(-50%);
   width: 0; 
   height: 0; 
   border-left: 20px solid transparent;
   border-right: 20px solid transparent;
-  border-top: 40px solid #ef4444;
-  z-index: 3;
+  border-top: 35px solid #ef4444;
+  z-index: 10;
   filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
 }
 .roulette-btn {
-  margin-top: 40px;
-  font-size: 1.2rem;
-  padding: 14px 40px;
+  margin-top: 10px;
+  font-size: 1.1rem;
+  padding: 12px 30px;
   border-radius: 30px;
   background: var(--accent);
   color: #000;
@@ -80,35 +133,23 @@
   transform: translateY(-2px);
   box-shadow: 0 0 30px rgba(0,229,195,0.8);
 }
-.roulette-btn:disabled {
-  background: #475569;
-  color: #94a3b8;
-  box-shadow: none;
-  cursor: not-allowed;
-  transform: none;
-}
 .roulette-result {
-  margin-top: 25px;
-  font-size: 1.5rem;
+  margin-top: 15px;
+  font-size: 1.3rem;
   font-weight: bold;
   text-align: center;
   min-height: 40px;
   color: #fff;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-  max-width: 90%;
 }
 .roulette-title {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: var(--accent);
-  margin-bottom: 10px;
+  margin-bottom: 5px;
   text-shadow: 0 0 10px rgba(0,229,195,0.3);
-  text-align: center;
 }
 .roulette-subtitle {
   color: var(--text-secondary);
-  font-size: 1rem;
-  text-align: center;
-  max-width: 90%;
-  margin-bottom: 20px;
+  font-size: 0.95rem;
+  margin-bottom: 10px;
 }

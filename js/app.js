@@ -225,6 +225,11 @@ function renderApp() {
       ${renderSupportWidget()}
       ${termsHtml}
     `;
+    requestAnimationFrame(() => {
+      if (typeof tryTriggerRoulette === 'function') {
+        tryTriggerRoulette(appState.trackingOrderId);
+      }
+    });
   } else if (appState.currentView === 'lookup') {
     app.innerHTML = `
       <div class="bg-ocean-grid">${renderBubbles()}</div>
@@ -1092,7 +1097,7 @@ function showOrderConfirmation(order) {
               </div>
             </div>
 
-            <button class="btn-primary pf-done-btn" onclick="handleRouletteTransition('${order.id}')" style="width: 100%; border-radius: 12px; padding: 16px; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <button class="btn-primary pf-done-btn" onclick="goToTracking('${order.id}')" style="width: 100%; border-radius: 12px; padding: 16px; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
               📡 Ver Estado del Pedido
             </button>
           </div>

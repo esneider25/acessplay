@@ -1,13 +1,38 @@
 // ── Roulette Feature ──
-function showRouletteModal(order, product) {
-  // Check if product belongs to category "juegos" or if it is "game-id"
-  const isGame = (product.category === 'juegos' || product.type === 'game-id');
-  if (!isGame) {
-    // If not a game, go directly to tracking
-    goToTracking(order.id);
-    return;
-  }
 
+function tryTriggerRoulette(orderId) {
+  const orders = typeof getOrders === 'function' ? getOrders() : [];
+  const order = orders.find(o => o.id === orderId);
+  
+  if (!order) return;
+  
+  // SOLO CUANDO SEA APROBADO
+  if (order.status !== 'completed') return;
+  
+  // SOLO PARA CLIENTE E INFLUENCER, NO REVENDEDOR
+  const profile = typeof userProfile !== 'undefined' ? userProfile : null;
+  if (profile && profile.role === 'revendedor') return;
+
+  // NO REPETIR POR ORDEN
+  if (localStorage.getItem('roulette_played_' + orderId)) return;
+
+  const products = typeof getProducts === 'function' ? getProducts() : [];
+  const product = products.find(p => p.id === order.productId);
+  if (!product) return;
+
+  // SOLO PARA JUEGOS
+  const isGame = (product.category && product.category.toLowerCase() === 'juegos') || product.type === 'game-id';
+  if (!isGame) return;
+
+  // Marcar como jugada
+  localStorage.setItem('roulette_played_' + orderId, 'true');
+
+  setTimeout(() => {
+    showRouletteModal(order, product);
+  }, 1000); // 1 sec delay after entering tracking screen
+}
+
+function showRouletteModal(order, product) {
   // 2% chance
   const isWinner = Math.random() < 0.02;
 
@@ -17,33 +42,26 @@ function showRouletteModal(order, product) {
   modal.id = 'roulette-modal';
   
   modal.innerHTML = `
-    <h2 class="roulette-title">🎰 Ruleta de la Suerte</h2>
-    <p class="roulette-subtitle">¡Gira la ruleta y gana un premio sorpresa por tu recarga!</p>
-    <div class="roulette-container">
-      <div class="roulette-pointer"></div>
-      <div class="roulette-wheel" id="roulette-wheel">
-        <div class="sec" style="transform: rotate(0deg) skewY(-30deg);">
-          <span style="transform: skewY(30deg) rotate(30deg); display: block; margin-top: 40px; margin-left: 20px;">NADA</span>
-        </div>
-        <div class="sec" style="transform: rotate(60deg) skewY(-30deg);">
-          <span style="transform: skewY(30deg) rotate(30deg); display: block; margin-top: 40px; margin-left: 20px;">CASI</span>
-        </div>
-        <div class="sec" style="transform: rotate(120deg) skewY(-30deg);">
-          <span style="transform: skewY(30deg) rotate(30deg); display: block; margin-top: 40px; margin-left: 20px;">OTRA VEZ</span>
-        </div>
-        <div class="sec" style="transform: rotate(180deg) skewY(-30deg);">
-          <span style="transform: skewY(30deg) rotate(30deg); display: block; margin-top: 40px; margin-left: 20px;">NADA</span>
-        </div>
-        <div class="sec" style="transform: rotate(240deg) skewY(-30deg);">
-          <span style="transform: skewY(30deg) rotate(30deg); display: block; margin-top: 40px; margin-left: 20px;">SUERTE</span>
-        </div>
-        <div class="sec" style="transform: rotate(300deg) skewY(-30deg);">
-          <span style="transform: skewY(30deg) rotate(30deg); display: block; margin-top: 40px; margin-left: 20px; color: #000; font-size: 1.1rem;">PREMIO</span>
+    <div class="roulette-modal-content">
+      <h2 class="roulette-title">🎰 Ruleta de la Suerte</h2>
+      <p class="roulette-subtitle">¡Gira la ruleta y gana un premio sorpresa por tu recarga!</p>
+      
+      <div class="roulette-container">
+        <div class="roulette-pointer"></div>
+        <div class="roulette-wheel" id="roulette-wheel">
+          <div class="sec sec-0"><span>NADA</span></div>
+          <div class="sec sec-1"><span>CASI</span></div>
+          <div class="sec sec-2"><span>INTENTA</span></div>
+          <div class="sec sec-3"><span>NADA</span></div>
+          <div class="sec sec-4"><span>SUERTE</span></div>
+          <div class="sec sec-5"><span>PREMIO</span></div>
         </div>
       </div>
+      
+      <div class="roulette-result" id="roulette-result"></div>
+      <button class="roulette-btn" id="roulette-btn" onclick="spinRoulette(${isWinner}, '${order.id}', '${product.id}')">GIRAR AHORA</button>
+      <button class="roulette-close-btn" onclick="document.getElementById('roulette-modal').remove()">✖</button>
     </div>
-    <div class="roulette-result" id="roulette-result"></div>
-    <button class="roulette-btn" id="roulette-btn" onclick="spinRoulette(${isWinner}, '${order.id}', '${product.id}')">GIRAR AHORA</button>
   `;
   document.body.appendChild(modal);
 }
@@ -52,20 +70,29 @@ function spinRoulette(isWinner, orderId, productId) {
   const btn = document.getElementById('roulette-btn');
   const wheel = document.getElementById('roulette-wheel');
   const resultDiv = document.getElementById('roulette-result');
+  const closeBtn = document.querySelector('.roulette-close-btn');
   
-  btn.disabled = true;
-  btn.innerText = "GIRANDO...";
+  btn.style.display = 'none';
+  if (closeBtn) closeBtn.style.display = 'none';
   
+  // Sections: 6 sections (60deg each). 
+  // sec-0 = 0-60, sec-1 = 60-120... sec-5 = 300-360
+  // Winner is sec-5 (PREMIO)
+  // Final degree to apply to the wheel
   const baseSpins = 360 * 5; 
   let finalDegree;
   if (isWinner) {
-    finalDegree = baseSpins + 30; // lands on 300-360 section
+    // Winner is sec-5 at CSS angle 330deg. Top is 270deg.
+    // finalDegree = 270 - 330 = -60 + baseSpins
+    finalDegree = baseSpins - 60; 
   } else {
-    const losingAngles = [90, 150, 210, 270, 330]; 
+    // Losing angles: centers of sec 0, 1, 2, 3, 4 (30, 90, 150, 210, 270)
+    const losingAngles = [30, 90, 150, 210, 270]; 
     const randomLosingAngle = losingAngles[Math.floor(Math.random() * losingAngles.length)];
-    finalDegree = baseSpins + randomLosingAngle;
+    finalDegree = baseSpins + (270 - randomLosingAngle);
   }
 
+  wheel.style.transition = `transform 6s cubic-bezier(0.15, 0.9, 0.15, 1)`;
   wheel.style.transform = `rotate(${finalDegree}deg)`;
   
   setTimeout(() => {
@@ -79,11 +106,10 @@ function spinRoulette(isWinner, orderId, productId) {
       resultDiv.style.color = "#f87171";
     }
     
-    btn.innerText = "CONTINUAR";
-    btn.disabled = false;
+    btn.innerText = "CERRAR";
+    btn.style.display = 'block';
     btn.onclick = () => {
       document.getElementById('roulette-modal').remove();
-      goToTracking(orderId);
     };
   }, 6000);
 }
