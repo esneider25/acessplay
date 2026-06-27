@@ -1092,7 +1092,7 @@ function showOrderConfirmation(order) {
               </div>
             </div>
 
-            <button class="btn-primary pf-done-btn" onclick="goToTracking('${order.id}')" style="width: 100%; border-radius: 12px; padding: 16px; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <button class="btn-primary pf-done-btn" onclick="handleRouletteTransition('${order.id}')" style="width: 100%; border-radius: 12px; padding: 16px; font-size: 1rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
               📡 Ver Estado del Pedido
             </button>
           </div>
@@ -1114,6 +1114,23 @@ function showOrderConfirmation(order) {
       setTimeout(() => createConfetti(), 300);
     }, 1800);
   }, 1500);
+}
+
+function handleRouletteTransition(orderId) {
+  const container = document.getElementById('modal-container');
+  if (container) container.remove();
+
+  const orders = typeof getOrders === 'function' ? getOrders() : ORDERS;
+  const products = typeof getProducts === 'function' ? getProducts() : PRODUCTS;
+  
+  const order = orders.find(o => o.id === orderId);
+  const product = order ? products.find(p => p.id === order.productId) : null;
+
+  if (typeof showRouletteModal === 'function' && order && product) {
+    showRouletteModal(order, product);
+  } else {
+    goToTracking(orderId);
+  }
 }
 
 function goToTracking(orderId) {

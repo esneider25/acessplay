@@ -1,0 +1,114 @@
+/* ── Roulette Modal ── */
+.roulette-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15,23,42,0.95);
+  backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.roulette-container {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  margin-top: 20px;
+}
+.roulette-wheel {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 6px solid var(--border);
+  background: conic-gradient(
+    #1e293b 0deg 60deg, 
+    #334155 60deg 120deg, 
+    #1e293b 120deg 180deg, 
+    #334155 180deg 240deg, 
+    #1e293b 240deg 300deg, 
+    var(--accent) 300deg 360deg
+  );
+  box-shadow: 0 0 30px rgba(0,0,0,0.5);
+  transition: transform 6s cubic-bezier(0.15, 0.9, 0.15, 1);
+  position: relative;
+  overflow: hidden;
+}
+.roulette-wheel::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background: var(--bg-deep);
+  border: 4px solid var(--border);
+  border-radius: 50%;
+  z-index: 2;
+}
+.roulette-pointer {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; 
+  height: 0; 
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-top: 40px solid #ef4444;
+  z-index: 3;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.6));
+}
+.roulette-btn {
+  margin-top: 40px;
+  font-size: 1.2rem;
+  padding: 14px 40px;
+  border-radius: 30px;
+  background: var(--accent);
+  color: #000;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(0,229,195,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.roulette-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(0,229,195,0.8);
+}
+.roulette-btn:disabled {
+  background: #475569;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.roulette-result {
+  margin-top: 25px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  min-height: 40px;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  max-width: 90%;
+}
+.roulette-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px rgba(0,229,195,0.3);
+  text-align: center;
+}
+.roulette-subtitle {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  text-align: center;
+  max-width: 90%;
+  margin-bottom: 20px;
+}

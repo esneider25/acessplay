@@ -1,4 +1,4 @@
-const CACHE_NAME = 'accessplay-v48';
+const CACHE_NAME = 'accessplay-v49';
 const urlsToCache = [
   '/',
   '/manifest.json',
@@ -6,10 +6,13 @@ const urlsToCache = [
   '/admin.html',
   '/css/styles.css',
   '/css/admin.css',
+  '/css/roulette.css',
   '/js/data.js',
   '/js/components.js',
   '/js/app.js',
   '/js/admin.js',
+  '/js/tutorial.js',
+  '/js/roulette.js',
   '/img/logo.png',
   '/img/favicon-192.png',
   '/img/favicon-512.png',
