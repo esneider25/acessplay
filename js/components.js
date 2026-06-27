@@ -748,7 +748,7 @@ function renderOrderTracking(orderId) {
 
   const config = typeof getSettings === 'function' ? getSettings() : {};
   let rouletteButtonHtml = '';
-  if (config.enableRoulette && order.status === 'completed' && !order.roulettePlayed) {
+  if (config.enableRoulette !== false && order.status === 'completed' && !order.roulettePlayed) {
     const products = typeof getProducts === 'function' ? getProducts() : [];
     const product = products.find(p => p.id === order.productId);
     const profile = typeof userProfile !== 'undefined' ? userProfile : null;
