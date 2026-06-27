@@ -3105,6 +3105,12 @@ function renderSettings(container) {
             ✨ Normalizar Base de Datos de Migración
           </button>
         </div>
+        <div class="admin-form-group" style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Recalcula el dinero gastado por cada cliente excluyendo las recargas de billetera, para corregir el nivel VIP.</p>
+          <button id="btn-fix-wallet" class="btn btn-primary" onclick="fixWalletSpendingBug()" style="width: 100%; background: #0ea5e9;">
+            ✨ Corregir Gastos de Billetera
+          </button>
+        </div>
       </div>
 
       <div class="admin-card">
