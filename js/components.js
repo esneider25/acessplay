@@ -693,6 +693,23 @@ function renderOrderTracking(orderId) {
   const isErrorStatus = order.status === 'rejected' || order.status === 'invalid-id';
   const currentIndex = isErrorStatus ? 1 : statusOrder.indexOf(order.status);
 
+  const cleanStr = (str) => {
+    if (!str) return str;
+    let clean = str;
+    clean = clean.replace(/Enviando a API externa\.\.\./gi, 'Procesando el pedido de forma automatizada...');
+    clean = clean.replace(/Aprobado y entregado por API/gi, 'Aprobado y entregado automáticamente');
+    clean = clean.replace(/El proveedor rechazó la recarga/gi, 'El sistema rechazó la recarga');
+    clean = clean.replace(/Fallo conexión API externa/gi, 'Fallo en el sistema de recarga automatizada');
+    clean = clean.replace(/El proveedor canceló la recarga/gi, 'El sistema canceló la recarga automáticamente');
+    clean = clean.replace(/API rechazó la cuenta/gi, 'Datos inválidos');
+    clean = clean.replace(/API Error:/gi, 'Error:');
+    clean = clean.replace(/\bAPI\b/gi, 'Sistema');
+    clean = clean.replace(/\bproveedor\b/gi, 'sistema');
+    return clean;
+  };
+
+  const cleanAdminNote = cleanStr(order.adminNote);
+
   const timelineSteps = [
     { key: 'pending', label: 'Recibido', icon: '📋', desc: 'Tu pedido fue registrado exitosamente' },
     { key: 'processing', label: 'Procesando', icon: '⚙️', desc: 'Estamos verificando tu pago y procesando la recarga' },
@@ -709,7 +726,7 @@ function renderOrderTracking(orderId) {
       stepClass = 'error';
       displayIcon = order.status === 'rejected' ? '❌' : '⚠️';
       displayLabel = ORDER_STATUSES[order.status]?.label || step.label;
-      displayDesc = order.adminNote || 'Contacta soporte para más información';
+      displayDesc = cleanAdminNote || 'Contacta soporte para más información';
     } else if (i < currentIndex) {
       stepClass = 'completed';
       displayIcon = '✓';
@@ -736,18 +753,7 @@ function renderOrderTracking(orderId) {
     const date = new Date(h.timestamp);
     
     // Enmascarar notas viejas para eliminar rastro de APIs o proveedores
-    let cleanNote = h.note || '';
-    if (cleanNote) {
-      cleanNote = cleanNote.replace(/Enviando a API externa\.\.\./gi, 'Procesando el pedido de forma automatizada...');
-      cleanNote = cleanNote.replace(/Aprobado y entregado por API/gi, 'Aprobado y entregado automáticamente');
-      cleanNote = cleanNote.replace(/El proveedor rechazó la recarga/gi, 'El sistema rechazó la recarga');
-      cleanNote = cleanNote.replace(/Fallo conexión API externa/gi, 'Fallo en el sistema de recarga automatizada');
-      cleanNote = cleanNote.replace(/El proveedor canceló la recarga/gi, 'El sistema canceló la recarga automáticamente');
-      cleanNote = cleanNote.replace(/API rechazó la cuenta/gi, 'Datos inválidos');
-      cleanNote = cleanNote.replace(/API Error:/gi, 'Error:');
-      cleanNote = cleanNote.replace(/\bAPI\b/gi, 'Sistema');
-      cleanNote = cleanNote.replace(/\bproveedor\b/gi, 'sistema');
-    }
+    let cleanNote = cleanStr(h.note);
 
     return `
       <div class="tracking-history-item">
@@ -811,9 +817,9 @@ function renderOrderTracking(orderId) {
           <div class="tracking-timeline">
             ${timelineHtml}
           </div>
-          ${order.adminNote && isErrorStatus ? `
+          ${cleanAdminNote && isErrorStatus ? `
             <div class="tracking-admin-note">
-              <strong>📝 Nota del equipo:</strong> ${order.adminNote}
+              <strong>📝 Nota del equipo:</strong> ${cleanAdminNote}
             </div>
           ` : ''}
           ${order.status === 'invalid-id' ? `
