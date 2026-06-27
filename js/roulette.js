@@ -31,7 +31,7 @@ function showRouletteModal(orderId) {
           <div class="sec sec-2"><span>INTENTA</span></div>
           <div class="sec sec-3"><span>NADA</span></div>
           <div class="sec sec-4"><span>SUERTE</span></div>
-          <div class="sec sec-5"><span>PREMIO</span></div>
+          <div class="sec sec-5"><span>🎁 PREMIO</span></div>
         </div>
       </div>
       
@@ -75,10 +75,10 @@ function spinRoulette(isWinner, orderId, productId) {
   const baseSpins = 360 * 5; 
   let finalDegree;
   if (isWinner) {
-    // Winner is sec-5 at CSS angle 330deg. Top is 270deg.
-    finalDegree = baseSpins - 60; 
+    // Winner is sec-5 at CSS angle 240deg. Top is 270deg.
+    finalDegree = baseSpins + 30; 
   } else {
-    const losingAngles = [30, 90, 150, 210, 270]; 
+    const losingAngles = [0, 60, 120, 180, 300]; 
     const randomLosingAngle = losingAngles[Math.floor(Math.random() * losingAngles.length)];
     finalDegree = baseSpins + (270 - randomLosingAngle);
   }
