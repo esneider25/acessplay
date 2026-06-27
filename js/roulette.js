@@ -1,11 +1,12 @@
 // ── Roulette Feature ──
 
 function showRouletteModal(orderId) {
-  const orders = typeof getOrders === 'function' ? getOrders() : [];
-  const order = orders.find(o => o.id === orderId);
+  const actualOrderId = typeof orderId === 'object' ? orderId.id : orderId;
+  const orders = typeof getOrders === 'function' ? getOrders() : (typeof ORDERS !== 'undefined' ? ORDERS : []);
+  const order = typeof orderId === 'object' ? orderId : orders.find(o => o.id === actualOrderId);
   if (!order) return;
 
-  const products = typeof getProducts === 'function' ? getProducts() : [];
+  const products = typeof PRODUCTS !== 'undefined' ? PRODUCTS : [];
   const product = products.find(p => p.id === order.productId);
   if (!product) return;
 

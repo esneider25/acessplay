@@ -1127,7 +1127,7 @@ function handleRouletteTransition(orderId) {
   const product = order ? products.find(p => p.id === order.productId) : null;
 
   if (typeof showRouletteModal === 'function' && order && product) {
-    showRouletteModal(order, product);
+    showRouletteModal(order.id);
   } else {
     goToTracking(orderId);
   }
