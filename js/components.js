@@ -732,6 +732,21 @@ function renderOrderTracking(orderId) {
   const historyHtml = (order.statusHistory || []).slice().reverse().map(h => {
     const s = ORDER_STATUSES[h.status] || {};
     const date = new Date(h.timestamp);
+    
+    // Enmascarar notas viejas para eliminar rastro de APIs o proveedores
+    let cleanNote = h.note || '';
+    if (cleanNote) {
+      cleanNote = cleanNote.replace(/Enviando a API externa\.\.\./gi, 'Procesando el pedido de forma automatizada...');
+      cleanNote = cleanNote.replace(/Aprobado y entregado por API/gi, 'Aprobado y entregado automáticamente');
+      cleanNote = cleanNote.replace(/El proveedor rechazó la recarga/gi, 'El sistema rechazó la recarga');
+      cleanNote = cleanNote.replace(/Fallo conexión API externa/gi, 'Fallo en el sistema de recarga automatizada');
+      cleanNote = cleanNote.replace(/El proveedor canceló la recarga/gi, 'El sistema canceló la recarga automáticamente');
+      cleanNote = cleanNote.replace(/API rechazó la cuenta/gi, 'Datos inválidos');
+      cleanNote = cleanNote.replace(/API Error:/gi, 'Error:');
+      cleanNote = cleanNote.replace(/\bAPI\b/gi, 'Sistema');
+      cleanNote = cleanNote.replace(/\bproveedor\b/gi, 'sistema');
+    }
+
     return `
       <div class="tracking-history-item">
         <div class="tracking-history-dot" style="background: ${s.color || '#5a7099'}"></div>
@@ -739,7 +754,7 @@ function renderOrderTracking(orderId) {
           <span class="tracking-history-status">${s.icon || ''} ${s.label || h.status}</span>
           <span class="tracking-history-time">${date.toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric' })} ${date.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
-        ${h.note ? `<div class="tracking-history-note">${h.note}</div>` : ''}
+        ${cleanNote ? `<div class="tracking-history-note">${cleanNote}</div>` : ''}
       </div>
     `;
   }).join('');
