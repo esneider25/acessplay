@@ -412,13 +412,16 @@ function saveDiscounts() {
   saveToDb('discounts', DISCOUNT_CODES);
 }
 
-function createDiscount(code, type, value) {
+function createDiscount(code, type, value, expiryDate = null, globalLimit = null, perClientLimit = null) {
   const newCode = code.trim().toUpperCase();
   if (DISCOUNT_CODES.some(d => d.code === newCode)) return false;
   DISCOUNT_CODES.push({
     code: newCode,
     type: type, // 'percentage' or 'fixed'
     value: parseFloat(value),
+    expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null,
+    globalLimit: globalLimit ? parseInt(globalLimit) : null,
+    perClientLimit: perClientLimit ? parseInt(perClientLimit) : null,
     active: true,
     createdAt: new Date().toISOString()
   });
@@ -434,9 +437,29 @@ function deleteDiscount(code) {
   }
 }
 
-function validateDiscount(code) {
+function validateDiscount(code, contact = null) {
   const target = code.trim().toUpperCase();
-  return DISCOUNT_CODES.find(d => d.code === target && d.active);
+  const d = DISCOUNT_CODES.find(d => d.code === target && d.active);
+  if (!d) return null;
+
+  if (d.expiryDate && new Date() > new Date(d.expiryDate)) {
+    return null;
+  }
+
+  const allOrdersWithCode = getOrders().filter(o => o.discountCode === target && o.status !== 'rejected');
+  
+  if (d.globalLimit && allOrdersWithCode.length >= d.globalLimit) {
+    return null;
+  }
+
+  if (d.perClientLimit && contact) {
+    const clientUses = allOrdersWithCode.filter(o => o.customerContact === contact).length;
+    if (clientUses >= d.perClientLimit) {
+      return null;
+    }
+  }
+
+  return d;
 }
 
 

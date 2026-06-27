@@ -455,9 +455,12 @@ function applyDiscount() {
     return;
   }
 
-  const discount = validateDiscount(code);
+  const contactInput = document.getElementById('customer-contact');
+  const contact = contactInput ? contactInput.value.trim() : null;
+
+  const discount = validateDiscount(code, contact);
   if (!discount) {
-    showToast('⚠️ Código de descuento inválido o inactivo');
+    showToast('⚠️ Código inválido, expirado o límite excedido');
     appState.appliedDiscount = null;
     updateOrderSummary();
     return;
@@ -657,11 +660,16 @@ async function _submitOrderLogic() {
   let discountType = null;
 
   if (appState.appliedDiscount) {
-    const dAmount = calculateDiscountAmount(finalUsd, appState.appliedDiscount);
+    const validDiscount = validateDiscount(appState.appliedDiscount.code, contactInput.value.trim());
+    if (!validDiscount) {
+      showToast('⚠️ El cupón ya no es válido, expiró o alcanzó su límite de uso.');
+      return;
+    }
+    const dAmount = calculateDiscountAmount(finalUsd, validDiscount);
     finalUsd = Math.max(0, finalUsd - dAmount);
-    discountCode = appState.appliedDiscount.code;
-    discountValue = appState.appliedDiscount.value;
-    discountType = appState.appliedDiscount.type;
+    discountCode = validDiscount.code;
+    discountValue = validDiscount.value;
+    discountType = validDiscount.type;
   }
 
   if (appState.selectedPaymentId === 'wallet') {

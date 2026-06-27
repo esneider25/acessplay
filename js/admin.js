@@ -2785,16 +2785,23 @@ function handleUrlAction(action, orderId) {
 function renderDiscounts(container) {
   const discounts = getDiscounts();
   const listHtml = discounts.length > 0 ? discounts.map(d => `
-    <div style="background: var(--bg-deep); padding: 16px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <span class="admin-order-ref" style="font-size: 1.1rem; padding: 6px 12px;">${d.code}</span>
-        <span style="font-size: 1rem; color: var(--text-secondary); font-weight: 500;">
-          ${d.type === 'percentage' ? '-' + d.value + '%' : '-$' + parseFloat(d.value).toFixed(2)}
-        </span>
+    <div style="background: rgba(15, 31, 56, 0.4); backdrop-filter: blur(8px); padding: 16px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <span class="admin-order-ref" style="font-size: 1.1rem; padding: 6px 12px;">${d.code}</span>
+          <span style="font-size: 1.05rem; color: var(--accent); font-weight: 600;">
+            ${d.type === 'percentage' ? '-' + d.value + '%' : '-$' + parseFloat(d.value).toFixed(2)}
+          </span>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap;">
+          ${d.expiryDate ? `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">📅 Vence: ${new Date(d.expiryDate).toLocaleDateString()}</span>` : `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">📅 Sin Vencimiento</span>`}
+          ${d.globalLimit ? `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">🌍 Uso Global: ${d.globalLimit}</span>` : `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">🌍 Uso Ilimitado</span>`}
+          ${d.perClientLimit ? `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">👤 Límite Cliente: ${d.perClientLimit}</span>` : ''}
+        </div>
       </div>
       <button class="btn btn-secondary" style="padding: 6px 12px; color: #ff6b6b; border-color: rgba(220,53,69,0.2);" onclick="adminDeleteDiscount('${d.code}')" title="Eliminar cupón">🗑️ Eliminar</button>
     </div>
-  `).join('') : '<p style="color: var(--text-muted); padding: 20px; text-align: center; background: rgba(0,0,0,0.02); border-radius: 8px;">No hay cupones activos.</p>';
+  `).join('') : '<p style="color: var(--text-muted); padding: 20px; text-align: center; background: rgba(0,0,0,0.2); border-radius: 8px;">No hay cupones activos.</p>';
 
   container.innerHTML = `
     <div class="admin-header">
@@ -2827,7 +2834,21 @@ function renderDiscounts(container) {
               <input type="number" id="discount-value" class="admin-form-input" required min="0.1" step="0.1" placeholder="Ej: 10">
             </div>
           </div>
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">➕ Crear Cupón</button>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 10px;">
+            <div class="admin-form-group">
+              <label class="admin-form-label">Vence (Opcional)</label>
+              <input type="date" id="discount-expiry" class="admin-form-input">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">Uso Global (Opcional)</label>
+              <input type="number" id="discount-global-limit" class="admin-form-input" min="1" placeholder="Ilimitado">
+            </div>
+            <div class="admin-form-group">
+              <label class="admin-form-label">Por Cliente (Opcional)</label>
+              <input type="number" id="discount-client-limit" class="admin-form-input" min="1" placeholder="Ilimitado">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">➕ Crear Cupón</button>
         </form>
       </div>
 
@@ -2848,8 +2869,11 @@ function adminCreateDiscount(event) {
   const code = document.getElementById('discount-code').value;
   const type = document.getElementById('discount-type').value;
   const value = document.getElementById('discount-value').value;
+  const expiryDate = document.getElementById('discount-expiry').value || null;
+  const globalLimit = document.getElementById('discount-global-limit').value || null;
+  const clientLimit = document.getElementById('discount-client-limit').value || null;
 
-  if (createDiscount(code, type, value)) {
+  if (createDiscount(code, type, value, expiryDate, globalLimit, clientLimit)) {
     showAdminToast('✅ Cupón creado exitosamente', 'success');
     renderActiveTab();
   } else {
