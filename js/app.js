@@ -237,10 +237,14 @@ function renderApp() {
       ${termsHtml}
     `;
   } else if (appState.currentView === 'history') {
-    const orders = getOrders().filter(o => 
-      o.customerContact && appState.historyContactStr && 
-      o.customerContact.toLowerCase().includes(appState.historyContactStr.toLowerCase())
-    );
+    const orders = getOrders().filter(o => {
+      if (!appState.historyContactStr) return false;
+      const term = appState.historyContactStr.toLowerCase();
+      const matchContact = o.customerContact && o.customerContact.toLowerCase().includes(term);
+      const matchEmail = o.userEmail && o.userEmail.toLowerCase().includes(term);
+      const matchPhone = o.userPhone && o.userPhone.toLowerCase().includes(term);
+      return matchContact || matchEmail || matchPhone;
+    });
     app.innerHTML = `
       <div class="bg-ocean-grid">${renderBubbles()}</div>
       ${renderNavbar()}
@@ -1202,13 +1206,19 @@ function lookupOrder() {
   }
   const val = input.value.trim();
   
-  // Allow tracking by digits (which we prepend AP- to) or full AP- code
-  if (/^\d{1,6}$/.test(val)) {
+  // 1. Revisa si hay un match exacto (ej. AP-OLD-20)
+  const orders = typeof getOrders === 'function' ? getOrders() : [];
+  const exactOrder = orders.find(o => o.id && o.id.toLowerCase() === val.toLowerCase());
+  
+  if (exactOrder) {
+    navigateTo('tracking', exactOrder.id);
+  } else if (/^\d{1,6}$/.test(val)) {
+    // 2. Si solo puso el número, asumimos que es uno nuevo AP-
     navigateTo('tracking', 'AP-' + val);
   } else if (/^AP-\d{1,6}$/i.test(val)) {
     navigateTo('tracking', val.toUpperCase());
   } else {
-    // Treat as contact search (email or phone)
+    // 3. Búsqueda por contacto (email, teléfono, etc.)
     navigateTo('history', val);
   }
 }
