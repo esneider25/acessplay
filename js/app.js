@@ -225,11 +225,6 @@ function renderApp() {
       ${renderSupportWidget()}
       ${termsHtml}
     `;
-    requestAnimationFrame(() => {
-      if (typeof tryTriggerRoulette === 'function') {
-        tryTriggerRoulette(appState.trackingOrderId);
-      }
-    });
   } else if (appState.currentView === 'lookup') {
     app.innerHTML = `
       <div class="bg-ocean-grid">${renderBubbles()}</div>

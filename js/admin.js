@@ -3103,6 +3103,19 @@ function renderSettings(container) {
         </div>
       </div>
 
+      <div class="admin-card">
+        <div class="admin-card-header">
+          <h3 class="admin-card-title">🎰 Gamificación</h3>
+        </div>
+        <div class="admin-form-group">
+          <label class="admin-form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Activar Ruleta de la Suerte</span>
+            <input type="checkbox" id="setting-enable-roulette" ${config.enableRoulette !== false ? 'checked' : ''} style="width: 24px; height: 24px; accent-color: var(--accent); cursor: pointer;">
+          </label>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">Si se activa, a los clientes que recarguen en la categoría de juegos les aparecerá el botón para girar la ruleta luego de que su pedido sea aprobado.</p>
+        </div>
+      </div>
+
       <div class="admin-card" style="grid-column: 1 / -1;">
         <div class="admin-card-header">
           <h3 class="admin-card-title">📢 Mensaje Emergente (Aviso Inicial)</h3>
@@ -3202,9 +3215,11 @@ function adminSaveSettings() {
   const maintenance = document.getElementById('setting-maintenance').checked;
   const announcementEnabled = document.getElementById('setting-announcement-enabled').checked;
   const announcementMessage = document.getElementById('setting-announcement-msg').value;
+  const enableRouletteEl = document.getElementById('setting-enable-roulette');
+  const enableRoulette = enableRouletteEl ? enableRouletteEl.checked : true;
   const termsAndConditions = window.currentTermsEditorData || [];
 
-  saveSettings({ whatsapp, whatsappChannel, instagram, telegram, schedule, maintenance, announcementEnabled, announcementMessage, termsAndConditions });
+  saveSettings({ whatsapp, whatsappChannel, instagram, telegram, schedule, maintenance, announcementEnabled, announcementMessage, enableRoulette, termsAndConditions });
   showAdminToast('✅ Configuración guardada', 'success');
 }
 

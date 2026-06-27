@@ -1,38 +1,14 @@
 // ── Roulette Feature ──
 
-function tryTriggerRoulette(orderId) {
+function showRouletteModal(orderId) {
   const orders = typeof getOrders === 'function' ? getOrders() : [];
   const order = orders.find(o => o.id === orderId);
-  
   if (!order) return;
-  
-  // SOLO CUANDO SEA APROBADO
-  if (order.status !== 'completed') return;
-  
-  // SOLO PARA CLIENTE E INFLUENCER, NO REVENDEDOR
-  const profile = typeof userProfile !== 'undefined' ? userProfile : null;
-  if (profile && profile.role === 'revendedor') return;
-
-  // NO REPETIR POR ORDEN
-  if (localStorage.getItem('roulette_played_' + orderId)) return;
 
   const products = typeof getProducts === 'function' ? getProducts() : [];
   const product = products.find(p => p.id === order.productId);
   if (!product) return;
 
-  // SOLO PARA JUEGOS
-  const isGame = (product.category && product.category.toLowerCase() === 'juegos') || product.type === 'game-id';
-  if (!isGame) return;
-
-  // Marcar como jugada
-  localStorage.setItem('roulette_played_' + orderId, 'true');
-
-  setTimeout(() => {
-    showRouletteModal(order, product);
-  }, 1000); // 1 sec delay after entering tracking screen
-}
-
-function showRouletteModal(order, product) {
   // 2% chance
   const isWinner = Math.random() < 0.02;
 
@@ -74,19 +50,33 @@ function spinRoulette(isWinner, orderId, productId) {
   
   btn.style.display = 'none';
   if (closeBtn) closeBtn.style.display = 'none';
+
+  // Mark as played securely in database
+  const orders = typeof getOrders === 'function' ? getOrders() : [];
+  const order = orders.find(o => o.id === orderId);
+  if (order && typeof saveOrderToDb === 'function') {
+    order.roulettePlayed = true;
+    saveOrderToDb(order);
+    
+    // Also re-render tracking so the button disappears in background
+    if (appState && appState.currentView === 'tracking') {
+      setTimeout(() => {
+        if (typeof renderOrderTracking === 'function') {
+          const container = document.querySelector('.app-container');
+          if (container) {
+            container.innerHTML = renderOrderTracking(orderId) + (typeof renderFooter === 'function' ? renderFooter() : '');
+          }
+        }
+      }, 500);
+    }
+  }
   
-  // Sections: 6 sections (60deg each). 
-  // sec-0 = 0-60, sec-1 = 60-120... sec-5 = 300-360
-  // Winner is sec-5 (PREMIO)
-  // Final degree to apply to the wheel
   const baseSpins = 360 * 5; 
   let finalDegree;
   if (isWinner) {
     // Winner is sec-5 at CSS angle 330deg. Top is 270deg.
-    // finalDegree = 270 - 330 = -60 + baseSpins
     finalDegree = baseSpins - 60; 
   } else {
-    // Losing angles: centers of sec 0, 1, 2, 3, 4 (30, 90, 150, 210, 270)
     const losingAngles = [30, 90, 150, 210, 270]; 
     const randomLosingAngle = losingAngles[Math.floor(Math.random() * losingAngles.length)];
     finalDegree = baseSpins + (270 - randomLosingAngle);

@@ -746,6 +746,28 @@ function renderOrderTracking(orderId) {
 
   const typeLabel = order.productType === 'account' ? '🔐 Interna' : order.productType === 'code' ? '🎫 Código' : '🎮 Por ID';
 
+  const config = typeof getSettings === 'function' ? getSettings() : {};
+  let rouletteButtonHtml = '';
+  if (config.enableRoulette && order.status === 'completed' && !order.roulettePlayed) {
+    const products = typeof getProducts === 'function' ? getProducts() : [];
+    const product = products.find(p => p.id === order.productId);
+    const profile = typeof userProfile !== 'undefined' ? userProfile : null;
+    const isGame = product && ((product.category && product.category.toLowerCase() === 'juegos') || product.type === 'game-id');
+    const isNotReseller = !profile || profile.role !== 'revendedor';
+    
+    if (isGame && isNotReseller) {
+      rouletteButtonHtml = `
+        <div style="margin-top: 25px; background: linear-gradient(135deg, rgba(0, 229, 195, 0.1), rgba(14, 165, 233, 0.1)); border: 1px dashed var(--accent); border-radius: var(--radius-md); padding: 25px 20px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.2);">
+          <h4 style="color: var(--accent); font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 10px; text-shadow: 0 0 10px rgba(0,229,195,0.3);">🎁 ¡Tienes un giro pendiente!</h4>
+          <p style="font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 20px;">Por recargar juegos, has ganado la oportunidad de girar la Ruleta de la Suerte.</p>
+          <button class="btn-primary" onclick="showRouletteModal('${order.id}')" style="background: var(--accent); color: #000; padding: 14px 30px; font-weight: 800; font-size: 1.1rem; border-radius: 30px; box-shadow: 0 0 20px rgba(0,229,195,0.4); border: none; letter-spacing: 1px; width: 100%; max-width: 300px; margin: 0 auto; display: block;">
+            🎰 GIRAR AHORA
+          </button>
+        </div>
+      `;
+    }
+  }
+
   return `
     <section class="order-tracking-section" id="order-tracking">
       <div class="container">
@@ -766,6 +788,7 @@ function renderOrderTracking(orderId) {
           <div class="tracking-timeline">
             ${timelineHtml}
           </div>
+          ${rouletteButtonHtml}
           ${order.adminNote && isErrorStatus ? `
             <div class="tracking-admin-note">
               <strong>📝 Nota del equipo:</strong> ${order.adminNote}
