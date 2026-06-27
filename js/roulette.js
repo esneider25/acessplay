@@ -51,7 +51,7 @@ function spinRoulette(isWinner, orderId, productId) {
   
   // Audios
   const winSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'); // Win arcade
-  const loseSound = new Audio('https://assets.mixkit.co/active_storage/sfx/3148/3148-preview.mp3'); // Lose sad trombone
+  const loseSound = new Audio('https://www.myinstants.com/media/sounds/sadtrombone.mp3'); // Classic sad horn/trombone
   
   btn.style.display = 'none';
   if (closeBtn) closeBtn.style.display = 'none';
@@ -62,26 +62,25 @@ function spinRoulette(isWinner, orderId, productId) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+    // Use a square wave with a low frequency drop to simulate a heavy plastic flapper hitting a peg
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.03);
+    gainNode.gain.setValueAtTime(1, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.05);
+    osc.stop(audioCtx.currentTime + 0.03);
   }
 
-  let ticks = 0;
-  const maxTicks = 40; // 40 ticks
-  let delay = 20; // start fast (20ms)
+  let delay = 15; // start extremely fast (15ms)
   function triggerTick() {
-    if (ticks >= maxTicks) return;
     playTick();
-    ticks++;
-    delay = delay * 1.10; // increase delay by 10% each tick (slows down)
-    setTimeout(triggerTick, delay);
+    delay = delay * 1.10; // increase delay by 10% each tick (slows down perfectly over ~11.8 seconds)
+    if (delay < 1200) { // Keep ticking until the delay between ticks reaches 1.2 seconds
+      setTimeout(triggerTick, delay);
+    }
   }
   triggerTick();
 
@@ -105,7 +104,7 @@ function spinRoulette(isWinner, orderId, productId) {
     }
   }
   
-  const baseSpins = 360 * 10; // 10 vueltas para mayor suspenso
+  const baseSpins = 360 * 15; // 15 vueltas para muchísimo más suspenso
   let finalDegree;
   if (isWinner) {
     // Winner is sec-5 at CSS angle 240deg. Top is 270deg.
@@ -116,8 +115,8 @@ function spinRoulette(isWinner, orderId, productId) {
     finalDegree = baseSpins + (270 - randomLosingAngle);
   }
 
-  // 10 segundos de animación, empieza rápido y se detiene muy lentamente
-  wheel.style.transition = `transform 10s cubic-bezier(0.1, 0.9, 0.1, 1)`;
+  // 12 segundos de animación, empieza rápido, pero tiene una caída larga y tensa
+  wheel.style.transition = `transform 12s cubic-bezier(0.15, 0.8, 0.1, 1)`;
   wheel.style.transform = `rotate(${finalDegree}deg)`;
   
   setTimeout(() => {
@@ -138,7 +137,7 @@ function spinRoulette(isWinner, orderId, productId) {
     btn.onclick = () => {
       document.getElementById('roulette-modal').remove();
     };
-  }, 10000); // 10 segundos para coincidir con la transición
+  }, 12000); // 12 segundos para coincidir con la transición
 }
 
 function processRoulettePrize(originalOrderId, productId) {
