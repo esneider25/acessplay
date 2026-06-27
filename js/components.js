@@ -25,7 +25,9 @@ function renderNavbar() {
           <li id="pwa-nav-item"><a id="pwa-install-app-btn" onclick="window.handleStoreInstallClick()" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer; color: white;">📲 Instalar App</a></li>
           <li><a class="theme-toggle-btn" onclick="toggleTheme()" style="cursor:pointer; font-size: 1.2rem;" title="Cambiar Tema">🌓</a></li>
         </ul>
-        <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu">☰</button>
+        <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu" style="background: var(--bg-surface); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; color: var(--text-primary); font-family: var(--font-primary); font-weight: 600; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+          <div style="display: flex; align-items: center; gap: 8px;">Menú Principal <span style="font-size: 0.9rem;">▼</span></div>
+        </button>
       </div>
     </nav>
   `;
