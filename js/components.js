@@ -748,7 +748,14 @@ function renderOrderTracking(orderId) {
 
   const config = typeof getSettings === 'function' ? getSettings() : {};
   let rouletteButtonHtml = '';
-  if (config.enableRoulette !== false && order.status === 'completed' && !order.roulettePlayed) {
+  
+  // Solo mostrar ruleta si fue activada, el pedido está completado, no se ha jugado, 
+  // y el pedido fue creado DESPUÉS del 27 de Junio de 2026 a las 12:00 PM (16:00 UTC)
+  const rouletteCutoffTime = new Date('2026-06-27T16:00:00Z').getTime();
+  const orderTime = new Date(order.createdAt || 0).getTime();
+  const isEligibleByDate = orderTime >= rouletteCutoffTime;
+
+  if (config.enableRoulette !== false && order.status === 'completed' && !order.roulettePlayed && isEligibleByDate) {
     const products = typeof getProducts === 'function' ? getProducts() : [];
     const product = products.find(p => p.id === order.productId);
     const profile = typeof userProfile !== 'undefined' ? userProfile : null;
