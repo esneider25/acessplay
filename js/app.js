@@ -1466,7 +1466,7 @@ function startSupportSession() {
   // Call addMessage empty just to create session with contact if not exists
   let msgs = getMessagesForSession(sessionId);
   if (msgs.length === 0) {
-     addMessage(sessionId, 'bot', '¡Hola! 👋 Bienvenido a AccessPlay. ¿En qué puedo ayudarte hoy?', contact);
+     addMessage(sessionId, 'bot', '¡Hola! 👋 Bienvenido a AccesPlay. ¿En qué puedo ayudarte hoy?', contact);
   } else {
      // Force contact update
      addMessage(sessionId, 'system', '', contact);
