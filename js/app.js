@@ -808,7 +808,7 @@ let isProcessingOrder = false;
 window.addEventListener('beforeunload', function (e) {
   if (isProcessingOrder) {
     e.preventDefault();
-    e.returnValue = 'Estamos conectando con el proveedor. Si actualizas la página el proceso podría quedar a medias.';
+    e.returnValue = 'Estamos procesando tu recarga de forma automatizada. Si actualizas la página el proceso podría quedar a medias.';
     return e.returnValue;
   }
 });
