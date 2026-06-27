@@ -663,7 +663,7 @@ function renderDashboard(container) {
       if (elTopClients) {
         const userSpentMap = {};
         completedOrders.forEach(o => {
-          if (o.userId) {
+          if (o.userId && o.productType !== 'wallet-recharge') {
             userSpentMap[o.userId] = (userSpentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
           }
         });
@@ -867,7 +867,9 @@ async function renderCustomers(container) {
     customersMap[key].totalOrders += 1;
     // Si no tiene UID (guest) o no se migró el totalSpent, sumar lo gastado aquí
     if (!customersMap[key].uid || !customersMap[key].hasTotalSpent) {
-      customersMap[key].totalSpent += (o.priceUsd || 0);
+      if (o.productType !== 'wallet-recharge') {
+        customersMap[key].totalSpent += (o.priceUsd || 0);
+      }
     }
     if (!customersMap[key].firstOrder || o.createdAt < customersMap[key].firstOrder) customersMap[key].firstOrder = o.createdAt;
     if (!customersMap[key].lastOrder || o.createdAt > customersMap[key].lastOrder) customersMap[key].lastOrder = o.createdAt;
@@ -1050,7 +1052,9 @@ async function exportCustomersCSV() {
     }
     customersMap[key].totalOrders += 1;
     if (!customersMap[key].uid || !customersMap[key].hasTotalSpent) {
-      customersMap[key].totalSpent += (o.priceUsd || 0);
+      if (o.productType !== 'wallet-recharge') {
+        customersMap[key].totalSpent += (o.priceUsd || 0);
+      }
     }
     if (!customersMap[key].lastOrder || o.createdAt > customersMap[key].lastOrder) customersMap[key].lastOrder = o.createdAt;
   });
@@ -4368,7 +4372,7 @@ window.normalizeLegacyData = async function () {
         batchUpdates['users/' + o.userId + '/orders/' + o.id] = true;
       }
       if (o.status === 'completed' || o.status === 'completado') {
-        if (o.userId) spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+        if (o.userId && o.productType !== 'wallet-recharge') spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
       }
     });
 
