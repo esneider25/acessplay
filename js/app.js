@@ -938,7 +938,7 @@ async function processWalletOrderAuto(order, isReseller = false) {
               isProcessingOrder = false;
               let errorMsg = pollData.error || pollData.msg || pollData.estado || 'Rechazado';
               if (typeof updateOrderStatus === 'function') {
-                updateOrderStatus(order.id, 'invalid-id', `Verifica que el ID o la cuenta sean correctos. El proveedor rechazó la recarga. (${errorMsg})`);
+                updateOrderStatus(order.id, 'invalid-id', `Verifica que el ID o la cuenta sean correctos. El sistema rechazó la recarga. (${errorMsg})`);
               }
               if (typeof sendTelegramMessage === 'function') {
                 sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — #${order.id}</b>\n\nEl proveedor rechazó el pedido luego de procesar. El cliente debe corregir los datos. Mensaje de error: ${errorMsg}`);

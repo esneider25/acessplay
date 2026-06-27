@@ -1616,7 +1616,7 @@ async function processAutomaticTopup(orderId, fromModal = false) {
 
   const baseUrl = api.baseUrl.endsWith('/') ? api.baseUrl.slice(0, -1) : api.baseUrl;
 
-  updateOrderStatus(orderId, 'processing', 'Enviando a API externa...');
+  updateOrderStatus(orderId, 'processing', 'Procesando el pedido de forma automatizada...');
   refreshOrdersView();
 
   try {
@@ -1660,7 +1660,7 @@ async function processAutomaticTopup(orderId, fromModal = false) {
 
     if (data.ok) {
       if (data.estado === 'completado') {
-        let note = 'Aprobado y entregado por API';
+        let note = 'Aprobado y entregado automáticamente';
         if (data.codigos && data.codigos.length > 0) {
           note = 'Códigos entregados:\n' + data.codigos.join('\n');
         } else if (data.codigo) {
@@ -1677,7 +1677,7 @@ async function processAutomaticTopup(orderId, fromModal = false) {
     } else {
       const refundMsg = data.reembolsado ? ' (Reembolsado al saldo)' : '';
       showAdminToast(`❌ API Error: ${data.error}${refundMsg}`, 'error');
-      updateOrderStatus(orderId, 'invalid-id', `Verifica que el ID o la cuenta sean correctos. El proveedor rechazó la recarga. (${data.error}${refundMsg})`);
+      updateOrderStatus(orderId, 'invalid-id', `Verifica que el ID o la cuenta sean correctos. El sistema rechazó la recarga. (${data.error}${refundMsg})`);
       refreshOrdersView();
       if (fromModal) closeAdminModal();
 
@@ -1687,7 +1687,7 @@ async function processAutomaticTopup(orderId, fromModal = false) {
   } catch (error) {
     console.error('Error API Comprar:', error);
     showAdminToast(`❌ Fallo de conexión con la API`, 'error');
-    updateOrderStatus(orderId, 'pending', 'Fallo conexión API externa');
+    updateOrderStatus(orderId, 'pending', 'Fallo en el sistema de recarga automatizada');
     refreshOrdersView();
     sendTelegramMessage(`⚠️ <b>FALLO DE CONEXIÓN API — Pedido #${orderId}</b>\nNo se pudo conectar con el proveedor API externo.\nEl pedido sigue en estado Pendiente.`);
   }
@@ -1734,7 +1734,7 @@ function pollApiStatus(baseUrl, apiKey, orderId, fromModal) {
           completeOrderLocally(orderId, fromModal, note);
         } else if (data.status === 'failed' || data.estado === 'cancelado') {
           clearInterval(interval);
-          updateOrderStatus(orderId, 'rejected', 'El proveedor canceló la recarga');
+          updateOrderStatus(orderId, 'rejected', 'El sistema canceló la recarga automáticamente');
           refreshOrdersView();
           showAdminToast(`❌ Proveedor canceló el pedido ${orderId}`, 'error');
           if (fromModal) closeAdminModal();
