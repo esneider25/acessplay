@@ -392,11 +392,3 @@ class WalkthroughTutorial {
 }
 
 window.Tutorial = new WalkthroughTutorial();
-
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    if (!localStorage.getItem('tutorialCompleted') && (window.location.pathname === '/' || window.location.pathname.includes('index'))) {
-      window.Tutorial.start();
-    }
-  }, 2500); 
-});
