@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script>
+    if (window.location.hostname.startsWith('admin.') && window.location.pathname === '/') {
+      window.location.href = '/admin.html';
+    }
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="AccessPlay — Tu tienda digital todo en un solo lugar. Recargas de videojuegos, gift cards, streaming y billeteras digitales en Venezuela. Pago Móvil, transferencia y Binance.">
