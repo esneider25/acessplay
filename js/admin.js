@@ -4448,3 +4448,46 @@ window.filterCrmTable = function (val) {
     noRes.style.display = visibleCount === 0 ? 'block' : 'none';
   }
 };
+
+window.fixWalletSpendingBug = async function() {
+  if (!confirm("¿Corregir los gastos totales de los usuarios excluyendo recargas de billetera?")) return;
+  const btn = document.getElementById('btn-fix-wallet');
+  if (btn) btn.innerHTML = "Corrigiendo...";
+  
+  try {
+    const ordersSnap = await firebase.database().ref('orders').once('value');
+    const ordersData = ordersSnap.val() || {};
+    const spentMap = {};
+    
+    Object.values(ordersData).forEach(o => {
+      if ((o.status === 'completed' || o.status === 'completado') && o.userId) {
+        if (o.productType !== 'wallet-recharge') {
+          spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+        }
+      }
+    });
+
+    const usersSnap = await firebase.database().ref('users').once('value');
+    const usersData = usersSnap.val() || {};
+    const batchUpdates = {};
+    let updatedUsers = 0;
+
+    for (const uid in usersData) {
+      const actualSpent = spentMap[uid] || 0;
+      if (usersData[uid].totalSpent !== actualSpent) {
+        batchUpdates['users/' + uid + '/totalSpent'] = actualSpent;
+        updatedUsers++;
+      }
+    }
+
+    if (Object.keys(batchUpdates).length > 0) {
+      await firebase.database().ref().update(batchUpdates);
+    }
+    
+    alert(`Se corrigieron los gastos de ${updatedUsers} usuarios.`);
+    if (btn) btn.innerHTML = "✨ Corregir Gastos de Billetera";
+  } catch (err) {
+    alert("Error: " + err.message);
+    if (btn) btn.innerHTML = "✨ Corregir Gastos de Billetera";
+  }
+};
