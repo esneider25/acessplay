@@ -549,6 +549,25 @@ function saveMessages() {
 }
 
 // ── Orders CRUD ──
+function subscribeToGuestOrder(orderId) {
+  if (typeof firebase === 'undefined' || !orderId) return;
+  const db = firebase.database();
+  db.ref('orders/' + orderId).off('value'); 
+  db.ref('orders/' + orderId).on('value', (snapshot) => {
+    if (snapshot.exists()) {
+      const updatedOrder = snapshot.val();
+      const idx = ORDERS.findIndex(o => o.id === orderId);
+      if (idx !== -1) {
+        ORDERS[idx] = updatedOrder;
+      } else {
+        ORDERS.push(updatedOrder);
+      }
+      if (typeof appState !== 'undefined' && appState.currentView === 'tracking' && appState.trackingOrderId === orderId) {
+        if (typeof renderApp === 'function') renderApp();
+      }
+    }
+  });
+}
 function getOrders() {
   const canceledIds = [20, 31, 46, 49, 50, 62, 63, 81, 82, 84, 85, 86, 88, 103, 121, 134, 139, 173, 178, 179, 180, 210, 223, 231, 246, 274, 286, 307, 348, 350, 351, 358, 370, 374, 407, 415, 439, 471, 472, 473, 482, 485, 487, 488, 489, 500, 503, 505, 517].map(id => 'AP-OLD-' + id);
   const processingIds = [1, 143, 236, 369].map(id => 'AP-OLD-' + id);
