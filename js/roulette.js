@@ -49,8 +49,17 @@ function spinRoulette(isWinner, orderId, productId) {
   const resultDiv = document.getElementById('roulette-result');
   const closeBtn = document.querySelector('.roulette-close-btn');
   
+  // Audios
+  const spinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/226/226-preview.mp3'); // Suspense drumroll o sonido de giro
+  const winSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'); // Win arcade
+  const loseSound = new Audio('https://assets.mixkit.co/active_storage/sfx/3148/3148-preview.mp3'); // Lose sad trombone
+  
   btn.style.display = 'none';
   if (closeBtn) closeBtn.style.display = 'none';
+  
+  // Start spin sound
+  spinSound.volume = 0.6;
+  spinSound.play().catch(e => console.log('Audio autoplay blocked'));
 
   // Mark as played securely in database
   const orders = typeof getOrders === 'function' ? getOrders() : [];
@@ -72,7 +81,7 @@ function spinRoulette(isWinner, orderId, productId) {
     }
   }
   
-  const baseSpins = 360 * 5; 
+  const baseSpins = 360 * 10; // 10 vueltas para mayor suspenso
   let finalDegree;
   if (isWinner) {
     // Winner is sec-5 at CSS angle 240deg. Top is 270deg.
@@ -83,16 +92,19 @@ function spinRoulette(isWinner, orderId, productId) {
     finalDegree = baseSpins + (270 - randomLosingAngle);
   }
 
-  wheel.style.transition = `transform 6s cubic-bezier(0.15, 0.9, 0.15, 1)`;
+  // 10 segundos de animación, empieza rápido y se detiene muy lentamente
+  wheel.style.transition = `transform 10s cubic-bezier(0.1, 0.9, 0.1, 1)`;
   wheel.style.transform = `rotate(${finalDegree}deg)`;
   
   setTimeout(() => {
     if (isWinner) {
+      winSound.play().catch(e => console.log('Audio autoplay blocked'));
       resultDiv.innerHTML = "🎉 ¡FELICIDADES! ¡GANASTE UN PREMIO! 🎉";
       resultDiv.style.color = "var(--accent)";
       if (typeof createConfetti === 'function') createConfetti();
       processRoulettePrize(orderId, productId);
     } else {
+      loseSound.play().catch(e => console.log('Audio autoplay blocked'));
       resultDiv.innerHTML = "😔 Sigue participando. ¡Suerte a la próxima!";
       resultDiv.style.color = "#f87171";
     }
@@ -102,7 +114,7 @@ function spinRoulette(isWinner, orderId, productId) {
     btn.onclick = () => {
       document.getElementById('roulette-modal').remove();
     };
-  }, 6000);
+  }, 10000); // 10 segundos para coincidir con la transición
 }
 
 function processRoulettePrize(originalOrderId, productId) {
