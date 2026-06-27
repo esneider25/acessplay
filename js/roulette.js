@@ -50,16 +50,40 @@ function spinRoulette(isWinner, orderId, productId) {
   const closeBtn = document.querySelector('.roulette-close-btn');
   
   // Audios
-  const spinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/226/226-preview.mp3'); // Suspense drumroll o sonido de giro
   const winSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'); // Win arcade
   const loseSound = new Audio('https://assets.mixkit.co/active_storage/sfx/3148/3148-preview.mp3'); // Lose sad trombone
   
   btn.style.display = 'none';
   if (closeBtn) closeBtn.style.display = 'none';
   
-  // Start spin sound
-  spinSound.volume = 0.6;
-  spinSound.play().catch(e => console.log('Audio autoplay blocked'));
+  // Start spin sound (Synthetic Roulette Ticks)
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function playTick() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05);
+    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+  }
+
+  let ticks = 0;
+  const maxTicks = 40; // 40 ticks
+  let delay = 20; // start fast (20ms)
+  function triggerTick() {
+    if (ticks >= maxTicks) return;
+    playTick();
+    ticks++;
+    delay = delay * 1.10; // increase delay by 10% each tick (slows down)
+    setTimeout(triggerTick, delay);
+  }
+  triggerTick();
 
   // Mark as played securely in database
   const orders = typeof getOrders === 'function' ? getOrders() : [];
