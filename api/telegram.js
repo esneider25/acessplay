@@ -19,6 +19,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Faltan credenciales de Telegram." });
     }
 
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    
+    async function fetchWithRetry(url, options) {
+      let response = await fetch(url, options);
+      let data = await response.json();
+      
+      // Handle Telegram 429 Rate Limit
+      if (response.status === 429) {
+        const retryAfter = (data.parameters && data.parameters.retry_after) ? data.parameters.retry_after * 1000 : 3000;
+        console.warn(`Telegram 429: Retrying after ${retryAfter}ms`);
+        // We wait up to 7 seconds max to avoid Vercel Function timeouts
+        if (retryAfter <= 7000) {
+          await sleep(retryAfter + 100);
+          response = await fetch(url, options);
+          data = await response.json();
+        }
+      }
+      return { response, data };
+    }
+
     if (type === 'message') {
       const body = {
         chat_id: chatId,
@@ -29,12 +49,11 @@ export default async function handler(req, res) {
         body.reply_markup = { inline_keyboard: inlineKeyboard };
       }
       
-      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      const { response, data } = await fetchWithRetry(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      const data = await response.json();
       return res.status(response.status).json(data);
     } 
     
@@ -55,11 +74,10 @@ export default async function handler(req, res) {
         formData.append('photo', blob, 'comprobante.jpg');
       }
 
-      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+      const { response, data } = await fetchWithRetry(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
         method: 'POST',
         body: formData
       });
-      const data = await response.json();
       return res.status(response.status).json(data);
     }
     
