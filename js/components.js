@@ -777,8 +777,9 @@ function renderOrderTracking(orderId) {
   const rouletteCutoffTime = new Date('2026-06-27T16:00:00Z').getTime();
   const orderTime = new Date(order.createdAt || 0).getTime();
   const isEligibleByDate = orderTime >= rouletteCutoffTime;
+  const playedLocally = localStorage.getItem('roulette_played_' + order.id) === 'true';
 
-  if (config.enableRoulette !== false && order.status === 'completed' && !order.roulettePlayed && isEligibleByDate) {
+  if (config.enableRoulette !== false && order.status === 'completed' && !order.roulettePlayed && !playedLocally && isEligibleByDate) {
     const products = typeof getProducts === 'function' ? getProducts() : [];
     const product = products.find(p => p.id === order.productId);
     const profile = typeof userProfile !== 'undefined' ? userProfile : null;

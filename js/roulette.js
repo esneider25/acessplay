@@ -94,6 +94,7 @@ function spinRoulette(isWinner, orderId, productId) {
     if (order) {
       order.roulettePlayed = true;
     }
+    localStorage.setItem('roulette_played_' + orderId, 'true');
     
     // Also re-render tracking so the button disappears in background
     if (appState && appState.currentView === 'tracking') {
