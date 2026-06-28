@@ -1197,7 +1197,7 @@ function closeModalOutside(event) {
 }
 
 // ── Order Lookup ──
-function lookupOrder() {
+async function lookupOrder() {
   const input = document.getElementById('lookup-input');
   if (!input || !input.value.trim()) {
     showToast('⚠️ Ingresa un dato de búsqueda');
@@ -1206,20 +1206,41 @@ function lookupOrder() {
   }
   const val = input.value.trim();
   
-  // 1. Revisa si hay un match exacto (ej. AP-OLD-20)
-  const orders = typeof getOrders === 'function' ? getOrders() : [];
-  const exactOrder = orders.find(o => o.id && o.id.toLowerCase() === val.toLowerCase());
-  
-  if (exactOrder) {
-    navigateTo('tracking', exactOrder.id);
-  } else if (/^\d{1,6}$/.test(val)) {
-    // 2. Si solo puso el número, asumimos que es uno nuevo AP-
-    navigateTo('tracking', 'AP-' + val);
+  let orderIdToTrack = null;
+  if (/^\d{1,6}$/.test(val)) {
+    orderIdToTrack = 'AP-' + val;
   } else if (/^AP-\d{1,6}$/i.test(val)) {
-    navigateTo('tracking', val.toUpperCase());
+    orderIdToTrack = val.toUpperCase();
+  }
+
+  if (orderIdToTrack) {
+    const btn = input.nextElementSibling;
+    const oldHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.innerHTML = '⏳';
+      btn.disabled = true;
+    }
+    try {
+      const snap = await firebase.database().ref('orders/' + orderIdToTrack).once('value');
+      if (btn) { btn.innerHTML = oldHtml; btn.disabled = false; }
+      
+      if (snap.exists()) {
+        const orderData = snap.val();
+        // Insert into local ORDERS if not present
+        if (!ORDERS.find(o => o.id === orderData.id)) {
+          ORDERS.push(orderData);
+        }
+        navigateTo('tracking', orderData.id);
+      } else {
+        showToast('❌ Pedido no encontrado. Verifica el número (Ej: AP-1234)');
+      }
+    } catch (e) {
+      if (btn) { btn.innerHTML = oldHtml; btn.disabled = false; }
+      showToast('❌ Error al buscar pedido');
+    }
   } else {
-    // 3. Búsqueda por contacto (email, teléfono, etc.)
-    navigateTo('history', val);
+    // Búsqueda por correo/teléfono: ahora requiere inicio de sesión para el historial completo
+    showToast('⚠️ Para buscar por correo/teléfono debes Iniciar Sesión, o usa tu número de pedido (Ej: AP-1234)', 'info');
   }
 }
 
