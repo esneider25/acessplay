@@ -851,15 +851,23 @@ function renderProducts(container) {
 // 2.5 CUSTOMERS (CRM)
 // ════════════════════════════════════════
 async function renderCustomers(container) {
+  const titleText = adminState.showHistoricalOrders ? 'Clientes VIP (Histórico)' : 'Clientes VIP (Últimos 150)';
+  const historyBtn = adminState.showHistoricalOrders 
+    ? `<button class="btn btn-secondary" onclick="adminState.showHistoricalOrders = false; renderActiveTab();" style="padding: 8px 16px; font-size: 0.85rem;">⬅️ Volver a Recientes</button>`
+    : `<button class="btn btn-secondary" onclick="loadHistoricalOrdersList()" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid var(--accent); color: var(--accent);">📚 Calcular con Historial Completo</button>`;
+
   container.innerHTML = `
     <div class="admin-header">
       <div>
-        <h1 class="admin-title">Clientes VIP (CRM)</h1>
+        <h1 class="admin-title">${titleText}</h1>
         <p class="admin-subtitle">Usuarios registrados y mejores compradores</p>
       </div>
-      <button class="btn btn-secondary" onclick="exportCustomersCSV()">
-        <span>📥</span> Exportar a CSV
-      </button>
+      <div style="display: flex; gap: 8px;">
+        ${historyBtn}
+        <button class="btn btn-secondary" onclick="exportCustomersCSV()">
+          <span>📥</span> Exportar a CSV
+        </button>
+      </div>
     </div>
     
     <div style="margin-bottom: 20px; display: flex; gap: 8px;">
@@ -884,7 +892,7 @@ async function renderCustomers(container) {
     console.error("Error fetching users:", error);
   }
 
-  const allOrders = getOrders();
+  const allOrders = adminState.showHistoricalOrders && adminState.historicalOrders ? adminState.historicalOrders : getOrders();
   const completedOrders = allOrders.filter(o => o.status === 'completed' || o.status === 'completado');
 
   const customersMap = {};
