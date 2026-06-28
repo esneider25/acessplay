@@ -743,7 +743,29 @@ window.calculateHistoricalStats = async function() {
   try {
     const snap = await firebase.database().ref('orders').once('value');
     const ordersData = snap.val() || {};
-    const allHistoricalOrders = Object.values(ordersData);
+    let allHistoricalOrders = Object.values(ordersData);
+
+    const canceledIds = [20, 31, 46, 49, 50, 62, 63, 81, 82, 84, 85, 86, 88, 103, 121, 134, 139, 173, 178, 179, 180, 210, 223, 231, 246, 274, 286, 307, 348, 350, 351, 358, 370, 374, 407, 415, 439, 471, 472, 473, 482, 485, 487, 488, 489, 500, 503, 505, 517].map(id => 'AP-OLD-' + id);
+    const processingIds = [1, 143, 236, 369].map(id => 'AP-OLD-' + id);
+
+    allHistoricalOrders = allHistoricalOrders.map(o => {
+      if (o.status === 'completado') o.status = 'completed';
+      if (o.status === 'rechazado' || o.status === 'cancelado') o.status = 'rejected';
+      if (o.status === 'pendiente') o.status = 'pending';
+      if (o.status === 'procesando') o.status = 'processing';
+      if (canceledIds.includes(o.id)) o.status = 'rejected';
+      if (processingIds.includes(o.id)) o.status = 'processing';
+      
+      if (!o.productName && o.productDetails) o.productName = o.productDetails;
+      if (!o.packageLabel) o.packageLabel = 'Migrado';
+      if (!o.paymentMethodName && o.paymentMethod) o.paymentMethodName = o.paymentMethod;
+      if (!o.customerContact && (o.userEmail || o.userPhone)) o.customerContact = o.userEmail || o.userPhone;
+      
+      return o;
+    });
+
+    // Sort descending by date
+    allHistoricalOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
     // Almacenar en el estado temporalmente
     adminState.showHistorical = true;
