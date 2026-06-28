@@ -2191,8 +2191,55 @@ function showAdminToast(message, type = 'success') {
 // ════════════════════════════════════════
 // 8. ORDERS MANAGEMENT
 // ════════════════════════════════════════
+window.loadHistoricalOrdersList = async function() {
+  if (!confirm("¿Deseas descargar el historial completo de pedidos? Esto puede demorar unos segundos.")) return;
+  const btn = document.getElementById('btn-calc-history-orders');
+  if (btn) {
+    btn.innerHTML = 'Descargando... ⏳';
+    btn.disabled = true;
+  }
+  try {
+    const snap = await firebase.database().ref('orders').once('value');
+    const ordersData = snap.val() || {};
+    let allHistoricalOrders = Object.values(ordersData);
+
+    const canceledIds = [20, 31, 46, 49, 50, 62, 63, 81, 82, 84, 85, 86, 88, 103, 121, 134, 139, 173, 178, 179, 180, 210, 223, 231, 246, 274, 286, 307, 348, 350, 351, 358, 370, 374, 407, 415, 439, 471, 472, 473, 482, 485, 487, 488, 489, 500, 503, 505, 517].map(id => 'AP-OLD-' + id);
+    const processingIds = [1, 143, 236, 369].map(id => 'AP-OLD-' + id);
+
+    allHistoricalOrders = allHistoricalOrders.map(o => {
+      if (o.status === 'completado') o.status = 'completed';
+      if (o.status === 'rechazado' || o.status === 'cancelado') o.status = 'rejected';
+      if (o.status === 'pendiente') o.status = 'pending';
+      if (o.status === 'procesando') o.status = 'processing';
+      if (canceledIds.includes(o.id)) o.status = 'rejected';
+      if (processingIds.includes(o.id)) o.status = 'processing';
+      
+      if (!o.productName && o.productDetails) o.productName = o.productDetails;
+      if (!o.packageLabel) o.packageLabel = 'Migrado';
+      if (!o.paymentMethodName && o.paymentMethod) o.paymentMethodName = o.paymentMethod;
+      if (!o.customerContact && (o.userEmail || o.userPhone)) o.customerContact = o.userEmail || o.userPhone;
+      
+      return o;
+    });
+
+    allHistoricalOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    adminState.showHistoricalOrders = true;
+    adminState.historicalOrders = allHistoricalOrders;
+
+    renderActiveTab();
+  } catch(e) {
+    console.error(e);
+    alert('Error al descargar el historial');
+    if (btn) {
+      btn.innerHTML = '📚 Ver Historial Completo';
+      btn.disabled = false;
+    }
+  }
+};
+
 function renderOrders(container) {
-  const allOrders = getOrders();
+  const allOrders = adminState.showHistoricalOrders && adminState.historicalOrders ? adminState.historicalOrders : getOrders();
   const filter = adminState.ordersFilter || 'all';
   const searchTerm = (adminState.ordersSearch || '').toLowerCase().trim();
 
@@ -2347,13 +2394,19 @@ function renderOrders(container) {
     </div>
   ` : '';
 
+  const titleText = adminState.showHistoricalOrders ? 'Gestión de Pedidos (Histórico)' : 'Gestión de Pedidos (Últimos 150)';
+  const historyBtn = adminState.showHistoricalOrders 
+    ? `<button class="btn btn-secondary" onclick="adminState.showHistoricalOrders = false; renderActiveTab();" style="padding: 8px 16px; font-size: 0.85rem;">⬅️ Volver a Recientes</button>`
+    : `<button id="btn-calc-history-orders" class="btn btn-secondary" onclick="loadHistoricalOrdersList()" style="padding: 8px 16px; font-size: 0.85rem; border: 1px solid var(--accent); color: var(--accent);">📚 Ver Historial Completo</button>`;
+
   container.innerHTML = `
     <div class="admin-header">
       <div>
-        <h1 class="admin-title">Gestión de Pedidos</h1>
+        <h1 class="admin-title">${titleText}</h1>
         <p class="admin-subtitle">${filteredOrders.length} resultados de ${allOrders.length} en total · ${counts.pending} pendiente${counts.pending !== 1 ? 's' : ''}</p>
       </div>
       <div style="display: flex; gap: 8px;">
+        ${historyBtn}
         <button class="btn btn-secondary" onclick="exportOrders()" style="padding: 8px 16px; font-size: 0.85rem;">
           📥 Exportar
         </button>
