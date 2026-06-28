@@ -299,9 +299,12 @@ function initFirebaseData() {
   }
 
   const isAdmin = window.location.pathname.includes('admin');
+  const userLoggedIn = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
+  
+  const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config'];
   const keysToLoad = isAdmin 
     ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', 'spam_tracker', 'order_counter', 'banners', 'landing_config']
-    : ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config'];
+    : (userLoggedIn ? [...baseKeys, 'api_configs'] : baseKeys);
   
   const loadedKeys = new Set();
 
