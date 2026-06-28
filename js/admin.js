@@ -3752,7 +3752,7 @@ window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, point
           id: Date.now().toString(),
           type: 'deposit',
           amount: 0,
-          description: `Devolución por retiro rechazado (+\${pointsToRefund} PTS)`,
+          description: `Devolución por retiro rechazado (+${pointsToRefund} PTS)`,
           date: Date.now()
         });
       });
@@ -3819,6 +3819,9 @@ window.openCustomerInfoModal = function (uid) {
 };
 
 async function showUserDetailsModal(uid) {
+  const existingModal = document.getElementById('customer-info-modal-overlay');
+  if (existingModal) existingModal.remove();
+
   const users = adminState.users || {};
   const user = users[uid] || (window.ADMIN_CUSTOMERS ? window.ADMIN_CUSTOMERS.find(u => u.uid === uid) : null);
   if (!user) return;
@@ -3969,6 +3972,9 @@ window.forceCustomerPassword = async function (uid) {
 };
 
 window.openRoleModal = function (uid, currentRole, currentDiscount, currentReferralLimit, currentAutoProcess) {
+  const existingModal = document.getElementById('role-modal-overlay');
+  if (existingModal) existingModal.remove();
+
   const modalHTML = `
     <div class="modal-overlay active" id="role-modal-overlay">
       <div class="modal">
