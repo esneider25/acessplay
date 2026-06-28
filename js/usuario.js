@@ -287,21 +287,13 @@ async function loadDashboardData() {
   if (!currentUser) return;
   
   try {
-    const orderIds = {};
-    const userOrdersRef = await firebase.database().ref('users/' + currentUser.uid + '/orders').once('value');
-    if (userOrdersRef.exists()) {
-      Object.keys(userOrdersRef.val()).forEach(k => orderIds[k] = true);
-    }
-    
     let allOrders = [];
-    if (Object.keys(orderIds).length > 0) {
-      const keys = Object.keys(orderIds);
-      for (let id of keys) {
-        const orderSnap = await firebase.database().ref('orders/' + id).once('value');
-        if (orderSnap.exists()) {
-          allOrders.push(orderSnap.val());
-        }
-      }
+    const snap = await firebase.database().ref('orders').orderByChild('userId').equalTo(currentUser.uid).once('value');
+    
+    if (snap.exists()) {
+      snap.forEach(child => {
+        allOrders.push(child.val());
+      });
     }
     
     allOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

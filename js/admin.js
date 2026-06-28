@@ -3815,16 +3815,13 @@ window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, point
 
 // ── Roles and Blocking ──
 window.openCustomerInfoModal = function (uid) {
-  if (!window.ADMIN_CUSTOMERS) return;
-  const user = window.ADMIN_CUSTOMERS.find(u => u.uid === uid);
+  showUserDetailsModal(uid);
+};
+
+async function showUserDetailsModal(uid) {
+  const users = adminState.users || {};
+  const user = users[uid] || (window.ADMIN_CUSTOMERS ? window.ADMIN_CUSTOMERS.find(u => u.uid === uid) : null);
   if (!user) return;
-
-  const allOrders = typeof getOrders === 'function' ? getOrders() : [];
-  const userOrders = allOrders.filter(o => o.userId === uid);
-
-  const pending = userOrders.filter(o => o.status === 'pending' || o.status === 'processing').length;
-  const completed = userOrders.filter(o => o.status === 'completed').length;
-  const rejected = userOrders.filter(o => o.status === 'rejected').length;
 
   const dateStr = user.createdAt ? new Date(user.createdAt).toLocaleString() : 'N/A';
   const wallet = user.wallet || 0;
@@ -3869,18 +3866,9 @@ window.openCustomerInfoModal = function (uid) {
         </div>
 
         <h4 style="margin-bottom: 10px; color: var(--text-secondary);">Historial de Recargas</h4>
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-          <div style="flex: 1; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
-            <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">${pending}</div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary);">Pendientes</div>
-          </div>
-          <div style="flex: 1; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
-            <div style="font-size: 1.5rem; font-weight: bold; color: #0ea5e9;">${completed}</div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary);">Completadas</div>
-          </div>
-          <div style="flex: 1; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
-            <div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">${rejected}</div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary);">Rechazadas</div>
+        <div id="modal-order-stats-container-${uid}" style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <div style="flex: 1; padding: 20px; text-align: center; color: var(--text-secondary); background: rgba(0,0,0,0.2); border-radius: 8px;">
+            <i class="ph ph-spinner-gap" style="animation: spin 1s linear infinite; font-size: 1.5rem;"></i><br><small>Cargando historial...</small>
           </div>
         </div>
 
@@ -3910,6 +3898,47 @@ window.openCustomerInfoModal = function (uid) {
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  // Fetch true order stats asynchronously
+  try {
+    const snap = await firebase.database().ref('orders').orderByChild('userId').equalTo(uid).once('value');
+    let pending = 0;
+    let completed = 0;
+    let rejected = 0;
+    
+    if (snap.exists()) {
+      snap.forEach(child => {
+        const o = child.val();
+        if (o.status === 'pending' || o.status === 'processing' || o.status === 'procesando') pending++;
+        else if (o.status === 'completed' || o.status === 'completado') completed++;
+        else if (o.status === 'rejected' || o.status === 'rechazado' || o.status === 'cancelado' || o.status === 'invalid-id') rejected++;
+      });
+    }
+    
+    const statsContainer = document.getElementById(`modal-order-stats-container-${uid}`);
+    if (statsContainer) {
+      statsContainer.innerHTML = `
+        <div style="flex: 1; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: bold; color: #f59e0b;">${pending}</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">Pendientes</div>
+        </div>
+        <div style="flex: 1; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: bold; color: #0ea5e9;">${completed}</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">Completadas</div>
+        </div>
+        <div style="flex: 1; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 10px; text-align: center;">
+          <div style="font-size: 1.5rem; font-weight: bold; color: #ef4444;">${rejected}</div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary);">Rechazadas</div>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error("Error fetching order stats for modal:", error);
+    const statsContainer = document.getElementById(`modal-order-stats-container-${uid}`);
+    if (statsContainer) {
+      statsContainer.innerHTML = `<div style="color: #ef4444; font-size: 0.8rem; text-align: center;">Error al cargar historial completo.</div>`;
+    }
+  }
 };
 
 window.forceCustomerPassword = async function (uid) {
