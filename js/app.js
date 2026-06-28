@@ -1942,11 +1942,11 @@ function initPublicAuth() {
   firebase.auth().onAuthStateChanged(async (user) => {
     currentUser = user;
     const authNavItem = document.getElementById('auth-nav-item');
+    const mobileAuthBtn = document.querySelector('.mobile-auth-btn');
     
     // Si es el administrador, le mostramos el botón para ir al panel y un botón para salir
     if (user && user.email === 'admin@accesplay.com') {
-       if (authNavItem) {
-          authNavItem.innerHTML = `
+       const adminHtml = `
             <div style="display:flex; gap:8px; align-items:center;">
               <a onclick="window.location.href='https://admin.accesplay.com/'" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer; padding: 8px 16px;">Ir al Panel</a>
               <a onclick="firebase.auth().signOut().then(() => window.location.href='/')" class="nav-cta" style="background: rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.3); cursor:pointer; padding: 8px;" title="Cerrar sesión">
@@ -1954,7 +1954,8 @@ function initPublicAuth() {
               </a>
             </div>
           `;
-       }
+       if (authNavItem) authNavItem.innerHTML = adminHtml;
+       if (mobileAuthBtn) mobileAuthBtn.innerHTML = adminHtml;
        return;
     }
 
@@ -1969,14 +1970,25 @@ function initPublicAuth() {
           return;
         }
 
+        const balanceHtml = `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer; font-size: 0.85rem; padding: 6px 12px !important;">Mi Perfil ($${Number(userProfile.wallet || 0).toFixed(2)})</a>`;
+        
         if (authNavItem) {
           authNavItem.innerHTML = `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Mi Perfil ($${Number(userProfile.wallet || 0).toFixed(2)})</a>`;
+        }
+        if (mobileAuthBtn) {
+          mobileAuthBtn.innerHTML = balanceHtml;
         }
       });
     } else {
       userProfile = null;
+      const loginHtmlDesktop = `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer;">Iniciar Sesión</a>`;
+      const loginHtmlMobile = `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer; font-size: 0.85rem; padding: 6px 12px !important;">Iniciar Sesión</a>`;
+      
       if (authNavItem) {
-        authNavItem.innerHTML = `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer;">Iniciar Sesión</a>`;
+        authNavItem.innerHTML = loginHtmlDesktop;
+      }
+      if (mobileAuthBtn) {
+        mobileAuthBtn.innerHTML = loginHtmlMobile;
       }
     }
   });
