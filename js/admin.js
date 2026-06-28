@@ -737,11 +737,16 @@ window.calculateHistoricalStats = async function() {
 
     let totalRev = 0;
     let totalCst = 0;
+    const userSpentMap = {};
 
     allHistoricalOrders.forEach(o => {
       if (o.status === 'completed' || o.status === 'completado') {
         totalRev += Number(o.priceUsd) || 0;
         
+        if (o.userId && o.productType !== 'wallet-recharge') {
+          userSpentMap[o.userId] = (userSpentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+        }
+
         let cost = 0;
         if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
           cost = parseFloat(o.costUsd) || 0;
@@ -787,6 +792,65 @@ window.calculateHistoricalStats = async function() {
     
     document.querySelector('.admin-title').innerText = 'Panel Financiero (Histórico Completo)';
     btn.style.display = 'none';
+
+    // Update VIPs
+    const elTopClients = document.getElementById('dash-top-clients');
+    if (elTopClients) {
+      elTopClients.innerHTML = `<div style="text-align: center; padding: 20px;"><span class="tracking-spinner"></span> Actualizando VIPs...</div>`;
+      const usersSnap = await firebase.database().ref('users').once('value');
+      const usersData = usersSnap.val() || {};
+      
+      const usersArray = Object.keys(userSpentMap).map(uid => {
+        const u = usersData[uid] || {};
+        const fallbackOrder = allHistoricalOrders.find(o => o.userId === uid && o.userEmail) || {};
+        return {
+          uid,
+          name: u.name || u.displayName || fallbackOrder.userEmail || 'Usuario',
+          email: u.email || fallbackOrder.userEmail || '',
+          role: u.role || 'cliente',
+          spent: userSpentMap[uid] || 0
+        };
+      }).filter(u => u.spent > 0);
+
+      usersArray.sort((a, b) => b.spent - a.spent);
+      const top5 = usersArray.slice(0, 5);
+
+      if (top5.length === 0) {
+        elTopClients.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">Aún no hay clientes con compras.</div>`;
+      } else {
+        elTopClients.innerHTML = `
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); text-align: left; font-size: 0.85rem;">
+                <th style="padding: 10px;">#</th>
+                <th style="padding: 10px;">Cliente</th>
+                <th style="padding: 10px;">Rol</th>
+                <th style="padding: 10px; text-align: right;">Total Comprado</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${top5.map((u, i) => `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <td style="padding: 12px 10px; color: var(--text-secondary);">${i + 1}</td>
+                  <td style="padding: 12px 10px;">
+                    <div style="font-weight: bold; color: #fff;">${u.name}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${u.email}</div>
+                  </td>
+                  <td style="padding: 12px 10px;">
+                    <span class="admin-badge" style="${u.role === 'revendedor' ? 'background: rgba(168, 85, 247, 0.2); color: #d8b4fe;' :
+            (u.role === 'influencer' ? 'background: rgba(239, 68, 68, 0.2); color: #f87171;' :
+              (u.role === 'admin' ? 'background: rgba(234, 179, 8, 0.2); color: #facc15;' :
+                'background: rgba(0, 229, 195, 0.15); color: #0ea5e9;'))
+          }">${(u.role === 'user' ? 'cliente' : u.role).toUpperCase()}</span>
+                  </td>
+                  <td style="padding: 12px 10px; text-align: right; font-weight: bold; color: #42a5f5;">$${u.spent.toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `;
+      }
+    }
 
   } catch(e) {
     console.error(e);
