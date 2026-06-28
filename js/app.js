@@ -1565,15 +1565,6 @@ function supportQuickAction(title) {
   sendSupportMessage();
 }
 
-function showSupportMenu() {
-  const quickActions = document.getElementById('support-quick-actions');
-  if (quickActions) {
-    if (typeof renderDynamicQuickActions === 'function') renderDynamicQuickActions();
-    quickActions.style.display = 'flex';
-  }
-}
-
-// ── Screenshot Upload & Telegram ──
 function previewScreenshot(input) {
   const file = input.files[0];
   if (!file) return;
@@ -1585,102 +1576,12 @@ function previewScreenshot(input) {
   }
 
   const previewContainer = document.getElementById('screenshot-preview');
-  if (previewContainer) {
-    previewContainer.innerHTML = `
-      <div style="padding: 20px; text-align: center; color: var(--accent);">
-        <div class="pf-spinner" style="width: 30px; height: 30px; margin: 0 auto 10px;">
-          <div class="pf-spinner-ring"></div>
-        </div>
-        <div style="font-size: 0.85rem; opacity: 0.8;">Analizando captura (Anti-Fraude)...</div>
-      </div>
-    `;
-  }
-
+  
   const reader = new FileReader();
-  reader.onload = async function(e) {
+  reader.onload = function(e) {
     const dataUrl = e.target.result;
     
     appState.selectedScreenshot = file;
-    
-    // ── IMAGE HASH CHECK (Exact duplicate file detection) ──
-    let imgHashNum = 0;
-    const step = Math.max(1, Math.floor(dataUrl.length / 100000));
-    for (let i = 0; i < dataUrl.length; i += step) {
-      imgHashNum = ((imgHashNum << 5) - imgHashNum) + dataUrl.charCodeAt(i);
-      imgHashNum |= 0;
-    }
-    const imageHash = 'img-' + Math.abs(imgHashNum).toString(36) + '-' + file.size;
-    appState.selectedScreenshotHash = imageHash;
-
-    let duplicateFound = false;
-    let numbers = [];
-    
-    // Fetch recent orders from Firebase for global duplicate checking
-    let recentOrders = [];
-    if (typeof firebase !== 'undefined') {
-      try {
-        const recentSnap = await firebase.database().ref('orders').orderByChild('createdAt').limitToLast(500).once('value');
-        if (recentSnap.exists()) {
-          recentOrders = Object.values(recentSnap.val());
-        }
-      } catch (err) {
-        console.error("Error fetching recent orders for anti-fraud:", err);
-      }
-    }
-
-    duplicateFound = recentOrders.some(o => o.status !== 'rejected' && o.imageHash === imageHash);
-    
-    // OCR Check for duplicates (Catches cropped/compressed images)
-    if (!duplicateFound && window.Tesseract) {
-      try {
-        const { data: { text } } = await Tesseract.recognize(dataUrl, 'spa');
-        
-        // Buscar específicamente referencias o números de operación
-        const regexKeywords = /(?:ref(?:erencia)?|operaci[oó]n|orden|recibo|comprobante|autorizaci[oó]n|folio|transacci[oó]n|nro|n[uú]mero\s+de\s+operaci[oó]n)[\s:.\-#\n]*([A-Za-z0-9]{5,20})/gi;
-        let match;
-        while ((match = regexKeywords.exec(text)) !== null) {
-          numbers.push(match[1]);
-        }
-        
-        if (numbers.length > 0) {
-          for (const num of numbers) {
-            if (recentOrders.some(o => o.status !== 'rejected' && o.ocrNumbers && o.ocrNumbers.includes(num))) {
-              duplicateFound = true;
-              break;
-            }
-          }
-        }
-        
-        // Save OCR numbers to state to attach to order later
-        appState.selectedScreenshotOcr = numbers;
-
-      } catch (err) {
-        console.error('OCR analysis failed:', err);
-      }
-    }
-    
-    if (duplicateFound) {
-      showToast('🚨 PAGO DUPLICADO: Esta captura ya fue procesada anteriormente.');
-      
-      const fp = getDeviceFingerprint();
-      blockUserForFraud(fp);
-      sendTelegramMessage(`🚨 <b>ALERTA DE FRAUDE:</b>\nUn cliente intentó re-utilizar un comprobante de pago ya procesado.\nFingerprint: <code>${fp}</code>\nEl usuario ha sido bloqueado preventivamente.`);
-      
-      appState.selectedScreenshot = null;
-      appState.selectedScreenshotOcr = null;
-      appState.selectedScreenshotHash = null;
-      input.value = '';
-      
-      if (previewContainer) {
-        previewContainer.innerHTML = `
-          <div class="screenshot-placeholder" style="border-color: var(--coral);">
-            <span style="font-size: 2rem;">🚨</span>
-            <span class="screenshot-hint" style="color: var(--coral);">Captura duplicada rechazada</span>
-          </div>
-        `;
-      }
-      return; // Stop execution
-    }
 
     if (previewContainer) {
       previewContainer.innerHTML = `
@@ -1747,6 +1648,43 @@ function generateThumbnail(file) {
   });
 }
 
+function compressFileToBlob(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        const max_size = 1000;
+        if (width > height) {
+          if (width > max_size) {
+            height *= max_size / width;
+            width = max_size;
+          }
+        } else {
+          if (height > max_size) {
+            width *= max_size / height;
+            height = max_size;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob((blob) => {
+          resolve(blob || file);
+        }, 'image/jpeg', 0.8);
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 async function triggerTelegramNotification(order) {
   if (appState.selectedScreenshot) {
     try {
@@ -1768,7 +1706,13 @@ async function triggerTelegramNotification(order) {
   const keyboard = buildOrderKeyboard(order.id);
 
   if (appState.selectedScreenshot) {
-    await sendTelegramPhoto(appState.selectedScreenshot, msgText, keyboard);
+    try {
+      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
+      await sendTelegramPhoto(compressedBlob, msgText, keyboard);
+    } catch(e) {
+      console.error('Compression failed, sending original:', e);
+      await sendTelegramPhoto(appState.selectedScreenshot, msgText, keyboard);
+    }
   } else {
     await sendTelegramMessage(msgText, keyboard);
   }

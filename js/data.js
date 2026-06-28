@@ -993,11 +993,11 @@ function buildOrderTelegramMessage(order) {
 function buildOrderKeyboard(orderId) {
   return [
     [
-      { text: '✅ Aprobar', url: `https://admin.accesplay.com/?action=approve&order=${orderId}` },
-      { text: '❌ Rechazar', url: `https://admin.accesplay.com/?action=reject&order=${orderId}` }
+      { text: '✅ Aprobar', url: `${window.location.origin}/admin.html?action=approve&order=${orderId}` },
+      { text: '❌ Rechazar', url: `${window.location.origin}/admin.html?action=reject&order=${orderId}` }
     ],
     [
-      { text: '🔍 Ver en Panel Admin', url: `https://admin.accesplay.com/` }
+      { text: '🔍 Ver en Panel Admin', url: `${window.location.origin}/admin.html` }
     ]
   ];
 }
