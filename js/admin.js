@@ -3994,7 +3994,7 @@ window.openRoleModal = function (uid, currentRole, currentDiscount, currentRefer
           
           <div style="margin-top: 15px; background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(14, 165, 233, 0.2);">
             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-              <input type="checkbox" id="auto-process-input" ${currentAutoProcess ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer;">
+              <input type="checkbox" id="auto-process-input" ${currentAutoProcess ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
               <span style="font-size: 0.9rem; font-weight: 500;">Auto-procesar pagos externos</span>
             </label>
             <div class="form-hint" style="margin-top: 5px;">Si está activo, los Pagos Móviles y Binance de este revendedor se completarán solos SIN tu aprobación. Actívalo solo para revendedores de total confianza.</div>
