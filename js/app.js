@@ -867,18 +867,15 @@ async function processWalletOrderAuto(order, isReseller = false) {
       }
     }
 
-    const proxyUrl = '/api/proxy';
-    const response = await fetch(proxyUrl, {
+    const targetUrl = `${baseUrl}/comprar`;
+    const response = await fetch(targetUrl, {
       method: 'POST',
       keepalive: true,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: "comprar",
-        method: "POST",
-        apiKey: api.apiKey,
-        baseUrl: baseUrl,
-        data: payload
-      })
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': api.apiKey
+      },
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
@@ -905,16 +902,14 @@ async function processWalletOrderAuto(order, isReseller = false) {
         const pollInterval = setInterval(async () => {
           attempts++;
           try {
-            const resp = await fetch(proxyUrl, {
-              method: 'POST',
+            const pollUrl = `${baseUrl}/status?merchant_ref=${finalMerchantRef}`;
+            const resp = await fetch(pollUrl, {
+              method: 'GET',
               keepalive: true,
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                endpoint: `recargas/status?merchant_ref=${finalMerchantRef}`,
-                method: "GET",
-                apiKey: api.apiKey,
-                baseUrl: baseUrl
-              })
+              headers: { 
+                'Content-Type': 'application/json',
+                'X-API-Key': api.apiKey
+              }
             });
             const pollData = await resp.json();
             const estadoStr = String(pollData.estado || pollData.status || '').toLowerCase();
@@ -1804,80 +1799,44 @@ window.verifyGameId = async function(productId) {
   resultDiv.innerHTML = '';
 
   try {
-    const payload = {
-      producto_id: parseInt(product.apiServiceId) || 0,
-      id_juego: id_juego
-    };
-    if (input2) payload.input2 = input2;
-
     let bUrl = api.baseUrl.trim();
-    let proxyBaseUrl = bUrl;
-    let proxyEndpoint = 'check'; // Default for Smile.One
     let finalMethod = 'POST';
+    let url = bUrl.endsWith('/') ? bUrl + 'check' : bUrl + '/check';
 
     // Manejar formato de TiendaGiftVen, NetEase Bloodstrike o cualquier API por GET
-    // Solo asumimos GET si el usuario incluyó explícitamente tokens o action=
     if (bUrl.includes('{ID}') || bUrl.includes('{PLAYER_ID}') || bUrl.includes('{ID_JUGADOR}') || bUrl.includes('action=') || bUrl.includes('api.php')) {
       finalMethod = 'GET';
       
-      // Reemplazar tokens {ID} o {PLAYER_ID} o {ID_JUGADOR}
-      if (bUrl.includes('{ID}')) {
-        bUrl = bUrl.replace(/{ID}/g, encodeURIComponent(id_juego));
-      }
-      if (bUrl.includes('{PLAYER_ID}')) {
-        bUrl = bUrl.replace(/{PLAYER_ID}/g, encodeURIComponent(id_juego));
-      }
-      if (bUrl.includes('{ID_JUGADOR}')) {
-        bUrl = bUrl.replace(/{ID_JUGADOR}/g, encodeURIComponent(id_juego));
-      }
-      if (input2 && bUrl.includes('{ZONE}')) {
-        bUrl = bUrl.replace(/{ZONE}/g, encodeURIComponent(input2));
-      }
-      if (input2 && bUrl.includes('{ZONE_ID}')) {
-        bUrl = bUrl.replace(/{ZONE_ID}/g, encodeURIComponent(input2));
-      }
+      if (bUrl.includes('{ID}')) bUrl = bUrl.replace(/{ID}/g, encodeURIComponent(id_juego));
+      if (bUrl.includes('{PLAYER_ID}')) bUrl = bUrl.replace(/{PLAYER_ID}/g, encodeURIComponent(id_juego));
+      if (bUrl.includes('{ID_JUGADOR}')) bUrl = bUrl.replace(/{ID_JUGADOR}/g, encodeURIComponent(id_juego));
+      if (input2 && bUrl.includes('{ZONE}')) bUrl = bUrl.replace(/{ZONE}/g, encodeURIComponent(input2));
+      if (input2 && bUrl.includes('{ZONE_ID}')) bUrl = bUrl.replace(/{ZONE_ID}/g, encodeURIComponent(input2));
       
-      // Si el usuario puso un ? pero olvidó el token de ID, lo agregamos al final (fallback)
       if (!bUrl.includes(encodeURIComponent(id_juego))) {
          bUrl = bUrl.endsWith('=') ? bUrl + encodeURIComponent(id_juego) : bUrl + '&id=' + encodeURIComponent(id_juego);
       }
-      
-      // Separar baseUrl y endpoint para evitar doble slash en el proxy
-      const queryIndex = bUrl.indexOf('?');
-      const basePath = queryIndex > -1 ? bUrl.substring(0, queryIndex) : bUrl;
-      const queryPart = queryIndex > -1 ? bUrl.substring(queryIndex) : '';
-      
-      const lastSlashIdx = basePath.lastIndexOf('/');
-      if (lastSlashIdx > 8) {
-        proxyBaseUrl = basePath.substring(0, lastSlashIdx);
-        proxyEndpoint = basePath.substring(lastSlashIdx + 1) + queryPart; 
-      } else {
-        proxyBaseUrl = basePath;
-        proxyEndpoint = queryPart.startsWith('?') ? queryPart.substring(1) : queryPart;
-      }
-    } else {
-      proxyBaseUrl = bUrl.endsWith('/') ? bUrl.slice(0, -1) : bUrl;
+      url = bUrl;
     }
 
-    const proxyUrl = '/api/proxy';
-    
-    const requestBody = {
-      endpoint: proxyEndpoint,
+    const fetchOptions = {
       method: finalMethod,
-      apiKey: api.apiKey || '',
-      baseUrl: proxyBaseUrl
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': api.apiKey || ''
+      }
     };
-
+    
     if (finalMethod === 'POST') {
-      requestBody.data = payload;
+      const payload = {
+        producto_id: parseInt(product.apiServiceId) || 0,
+        id_juego: id_juego
+      };
+      if (input2) payload.input2 = input2;
+      fetchOptions.body = JSON.stringify(payload);
     }
 
-    const response = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    });
-
+    const response = await fetch(url, fetchOptions);
     const data = await response.json();
 
     // Comprobar éxito (código 200 numérico o string, o si existe data.data)

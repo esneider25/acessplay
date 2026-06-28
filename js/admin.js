@@ -1639,16 +1639,13 @@ async function testApiConnection(idx) {
   showAdminToast(`🔌 Conectando con ${api.name || 'API'}...`, 'info');
 
   try {
-    const proxyUrl = '/api/proxy';
-    const response = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: "saldo",
-        method: "GET",
-        apiKey: api.apiKey,
-        baseUrl: baseUrl
-      })
+    const targetUrl = `${baseUrl}/saldo`;
+    const response = await fetch(targetUrl, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-API-Key': api.apiKey || ''
+      }
     });
 
     if (response.ok) {
@@ -1725,17 +1722,13 @@ async function processAutomaticTopup(orderId, fromModal = false) {
       }
     }
 
-    const proxyUrl = '/api/proxy';
-    const response = await fetch(proxyUrl, {
+    const response = await fetch(`${baseUrl}/comprar`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: "comprar",
-        method: "POST",
-        apiKey: api.apiKey,
-        baseUrl: baseUrl,
-        data: payload
-      })
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-API-Key': api.apiKey
+      },
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
@@ -1792,16 +1785,13 @@ function pollApiStatus(baseUrl, apiKey, orderId, fromModal) {
   const interval = setInterval(async () => {
     attempts++;
     try {
-      const proxyUrl = '/api/proxy';
-      const resp = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          endpoint: `recargas/status?merchant_ref=${orderId}`,
-          method: "GET",
-          apiKey: apiKey,
-          baseUrl: baseUrl
-        })
+      const targetUrl = `${baseUrl}/status?merchant_ref=${orderId}`;
+      const resp = await fetch(targetUrl, {
+        method: 'GET',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-API-Key': apiKey 
+        }
       });
       const data = await resp.json();
 
