@@ -34,6 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
     appState.currentView = 'tracking';
     appState.trackingOrderId = urlParams.get('tracking');
     window.history.replaceState({}, document.title, window.location.pathname);
+    if (typeof subscribeToGuestOrder === 'function') {
+      subscribeToGuestOrder(appState.trackingOrderId);
+    }
   }
   if (localStorage.getItem('recargaaccessplay_theme') === 'light') {
     document.body.classList.add('light-theme');
