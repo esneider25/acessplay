@@ -155,6 +155,13 @@ function processRoulettePrize(originalOrderId, productId) {
   const originalOrder = orders.find(o => o.id === originalOrderId);
   if (!originalOrder) return;
   
+  // Prevent duplicate prizes if they clear cache
+  const alreadyWon = orders.some(o => o.paymentMethodId === 'roulette' && o.adminNote && o.adminNote.includes(originalOrderId));
+  if (alreadyWon) {
+    console.warn('Prize already claimed for this order.');
+    return;
+  }
+  
   const freeOrderData = {
     userId: originalOrder.userId,
     userName: originalOrder.userName,
