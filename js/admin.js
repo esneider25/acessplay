@@ -279,7 +279,13 @@ function renderActiveTab() {
   lastUnreadMessages = getUnreadMessagesCount();
 
   switch (adminState.currentTab) {
-    case 'dashboard': renderDashboard(main); break;
+    case 'dashboard': 
+      if (adminState.showHistorical && adminState.historicalOrders) {
+        renderDashboard(main, adminState.historicalOrders);
+      } else {
+        renderDashboard(main);
+      }
+      break;
     case 'orders': renderOrders(main); break;
     case 'products': renderProducts(main); break;
     case 'customers': renderCustomers(main); break;
@@ -307,8 +313,8 @@ function getUnreadMessagesCount() {
 // ════════════════════════════════════════
 // 1. DASHBOARD
 // ════════════════════════════════════════
-function renderDashboard(container) {
-  let allOrders = getOrders();
+function renderDashboard(container, forcedOrders = null) {
+  let allOrders = forcedOrders || getOrders();
 
   // Date filtering
   if (adminState.dashboardStartDate) {
@@ -413,11 +419,14 @@ function renderDashboard(container) {
     `;
   }).join('') : '<div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.85rem;">No hay pedidos aún</div>';
 
+  const titleText = forcedOrders ? 'Panel Financiero (Histórico Completo)' : 'Panel Financiero (Últimos 150)';
+  const btnHtml = forcedOrders ? `<button class="btn btn-secondary" style="margin-left: 10px; padding: 4px 8px; font-size: 0.75rem;" onclick="adminState.showHistorical = false; renderActiveTab();">Volver a Recientes</button>` : `<button id="btn-calc-history" onclick="calculateHistoricalStats()" style="background: none; border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: 10px;">Calcular Histórico Completo</button>`;
+
   container.innerHTML = `
     <div class="admin-header">
       <div>
-        <h1 class="admin-title">Panel Financiero (Últimos 150)</h1>
-        <p class="admin-subtitle">Resumen de ganancias <button id="btn-calc-history" onclick="calculateHistoricalStats()" style="background: none; border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: 10px;">Calcular Histórico Completo</button></p>
+        <h1 class="admin-title">${titleText}</h1>
+        <p class="admin-subtitle">Resumen de ganancias ${btnHtml}</p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; background: var(--bg-surface); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
         <input type="date" id="dash-start-date" class="admin-form-input" style="margin-bottom: 0; padding: 6px;" value="${adminState.dashboardStartDate}" onchange="updateDashboardDates()">
@@ -726,137 +735,31 @@ function renderDashboard(container) {
 window.calculateHistoricalStats = async function() {
   if (!confirm("¿Deseas descargar y calcular el historial completo? Esto puede demorar unos segundos dependiendo de la cantidad de pedidos.")) return;
   const btn = document.getElementById('btn-calc-history');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = 'Calculando... ⏳';
-  btn.disabled = true;
+  if (btn) {
+    btn.innerHTML = 'Calculando... ⏳';
+    btn.disabled = true;
+  }
 
   try {
     const snap = await firebase.database().ref('orders').once('value');
     const ordersData = snap.val() || {};
     const allHistoricalOrders = Object.values(ordersData);
-
-    let totalRev = 0;
-    let totalCst = 0;
-    const userSpentMap = {};
-
-    allHistoricalOrders.forEach(o => {
-      if (o.status === 'completed' || o.status === 'completado') {
-        totalRev += Number(o.priceUsd) || 0;
-        
-        if (o.userId && o.productType !== 'wallet-recharge') {
-          userSpentMap[o.userId] = (userSpentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
-        }
-
-        let cost = 0;
-        if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
-          cost = parseFloat(o.costUsd) || 0;
-        } else {
-          let pkg = null;
-          const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
-          const orderPrice = Number(o.priceUsd) || 0;
-          let prodList = o.productId && o.productId !== 'legacy' ? PRODUCTS.filter(p => p.id === o.productId) : PRODUCTS;
-
-          for (let i = 0; i < prodList.length; i++) {
-            if (prodList[i].packages) {
-              pkg = prodList[i].packages.find(p => Number(p.priceUsd) === orderPrice);
-              if (pkg) break;
-            }
-          }
-
-          if (!pkg) {
-            const nums = searchLabel.match(/\d+/g);
-            if (nums && nums.length > 0) {
-              const targetNum = nums[0];
-              for (let i = 0; i < prodList.length; i++) {
-                if (prodList[i].packages) {
-                  pkg = prodList[i].packages.find(p => {
-                    return String(p.amount) === targetNum || String(p.label).includes(targetNum);
-                  });
-                  if (pkg) break;
-                }
-              }
-            }
-          }
-
-          if (pkg && pkg.costUsd) cost = parseFloat(pkg.costUsd) || 0;
-        }
-        totalCst += cost;
-      }
-    });
-
-    const totalProf = totalRev - totalCst;
-
-    document.getElementById('dash-total-revenue').innerText = '$' + totalRev.toFixed(2);
-    document.getElementById('dash-total-cost').innerText = '$' + totalCst.toFixed(2);
-    document.getElementById('dash-total-profit').innerText = '$' + totalProf.toFixed(2);
     
-    document.querySelector('.admin-title').innerText = 'Panel Financiero (Histórico Completo)';
-    btn.style.display = 'none';
+    // Almacenar en el estado temporalmente
+    adminState.showHistorical = true;
+    adminState.historicalOrders = allHistoricalOrders;
 
-    // Update VIPs
-    const elTopClients = document.getElementById('dash-top-clients');
-    if (elTopClients) {
-      elTopClients.innerHTML = `<div style="text-align: center; padding: 20px;"><span class="tracking-spinner"></span> Actualizando VIPs...</div>`;
-      const usersSnap = await firebase.database().ref('users').once('value');
-      const usersData = usersSnap.val() || {};
-      
-      const usersArray = Object.keys(userSpentMap).map(uid => {
-        const u = usersData[uid] || {};
-        const fallbackOrder = allHistoricalOrders.find(o => o.userId === uid && o.userEmail) || {};
-        return {
-          uid,
-          name: u.name || u.displayName || fallbackOrder.userEmail || 'Usuario',
-          email: u.email || fallbackOrder.userEmail || '',
-          role: u.role || 'cliente',
-          spent: userSpentMap[uid] || 0
-        };
-      }).filter(u => u.spent > 0);
-
-      usersArray.sort((a, b) => b.spent - a.spent);
-      const top5 = usersArray.slice(0, 5);
-
-      if (top5.length === 0) {
-        elTopClients.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">Aún no hay clientes con compras.</div>`;
-      } else {
-        elTopClients.innerHTML = `
-          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-            <thead>
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); text-align: left; font-size: 0.85rem;">
-                <th style="padding: 10px;">#</th>
-                <th style="padding: 10px;">Cliente</th>
-                <th style="padding: 10px;">Rol</th>
-                <th style="padding: 10px; text-align: right;">Total Comprado</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${top5.map((u, i) => `
-                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                  <td style="padding: 12px 10px; color: var(--text-secondary);">${i + 1}</td>
-                  <td style="padding: 12px 10px;">
-                    <div style="font-weight: bold; color: #fff;">${u.name}</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">${u.email}</div>
-                  </td>
-                  <td style="padding: 12px 10px;">
-                    <span class="admin-badge" style="${u.role === 'revendedor' ? 'background: rgba(168, 85, 247, 0.2); color: #d8b4fe;' :
-            (u.role === 'influencer' ? 'background: rgba(239, 68, 68, 0.2); color: #f87171;' :
-              (u.role === 'admin' ? 'background: rgba(234, 179, 8, 0.2); color: #facc15;' :
-                'background: rgba(0, 229, 195, 0.15); color: #0ea5e9;'))
-          }">${(u.role === 'user' ? 'cliente' : u.role).toUpperCase()}</span>
-                  </td>
-                  <td style="padding: 12px 10px; text-align: right; font-weight: bold; color: #42a5f5;">$${u.spent.toFixed(2)}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `;
-      }
+    const main = document.getElementById('admin-main-content');
+    if (main) {
+      renderDashboard(main, allHistoricalOrders);
     }
-
   } catch(e) {
     console.error(e);
     alert('Error al calcular el histórico');
-    btn.innerHTML = originalText;
-    btn.disabled = false;
+    if (btn) {
+      btn.innerHTML = 'Calcular Histórico Completo';
+      btn.disabled = false;
+    }
   }
 };
 
