@@ -948,14 +948,14 @@ async function sendTelegramMessage(text, inlineKeyboard) {
   if (!TELEGRAM_CONFIG.enabled || !TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) return false;
   try {
     const body = {
-      chat_id: TELEGRAM_CONFIG.chatId,
+      type: 'message',
+      chatId: TELEGRAM_CONFIG.chatId,
+      botToken: TELEGRAM_CONFIG.botToken,
       text: text,
-      parse_mode: 'HTML'
+      inlineKeyboard: inlineKeyboard || null
     };
-    if (inlineKeyboard) {
-      body.reply_markup = { inline_keyboard: inlineKeyboard };
-    }
-    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`, {
+    
+    const res = await fetch('/api/telegram', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -971,20 +971,35 @@ async function sendTelegramMessage(text, inlineKeyboard) {
 async function sendTelegramPhoto(photoBlob, caption, inlineKeyboard) {
   if (!TELEGRAM_CONFIG.enabled || !TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) return false;
   try {
-    const formData = new FormData();
-    formData.append('chat_id', TELEGRAM_CONFIG.chatId);
-    formData.append('photo', photoBlob, 'comprobante.jpg');
-    formData.append('caption', caption);
-    formData.append('parse_mode', 'HTML');
-    if (inlineKeyboard) {
-      formData.append('reply_markup', JSON.stringify({ inline_keyboard: inlineKeyboard }));
-    }
-    const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendPhoto`, {
-      method: 'POST',
-      body: formData
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64data = reader.result.split(',')[1];
+          const body = {
+            type: 'photo',
+            chatId: TELEGRAM_CONFIG.chatId,
+            botToken: TELEGRAM_CONFIG.botToken,
+            text: caption,
+            inlineKeyboard: inlineKeyboard || null,
+            photoBase64: base64data
+          };
+          
+          const res = await fetch('/api/telegram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          const data = await res.json();
+          resolve(data.ok);
+        } catch (e) {
+          console.warn('Telegram proxy photo error:', e);
+          resolve(false);
+        }
+      };
+      reader.onerror = () => resolve(false);
+      reader.readAsDataURL(photoBlob);
     });
-    const data = await res.json();
-    return data.ok;
   } catch (e) {
     console.warn('Telegram sendPhoto error:', e);
     return false;
