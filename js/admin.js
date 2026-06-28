@@ -416,8 +416,8 @@ function renderDashboard(container) {
   container.innerHTML = `
     <div class="admin-header">
       <div>
-        <h1 class="admin-title">Panel de Control Financiero</h1>
-        <p class="admin-subtitle">Resumen y métricas de ganancias de AccessPlay</p>
+        <h1 class="admin-title">Panel Financiero (Últimos 150)</h1>
+        <p class="admin-subtitle">Resumen de ganancias <button id="btn-calc-history" onclick="calculateHistoricalStats()" style="background: none; border: 1px solid var(--accent); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: 10px;">Calcular Histórico Completo</button></p>
       </div>
       <div style="display: flex; gap: 8px; align-items: center; background: var(--bg-surface); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
         <input type="date" id="dash-start-date" class="admin-form-input" style="margin-bottom: 0; padding: 6px;" value="${adminState.dashboardStartDate}" onchange="updateDashboardDates()">
@@ -431,17 +431,17 @@ function renderDashboard(container) {
     <div class="admin-stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 24px;">
       <div class="admin-stat-card" style="background: linear-gradient(135deg, rgba(66, 165, 245, 0.1), rgba(66, 165, 245, 0.02)); border-color: rgba(66, 165, 245, 0.3);">
         <div class="admin-stat-icon">💰</div>
-        <div class="admin-stat-value" style="color: #42a5f5;">$${totalRevenue.toFixed(2)}</div>
+        <div class="admin-stat-value" id="dash-total-revenue" style="color: #42a5f5;">$${totalRevenue.toFixed(2)}</div>
         <div class="admin-stat-label">Ingresos Brutos</div>
       </div>
       <div class="admin-stat-card" style="background: linear-gradient(135deg, rgba(239, 83, 80, 0.1), rgba(239, 83, 80, 0.02)); border-color: rgba(239, 83, 80, 0.3);">
         <div class="admin-stat-icon">📉</div>
-        <div class="admin-stat-value" style="color: #ef5350;">$${totalCost.toFixed(2)}</div>
+        <div class="admin-stat-value" id="dash-total-cost" style="color: #ef5350;">$${totalCost.toFixed(2)}</div>
         <div class="admin-stat-label">Costos Proveedor</div>
       </div>
       <div class="admin-stat-card" style="background: linear-gradient(135deg, rgba(102, 187, 106, 0.1), rgba(102, 187, 106, 0.02)); border-color: rgba(102, 187, 106, 0.3);">
         <div class="admin-stat-icon">💎</div>
-        <div class="admin-stat-value" style="color: #66bb6a;">$${totalProfit.toFixed(2)}</div>
+        <div class="admin-stat-value" id="dash-total-profit" style="color: #66bb6a;">$${totalProfit.toFixed(2)}</div>
         <div class="admin-stat-label">Ganancia Neta</div>
       </div>
     </div>
@@ -722,6 +722,79 @@ function renderDashboard(container) {
     }).catch(e => console.error("Error fetching users data:", e));
   }, 100);
 }
+
+window.calculateHistoricalStats = async function() {
+  if (!confirm("¿Deseas descargar y calcular el historial completo? Esto puede demorar unos segundos dependiendo de la cantidad de pedidos.")) return;
+  const btn = document.getElementById('btn-calc-history');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Calculando... ⏳';
+  btn.disabled = true;
+
+  try {
+    const snap = await firebase.database().ref('orders').once('value');
+    const ordersData = snap.val() || {};
+    const allHistoricalOrders = Object.values(ordersData);
+
+    let totalRev = 0;
+    let totalCst = 0;
+
+    allHistoricalOrders.forEach(o => {
+      if (o.status === 'completed' || o.status === 'completado') {
+        totalRev += Number(o.priceUsd) || 0;
+        
+        let cost = 0;
+        if (o.costUsd !== undefined && o.costUsd !== null && parseFloat(o.costUsd) > 0) {
+          cost = parseFloat(o.costUsd) || 0;
+        } else {
+          let pkg = null;
+          const searchLabel = String(o.packageLabel || o.productDetails || '').toLowerCase();
+          const orderPrice = Number(o.priceUsd) || 0;
+          let prodList = o.productId && o.productId !== 'legacy' ? PRODUCTS.filter(p => p.id === o.productId) : PRODUCTS;
+
+          for (let i = 0; i < prodList.length; i++) {
+            if (prodList[i].packages) {
+              pkg = prodList[i].packages.find(p => Number(p.priceUsd) === orderPrice);
+              if (pkg) break;
+            }
+          }
+
+          if (!pkg) {
+            const nums = searchLabel.match(/\d+/g);
+            if (nums && nums.length > 0) {
+              const targetNum = nums[0];
+              for (let i = 0; i < prodList.length; i++) {
+                if (prodList[i].packages) {
+                  pkg = prodList[i].packages.find(p => {
+                    return String(p.amount) === targetNum || String(p.label).includes(targetNum);
+                  });
+                  if (pkg) break;
+                }
+              }
+            }
+          }
+
+          if (pkg && pkg.costUsd) cost = parseFloat(pkg.costUsd) || 0;
+        }
+        totalCst += cost;
+      }
+    });
+
+    const totalProf = totalRev - totalCst;
+
+    document.getElementById('dash-total-revenue').innerText = '$' + totalRev.toFixed(2);
+    document.getElementById('dash-total-cost').innerText = '$' + totalCst.toFixed(2);
+    document.getElementById('dash-total-profit').innerText = '$' + totalProf.toFixed(2);
+    
+    document.querySelector('.admin-title').innerText = 'Panel Financiero (Histórico Completo)';
+    btn.style.display = 'none';
+
+  } catch(e) {
+    console.error(e);
+    alert('Error al calcular el histórico');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
+};
 
 // ════════════════════════════════════════
 // 2. PRODUCTS
