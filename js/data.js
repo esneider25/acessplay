@@ -348,7 +348,20 @@ function initFirebaseData() {
             if (typeof updateAdminSidebarBadges === 'function') updateAdminSidebarBadges();
           }
           else if (key === 'orders') {
-            ORDERS = toArray(data);
+            let newOrders = [];
+            if (!data) newOrders = [];
+            else if (Array.isArray(data)) newOrders = data.filter(Boolean);
+            else newOrders = Object.values(data).filter(Boolean);
+            
+            // Preserve currently tracked order if it's older than the limit
+            if (typeof appState !== 'undefined' && appState.currentView === 'tracking' && appState.trackingOrderId) {
+              const trackedOrder = getOrderById(appState.trackingOrderId);
+              if (trackedOrder && !newOrders.some(o => o.id === trackedOrder.id)) {
+                newOrders.push(trackedOrder);
+              }
+            }
+            
+            ORDERS = newOrders;
             ORDERS.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           }
           else if (key === 'telegram_config') Object.assign(TELEGRAM_CONFIG, data);

@@ -37,7 +37,10 @@
       ".write": "auth != null",
       "$orderId": {
         ".read": "true",
-        ".write": "!data.exists() || auth != null"
+        ".write": "!data.exists() || auth != null",
+        "roulettePlayed": {
+          ".write": "true"
+        }
       }
     },
     "withdrawals": {

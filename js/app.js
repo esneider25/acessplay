@@ -288,7 +288,7 @@ function navigateTo(view, param) {
   } else if (view === 'tracking') {
     appState.currentView = 'tracking';
     appState.trackingOrderId = param;
-    if (typeof subscribeToGuestOrder === 'function' && (!currentUser || !window.__firebaseAuthHooked)) {
+    if (typeof subscribeToGuestOrder === 'function') {
       subscribeToGuestOrder(param);
     }
   } else if (view === 'lookup') {
