@@ -2896,22 +2896,29 @@ function adminUnblockUser(fingerprint) {
 }
 
 function handleUrlAction(action, orderId) {
-  setTimeout(() => {
-    switchTab('orders');
-    if (action === 'approve') {
-      const order = getOrderById(orderId);
-      if (order && order.status !== 'completed') {
-        // En lugar de forzar 'completed', usamos quickUpdateStatus que dispara la API automática (SmileOne/Moogold) si está configurada
-        quickUpdateStatus(orderId, 'completed');
+  const checkInterval = setInterval(() => {
+    // Esperar a que los datos se hayan cargado (las órdenes están en window.ADMIN_ORDERS o en getOrders())
+    const orders = getOrders();
+    if (window.DATA_LOADED && orders && orders.length > 0) {
+      clearInterval(checkInterval);
+      switchTab('orders');
+      if (action === 'approve') {
+        const order = getOrderById(orderId);
+        if (order && order.status !== 'completed') {
+          quickUpdateStatus(orderId, 'completed');
+        }
+      } else if (action === 'reject') {
+        openRejectModal(orderId, 'rejected');
+        showAdminToast('Por favor confirme el rechazo y escriba el motivo.', 'info');
+      } else if (action === 'view') {
+        openOrderDetailModal(orderId);
       }
-    } else if (action === 'reject') {
-      openRejectModal(orderId, 'rejected');
-      showAdminToast('Por favor confirme el rechazo y escriba el motivo.', 'info');
-    } else if (action === 'view') {
-      openOrderDetailModal(orderId);
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }, 500);
+  }, 200);
+
+  // Fallback timeout para detener el intervalo si tarda más de 10 segundos
+  setTimeout(() => clearInterval(checkInterval), 10000);
 }
 
 // ════════════════════════════════════════
