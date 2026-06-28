@@ -298,7 +298,11 @@ function initFirebaseData() {
     });
   }
 
-  const keysToLoad = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', 'spam_tracker', 'order_counter', 'banners', 'landing_config'];
+  const isAdmin = window.location.pathname.includes('admin');
+  const keysToLoad = isAdmin 
+    ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', 'spam_tracker', 'order_counter', 'banners', 'landing_config']
+    : ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config'];
+  
   const loadedKeys = new Set();
 
   function checkLoadComplete(key) {
@@ -320,8 +324,12 @@ function initFirebaseData() {
   }
 
   keysToLoad.forEach(key => {
+    let dbRef = db.ref('/' + key);
+    if (key === 'orders') {
+      dbRef = dbRef.orderByChild('createdAt').limitToLast(150);
+    }
     db.ref('/' + key).off('value');
-    db.ref('/' + key).on('value', (snapshot) => {
+    dbRef.on('value', (snapshot) => {
       const data = snapshot.val();
       try {
         if (data !== null && data !== undefined) {
