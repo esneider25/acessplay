@@ -1639,13 +1639,16 @@ async function testApiConnection(idx) {
   showAdminToast(`🔌 Conectando con ${api.name || 'API'}...`, 'info');
 
   try {
-    const targetUrl = `${baseUrl}/saldo`;
-    const response = await fetch(targetUrl, {
-      method: 'GET',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-API-Key': api.apiKey || ''
-      }
+    const proxyUrl = '/api/proxy';
+    const response = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: "saldo",
+        method: "GET",
+        apiKey: api.apiKey,
+        baseUrl: baseUrl
+      })
     });
 
     if (response.ok) {
@@ -1722,13 +1725,17 @@ async function processAutomaticTopup(orderId, fromModal = false) {
       }
     }
 
-    const response = await fetch(`${baseUrl}/comprar`, {
+    const proxyUrl = '/api/proxy';
+    const response = await fetch(proxyUrl, {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'X-API-Key': api.apiKey
-      },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: "comprar",
+        method: "POST",
+        apiKey: api.apiKey,
+        baseUrl: baseUrl,
+        data: payload
+      })
     });
 
     const data = await response.json();
@@ -1785,13 +1792,16 @@ function pollApiStatus(baseUrl, apiKey, orderId, fromModal) {
   const interval = setInterval(async () => {
     attempts++;
     try {
-      const targetUrl = `${baseUrl}/status?merchant_ref=${orderId}`;
-      const resp = await fetch(targetUrl, {
-        method: 'GET',
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-API-Key': apiKey 
-        }
+      const proxyUrl = '/api/proxy';
+      const resp = await fetch(proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: `recargas/status?merchant_ref=${orderId}`,
+          method: "GET",
+          apiKey: apiKey,
+          baseUrl: baseUrl
+        })
       });
       const data = await resp.json();
 
