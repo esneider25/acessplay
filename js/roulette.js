@@ -87,9 +87,13 @@ function spinRoulette(isWinner, orderId, productId) {
   // Mark as played securely in database
   const orders = typeof getOrders === 'function' ? getOrders() : [];
   const order = orders.find(o => o.id === orderId);
-  if (order && typeof saveOrderToDb === 'function') {
-    order.roulettePlayed = true;
-    saveOrderToDb(order);
+  if (typeof firebase !== 'undefined') {
+    firebase.database().ref('orders/' + orderId).update({ roulettePlayed: true })
+      .catch(err => console.error('Error saving roulette status:', err));
+    
+    if (order) {
+      order.roulettePlayed = true;
+    }
     
     // Also re-render tracking so the button disappears in background
     if (appState && appState.currentView === 'tracking') {
