@@ -9,13 +9,21 @@ function renderNavbar() {
         <div class="logo" onclick="navigateTo('home')">
           <img src="img/logo.png" alt="AccessPlay" style="height: 45px; width: auto; object-fit: contain;">
         </div>
+        
+        <div class="mobile-auth-btn">
+          ${(typeof currentUser !== 'undefined' && currentUser) 
+            ? `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer; font-size: 0.85rem; padding: 6px 12px !important;">Mi Perfil</a>`
+            : `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer; font-size: 0.85rem; padding: 6px 12px !important;">Iniciar Sesión</a>`
+          }
+        </div>
+
         <ul class="nav-links" id="nav-links">
           <li><a onclick="navigateTo('home')" class="active" data-section="home">Inicio</a></li>
           <li><a onclick="scrollToSection('catalog')" data-section="catalog">Catálogo</a></li>
           <li><a onclick="scrollToSection('how-it-works')" data-section="how-it-works">¿Cómo Funciona?</a></li>
           <li><a onclick="scrollToSection('features')" data-section="features">Ventajas</a></li>
           <li><a onclick="navigateTo('lookup')" data-section="lookup">🔍 Mis Pedidos</a></li>
-          <li id="auth-nav-item">
+          <li id="auth-nav-item" class="desktop-auth-item">
             ${(typeof currentUser !== 'undefined' && currentUser) 
               ? `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Mi Perfil ($${Number((typeof userProfile !== 'undefined' && userProfile && userProfile.wallet) ? userProfile.wallet : 0).toFixed(2)})</a>`
               : `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer;">Iniciar Sesión</a>`
@@ -25,8 +33,8 @@ function renderNavbar() {
           <li id="pwa-nav-item"><a id="pwa-install-app-btn" onclick="window.handleStoreInstallClick()" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer; color: white;">📲 Instalar App</a></li>
           <li><a class="theme-toggle-btn" onclick="toggleTheme()" style="cursor:pointer; font-size: 1.2rem;" title="Cambiar Tema">🌓</a></li>
         </ul>
-        <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu" style="background: var(--bg-surface); border: 1px solid var(--border); padding: 8px 16px; border-radius: 20px; color: var(--text-primary); font-family: var(--font-primary); font-weight: 600; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-          <div style="display: flex; align-items: center; gap: 8px;">Menú Principal <span style="font-size: 0.9rem;">▼</span></div>
+        <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Menu" style="background: var(--bg-surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: 20px; color: var(--text-primary); font-family: var(--font-primary); font-weight: 600; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+          <div style="display: flex; align-items: center; gap: 6px;">Menú <span style="font-size: 0.8rem;">▼</span></div>
         </button>
       </div>
     </nav>

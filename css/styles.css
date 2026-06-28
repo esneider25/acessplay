@@ -139,6 +139,7 @@ body {
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+.mobile-auth-btn { display: none; }
 .nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
 .nav-links a {
   color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;
@@ -1375,6 +1376,8 @@ body {
 @media (max-width: 768px) {
   /* Navbar Mobile Fix */
   .mobile-toggle { display: block; }
+  .mobile-auth-btn { display: block; }
+  .desktop-auth-item { display: none !important; }
   .nav-links {
     position: fixed; top: 70px; left: 0; right: 0;
     background: rgba(6, 13, 26, 0.98);
