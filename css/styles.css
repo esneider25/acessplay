@@ -1471,23 +1471,23 @@ body {
 }
 
 @media (max-width: 768px) {
-  /* 2-Column Hero Mobile (Banner on top) */
+  /* 2-Column Hero Mobile (Text on top, Banner below) */
   .hero-2col {
     flex-direction: column;
-    padding-top: 20px;
-    gap: 10px;
+    padding-top: 10px; /* Sube más el hero completo */
+    gap: 25px; /* Separa un poco el banner hacia abajo */
   }
   .hero-banner-side {
-    order: -1; /* Puts banner on top */
+    order: 2; /* Puts banner on bottom */
     width: 100%;
     max-width: 440px;
     margin: 0 auto;
   }
   .hero-text-side {
-    order: 2;
+    order: 1; /* Puts text on top */
     text-align: center;
   }
-  .hero-2col .hero { padding: 10px 15px 10px !important; text-align: center; }
+  .hero-2col .hero { padding: 0 15px 10px !important; text-align: center; }
   .hero-2col .hero-subtitle { margin: 0 auto 20px; }
   .hero-2col .hero-cta-group { justify-content: center; }
   .hero-2col .hero-stats { justify-content: center; margin: 24px auto 0; }
