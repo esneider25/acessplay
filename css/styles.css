@@ -1471,21 +1471,23 @@ body {
 }
 
 @media (max-width: 768px) {
-  /* 2-Column Hero Mobile (Text on top, Banner below) */
+  /* 2-Column Hero Mobile (Banner on top) */
   .hero-2col {
     flex-direction: column;
-    padding-top: 10px; /* Sube más el hero completo */
-    gap: 25px; /* Separa un poco el banner hacia abajo */
+    padding-top: 15px;
+    gap: 5px; /* Casi sin separación */
   }
   .hero-banner-side {
-    order: 2; /* Puts banner on bottom */
+    order: -1; /* Puts banner on top */
     width: 100%;
     max-width: 440px;
     margin: 0 auto;
+    transform: translateY(10px); /* Baja un poco el banner visualmente */
   }
   .hero-text-side {
-    order: 1; /* Puts text on top */
+    order: 2; /* Puts text on bottom */
     text-align: center;
+    margin-top: -5px; /* Sube un poco el texto hacia el banner */
   }
   .hero-2col .hero { padding: 0 15px 10px !important; text-align: center; }
   .hero-2col .hero-subtitle { margin: 0 auto 20px; }
