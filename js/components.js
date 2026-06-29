@@ -202,8 +202,8 @@ function renderHowItWorks() {
     <section class="how-it-works" id="how-it-works">
       <div class="container" style="max-width: 600px; margin: 0 auto;">
         <div class="section-header" style="text-align: center;">
-          <h2>⚡ Entrega en <span class="gradient-text">segundos</span></h2>
-          <p>Tu recarga automática y sin demoras.</p>
+          <h2>⚡ Recargas en pocos <span class="gradient-text">minutos</span></h2>
+          <p>Tu recarga rápida y sin complicaciones.</p>
         </div>
         <div class="speed-flow">
           <div class="speed-step">
