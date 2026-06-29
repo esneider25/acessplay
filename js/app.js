@@ -1718,7 +1718,11 @@ async function triggerTelegramNotification(order) {
       if (o) {
         o.screenshot = thumbnail;
         order.screenshot = thumbnail;
-        saveOrderToDb(order);
+        try {
+          saveOrderToDb(order);
+        } catch (err) {
+          console.warn('Permiso denegado para miniatura (invitado), continuando con Telegram...');
+        }
         ORDERS = orders;
       }
     } catch (e) {
