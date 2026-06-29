@@ -1474,8 +1474,8 @@ body {
   /* 2-Column Hero Mobile (Banner on top) */
   .hero-2col {
     flex-direction: column;
-    padding-top: 10px;
-    gap: 0px; /* Sin separación */
+    padding-top: 80px; /* Leave space for navbar */
+    gap: 15px; /* Small gap between banner and text */
   }
   .hero-banner-side {
     order: -1; /* Puts banner on top */
@@ -1486,14 +1486,15 @@ body {
   .hero-text-side {
     order: 2; /* Puts text on bottom */
     text-align: center;
-    margin-top: -15px; /* Sube fuertemente el bloque de texto */
+    margin-top: 0;
   }
-  .hero-2col .hero { padding: 0 15px 0 !important; text-align: center; }
+  .hero-2col .hero { padding: 0 15px 20px !important; text-align: center; margin: 0 !important; }
   .hero-2col .hero-badge { margin-bottom: 10px; } /* Reduce el espacio debajo de la etiqueta */
   .hero-2col .hero-subtitle { margin: 0 auto 20px; }
   .hero-2col .hero-cta-group { justify-content: center; }
   .hero-2col .hero-stats { justify-content: center; margin: 24px auto 0; }
-  .hero-2col .promo-section { padding: 10px 15px 0 !important; }
+  .hero-2col .promo-section { padding: 0 15px 0 !important; margin: 0 !important; }
+  .promo-carousel { padding-bottom: 10px !important; }
   
   /* Navbar Mobile Fix */
   .mobile-toggle { display: block; }
