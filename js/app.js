@@ -187,8 +187,14 @@ function renderApp() {
       <div class="bg-ocean-grid">${renderBubbles()}</div>
       ${renderNavbar()}
       <div class="app-container">
-        ${renderHero()}
-        ${renderPromoCarousel()}
+        <section class="hero-2col">
+          <div class="hero-text-side">
+            ${renderHero()}
+          </div>
+          <div class="hero-banner-side">
+            ${renderPromoCarousel()}
+          </div>
+        </section>
         ${renderHowItWorks()}
         ${renderCatalogSection(appState.selectedCategory)}
         ${renderFeaturesSection()}

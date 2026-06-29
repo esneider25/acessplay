@@ -1373,6 +1373,31 @@ body {
   white-space: nowrap;
 }
 
+/* 2-Column Hero Layout (Text + Banner) */
+.hero-2col {
+  display: flex;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 30px;
+  padding-top: 40px;
+}
+.hero-text-side {
+  flex: 1 1 500px;
+}
+.hero-banner-side {
+  flex: 0 1 500px;
+  width: 100%;
+}
+/* Strip excess paddings inside the 2col layout and fix alignment */
+.hero-2col .hero { padding: 20px 20px 20px 0; text-align: left; }
+.hero-2col .hero-subtitle { margin: 0 0 32px 0; }
+.hero-2col .hero-cta-group { justify-content: flex-start; }
+.hero-2col .hero-stats { justify-content: flex-start; margin-left: 0; }
+.hero-2col .promo-section { padding: 0 !important; margin: 0 !important; }
+.hero-2col .promo-carousel { padding-bottom: 0 !important; }
+
+
 /* Speed Flow (How it works ultra compact) */
 .speed-flow {
   display: flex;
@@ -1444,6 +1469,28 @@ body {
 }
 
 @media (max-width: 768px) {
+  /* 2-Column Hero Mobile (Banner on top) */
+  .hero-2col {
+    flex-direction: column;
+    padding-top: 20px;
+    gap: 10px;
+  }
+  .hero-banner-side {
+    order: -1; /* Puts banner on top */
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .hero-text-side {
+    order: 2;
+    text-align: center;
+  }
+  .hero-2col .hero { padding: 10px 15px 10px !important; text-align: center; }
+  .hero-2col .hero-subtitle { margin: 0 auto 20px; }
+  .hero-2col .hero-cta-group { justify-content: center; }
+  .hero-2col .hero-stats { justify-content: center; margin: 24px auto 0; }
+  .hero-2col .promo-section { padding: 10px 15px 0 !important; }
+  
   /* Navbar Mobile Fix */
   .mobile-toggle { display: block; }
   .mobile-auth-btn { display: block; }
