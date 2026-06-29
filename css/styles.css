@@ -1500,13 +1500,13 @@ body {
   .hero-stat-label { font-size: 0.7rem; line-height: 1.15; margin-top: 2px; }
 
   /* Sections */
-  section { padding: 40px 0; }
+  section { padding: 20px 0; }
   .section-header h2 { font-size: 1.35rem; margin-bottom: 8px; line-height: 1.2; }
   .section-header p { font-size: 0.85rem; margin-bottom: 20px; }
 
   /* Steps and Features */
-  .how-it-works { padding: 25px 16px; }
-  .features-section { padding: 40px 20px; }
+  .how-it-works { padding: 15px 16px; }
+  .features-section { padding: 20px 16px; }
   .steps-grid { grid-template-columns: 1fr; gap: 10px; }
   .features-grid { grid-template-columns: 1fr; gap: 16px; }
   
