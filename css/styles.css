@@ -1376,7 +1376,7 @@ body {
 /* 2-Column Hero Layout (Text + Banner) */
 .hero-2col {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   max-width: 1200px;
   margin: 0 auto;
   gap: 30px;
@@ -1390,7 +1390,7 @@ body {
   width: 100%;
 }
 /* Strip excess paddings inside the 2col layout and fix alignment */
-.hero-2col .hero { padding: 20px 20px 20px 0; text-align: left; }
+.hero-2col .hero { padding: 0 20px 20px 0; text-align: left; margin-top: -40px; }
 .hero-2col .hero h1 { font-size: clamp(2.2rem, 3.5vw, 3.2rem); }
 .hero-2col .hero-subtitle { margin: 0 0 32px 0; max-width: 100%; }
 .hero-2col .hero-cta-group { justify-content: flex-start; }

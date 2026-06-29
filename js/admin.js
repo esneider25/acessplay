@@ -1758,6 +1758,14 @@ async function processAutomaticTopup(orderId, fromModal = false) {
       }
     } else {
       const refundMsg = data.reembolsado ? ' (Reembolsado al saldo)' : '';
+
+      const errorStr = (data.error || '').toLowerCase();
+      if (errorStr.includes('ya fue usado') || errorStr.includes('ya existe') || errorStr.includes('already used')) {
+        showAdminToast(`⚠️ API indica que ya fue procesado. Aprobando localmente...`, 'info');
+        completeOrderLocally(orderId, fromModal, `Aprobado forzadamente (API indicó: ${data.error})`);
+        return;
+      }
+
       showAdminToast(`❌ API Error: ${data.error}${refundMsg}`, 'error');
       updateOrderStatus(orderId, 'invalid-id', `Verifica que el ID o la cuenta sean correctos. El sistema rechazó la recarga. (${data.error}${refundMsg})`);
       refreshOrdersView();
