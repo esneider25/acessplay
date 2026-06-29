@@ -11,7 +11,8 @@ function showRouletteModal(orderId) {
   if (!product) return;
 
   // 2% chance
-  const isWinner = Math.random() < 0.02;
+  // 5% de probabilidad de ganar
+  const isWinner = Math.random() < 0.05;
 
   // Create UI
   const modal = document.createElement('div');
@@ -51,7 +52,7 @@ function spinRoulette(isWinner, orderId, productId) {
   
   // Audios
   const winSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3'); // Win arcade
-  const loseSound = new Audio('https://www.myinstants.com/media/sounds/sadtrombone.mp3'); // Classic sad horn/trombone
+  const loseSound = new Audio('https://www.myinstants.com/media/sounds/aww-sound-effect.mp3'); // Mild aww sound
   
   btn.style.display = 'none';
   if (closeBtn) closeBtn.style.display = 'none';
