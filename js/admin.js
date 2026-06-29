@@ -2352,6 +2352,7 @@ function renderOrders(container) {
         actionsHtml += `<button class="admin-order-action-btn admin-action-process" onclick="event.stopPropagation(); quickUpdateStatus('${order.id}', 'processing')" title="Marcar como procesando">⚙️ Procesar</button>`;
       }
       actionsHtml += `<button class="admin-order-action-btn admin-action-approve" onclick="event.stopPropagation(); quickUpdateStatus('${order.id}', 'completed')" title="Aprobar y completar">✅ Aprobar</button>`;
+      actionsHtml += `<button class="admin-order-action-btn admin-action-approve" style="background-color: #0288d1;" onclick="event.stopPropagation(); completeOrderLocally('${order.id}', false, 'Aprobado manualmente (API omitida)')" title="Aprobar localmente sin enviar a la API">✅ Local</button>`;
       actionsHtml += `<button class="admin-order-action-btn admin-action-reject" onclick="event.stopPropagation(); openRejectModal('${order.id}', 'rejected')" title="Rechazar pedido">❌ Rechazar</button>`;
       actionsHtml += `<button class="admin-order-action-btn admin-action-invalid" onclick="event.stopPropagation(); openRejectModal('${order.id}', 'invalid-id')" title="ID Inválido">⚠️ Inválido</button>`;
     } else {
@@ -2359,6 +2360,7 @@ function renderOrders(container) {
       actionsHtml += `<span style="font-size: 0.75rem; color: var(--text-muted); margin-right: 4px;">Cambiar a:</span>`;
       if (order.status !== 'completed') {
         actionsHtml += `<button class="admin-order-action-btn admin-action-approve" onclick="event.stopPropagation(); quickUpdateStatus('${order.id}', 'completed')" title="Forzar Aprobación">✅</button>`;
+        actionsHtml += `<button class="admin-order-action-btn admin-action-approve" style="background-color: #0288d1;" onclick="event.stopPropagation(); completeOrderLocally('${order.id}', false, 'Aprobado forzadamente (API omitida)')" title="Aprobar Localmente (Omitir API)">✅ Local</button>`;
       }
       if (order.status !== 'rejected') {
         actionsHtml += `<button class="admin-order-action-btn admin-action-reject" onclick="event.stopPropagation(); openRejectModal('${order.id}', 'rejected')" title="Forzar Rechazo">❌</button>`;
@@ -2610,6 +2612,7 @@ function openOrderDetailModal(orderId) {
       <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
         ${order.status === 'pending' ? `<button class="admin-order-action-btn admin-action-process" onclick="quickUpdateStatusFromModal('${order.id}', 'processing')" style="padding: 10px 20px; font-size: 0.88rem;">⚙️ Procesando</button>` : ''}
         <button class="admin-order-action-btn admin-action-approve" onclick="quickUpdateStatusFromModal('${order.id}', 'completed')" style="padding: 10px 20px; font-size: 0.88rem;">✅ Aprobar</button>
+        <button class="admin-order-action-btn admin-action-approve" style="background-color: #0288d1; padding: 10px 20px; font-size: 0.88rem;" onclick="completeOrderLocally('${order.id}', true, 'Aprobado manualmente (API omitida)')">✅ Local</button>
         <button class="admin-order-action-btn admin-action-reject" onclick="closeAdminModal(); setTimeout(() => openRejectModal('${order.id}', 'rejected'), 200);" style="padding: 10px 20px; font-size: 0.88rem;">❌ Rechazar</button>
         <button class="admin-order-action-btn admin-action-invalid" onclick="closeAdminModal(); setTimeout(() => openRejectModal('${order.id}', 'invalid-id'), 200);" style="padding: 10px 20px; font-size: 0.88rem;">⚠️ ID Inválido</button>
       </div>
