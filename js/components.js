@@ -200,31 +200,26 @@ function renderPromoCarousel() {
 function renderHowItWorks() {
   return `
     <section class="how-it-works" id="how-it-works">
-      <div class="container">
-        <div class="section-header">
-          <h2>¿Cómo <span class="gradient-text">Funciona</span>?</h2>
-          <p>Tres simples pasos para recargar</p>
+      <div class="container" style="max-width: 600px; margin: 0 auto;">
+        <div class="section-header" style="text-align: center;">
+          <h2>⚡ Entrega en <span class="gradient-text">segundos</span></h2>
+          <p>Tu recarga automática y sin demoras.</p>
         </div>
-        <div class="steps-grid">
-          ${(() => {
-            const steps = (typeof LANDING_CONFIG !== 'undefined' && LANDING_CONFIG.howItWorks) ? LANDING_CONFIG.howItWorks : [
-              { title: 'Elige tu Producto', desc: 'Selecciona el juego, gift card, streaming o billetera que deseas recargar y elige el paquete.', icon: '🎯' },
-              { title: 'Realiza el Pago', desc: 'Paga con Pago Móvil, transferencia bancaria o Binance Pay. Envía el comprobante.', icon: '💳' },
-              { title: 'Recibe tu Recarga', desc: 'Verificamos tu pago y procesamos la recarga. ¡Listo en minutos!', icon: '🚀' }
-            ];
-            return steps.map((step, idx) => `
-              <div class="step-card fade-in-up stagger-${idx + 1}">
-                <div class="step-number">${idx + 1}</div>
-                <div class="step-icon">${step.icon}</div>
-                <h3>${step.title}</h3>
-                <p>${step.desc}</p>
-              </div>
-              ${idx < steps.length - 1 ? `
-              <div class="step-connector">
-                <svg width="40" height="2" viewBox="0 0 40 2"><line x1="0" y1="1" x2="40" y2="1" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4"/></svg>
-              </div>` : ''}
-            `).join('');
-          })()}
+        <div class="speed-flow">
+          <div class="speed-step">
+            <div class="si">🛒</div>
+            <div class="st">Eliges el paquete</div>
+          </div>
+          <div class="speed-arrow">→</div>
+          <div class="speed-step">
+            <div class="si">💳</div>
+            <div class="st">Pagas y reportas</div>
+          </div>
+          <div class="speed-arrow">→</div>
+          <div class="speed-step">
+            <div class="si">💎</div>
+            <div class="st">¡Recibes al instante!</div>
+          </div>
         </div>
       </div>
     </section>
