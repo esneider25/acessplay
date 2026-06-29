@@ -1419,21 +1419,51 @@ body {
   .section-header p { font-size: 0.85rem; margin-bottom: 20px; }
 
   /* Steps and Features */
-  .how-it-works, .features-section { padding: 40px 20px; }
-  .steps-grid, .features-grid { grid-template-columns: 1fr; gap: 16px; }
-  .step-card, .feature-card { 
-    text-align: center; padding: 24px 20px; max-width: 100%;
-    display: block;
+  .how-it-works { padding: 25px 16px; }
+  .features-section { padding: 40px 20px; }
+  .steps-grid { grid-template-columns: 1fr; gap: 10px; }
+  .features-grid { grid-template-columns: 1fr; gap: 16px; }
+  
+  /* Feature Card (keeps old center style) */
+  .feature-card { 
+    text-align: center; padding: 24px 20px; max-width: 100%; display: block;
   }
-  .step-icon, .feature-icon { 
-    font-size: 2.5rem; margin-bottom: 12px; 
-    display: block; margin-right: auto; margin-left: auto; width: auto;
+  .feature-icon { 
+    font-size: 2.5rem; margin-bottom: 12px; display: block; margin-right: auto; margin-left: auto; width: auto;
   }
-  .step-card h3, .feature-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
-  .step-card p, .feature-card p { font-size: 0.9rem; margin-bottom: 0; }
+  .feature-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
+  .feature-card p { font-size: 0.9rem; margin-bottom: 0; }
+
+  /* Step Card (Optimized compact row for mobile) */
+  .step-card { 
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 16px;
+    row-gap: 2px;
+    text-align: left; 
+    padding: 16px; 
+    max-width: 100%;
+    align-items: center;
+  }
+  .step-icon { 
+    grid-row: 1 / 3;
+    font-size: 2.2rem; 
+    margin-bottom: 0; 
+  }
+  .step-card h3 { 
+    grid-column: 2;
+    font-size: 1.05rem; 
+    margin-bottom: 0; 
+  }
+  .step-card p { 
+    grid-column: 2;
+    font-size: 0.85rem; 
+    margin-bottom: 0; 
+    line-height: 1.35;
+  }
   .step-number { 
-    top: -12px; left: 50%; transform: translateX(-50%); 
-    width: 24px; height: 24px; font-size: 0.8rem;
+    display: none; 
   }
   .step-connector { display: none; }
 
