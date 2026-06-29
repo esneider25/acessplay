@@ -1391,11 +1391,13 @@ body {
 }
 /* Strip excess paddings inside the 2col layout and fix alignment */
 .hero-2col .hero { padding: 20px 20px 20px 0; text-align: left; }
-.hero-2col .hero-subtitle { margin: 0 0 32px 0; }
+.hero-2col .hero h1 { font-size: clamp(2.2rem, 3.5vw, 3.2rem); }
+.hero-2col .hero-subtitle { margin: 0 0 32px 0; max-width: 100%; }
 .hero-2col .hero-cta-group { justify-content: flex-start; }
 .hero-2col .hero-stats { justify-content: flex-start; margin-left: 0; }
-.hero-2col .promo-section { padding: 0 !important; margin: 0 !important; }
-.hero-2col .promo-carousel { padding-bottom: 0 !important; }
+.hero-2col .promo-section { padding: 0 !important; margin: 0 !important; width: 100%; max-width: 100%; }
+.hero-2col .promo-carousel { padding: 0 !important; --card-width: 100% !important; }
+.hero-2col .promo-card { flex: 0 0 100% !important; width: 100% !important; }
 
 
 /* Speed Flow (How it works ultra compact) */
