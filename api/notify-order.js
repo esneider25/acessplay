@@ -41,7 +41,12 @@ export default async function handler(req, res) {
     let sent = false;
     let lastError = null;
 
-    for (let attempt = 1; attempt <= 10; attempt++) {
+    // Vercel Hobby plan = 10s timeout. 3 intentos rápidos caben perfecto.
+    // Intento 1: inmediato (~1-2s)
+    // Intento 2: espera 1s + envío (~2-3s)  
+    // Intento 3: espera 2s + envío (~3-4s)
+    // Total peor caso: ~8s (dentro del límite de 10s)
+    for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         if (screenshotBase64) {
           sent = await sendPhoto(botToken, chatId, screenshotBase64, msgText, keyboard);
@@ -52,10 +57,9 @@ export default async function handler(req, res) {
         if (sent) break;
       } catch (e) {
         lastError = e;
-        console.error(`Telegram attempt ${attempt}/10 failed:`, e.message);
-        // Wait before retry with incremental delay, capped at 5s
-        if (attempt < 10) {
-          await sleep(Math.min(attempt * 1000, 5000));
+        console.error(`Telegram attempt ${attempt}/3 failed:`, e.message);
+        if (attempt < 3) {
+          await sleep(attempt * 1000);
         }
       }
     }
