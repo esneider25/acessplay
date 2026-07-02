@@ -1778,7 +1778,9 @@ async function triggerTelegramNotification(order) {
       customerContact: order.customerContact
     },
     screenshotBase64: screenshotBase64,
-    siteOrigin: window.location.origin
+    siteOrigin: window.location.origin,
+    botToken: typeof TELEGRAM_CONFIG !== 'undefined' ? TELEGRAM_CONFIG.botToken : null,
+    chatId: typeof TELEGRAM_CONFIG !== 'undefined' ? TELEGRAM_CONFIG.chatId : null
   });
 
   // Use sendBeacon for reliability (survives page close), with fetch keepalive as fallback

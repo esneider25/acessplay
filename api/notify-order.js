@@ -14,23 +14,35 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { order, screenshotBase64, siteOrigin } = req.body;
+    let bodyObj = req.body;
+    if (typeof bodyObj === 'string') {
+      try { bodyObj = JSON.parse(bodyObj); } catch (e) {}
+    }
+
+    let { order, screenshotBase64, siteOrigin, botToken, chatId } = bodyObj || {};
 
     if (!order || !order.id) {
       return res.status(400).json({ error: 'Datos de orden inválidos.' });
     }
 
-    // ── Fetch Telegram config from Firebase ──
-    const FIREBASE_DB_URL = 'https://accesplay-8bf5d-default-rtdb.firebaseio.com';
-    
-    const configRes = await fetch(`${FIREBASE_DB_URL}/telegram_config.json`);
-    const telegramConfig = await configRes.json();
-
-    if (!telegramConfig || !telegramConfig.enabled || !telegramConfig.botToken || !telegramConfig.chatId) {
-      return res.status(200).json({ ok: true, skipped: true, reason: 'Telegram disabled or not configured' });
+    // Si no enviaron el token desde el cliente, intentamos leerlo de Firebase como fallback
+    if (!botToken || !chatId) {
+      const FIREBASE_DB_URL = 'https://accesplay-8bf5d-default-rtdb.firebaseio.com';
+      try {
+        const configRes = await fetch(`${FIREBASE_DB_URL}/telegram_config.json`);
+        const telegramConfig = await configRes.json();
+        if (telegramConfig) {
+          botToken = telegramConfig.botToken;
+          chatId = telegramConfig.chatId;
+        }
+      } catch (e) {
+        console.warn("No se pudo leer config de Firebase");
+      }
     }
 
-    const { botToken, chatId } = telegramConfig;
+    if (!botToken || !chatId) {
+      return res.status(200).json({ ok: true, skipped: true, reason: 'Telegram disabled or not configured' });
+    }
 
     // ── Build Telegram message (server-side replica of buildOrderTelegramMessage) ──
     const msgText = buildMessage(order);
