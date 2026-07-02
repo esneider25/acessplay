@@ -14,17 +14,17 @@ export default async function handler(req, res) {
 
   try {
     const { type, text, inlineKeyboard, photoBase64, botToken, chatId } = req.body;
-    
+
     if (!botToken || !chatId) {
       return res.status(400).json({ error: "Faltan credenciales de Telegram." });
     }
 
     const sleep = ms => new Promise(r => setTimeout(r, ms));
-    
+
     async function fetchWithRetry(url, options) {
       let response = await fetch(url, options);
       let data = await response.json();
-      
+
       // Handle Telegram 429 Rate Limit
       if (response.status === 429) {
         const retryAfter = (data.parameters && data.parameters.retry_after) ? data.parameters.retry_after * 1000 : 3000;
@@ -48,26 +48,26 @@ export default async function handler(req, res) {
       if (inlineKeyboard) {
         body.reply_markup = { inline_keyboard: inlineKeyboard };
       }
-      
+
       const { response, data } = await fetchWithRetry(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       return res.status(response.status).json(data);
-    } 
-    
+    }
+
     else if (type === 'photo') {
       // Use native Node 18+ FormData
       const formData = new FormData();
       formData.append('chat_id', chatId);
       formData.append('caption', text || '');
       formData.append('parse_mode', 'HTML');
-      
+
       if (inlineKeyboard) {
         formData.append('reply_markup', JSON.stringify({ inline_keyboard: inlineKeyboard }));
       }
-      
+
       if (photoBase64) {
         const buffer = Buffer.from(photoBase64, 'base64');
         const blob = new Blob([buffer], { type: 'image/jpeg' });
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
       });
       return res.status(response.status).json(data);
     }
-    
+
     return res.status(400).json({ error: "Tipo de mensaje no soportado." });
 
   } catch (error) {
