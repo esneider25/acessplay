@@ -98,25 +98,33 @@ function formatBs(amount) {
   return parseFloat(amount).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function escapeHtml(text) {
+  if (typeof text !== 'string') return text || '';
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function buildMessage(order) {
   let msg = `🤖 <b>NUEVO PEDIDO — ${order.id}</b>\n`;
-  msg += `👤 <b>Jugador:</b> ${order.playerName || 'ㅤ'}\n`;
-  msg += `🆔 <b>ID:</b> <code>${order.gameId || order.accountEmail || 'N/A'}</code>\n`;
-  msg += `🔥 <b>Producto:</b> ${order.productName} (${order.packageLabel})\n`;
+  msg += `👤 <b>Jugador:</b> ${escapeHtml(order.playerName) || 'ㅤ'}\n`;
+  msg += `🆔 <b>ID:</b> <code>${escapeHtml(order.gameId) || escapeHtml(order.accountEmail) || 'N/A'}</code>\n`;
+  msg += `🔥 <b>Producto:</b> ${escapeHtml(order.productName)} (${escapeHtml(order.packageLabel)})\n`;
   msg += `💰 <b>Monto:</b> $${parseFloat(order.priceUsd).toFixed(2)} USD | Bs. ${formatBs(order.priceBs)}\n`;
 
   if (order.discountCode) {
     const discountStr = order.discountType === 'percentage'
       ? `${order.discountValue}%`
       : `$${parseFloat(order.discountValue).toFixed(2)} USD`;
-    msg += `🎁 <b>Descuento:</b> ${order.discountCode} (-${discountStr})\n`;
+    msg += `🎁 <b>Descuento:</b> ${escapeHtml(order.discountCode)} (-${discountStr})\n`;
   }
 
   const refNumbers = (order.ocrNumbers && order.ocrNumbers.length > 0) ? order.ocrNumbers.join(', ') : 'Ver comprobante adjunto';
-  msg += `🔢 <b>Ref:</b> <code>${refNumbers}</code>\n`;
+  msg += `🔢 <b>Ref:</b> <code>${escapeHtml(refNumbers)}</code>\n`;
 
-  msg += `🏦 <b>metodo de pago:</b> ${order.paymentMethodName}\n`;
-  msg += `📱 <b>contacto:</b> ${order.customerContact || 'N/A'}\n`;
+  msg += `🏦 <b>metodo de pago:</b> ${escapeHtml(order.paymentMethodName)}\n`;
+  msg += `📱 <b>contacto:</b> ${escapeHtml(order.customerContact) || 'N/A'}\n`;
   return msg;
 }
 
