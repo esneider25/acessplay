@@ -1783,16 +1783,32 @@ async function triggerTelegramNotification(order) {
     chatId: typeof TELEGRAM_CONFIG !== 'undefined' ? TELEGRAM_CONFIG.chatId : null
   });
 
-  // Use sendBeacon for reliability (survives page close), with fetch keepalive as fallback
+  // Use sendBeacon for reliability (survives page close), with normal fetch as fallback for large payloads
   try {
-    const beaconSent = navigator.sendBeacon('/api/notify-order', new Blob([payload], { type: 'application/json' }));
-    if (!beaconSent) {
-      // Fallback: fetch with keepalive (also survives page close)
+    const blobPayload = new Blob([payload], { type: 'application/json' });
+    let sent = false;
+    
+    // navigator.sendBeacon and fetch keepalive=true have a ~64KB limit.
+    // Payloads with screenshots easily exceed this limit.
+    if (blobPayload.size < 60000) {
+      sent = navigator.sendBeacon('/api/notify-order', blobPayload);
+      if (!sent) {
+        fetch('/api/notify-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true
+        }).catch(() => {});
+        sent = true;
+      }
+    }
+
+    if (!sent) {
+      // For larger payloads (>64KB), we MUST use normal fetch without keepalive
       fetch('/api/notify-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: payload,
-        keepalive: true
+        body: payload
       }).catch(() => {});
     }
   } catch (e) {
