@@ -995,8 +995,8 @@ async function renderCustomers(container) {
       <div style="display: flex; flex-direction: column; gap: 8px;">
         ${c.uid ? `
           <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openRoleModal('${c.uid}', '${c.role}', ${c.discountPercentage})">
-              ${c.role === 'revendedor' ? '💼 Revend (' + c.discountPercentage + '%)' : '👤 Cliente'}
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="openRoleModal('${c.uid}', '${c.role || 'cliente'}', ${c.discountPercentage || 0}, ${c.referralLimit || 30}, ${!!c.autoProcessExternal})">
+              ${c.role === 'revendedor' ? '💼 Revend (' + c.discountPercentage + '%)' : (c.role === 'influencer' ? '🌟 Influencer' : '👤 Cliente')}
             </button>
             <button class="btn ${c.isBlocked ? 'btn-danger' : 'btn-secondary'}" style="padding: 4px 10px; font-size: 0.75rem; width: fit-content;" onclick="toggleBlockUser('${c.uid}', ${c.isBlocked})">
               ${c.isBlocked ? '🚫 Bloqueado' : '✅ Activo'}
