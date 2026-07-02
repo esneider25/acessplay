@@ -2525,11 +2525,11 @@ function initCarousel() {
     }
   };
 
-  carouselInterval = setInterval(autoScroll, 6000);
+  carouselInterval = setInterval(autoScroll, 3000);
 
   const resetInterval = () => {
     clearInterval(carouselInterval);
-    carouselInterval = setInterval(autoScroll, 6000);
+    carouselInterval = setInterval(autoScroll, 3000);
   };
   
   carousel.addEventListener('pointerdown', resetInterval);
