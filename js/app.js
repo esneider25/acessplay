@@ -1721,6 +1721,7 @@ function compressFileToBlob(file) {
 }
 
 async function triggerTelegramNotification(order) {
+  // ── Step 1: Save thumbnail to Firebase (keep existing behavior) ──
   if (appState.selectedScreenshot) {
     try {
       const thumbnail = await generateThumbnail(appState.selectedScreenshot);
@@ -1741,19 +1742,65 @@ async function triggerTelegramNotification(order) {
     }
   }
 
-  const msgText = buildOrderTelegramMessage(order);
-  const keyboard = buildOrderKeyboard(order.id);
-
+  // ── Step 2: Prepare screenshot base64 for server (if available) ──
+  let screenshotBase64 = null;
   if (appState.selectedScreenshot) {
     try {
       const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
-      await sendTelegramPhoto(compressedBlob, msgText, keyboard);
-    } catch(e) {
-      console.error('Compression failed, sending original:', e);
-      await sendTelegramPhoto(appState.selectedScreenshot, msgText, keyboard);
+      screenshotBase64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(compressedBlob);
+      });
+    } catch (e) {
+      console.warn('Error compressing screenshot for server, sending without image:', e);
     }
-  } else {
-    await sendTelegramMessage(msgText, keyboard);
+  }
+
+  // ── Step 3: Fire-and-forget POST to server endpoint ──
+  // The SERVER handles Telegram delivery with retries — no dependency on client
+  const payload = JSON.stringify({
+    order: {
+      id: order.id,
+      playerName: order.playerName,
+      gameId: order.gameId,
+      accountEmail: order.accountEmail,
+      productName: order.productName,
+      packageLabel: order.packageLabel,
+      priceUsd: order.priceUsd,
+      priceBs: order.priceBs,
+      discountCode: order.discountCode,
+      discountValue: order.discountValue,
+      discountType: order.discountType,
+      ocrNumbers: order.ocrNumbers,
+      paymentMethodName: order.paymentMethodName,
+      customerContact: order.customerContact
+    },
+    screenshotBase64: screenshotBase64,
+    siteOrigin: window.location.origin
+  });
+
+  // Use sendBeacon for reliability (survives page close), with fetch keepalive as fallback
+  try {
+    const beaconSent = navigator.sendBeacon('/api/notify-order', new Blob([payload], { type: 'application/json' }));
+    if (!beaconSent) {
+      // Fallback: fetch with keepalive (also survives page close)
+      fetch('/api/notify-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payload,
+        keepalive: true
+      }).catch(() => {});
+    }
+  } catch (e) {
+    // Last resort fallback
+    fetch('/api/notify-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload,
+      keepalive: true
+    }).catch(() => {});
   }
   
   appState.selectedScreenshot = null;
