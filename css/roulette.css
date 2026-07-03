@@ -101,7 +101,7 @@
 .sec-5 { transform: rotate(240deg); color: #000 !important; text-shadow: none !important; font-size: 1rem !important;}
 
 /* Fix text being upside down on the left/bottom side of the wheel */
-.sec-2 span, .sec-3 span, .sec-4 span {
+.sec-3 span, .sec-4 span, .sec-5 span {
   display: inline-block;
   transform: rotate(180deg);
 }
