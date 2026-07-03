@@ -337,7 +337,17 @@ function initFirebaseData() {
       try {
         if (data !== null && data !== undefined) {
           const toArray = (d) => Array.isArray(d) ? d.filter(Boolean) : Object.values(d);
-          if (key === 'products') { PRODUCTS.length = 0; toArray(data).forEach(p => PRODUCTS.push(p)); }
+          if (key === 'products') { 
+            PRODUCTS.length = 0; 
+            toArray(data).forEach(p => {
+              if (p.packages) {
+                p.packages = (Array.isArray(p.packages) ? p.packages : Object.values(p.packages)).filter(Boolean);
+              } else {
+                p.packages = [];
+              }
+              PRODUCTS.push(p); 
+            }); 
+          }
           else if (key === 'categories') { CATEGORIES.length = 0; toArray(data).forEach(c => CATEGORIES.push(c)); }
           else if (key === 'payment_methods') { PAYMENT_METHODS.length = 0; toArray(data).forEach(p => PAYMENT_METHODS.push(p)); }
           else if (key === 'exchange_rate') Object.assign(EXCHANGE_RATE, data);
