@@ -128,12 +128,11 @@ async function spinRoulette(orderId, productId) {
   const baseSpins = 360 * 15; // 15 vueltas
   let finalDegree;
   if (isWinner) {
-    // Winner is sec-5 at CSS angle 240deg. Top is 270deg.
     finalDegree = baseSpins + 30; 
   } else {
-    const losingAngles = [0, 60, 120, 180, 300]; 
+    const losingAngles = [90, 150, 210, 270, 330]; 
     const randomLosingAngle = losingAngles[Math.floor(Math.random() * losingAngles.length)];
-    finalDegree = baseSpins + (270 - randomLosingAngle);
+    finalDegree = baseSpins + randomLosingAngle;
   }
 
   wheel.style.transition = `transform 12s cubic-bezier(0.15, 0.8, 0.1, 1)`;

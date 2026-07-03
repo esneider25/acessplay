@@ -58,8 +58,8 @@
   box-shadow: 0 0 30px rgba(0,0,0,0.5);
   position: relative;
   overflow: hidden;
-  /* Rotate -90deg so 0 CSS deg matches conic 0deg (top) */
-  transform: rotate(-90deg); 
+  /* Set initial rotation to 0 so math matches conic gradient */
+  transform: rotate(0deg); 
 }
 .roulette-wheel::after {
   content: "";
@@ -93,16 +93,15 @@
   z-index: 3;
 }
 /* Center angles for conic gradient slices (which start at top) */
-/* sec-0: 0-60 -> middle 30. CSS rotate 30. */
-.sec-0 { transform: rotate(0deg); }
-.sec-1 { transform: rotate(60deg); }
-.sec-2 { transform: rotate(120deg); }
-.sec-3 { transform: rotate(180deg); }
-.sec-4 { transform: rotate(300deg); }
+.sec-0 { transform: rotate(-60deg); }
+.sec-1 { transform: rotate(0deg); }
+.sec-2 { transform: rotate(60deg); }
+.sec-3 { transform: rotate(120deg); }
+.sec-4 { transform: rotate(180deg); }
 .sec-5 { transform: rotate(240deg); color: #000 !important; text-shadow: none !important; font-size: 1rem !important;}
 
 /* Fix text being upside down on the left/bottom side of the wheel */
-.sec-2 span, .sec-3 span, .sec-5 span {
+.sec-2 span, .sec-3 span, .sec-4 span {
   display: inline-block;
   transform: rotate(180deg);
 }

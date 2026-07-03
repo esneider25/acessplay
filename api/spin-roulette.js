@@ -61,6 +61,7 @@ export default async function handler(req, res) {
           accountEmail: order.accountEmail || null,
           status: 'pending',
           adminNote: "🎁 PREMIO RULETA (Ganado de la orden " + orderId + ")",
+          createdAt: new Date().toISOString(),
           timestamp: new Date().toISOString()
         };
 
