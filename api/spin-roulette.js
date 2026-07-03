@@ -1,4 +1,3 @@
-const fetch = require('node-fetch'); // Required for older Vercel Node envs or implicitly available
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
