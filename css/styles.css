@@ -1642,7 +1642,13 @@ body {
     margin-right: 14px;
     border-radius: var(--radius-sm);
   }
-  .game-card-badge { display: none; }
+  .game-card-badge { 
+    display: block; 
+    top: 2px; 
+    right: 2px; 
+    font-size: 0.5rem; 
+    padding: 2px 4px; 
+  }
   .game-card-body {
     padding: 0;
     display: flex;
