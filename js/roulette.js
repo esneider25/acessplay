@@ -10,10 +10,6 @@ function showRouletteModal(orderId) {
   const product = products.find(p => p.id === order.productId);
   if (!product) return;
 
-  // 2% chance
-  // 5% de probabilidad de ganar
-  const isWinner = Math.random() < 0.05;
-
   // Create UI
   const modal = document.createElement('div');
   modal.className = 'roulette-modal';
@@ -37,14 +33,14 @@ function showRouletteModal(orderId) {
       </div>
       
       <div class="roulette-result" id="roulette-result"></div>
-      <button class="roulette-btn" id="roulette-btn" onclick="spinRoulette(${isWinner}, '${order.id}', '${product.id}')">GIRAR AHORA</button>
+      <button class="roulette-btn" id="roulette-btn" onclick="spinRoulette('${order.id}', '${product.id}')">GIRAR AHORA</button>
       <button class="roulette-close-btn" onclick="document.getElementById('roulette-modal').remove()">✖</button>
     </div>
   `;
   document.body.appendChild(modal);
 }
 
-function spinRoulette(isWinner, orderId, productId) {
+async function spinRoulette(orderId, productId) {
   const btn = document.getElementById('roulette-btn');
   const wheel = document.getElementById('roulette-wheel');
   const resultDiv = document.getElementById('roulette-result');
@@ -56,14 +52,41 @@ function spinRoulette(isWinner, orderId, productId) {
   
   btn.style.display = 'none';
   if (closeBtn) closeBtn.style.display = 'none';
-  
+  resultDiv.innerHTML = "Conectando al servidor...";
+  resultDiv.style.color = "var(--text-secondary)";
+
+  let isWinner = false;
+  try {
+    const res = await fetch('/api/spin-roulette', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.error || 'Error al conectar con la ruleta.');
+      btn.style.display = 'block';
+      if (closeBtn) closeBtn.style.display = 'block';
+      resultDiv.innerHTML = "";
+      return;
+    }
+    isWinner = data.isWinner === true;
+  } catch (err) {
+    alert('Error de red. Intenta nuevamente.');
+    btn.style.display = 'block';
+    if (closeBtn) closeBtn.style.display = 'block';
+    resultDiv.innerHTML = "";
+    return;
+  }
+
+  resultDiv.innerHTML = "¡Girando!";
+
   // Start spin sound (Synthetic Roulette Ticks)
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   function playTick() {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    // Use a square wave with a low frequency drop to simulate a heavy plastic flapper hitting a peg
     osc.type = 'square';
     osc.frequency.setValueAtTime(150, audioCtx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.03);
@@ -75,42 +98,34 @@ function spinRoulette(isWinner, orderId, productId) {
     osc.stop(audioCtx.currentTime + 0.03);
   }
 
-  let delay = 15; // start extremely fast (15ms)
+  let delay = 15;
   function triggerTick() {
     playTick();
-    delay = delay * 1.10; // increase delay by 10% each tick (slows down perfectly over ~11.8 seconds)
-    if (delay < 1200) { // Keep ticking until the delay between ticks reaches 1.2 seconds
+    delay = delay * 1.10;
+    if (delay < 1200) {
       setTimeout(triggerTick, delay);
     }
   }
   triggerTick();
 
-  // Mark as played securely in database
+  // Mark as played locally (server already did it securely)
   const orders = typeof getOrders === 'function' ? getOrders() : [];
   const order = orders.find(o => o.id === orderId);
-  if (typeof firebase !== 'undefined') {
-    firebase.database().ref('orders/' + orderId + '/roulettePlayed').set(true)
-      .catch(err => console.error('Error saving roulette status:', err));
-    
-    if (order) {
-      order.roulettePlayed = true;
-    }
-    localStorage.setItem('roulette_played_' + orderId, 'true');
-    
-    // Also re-render tracking so the button disappears in background
-    if (appState && appState.currentView === 'tracking') {
-      setTimeout(() => {
-        if (typeof renderOrderTracking === 'function') {
-          const container = document.querySelector('.app-container');
-          if (container) {
-            container.innerHTML = renderOrderTracking(orderId) + (typeof renderFooter === 'function' ? renderFooter() : '');
-          }
+  if (order) order.roulettePlayed = true;
+  localStorage.setItem('roulette_played_' + orderId, 'true');
+  
+  if (appState && appState.currentView === 'tracking') {
+    setTimeout(() => {
+      if (typeof renderOrderTracking === 'function') {
+        const container = document.querySelector('.app-container');
+        if (container) {
+          container.innerHTML = renderOrderTracking(orderId) + (typeof renderFooter === 'function' ? renderFooter() : '');
         }
-      }, 500);
-    }
+      }
+    }, 500);
   }
   
-  const baseSpins = 360 * 15; // 15 vueltas para muchísimo más suspenso
+  const baseSpins = 360 * 15; // 15 vueltas
   let finalDegree;
   if (isWinner) {
     // Winner is sec-5 at CSS angle 240deg. Top is 270deg.
@@ -121,17 +136,15 @@ function spinRoulette(isWinner, orderId, productId) {
     finalDegree = baseSpins + (270 - randomLosingAngle);
   }
 
-  // 12 segundos de animación, empieza rápido, pero tiene una caída larga y tensa
   wheel.style.transition = `transform 12s cubic-bezier(0.15, 0.8, 0.1, 1)`;
   wheel.style.transform = `rotate(${finalDegree}deg)`;
   
   setTimeout(() => {
     if (isWinner) {
       winSound.play().catch(e => console.log('Audio autoplay blocked'));
-      resultDiv.innerHTML = "🎉 ¡FELICIDADES! ¡GANASTE UN PREMIO! 🎉";
+      resultDiv.innerHTML = "🎉 ¡FELICIDADES! ¡GANASTE UN PREMIO! 🎉<br><small>Tu premio ya se ha añadido a tu cuenta.</small>";
       resultDiv.style.color = "var(--accent)";
       if (typeof createConfetti === 'function') createConfetti();
-      processRoulettePrize(orderId, productId);
     } else {
       loseSound.play().catch(e => console.log('Audio autoplay blocked'));
       resultDiv.innerHTML = "😔 Sigue participando. ¡Suerte a la próxima!";
@@ -143,62 +156,5 @@ function spinRoulette(isWinner, orderId, productId) {
     btn.onclick = () => {
       document.getElementById('roulette-modal').remove();
     };
-  }, 12000); // 12 segundos para coincidir con la transición
-}
-
-function processRoulettePrize(originalOrderId, productId) {
-  const products = typeof getProducts === 'function' ? getProducts() : PRODUCTS;
-  const product = products.find(p => p.id === productId);
-  if (!product || !product.packages || product.packages.length === 0) return;
-  
-  const cheapestPackage = [...product.packages].sort((a,b) => a.priceUsd - b.priceUsd)[0];
-  const orders = typeof getOrders === 'function' ? getOrders() : ORDERS;
-  const originalOrder = orders.find(o => o.id === originalOrderId);
-  if (!originalOrder) return;
-  
-  // Prevent duplicate prizes if they clear cache
-  const alreadyWon = orders.some(o => o.paymentMethodId === 'roulette' && o.adminNote && o.adminNote.includes(originalOrderId));
-  if (alreadyWon) {
-    console.warn('Prize already claimed for this order.');
-    return;
-  }
-  
-  const freeOrderData = {
-    userId: originalOrder.userId,
-    userName: originalOrder.userName,
-    productId: product.id,
-    productName: product.name,
-    productType: product.type,
-    packageLabel: cheapestPackage.name,
-    apiProductId: cheapestPackage.apiProductId,
-    apiProvider: product.apiProvider,
-    priceUsd: 0,
-    priceBs: 0,
-    costUsd: cheapestPackage.costUsd || 0,
-    paymentMethodId: 'roulette',
-    paymentMethodName: 'Premio Ruleta',
-    customerContact: originalOrder.customerContact,
-    gameId: originalOrder.gameId,
-    playerName: originalOrder.playerName,
-    accountEmail: originalOrder.accountEmail,
-    accountPassword: originalOrder.accountPassword,
-    imageHash: 'PREMIO_RULETA',
-    discountCode: null,
-    discountValue: 0,
-    discountType: null
-  };
-  
-  if (typeof createOrder === 'function') {
-    const freeOrder = createOrder(freeOrderData);
-    freeOrder.adminNote = "🎁 PREMIO RULETA (Ganado de la orden " + originalOrderId + ")";
-    if (!freeOrder.statusHistory) freeOrder.statusHistory = [];
-    freeOrder.statusHistory.push({
-      status: 'pending',
-      timestamp: new Date().toISOString(),
-      note: "Generado automáticamente por premio de ruleta."
-    });
-    if (typeof saveOrderToDb === 'function') {
-      saveOrderToDb(freeOrder);
-    }
-  }
+  }, 12000);
 }

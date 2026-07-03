@@ -791,8 +791,9 @@ window.calculateHistoricalStats = async function() {
 function renderProducts(container) {
   const productCardsHtml = PRODUCTS.map(product => {
     const cat = getCategoryById(product.category);
-    const minPrice = product.packages.length > 0 ? Math.min(...product.packages.map(p => p.priceUsd)) : 0;
-    const maxPrice = product.packages.length > 0 ? Math.max(...product.packages.map(p => p.priceUsd)) : 0;
+    const pkgList = product.packages || [];
+    const minPrice = pkgList.length > 0 ? Math.min(...pkgList.map(p => p.priceUsd)) : 0;
+    const maxPrice = pkgList.length > 0 ? Math.max(...pkgList.map(p => p.priceUsd)) : 0;
 
     let badgeHtml = '';
     if (product.isOutofStock) badgeHtml = `<span class="admin-badge" style="background: rgba(239, 83, 80, 0.2); color: #ef5350;">⛔ Agotado</span>`;
@@ -817,7 +818,7 @@ function renderProducts(container) {
             ${product.description || 'Sin descripción.'}
           </p>
           <div class="admin-game-packages">
-            <span>📦 ${product.packages.length} Paquetes</span> |
+            <span>📦 ${pkgList.length} Paquetes</span> |
             <span>$${minPrice.toFixed(2)} — $${maxPrice.toFixed(2)}</span>
           </div>
         </div>
@@ -1879,7 +1880,7 @@ function openProductModal(productId = null) {
     if (found) product = JSON.parse(JSON.stringify(found));
   }
 
-  adminState.tempPackages = [...product.packages];
+  adminState.tempPackages = [...(product.packages || [])];
 
   const categoryOptions = CATEGORIES.map(cat =>
     `<option value="${cat.id}" ${product.category === cat.id ? 'selected' : ''}>${cat.icon} ${cat.name}</option>`
@@ -3273,6 +3274,11 @@ function renderSettings(container) {
           </label>
           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">Si se activa, a los clientes que recarguen en la categoría de juegos les aparecerá el botón para girar la ruleta luego de que su pedido sea aprobado.</p>
         </div>
+        <div class="admin-form-group" style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+          <label class="admin-form-label">Probabilidad de Ganar (%)</label>
+          <input type="number" id="setting-roulette-probability" class="admin-form-input" value="${config.rouletteWinProbability || '2'}" min="0" max="100" step="1">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">De 0 a 100. (Ejemplo: 2 = 2% de los clientes ganarán el premio de la ruleta).</p>
+        </div>
       </div>
 
       <div class="admin-card" style="grid-column: 1 / -1;">
@@ -3376,9 +3382,11 @@ function adminSaveSettings() {
   const announcementMessage = document.getElementById('setting-announcement-msg').value;
   const enableRouletteEl = document.getElementById('setting-enable-roulette');
   const enableRoulette = enableRouletteEl ? enableRouletteEl.checked : true;
+  const rouletteProbEl = document.getElementById('setting-roulette-probability');
+  const rouletteWinProbability = rouletteProbEl ? parseInt(rouletteProbEl.value) : 2;
   const termsAndConditions = window.currentTermsEditorData || [];
 
-  saveSettings({ whatsapp, whatsappChannel, instagram, telegram, schedule, maintenance, announcementEnabled, announcementMessage, enableRoulette, termsAndConditions });
+  saveSettings({ whatsapp, whatsappChannel, instagram, telegram, schedule, maintenance, announcementEnabled, announcementMessage, enableRoulette, rouletteWinProbability, termsAndConditions });
   showAdminToast('✅ Configuración guardada', 'success');
 }
 

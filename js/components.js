@@ -277,8 +277,9 @@ function renderProductCard(product, index) {
   if (product.isOutofStock) badge = '<span class="game-card-badge" style="background: rgba(239, 83, 80, 0.9); color: white;">⛔ Agotado</span>';
   else if (product.popular) badge = '<span class="game-card-badge badge-popular">🔥 Popular</span>';
   else if (product.isNew) badge = '<span class="game-card-badge badge-new">✨ Nuevo</span>';
-  const minPrice = Math.min(...product.packages.map(p => p.priceUsd));
-  const maxPrice = Math.max(...product.packages.map(p => p.priceUsd));
+  const pkgList = product.packages || [];
+  const minPrice = pkgList.length > 0 ? Math.min(...pkgList.map(p => p.priceUsd)) : 0;
+  const maxPrice = pkgList.length > 0 ? Math.max(...pkgList.map(p => p.priceUsd)) : 0;
 
   const bannerContent = product.imageUrl
     ? `<img src="${product.imageUrl}" alt="${product.name}" loading="lazy">`
@@ -323,7 +324,7 @@ function renderProductDetail(productId) {
   if (product.isOutofStock) {
     packages = '<div style="padding: 20px; background: rgba(239, 83, 80, 0.1); color: #ef5350; border: 1px solid rgba(239, 83, 80, 0.3); border-radius: 8px; text-align: center; width: 100%; margin-top: 15px;">Este producto se encuentra <b>agotado</b> por el momento.<br>Por favor, intenta más tarde.</div>';
   } else {
-    packages = product.packages.map((pkg, i) => {
+    packages = (product.packages || []).map((pkg, i) => {
       if (pkg.isOutofStock) {
         return `
           <div class="package-card fade-in-up stagger-${(i % 7) + 1}"

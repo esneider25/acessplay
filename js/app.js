@@ -351,7 +351,8 @@ function handleProductSearch(query) {
     productsGrid.innerHTML = filteredProducts.map((product, index) => {
       const category = CATEGORIES.find(c => c.id === product.category);
       const delay = (index % 10) * 0.05;
-      const minPrice = Math.min(...product.packages.map(p => p.priceUsd));
+      const pkgList = product.packages || [];
+      const minPrice = pkgList.length > 0 ? Math.min(...pkgList.map(p => p.priceUsd)) : 0;
       
       const iconHtml = product.imageUrl 
         ? `<img src="${product.imageUrl}" class="product-icon-img" alt="${product.name}" onerror="this.onerror=null; this.outerHTML='<div class=\\'product-icon\\'>${product.currencyIcon}</div>'">`
@@ -413,7 +414,7 @@ function selectPackage(productId, index) {
   }
 
   const product = PRODUCTS.find(g => g.id === productId);
-  const pkg = product ? product.packages[index] : null;
+  const pkg = product && product.packages ? product.packages[index] : null;
   if (pkg && typeof userProfile !== 'undefined' && userProfile && userProfile.wallet > 0) {
     if (userProfile.wallet >= pkg.priceUsd) {
       selectPayment('wallet');
@@ -654,7 +655,7 @@ async function _submitOrderLogic() {
     return;
   }
 
-  const pkg = product.packages[appState.selectedPackageIndex];
+  const pkg = (product.packages || [])[appState.selectedPackageIndex];
   let method = PAYMENT_METHODS.find(m => m.id === appState.selectedPaymentId);
   if (appState.selectedPaymentId === 'wallet') {
     method = { id: 'wallet', name: 'Saldo (Monedero)', currency: 'usd' };
