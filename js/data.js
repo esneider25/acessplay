@@ -527,59 +527,111 @@ function getMessagesForSession(sessionId) {
 }
 
 function addMessage(sessionId, sender, text, contact = null) {
-  let conv = MESSAGES.find(m => m.sessionId === sessionId);
-  if (!conv) {
-    conv = {
-      sessionId: sessionId,
-      contact: contact,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      messages: [],
-      hasUnreadAdmin: false,
-      hasUnreadUser: false
-    };
-    MESSAGES.push(conv);
+  // Local UI Update for instant feedback
+  let localConv = MESSAGES.find(m => m.sessionId === sessionId);
+  if (!localConv) {
+    localConv = { sessionId, contact: contact || 'Desconocido', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), messages: [], hasUnreadAdmin: false, hasUnreadUser: false };
+    MESSAGES.push(localConv);
   } else if (contact) {
-    conv.contact = contact;
+    localConv.contact = contact;
   }
-
+  
   if (text) {
-    conv.messages.push({
+    localConv.messages.push({
       id: 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
-      sender: sender, // 'user' or 'admin' or 'bot'
+      sender: sender,
       text: text,
       timestamp: new Date().toISOString()
     });
   }
-  conv.updatedAt = new Date().toISOString();
+  localConv.updatedAt = new Date().toISOString();
+  if (sender === 'user') localConv.hasUnreadAdmin = true;
+  else localConv.hasUnreadUser = true;
 
-  if (sender === 'user') {
-    conv.hasUnreadAdmin = true;
-  } else {
-    conv.hasUnreadUser = true;
+  // DB Transaction to avoid overwriting other chats
+  if (typeof firebase !== 'undefined') {
+    firebase.database().ref('messages').transaction((currentMessages) => {
+      let msgsArray = [];
+      if (currentMessages) {
+        msgsArray = Array.isArray(currentMessages) ? currentMessages.filter(Boolean) : Object.values(currentMessages);
+      }
+      
+      let convIndex = msgsArray.findIndex(m => m && m.sessionId === sessionId);
+      let conv = convIndex !== -1 ? msgsArray[convIndex] : null;
+      
+      if (!conv) {
+        conv = {
+          sessionId: sessionId,
+          contact: contact || 'Desconocido',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          messages: [],
+          hasUnreadAdmin: false,
+          hasUnreadUser: false
+        };
+        msgsArray.push(conv);
+        convIndex = msgsArray.length - 1;
+      } else if (contact) {
+        conv.contact = contact;
+      }
+
+      if (text) {
+        if (!conv.messages) conv.messages = [];
+        if (!Array.isArray(conv.messages)) conv.messages = Object.values(conv.messages).filter(Boolean);
+        conv.messages.push({
+          id: 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+          sender: sender,
+          text: text,
+          timestamp: new Date().toISOString()
+        });
+      }
+      conv.updatedAt = new Date().toISOString();
+      if (sender === 'user') conv.hasUnreadAdmin = true;
+      else conv.hasUnreadUser = true;
+      
+      msgsArray[convIndex] = conv;
+      return msgsArray;
+    });
   }
-
-  saveMessages();
 }
 
 function markMessagesAsRead(sessionId, reader) {
-  const conv = MESSAGES.find(m => m.sessionId === sessionId);
-  if (conv) {
-    let changed = false;
-    if (reader === 'admin' && conv.hasUnreadAdmin) {
-      conv.hasUnreadAdmin = false;
-      changed = true;
-    }
-    if (reader === 'user' && conv.hasUnreadUser) {
-      conv.hasUnreadUser = false;
-      changed = true;
-    }
-    if (changed) saveMessages();
+  // Local update
+  let localConv = MESSAGES.find(m => m.sessionId === sessionId);
+  if (localConv) {
+    if (reader === 'admin') localConv.hasUnreadAdmin = false;
+    if (reader === 'user') localConv.hasUnreadUser = false;
+  }
+  
+  // DB Transaction
+  if (typeof firebase !== 'undefined') {
+    firebase.database().ref('messages').transaction((currentMessages) => {
+      if (!currentMessages) return currentMessages;
+      let msgsArray = Array.isArray(currentMessages) ? currentMessages.filter(Boolean) : Object.values(currentMessages);
+      let convIndex = msgsArray.findIndex(m => m && m.sessionId === sessionId);
+      
+      if (convIndex !== -1) {
+        let conv = msgsArray[convIndex];
+        let changed = false;
+        if (reader === 'admin' && conv.hasUnreadAdmin) {
+          conv.hasUnreadAdmin = false;
+          changed = true;
+        }
+        if (reader === 'user' && conv.hasUnreadUser) {
+          conv.hasUnreadUser = false;
+          changed = true;
+        }
+        if (changed) {
+          msgsArray[convIndex] = conv;
+          return msgsArray;
+        }
+      }
+    });
   }
 }
 
 function saveMessages() {
-  saveToDb('messages', MESSAGES);
+  // Deprecated: handled via transaction now
 }
 
 // ── Orders CRUD ──
