@@ -301,7 +301,7 @@ function initFirebaseData() {
   const isAdmin = window.location.pathname.includes('admin');
   const userLoggedIn = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
   
-  const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'telegram_config'];
+  const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'telegram_config', 'discounts'];
   const keysToLoad = isAdmin 
     ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', 'spam_tracker', 'order_counter', 'banners', 'landing_config']
     : (userLoggedIn ? [...baseKeys, 'api_configs'] : baseKeys);
@@ -315,7 +315,7 @@ function initFirebaseData() {
       if (typeof renderApp === 'function') renderApp();
       if (typeof initAdminApp === 'function') initAdminApp();
     } else if (window.DATA_LOADED) {
-      const uiKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config'];
+      const uiKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'discounts'];
       const adminKeys = [...uiKeys, 'orders', 'api_configs', 'discounts', 'quick_replies'];
       if (uiKeys.includes(key)) {
         if (typeof renderApp === 'function' && typeof appState !== 'undefined' && appState.currentView === 'home') renderApp();
