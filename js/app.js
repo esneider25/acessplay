@@ -1743,83 +1743,36 @@ async function triggerTelegramNotification(order) {
     }
   }
 
-  // ── Step 2: Prepare screenshot base64 for server (if available) ──
-  let screenshotBase64 = null;
-  if (appState.selectedScreenshot) {
-    try {
-      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
-      screenshotBase64 = await new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result.split(',')[1]);
-        reader.onerror = () => resolve(null);
-        reader.readAsDataURL(compressedBlob);
-      });
-    } catch (e) {
-      console.warn('Error compressing screenshot for server, sending without image:', e);
-    }
-  }
+  // ── Step 2: Build Telegram message ──
+  const tgMsg = typeof buildOrderTelegramMessage === 'function'
+    ? buildOrderTelegramMessage(order)
+    : `🤖 <b>NUEVO PEDIDO — ${order.id}</b>\n🔥 ${order.productName} (${order.packageLabel})\n💰 $${order.priceUsd} USD`;
 
-  // ── Step 3: Fire-and-forget POST to server endpoint ──
-  // The SERVER handles Telegram delivery with retries — no dependency on client
-  const payload = JSON.stringify({
-    order: {
-      id: order.id,
-      playerName: order.playerName,
-      gameId: order.gameId,
-      accountEmail: order.accountEmail,
-      productName: order.productName,
-      packageLabel: order.packageLabel,
-      priceUsd: order.priceUsd,
-      priceBs: order.priceBs,
-      discountCode: order.discountCode,
-      discountValue: order.discountValue,
-      discountType: order.discountType,
-      ocrNumbers: order.ocrNumbers,
-      paymentMethodName: order.paymentMethodName,
-      customerContact: order.customerContact
-    },
-    screenshotBase64: screenshotBase64,
-    siteOrigin: window.location.origin,
-    botToken: typeof TELEGRAM_CONFIG !== 'undefined' ? TELEGRAM_CONFIG.botToken : null,
-    chatId: typeof TELEGRAM_CONFIG !== 'undefined' ? TELEGRAM_CONFIG.chatId : null
-  });
+  const keyboard = typeof buildOrderKeyboard === 'function'
+    ? buildOrderKeyboard(order.id)
+    : null;
 
-  // Use sendBeacon for reliability (survives page close), with normal fetch as fallback for large payloads
+  // ── Step 3: Send via Telegram (through /api/telegram proxy) ──
   try {
-    const blobPayload = new Blob([payload], { type: 'application/json' });
-    let sent = false;
-    
-    // navigator.sendBeacon and fetch keepalive=true have a ~64KB limit.
-    // Payloads with screenshots easily exceed this limit.
-    if (blobPayload.size < 60000) {
-      sent = navigator.sendBeacon('/api/notify-order', blobPayload);
-      if (!sent) {
-        fetch('/api/notify-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payload,
-          keepalive: true
-        }).catch(() => {});
-        sent = true;
+    if (appState.selectedScreenshot && TELEGRAM_CONFIG.notifyWithPhoto) {
+      // Compress and send as photo with caption
+      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
+      const photoSent = await sendTelegramPhoto(compressedBlob, tgMsg, keyboard);
+      if (!photoSent) {
+        console.warn('Photo send failed, falling back to text-only');
+        await sendTelegramMessage(tgMsg, keyboard);
       }
-    }
-
-    if (!sent) {
-      // For larger payloads (>64KB), we MUST use normal fetch without keepalive
-      fetch('/api/notify-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload
-      }).catch(() => {});
+    } else {
+      // Send text-only message
+      await sendTelegramMessage(tgMsg, keyboard);
     }
   } catch (e) {
-    // Last resort fallback
-    fetch('/api/notify-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: payload,
-      keepalive: true
-    }).catch(() => {});
+    console.warn('Telegram notification error, sending text fallback:', e);
+    try {
+      await sendTelegramMessage(tgMsg, keyboard);
+    } catch (e2) {
+      console.warn('Telegram text fallback also failed:', e2);
+    }
   }
   
   appState.selectedScreenshot = null;
