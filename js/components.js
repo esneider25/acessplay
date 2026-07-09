@@ -1422,6 +1422,13 @@ function renderDashboardOrders(orders, type) {
       <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 10px;">
         Fecha: ${new Date(order.createdAt).toLocaleString()}
       </div>
+
+      ${order.status === 'rejected' && order.rejectReason ? `
+      <div style="margin-bottom: 15px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; padding: 12px; color: #ef4444; font-size: 0.85rem;">
+        <i class="ph-fill ph-warning"></i> <strong>Tu pedido fue rechazado:</strong>
+        <div style="color: white; margin-top: 4px; font-size: 0.95rem; font-weight: 500;">${order.rejectReason}</div>
+      </div>
+      ` : ''}
       
       ${type === 'active' ? `
       <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 5px; font-weight: bold;">
