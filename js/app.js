@@ -1660,7 +1660,7 @@ function generateThumbnail(file) {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-        const max_size = 300;
+        const max_size = 1200;
         if (width > height) {
           if (width > max_size) {
             height *= max_size / width;
@@ -1676,7 +1676,7 @@ function generateThumbnail(file) {
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        resolve(canvas.toDataURL('image/jpeg', 0.7));
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
       };
       img.src = e.target.result;
     };
@@ -2505,3 +2505,4 @@ function initCarousel() {
   carousel.addEventListener('pointerdown', resetInterval);
   carousel.addEventListener('touchstart', resetInterval, { passive: true });
 }
+
