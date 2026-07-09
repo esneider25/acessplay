@@ -12,3 +12,4 @@ const firebaseConfig = {
 // Initialize Firebase using the Compat SDK
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+const storage = firebase.storage();

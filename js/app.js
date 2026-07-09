@@ -53,7 +53,7 @@ function toggleTheme() {
   localStorage.setItem('recargaaccessplay_theme', isLight ? 'light' : 'dark');
 }
 
-window.showManualInstallModal = function() {
+window.showManualInstallModal = function () {
   if (document.getElementById('pwa-manual-install-modal')) return;
   const modalContainer = document.createElement('div');
   modalContainer.id = 'pwa-manual-install-modal';
@@ -105,7 +105,7 @@ window.showManualInstallModal = function() {
   });
 };
 
-window.handleStoreInstallClick = function() {
+window.handleStoreInstallClick = function () {
   if (window.deferredStorePrompt) {
     window.deferredStorePrompt.prompt();
     window.deferredStorePrompt.userChoice.then((choice) => {
@@ -113,14 +113,14 @@ window.handleStoreInstallClick = function() {
     });
     return;
   }
-  
+
   window.showManualInstallModal();
 };
 
 // ── Render ──
 function showAnnouncementModal(message) {
   if (sessionStorage.getItem('recargaaccessplay_announcement_seen') === 'true') return;
-  
+
   const modalContainer = document.createElement('div');
   modalContainer.id = 'announcement-modal-container';
   modalContainer.innerHTML = `
@@ -152,7 +152,7 @@ function showAnnouncementModal(message) {
 function renderApp() {
   const app = document.getElementById('app');
   if (!app) return;
-  
+
   if (!window.DATA_LOADED) {
     app.innerHTML = `
       <div style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;">
@@ -338,13 +338,13 @@ function handleProductSearch(query) {
   const searchTerm = query.toLowerCase().trim();
   const productsGrid = document.getElementById('products-grid');
   if (!productsGrid) return;
-  
+
   const filteredProducts = PRODUCTS.filter(p => {
     if (appState.selectedCategory !== 'todos' && p.category !== appState.selectedCategory) return false;
-    return p.name.toLowerCase().includes(searchTerm) || 
-           (p.description && p.description.toLowerCase().includes(searchTerm));
+    return p.name.toLowerCase().includes(searchTerm) ||
+      (p.description && p.description.toLowerCase().includes(searchTerm));
   });
-  
+
   if (filteredProducts.length === 0) {
     productsGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted); background: var(--bg-surface); border-radius: 12px;">No se encontraron productos que coincidan con tu búsqueda.</div>';
   } else {
@@ -353,11 +353,11 @@ function handleProductSearch(query) {
       const delay = (index % 10) * 0.05;
       const pkgList = product.packages || [];
       const minPrice = pkgList.length > 0 ? Math.min(...pkgList.map(p => p.priceUsd)) : 0;
-      
-      const iconHtml = product.imageUrl 
+
+      const iconHtml = product.imageUrl
         ? `<img src="${product.imageUrl}" class="product-icon-img" alt="${product.name}" onerror="this.onerror=null; this.outerHTML='<div class=\\'product-icon\\'>${product.currencyIcon}</div>'">`
         : `<div class="product-icon">${product.currencyIcon}</div>`;
-        
+
       return `
         <div class="product-card fade-in-up" style="animation-delay: ${delay}s" onclick="navigateTo('product', '${product.id}')">
           <div class="product-card-bg" style="background: ${product.colorGradient || 'linear-gradient(135deg, var(--accent), var(--accent-hover))'}"></div>
@@ -445,7 +445,7 @@ function selectPayment(methodId) {
   if (selected) selected.classList.add('selected');
   const container = document.getElementById('payment-details-container');
   const screenshotGroup = document.getElementById('screenshot-group');
-  
+
   if (methodId === 'wallet') {
     if (container) container.innerHTML = `<div class="payment-details-card" style="border-color: #0ea5e9;">
       <h4>💰 Pago con Monedero</h4>
@@ -465,7 +465,7 @@ function applyDiscount() {
   if (!input) return;
   const code = input.value.trim().toUpperCase();
   input.value = code; // Force uppercase in input
-  
+
   if (!code) {
     appState.appliedDiscount = null;
     updateOrderSummary();
@@ -508,16 +508,16 @@ function updateOrderSummary() {
   }
   const summary = document.getElementById('order-summary');
   const btn = document.getElementById('btn-submit');
-  
+
   if (appState.currentView === 'wallet-recharge') {
     const amount = appState.selectedPackageIndex;
     if (amount && method) {
       const bs = usdToBs(amount);
       const isUsd = method.currency === 'usd';
-      const totalHtml = isUsd 
+      const totalHtml = isUsd
         ? `<div class="order-summary-row total" style="color: #0ea5e9;"><span>Total a pagar (USD)</span><span>$${amount.toFixed(2)} USD</span></div>`
         : `<div class="order-summary-row total"><span>Total a pagar (Bs.)</span><span>Bs. ${formatBs(bs)}</span></div>`;
-      
+
       summary.innerHTML = `
         <h4>Resumen de la Recarga</h4>
         <div class="order-summary-row"><span>Producto</span><span>Recarga de Monedero</span></div>
@@ -526,10 +526,10 @@ function updateOrderSummary() {
         ${totalHtml}
       `;
       summary.style.display = 'block';
-      if(btn) btn.disabled = false;
+      if (btn) btn.disabled = false;
     } else {
       summary.innerHTML = '';
-      if(btn) btn.disabled = true;
+      if (btn) btn.disabled = true;
     }
     return;
   }
@@ -539,10 +539,10 @@ function updateOrderSummary() {
   if (product && pkg && method) {
     summary.innerHTML = renderOrderSummary(product, pkg, method, appState.appliedDiscount);
     summary.style.display = 'block';
-    if(btn) btn.disabled = false;
+    if (btn) btn.disabled = false;
   } else {
     summary.innerHTML = '';
-    if(btn) btn.disabled = true;
+    if (btn) btn.disabled = true;
   }
 }
 
@@ -660,7 +660,7 @@ async function _submitOrderLogic() {
   if (appState.selectedPaymentId === 'wallet') {
     method = { id: 'wallet', name: 'Saldo (Monedero)', currency: 'usd' };
   }
-  
+
   let finalUsd = pkg.priceUsd;
 
   if (typeof userProfile !== 'undefined' && userProfile && userProfile.role === 'revendedor' && userProfile.discountPercentage > 0 && product.id !== 'wallet-recharge') {
@@ -761,12 +761,12 @@ async function _submitOrderLogic() {
   // Create the orders
   let lastOrder = null;
   const orderList = Array.isArray(gameId) ? gameId : [gameId];
-  
+
   for (let i = 0; i < orderList.length; i++) {
     const singleGameId = orderList[i];
     const orderPriceUsd = finalUsd / numberOfOrders;
     const orderPriceBs = priceBs / numberOfOrders;
-    
+
     const order = createOrder({
       userId: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.uid : null,
       userName: (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.displayName || currentUser.email) : null,
@@ -800,7 +800,7 @@ async function _submitOrderLogic() {
     if (typeof triggerTelegramNotification === 'function') {
       await triggerTelegramNotification(order);
     }
-    
+
     lastOrder = order;
 
     const isReseller = typeof userProfile !== 'undefined' && userProfile && userProfile.role === 'revendedor';
@@ -832,22 +832,22 @@ async function processWalletOrderAuto(order, isReseller = false) {
   if (isNaN(apiIdx) || typeof API_CONFIGS === 'undefined' || !API_CONFIGS[apiIdx] || !API_CONFIGS[apiIdx].enabled) {
     return;
   }
-  
+
   const api = API_CONFIGS[apiIdx];
   const apiProductId = parseInt(order.apiProductId);
   if (isNaN(apiProductId)) return;
 
   const baseUrl = api.baseUrl.endsWith('/') ? api.baseUrl.slice(0, -1) : api.baseUrl;
-  
+
   if (typeof firebase !== 'undefined') {
     let noteMsg = 'Auto-procesando...';
     if (order.paymentMethodId === 'wallet') noteMsg = 'Auto-procesando por pago con billetera...';
     else if (isReseller) noteMsg = 'Auto-procesando por ser Revendedor VIP...';
     else if ((order.statusHistory || []).length > 0) noteMsg = 'Re-procesando automáticamente ID rectificado...';
-    
+
     firebase.database().ref('orders/' + order.id).update({ status: 'processing', adminNote: noteMsg });
   }
-  
+
   isProcessingOrder = true;
 
   try {
@@ -906,7 +906,7 @@ async function processWalletOrderAuto(order, isReseller = false) {
       let note = 'Aprobado y entregado de forma inmediata (' + methodSource + ')';
       if (data.codigos && data.codigos.length > 0) note = 'Códigos entregados:\n' + data.codigos.join('\n');
       else if (data.codigo) note = 'Código entregado: ' + data.codigo;
-      
+
       setStatus('completed', note);
       if (typeof sendTelegramMessage === 'function') {
         sendTelegramMessage(`✅ <b>PEDIDO AUTO-COMPLETADO — #${order.id}</b>\n\nEl pedido fue procesado y entregado exitosamente al cliente.\nNota: ${note}`);
@@ -915,7 +915,7 @@ async function processWalletOrderAuto(order, isReseller = false) {
       if (typeof firebase !== 'undefined') {
         firebase.database().ref('orders/' + order.id).update({ adminNote: 'En proceso automático (esperando confirmación...)' });
       }
-      
+
       let attempts = 0;
       const maxAttempts = 12; // 12 intentos * 5 seg = 60 seg (1 minuto)
       const pollInterval = setInterval(async () => {
@@ -934,14 +934,14 @@ async function processWalletOrderAuto(order, isReseller = false) {
           });
           const pollData = await resp.json();
           const estadoStr = String(pollData.estado || pollData.status || '').toLowerCase();
-          
+
           if (pollData.ok && (estadoStr === 'completado' || estadoStr === 'completed')) {
             clearInterval(pollInterval);
             isProcessingOrder = false;
             let note = 'Aprobado y entregado automáticamente (luego de procesar)';
             if (pollData.codigo) note = 'Código entregado: ' + pollData.codigo;
             if (pollData.codigos && pollData.codigos.length > 0) note = 'Códigos entregados:\n' + pollData.codigos.join('\n');
-            
+
             setStatus('completed', note);
             if (typeof sendTelegramMessage === 'function') {
               sendTelegramMessage(`✅ <b>PEDIDO AUTO-COMPLETADO — #${order.id}</b>\n\nEl pedido fue procesado exitosamente luego de unos segundos.\nNota: ${note}`);
@@ -957,7 +957,7 @@ async function processWalletOrderAuto(order, isReseller = false) {
             isProcessingOrder = false;
             let errorMsg = pollData.error || pollData.msg || pollData.estado || 'Rechazado';
             const errorLower = String(errorMsg).toLowerCase();
-            
+
             if (errorLower.includes('ya fue usado') || errorLower.includes('ya existe') || errorLower.includes('already used')) {
               setStatus('completed', `Aprobado forzadamente (API indicó: ${errorMsg})`);
             } else {
@@ -981,7 +981,7 @@ async function processWalletOrderAuto(order, isReseller = false) {
       isProcessingOrder = false;
       const errorMsg = data.error || data.estado || 'Rechazado';
       const errorLower = String(errorMsg).toLowerCase();
-      
+
       if (errorLower.includes('ya fue usado') || errorLower.includes('ya existe') || errorLower.includes('already used')) {
         setStatus('completed', `Aprobado forzadamente (API indicó: ${errorMsg})`);
       } else {
@@ -1011,7 +1011,7 @@ function submitWalletRecharge() {
   }
   const amount = appState.selectedPackageIndex;
   const method = PAYMENT_METHODS.find(m => m.id === appState.selectedPaymentId);
-  
+
   if (!amount) { showToast('⚠️ Selecciona un monto'); return; }
   if (!method) { showToast('⚠️ Selecciona un método de pago'); return; }
   if (!appState.selectedScreenshot) {
@@ -1144,7 +1144,7 @@ function handleRouletteTransition(orderId) {
 
   const orders = typeof getOrders === 'function' ? getOrders() : ORDERS;
   const products = typeof getProducts === 'function' ? getProducts() : PRODUCTS;
-  
+
   const order = orders.find(o => o.id === orderId);
   const product = order ? products.find(p => p.id === order.productId) : null;
 
@@ -1220,7 +1220,7 @@ async function lookupOrder() {
     return;
   }
   const val = input.value.trim();
-  
+
   let orderIdToTrack = null;
   if (/^\d{1,6}$/.test(val)) {
     orderIdToTrack = 'AP-' + val;
@@ -1238,7 +1238,7 @@ async function lookupOrder() {
     try {
       const snap = await firebase.database().ref('orders/' + orderIdToTrack).once('value');
       if (btn) { btn.innerHTML = oldHtml; btn.disabled = false; }
-      
+
       if (snap.exists()) {
         const orderData = snap.val();
         // Insert into local ORDERS if not present
@@ -1308,13 +1308,13 @@ function rectifyOrderId(orderId) {
     note: `El cliente rectificó los datos a: ${newGameId}`
   });
   order.updatedAt = new Date().toISOString();
-  
+
   orders[orderIndex] = order;
   saveOrderToDb(order);
   ORDERS = orders;
 
   showToast('✅ Datos actualizados y reenviados correctamente');
-  
+
   // Notify admin via Telegram
   const msgText = `🔄 <b>PEDIDO RECTIFICADO — #${order.id}</b>\n\nEl cliente ha corregido sus datos.\nNuevos datos: <code>${newGameId}</code>`;
   sendTelegramMessage(msgText, buildOrderKeyboard(order.id));
@@ -1434,24 +1434,24 @@ function renderSupportMessages() {
   if (!messagesContainer) return;
   const sessionId = getDeviceFingerprint();
   const msgs = getMessagesForSession(sessionId);
-  
+
   if (msgs.length === 0) {
     messagesContainer.innerHTML = `
       <div class="support-msg support-msg--bot">
         <div class="support-msg-bubble">
           ¡Hola! 👋 Bienvenido a <strong>AccessPlay</strong>. ¿En qué puedo ayudarte hoy?
         </div>
-        <div class="support-msg-time">${new Date().toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'})}</div>
+        <div class="support-msg-time">${new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</div>
       </div>
     `;
     return;
   }
-  
+
   let html = '';
   msgs.forEach(msg => {
     if (msg.sender === 'system') return;
     const isUser = msg.sender === 'user';
-    const time = new Date(msg.timestamp).toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
+    const time = new Date(msg.timestamp).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
     html += `
       <div class="support-msg ${isUser ? 'support-msg--user' : 'support-msg--bot'}">
         <div class="support-msg-bubble">${msg.text}</div>
@@ -1470,11 +1470,11 @@ function toggleSupportChat() {
     if (widget.classList.contains('open')) {
       const sessionId = getDeviceFingerprint();
       const contact = localStorage.getItem('support_contact');
-      
+
       const loginView = document.getElementById('support-login-view');
       const messagesView = document.getElementById('support-messages');
       const bottomView = document.getElementById('support-chat-bottom');
-      
+
       if (!contact) {
         if (loginView) loginView.style.display = 'flex';
         if (messagesView) messagesView.style.display = 'none';
@@ -1485,14 +1485,14 @@ function toggleSupportChat() {
         if (loginView) loginView.style.display = 'none';
         if (messagesView) messagesView.style.display = 'flex';
         if (bottomView) bottomView.style.display = 'block';
-        
+
         markMessagesAsRead(sessionId, 'user');
         if (typeof renderDynamicQuickActions === 'function') renderDynamicQuickActions();
         renderSupportMessages();
-        
+
         const input = document.getElementById('support-input');
         if (input) setTimeout(() => input.focus(), 300);
-        
+
         if (!chatPollingInterval) {
           chatPollingInterval = setInterval(() => {
             if (widget.classList.contains('open') && localStorage.getItem('support_contact')) {
@@ -1519,27 +1519,27 @@ function startSupportSession() {
   }
   const contact = input.value.trim();
   localStorage.setItem('support_contact', contact);
-  
+
   const loginView = document.getElementById('support-login-view');
   const messagesView = document.getElementById('support-messages');
   const bottomView = document.getElementById('support-chat-bottom');
-  
+
   if (loginView) loginView.style.display = 'none';
   if (messagesView) messagesView.style.display = 'flex';
   if (bottomView) bottomView.style.display = 'block';
-  
+
   const sessionId = getDeviceFingerprint();
   // Call addMessage empty just to create session with contact if not exists
   let msgs = getMessagesForSession(sessionId);
   if (msgs.length === 0) {
-     addMessage(sessionId, 'bot', '¡Hola! 👋 Bienvenido a AccesPlay. ¿En qué puedo ayudarte hoy?', contact);
+    addMessage(sessionId, 'bot', '¡Hola! 👋 Bienvenido a AccesPlay. ¿En qué puedo ayudarte hoy?', contact);
   } else {
-     // Force contact update
-     addMessage(sessionId, 'system', '', contact);
+    // Force contact update
+    addMessage(sessionId, 'system', '', contact);
   }
-  
+
   if (typeof renderDynamicQuickActions === 'function') renderDynamicQuickActions();
-  
+
   renderSupportMessages();
   const chatInput = document.getElementById('support-input');
   if (chatInput) setTimeout(() => chatInput.focus(), 300);
@@ -1550,16 +1550,16 @@ async function sendSupportMessage() {
   if (!input || !input.value.trim()) return;
   const text = input.value.trim();
   input.value = '';
-  
+
   const sessionId = getDeviceFingerprint();
   const contact = localStorage.getItem('support_contact') || 'Desconocido';
-  
+
   addMessage(sessionId, 'user', text, contact);
   renderSupportMessages();
-  
+
   const quickActions = document.getElementById('support-quick-actions');
   if (quickActions) quickActions.style.display = 'none';
-  
+
   // Notify Telegram using global TELEGRAM_CONFIG
   if (typeof TELEGRAM_CONFIG !== 'undefined' && TELEGRAM_CONFIG.enabled && TELEGRAM_CONFIG.botToken && TELEGRAM_CONFIG.chatId) {
     const tgMsg = `💬 <b>Nuevo Mensaje de Soporte</b>\n\n<b>Contacto:</b> ${contact}\n<b>Mensaje:</b> ${text}\n\n<i>Responde desde el Panel Admin</i>`;
@@ -1569,14 +1569,14 @@ async function sendSupportMessage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ type: 'message', botToken: TELEGRAM_CONFIG.botToken, chatId: TELEGRAM_CONFIG.chatId, text: tgMsg })
       });
-    } catch(e) { console.error('Telegram error', e); }
+    } catch (e) { console.error('Telegram error', e); }
   }
 
   // Smart bot auto-replies for quick actions
   setTimeout(() => {
     let reply = '';
     const lowerText = text.toLowerCase();
-    
+
     // Check dynamic quick replies
     const replies = getQuickReplies();
     for (const r of replies) {
@@ -1612,11 +1612,11 @@ function previewScreenshot(input) {
   }
 
   const previewContainer = document.getElementById('screenshot-preview');
-  
+
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const dataUrl = e.target.result;
-    
+
     appState.selectedScreenshot = file;
 
     if (previewContainer) {
@@ -1654,9 +1654,9 @@ function removeScreenshot(event) {
 function generateThumbnail(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       const img = new Image();
-      img.onload = function() {
+      img.onload = function () {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
@@ -1687,9 +1687,9 @@ function generateThumbnail(file) {
 function compressFileToBlob(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       const img = new Image();
-      img.onload = function() {
+      img.onload = function () {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
@@ -1725,12 +1725,17 @@ async function triggerTelegramNotification(order) {
   // ── Step 1: Save thumbnail to Firebase (keep existing behavior) ──
   if (appState.selectedScreenshot) {
     try {
-      const thumbnail = await generateThumbnail(appState.selectedScreenshot);
+      // Usar Firebase Storage en lugar de texto
+      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
+      const storageRef = firebase.storage().ref('orders_screenshots/' + order.id + '.jpg');
+      await storageRef.put(compressedBlob);
+      const downloadURL = await storageRef.getDownloadURL();
+      
       const orders = getOrders();
       const o = orders.find(x => x.id === order.id);
       if (o) {
-        o.screenshot = thumbnail;
-        order.screenshot = thumbnail;
+        o.screenshot = downloadURL;
+        order.screenshot = downloadURL;
         try {
           saveOrderToDb(order);
         } catch (err) {
@@ -1739,7 +1744,7 @@ async function triggerTelegramNotification(order) {
         ORDERS = orders;
       }
     } catch (e) {
-      console.error('Error generating thumbnail:', e);
+      console.error('Error uploading to Storage:', e);
     }
   }
 
@@ -1774,7 +1779,7 @@ async function triggerTelegramNotification(order) {
       console.warn('Telegram text fallback also failed:', e2);
     }
   }
-  
+
   appState.selectedScreenshot = null;
 }
 
@@ -1801,7 +1806,7 @@ setInterval(() => {
 }, 3000); // Check every 3 seconds
 
 // ── Verificador de ID ──
-window.verifyGameId = async function(productId) {
+window.verifyGameId = async function (productId) {
   appState.verifiedPlayerName = null;
   const product = PRODUCTS.find(p => p.id === productId);
   if (!product || !product.apiVerifierProvider) return;
@@ -1823,7 +1828,7 @@ window.verifyGameId = async function(productId) {
 
   const uidInput = document.getElementById('game-uid');
   const zoneInput = document.getElementById('game-zone');
-  
+
   if (!uidInput || !uidInput.value.trim()) {
     showToast('⚠️ Ingresa el ID del juego primero.', 'info');
     uidInput?.focus();
@@ -1846,7 +1851,7 @@ window.verifyGameId = async function(productId) {
     // Manejar formato de TiendaGiftVen, NetEase Bloodstrike o cualquier API por GET
     if (bUrl.includes('{ID}') || bUrl.includes('{PLAYER_ID}') || bUrl.includes('{ID_JUGADOR}') || bUrl.includes('action=') || bUrl.includes('api.php')) {
       finalMethod = 'GET';
-      
+
       // Reemplazar tokens {ID} o {PLAYER_ID} o {ID_JUGADOR}
       if (bUrl.includes('{ID}')) {
         bUrl = bUrl.replace(/{ID}/g, encodeURIComponent(id_juego));
@@ -1863,21 +1868,21 @@ window.verifyGameId = async function(productId) {
       if (input2 && bUrl.includes('{ZONE_ID}')) {
         bUrl = bUrl.replace(/{ZONE_ID}/g, encodeURIComponent(input2));
       }
-      
+
       // Si el usuario puso un ? pero olvidó el token de ID, lo agregamos al final (fallback)
       if (!bUrl.includes(encodeURIComponent(id_juego))) {
-         bUrl = bUrl.endsWith('=') ? bUrl + encodeURIComponent(id_juego) : bUrl + '&id=' + encodeURIComponent(id_juego);
+        bUrl = bUrl.endsWith('=') ? bUrl + encodeURIComponent(id_juego) : bUrl + '&id=' + encodeURIComponent(id_juego);
       }
-      
+
       // Separar baseUrl y endpoint para evitar doble slash en el proxy
       const queryIndex = bUrl.indexOf('?');
       const basePath = queryIndex > -1 ? bUrl.substring(0, queryIndex) : bUrl;
       const queryPart = queryIndex > -1 ? bUrl.substring(queryIndex) : '';
-      
+
       const lastSlashIdx = basePath.lastIndexOf('/');
       if (lastSlashIdx > 8) {
         proxyBaseUrl = basePath.substring(0, lastSlashIdx);
-        proxyEndpoint = basePath.substring(lastSlashIdx + 1) + queryPart; 
+        proxyEndpoint = basePath.substring(lastSlashIdx + 1) + queryPart;
       } else {
         proxyBaseUrl = basePath;
         proxyEndpoint = queryPart.startsWith('?') ? queryPart.substring(1) : queryPart;
@@ -1887,7 +1892,7 @@ window.verifyGameId = async function(productId) {
     }
 
     const proxyUrl = '/api/proxy';
-    
+
     const requestBody = {
       endpoint: proxyEndpoint,
       method: finalMethod,
@@ -1913,14 +1918,14 @@ window.verifyGameId = async function(productId) {
 
     // Comprobar éxito (código 200 numérico o string, o si existe data.data)
     const isSuccess = data.ok || data.status == 200 || data.code == 200 || data.success || data.alerta === 'green' || data.mensaje === 'Consulta exitosa' || (data.data && typeof data.data === 'object' && !Array.isArray(data.data));
-    
+
     if (isSuccess) {
       // Buscar el nombre en la raíz o dentro del objeto "data" (solo si es un objeto válido)
       const src = (data.data && typeof data.data === 'object' && !Array.isArray(data.data)) ? data.data : data;
-      
+
       // Probar múltiples campos. Ignoramos temporalmente los que tengan "@" (como los correos internos de NetEase)
       let name = src.nickname || src.nick_name || src.rolename || src.role_name || src.PlayerName || src.player_name || src.nombre || src.Name;
-      
+
       if (!name) {
         // Si no encontró los primarios, intentar con estos
         const secondary = src.username || src.name || src.role || src.account;
@@ -1935,14 +1940,14 @@ window.verifyGameId = async function(productId) {
       } else {
         // Fallback inteligente: buscar cualquier string que no sea un correo y tenga longitud de nombre
         let fallbackName = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && !v.includes('@'));
-        
+
         if (fallbackName) {
-           appState.verifiedPlayerName = fallbackName;
-           resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${fallbackName}</b></span>`;
+          appState.verifiedPlayerName = fallbackName;
+          resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${fallbackName}</b></span>`;
         } else {
-           // Imprimir un mini-resumen de los datos recibidos para que el usuario pueda decirnos qué llaves llegaron
-           const availableKeys = Object.keys(src).filter(k => typeof src[k] === 'string' || typeof src[k] === 'number').map(k => `${k}: ${src[k]}`).join(', ');
-           resultDiv.innerHTML = `<span style="color: #0ea5e9; font-size: 0.8rem;">✅ Encontrado: ${availableKeys.substring(0, 100)}...</span>`;
+          // Imprimir un mini-resumen de los datos recibidos para que el usuario pueda decirnos qué llaves llegaron
+          const availableKeys = Object.keys(src).filter(k => typeof src[k] === 'string' || typeof src[k] === 'number').map(k => `${k}: ${src[k]}`).join(', ');
+          resultDiv.innerHTML = `<span style="color: #0ea5e9; font-size: 0.8rem;">✅ Encontrado: ${availableKeys.substring(0, 100)}...</span>`;
         }
       }
     } else {
@@ -1972,15 +1977,15 @@ let userProfile = null;
 
 function initPublicAuth() {
   if (!firebase || !firebase.auth) return;
-  
+
   firebase.auth().onAuthStateChanged(async (user) => {
     currentUser = user;
     const authNavItem = document.getElementById('auth-nav-item');
     const mobileAuthBtn = document.querySelector('.mobile-auth-btn');
-    
+
     // Si es el administrador, le mostramos el botón para ir al panel y un botón para salir
     if (user && user.email === 'admin@accesplay.com') {
-       const adminHtml = `
+      const adminHtml = `
             <div style="display:flex; gap:8px; align-items:center;">
               <a onclick="window.location.href='https://admin.accesplay.com/'" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer; padding: 8px 16px;">Ir al Panel</a>
               <a onclick="firebase.auth().signOut().then(() => window.location.href='/')" class="nav-cta" style="background: rgba(239, 68, 68, 0.1); color:#ef4444; border:1px solid rgba(239, 68, 68, 0.3); cursor:pointer; padding: 8px;" title="Cerrar sesión">
@@ -1988,16 +1993,16 @@ function initPublicAuth() {
               </a>
             </div>
           `;
-       if (authNavItem) authNavItem.innerHTML = adminHtml;
-       if (mobileAuthBtn) mobileAuthBtn.innerHTML = adminHtml;
-       return;
+      if (authNavItem) authNavItem.innerHTML = adminHtml;
+      if (mobileAuthBtn) mobileAuthBtn.innerHTML = adminHtml;
+      return;
     }
 
     if (user) {
       // Fetch profile from DB
       firebase.database().ref('users/' + user.uid).on('value', (snapshot) => {
         userProfile = snapshot.val() || { wallet: 0 };
-        
+
         if (userProfile.isBlocked) {
           firebase.auth().signOut();
           showToast('🚫 Tu cuenta ha sido suspendida. Contacta a soporte.', 'error');
@@ -2005,7 +2010,7 @@ function initPublicAuth() {
         }
 
         const balanceHtml = `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer; font-size: 0.85rem; padding: 6px 12px !important;">Mi Perfil ($${Number(userProfile.wallet || 0).toFixed(2)})</a>`;
-        
+
         if (authNavItem) {
           authNavItem.innerHTML = `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Mi Perfil ($${Number(userProfile.wallet || 0).toFixed(2)})</a>`;
         }
@@ -2017,7 +2022,7 @@ function initPublicAuth() {
       userProfile = null;
       const loginHtmlDesktop = `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer;">Iniciar Sesión</a>`;
       const loginHtmlMobile = `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer; font-size: 0.85rem; padding: 6px 12px !important;">Iniciar Sesión</a>`;
-      
+
       if (authNavItem) {
         authNavItem.innerHTML = loginHtmlDesktop;
       }
@@ -2032,9 +2037,9 @@ function showAuthModal(mode = 'login') {
   const existing = document.getElementById('auth-modal-container');
   const modalContainer = existing || document.createElement('div');
   modalContainer.id = 'auth-modal-container';
-  
+
   const isLogin = mode === 'login';
-  
+
   modalContainer.innerHTML = `
     <div class="modal-overlay active" onclick="if(event.target===this) this.parentElement.remove()" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 99999; display: flex; align-items: center; justify-content: center;">
       <div class="modal" style="background: var(--bg-surface); padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); text-align: center; max-width: 400px; width: 90%;">
@@ -2068,7 +2073,7 @@ function showAuthModal(mode = 'login') {
         </div>
       </div>
     </div>`;
-  
+
   if (!existing) {
     document.body.appendChild(modalContainer);
   }
@@ -2077,11 +2082,11 @@ function showAuthModal(mode = 'login') {
 function authWithEmail() {
   const email = document.getElementById('auth-email').value.trim();
   const pass = document.getElementById('auth-pass').value.trim();
-  if(!email || !pass) return showToast('⚠️ Ingresa correo y contraseña');
-  
+  if (!email || !pass) return showToast('⚠️ Ingresa correo y contraseña');
+
   firebase.auth().signInWithEmailAndPassword(email, pass).then(result => {
     const modal = document.getElementById('auth-modal-container');
-    if(modal) modal.remove();
+    if (modal) modal.remove();
   }).catch(err => {
     showToast('❌ Correo o contraseña incorrectos');
   });
@@ -2091,12 +2096,12 @@ function registerWithEmail() {
   const name = document.getElementById('auth-name').value.trim();
   const email = document.getElementById('auth-email').value.trim();
   const pass = document.getElementById('auth-pass').value.trim();
-  if(!name || !email || !pass) return showToast('⚠️ Llena todos los campos');
-  
+  if (!name || !email || !pass) return showToast('⚠️ Llena todos los campos');
+
   firebase.auth().createUserWithEmailAndPassword(email, pass).then(result => {
     const user = result.user;
     user.updateProfile({ displayName: name });
-    
+
     const referredBy = localStorage.getItem('recargaaccessplay_referredBy') || null;
     firebase.database().ref('users/' + user.uid).set({
       email: email,
@@ -2108,14 +2113,14 @@ function registerWithEmail() {
       referredBy: referredBy,
       hasMadeFirstPurchase: false
     });
-    
+
     const modal = document.getElementById('auth-modal-container');
-    if(modal) modal.remove();
+    if (modal) modal.remove();
     showToast('🎉 Cuenta creada exitosamente');
   }).catch(err => {
-    if(err.code === 'auth/email-already-in-use') {
+    if (err.code === 'auth/email-already-in-use') {
       showToast('❌ Este correo ya está registrado');
-    } else if(err.code === 'auth/weak-password') {
+    } else if (err.code === 'auth/weak-password') {
       showToast('❌ La contraseña debe tener al menos 6 caracteres');
     } else {
       showToast('❌ Error: ' + err.message);
@@ -2125,16 +2130,16 @@ function registerWithEmail() {
 
 function resetPassword() {
   let email = document.getElementById('auth-email').value.trim();
-  if(!email) {
+  if (!email) {
     email = prompt('Por favor, ingresa el correo electrónico de tu cuenta para recuperar la contraseña:');
     if (!email) return;
     email = email.trim();
   }
-  
+
   firebase.auth().sendPasswordResetEmail(email).then(() => {
     showToast('📩 Te hemos enviado un enlace para restablecer tu contraseña');
     const modal = document.getElementById('auth-modal-container');
-    if(modal) modal.remove();
+    if (modal) modal.remove();
   }).catch(err => {
     console.error("Reset Password Error: ", err);
     showToast('❌ Error: Verifica que el correo esté registrado');
@@ -2145,11 +2150,11 @@ function authWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
   firebase.auth().signInWithPopup(provider).then((result) => {
     const modal = document.getElementById('auth-modal-container');
-    if(modal) modal.remove();
-    
+    if (modal) modal.remove();
+
     const user = result.user;
     if (user.email === 'admin@accesplay.com') return; // Admin bypass
-    
+
     // Ensure user profile exists
     firebase.database().ref('users/' + user.uid).once('value', (snap) => {
       if (!snap.exists()) {
@@ -2205,7 +2210,7 @@ function startWalletRecharge() {
 async function loadUserHistory() {
   if (!currentUser) return;
   document.getElementById('profile-modal-container')?.remove();
-  
+
   // Show a loading state
   appState.currentView = 'history';
   app.innerHTML = `
@@ -2219,7 +2224,7 @@ async function loadUserHistory() {
   try {
     const snap = await firebase.database().ref('users/' + currentUser.uid + '/orders').once('value');
     const orderIds = snap.val();
-    
+
     if (!orderIds) {
       appState.historyContactStr = currentUser.email;
       app.innerHTML = `
@@ -2240,10 +2245,10 @@ async function loadUserHistory() {
         fetchedOrders.push(orderSnap.val());
       }
     }
-    
+
     fetchedOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     appState.historyContactStr = currentUser.email;
-    
+
     app.innerHTML = `
       <div class="bg-ocean-grid"></div>
       ${typeof renderNavbar === 'function' ? renderNavbar() : ''}
@@ -2260,7 +2265,7 @@ async function loadUserHistory() {
 function logout() {
   firebase.auth().signOut().then(() => {
     const modal = document.getElementById('profile-modal-container');
-    if(modal) modal.remove();
+    if (modal) modal.remove();
     // Navbar will automatically update via onAuthStateChanged
     window.location.reload();
   });
@@ -2280,15 +2285,15 @@ let dashboardOrders = { active: [], completed: [] };
 
 async function loadDashboardData() {
   if (!currentUser) return;
-  
+
   // 1. Load Orders
   try {
     const orderIds = {};
-      const userOrdersRef = await firebase.database().ref('users/' + currentUser.uid + '/orders').once('value');
-      if (userOrdersRef.exists()) {
-        Object.keys(userOrdersRef.val()).forEach(k => orderIds[k] = true);
-      }
-    
+    const userOrdersRef = await firebase.database().ref('users/' + currentUser.uid + '/orders').once('value');
+    if (userOrdersRef.exists()) {
+      Object.keys(userOrdersRef.val()).forEach(k => orderIds[k] = true);
+    }
+
     let allOrders = [];
     if (Object.keys(orderIds).length > 0) {
       const keys = Object.keys(orderIds);
@@ -2299,12 +2304,12 @@ async function loadDashboardData() {
         }
       }
     }
-    
+
     // Sort and separate
     allOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     dashboardOrders.active = allOrders.filter(o => o.status === 'pending' || o.status === 'processing');
     dashboardOrders.completed = allOrders.filter(o => o.status !== 'pending' && o.status !== 'processing');
-    
+
     // Render default tab
     switchDashboardTab('active');
 
@@ -2314,7 +2319,7 @@ async function loadDashboardData() {
 
   // 2. Render Saved IDs
   renderDashboardSavedIds();
-  
+
   // 3. Render Transactions
   if (typeof renderDashboardTransactions === 'function') {
     renderDashboardTransactions();
@@ -2325,7 +2330,7 @@ function switchDashboardTab(tab) {
   const activeBtn = document.getElementById('tab-active-orders');
   const completedBtn = document.getElementById('tab-completed-orders');
   const container = document.getElementById('dashboard-orders-container');
-  
+
   if (!activeBtn || !completedBtn || !container) return;
 
   if (tab === 'active') {
@@ -2348,14 +2353,14 @@ function switchDashboardTab(tab) {
 function renderDashboardSavedIds() {
   const container = document.getElementById('dashboard-saved-ids');
   if (!container) return;
-  
+
   const savedIds = (userProfile && userProfile.savedIds) ? userProfile.savedIds : [];
-  
+
   if (savedIds.length === 0) {
     container.innerHTML = `<div style="font-size: 0.9rem; color: var(--text-secondary); text-align: center; padding: 10px;">No tienes IDs guardados.</div>`;
     return;
   }
-  
+
   container.innerHTML = savedIds.map((item, index) => `
     <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
       <div style="text-align: left;">
@@ -2408,21 +2413,21 @@ async function saveNewId() {
   const alias = document.getElementById('new-id-alias').value.trim();
   const uid = document.getElementById('new-id-uid').value.trim();
   const zone = document.getElementById('new-id-zone').value.trim();
-  
+
   if (!game || !uid) {
     showToast('⚠️ Debes ingresar el nombre del juego y el ID');
     return;
   }
-  
+
   const savedIds = (userProfile && userProfile.savedIds) ? userProfile.savedIds : [];
   savedIds.push({ gameName: game, uid: uid, zoneId: zone || null, alias: alias || null });
-  
+
   try {
     await firebase.database().ref('users/' + currentUser.uid + '/savedIds').set(savedIds);
     document.getElementById('add-id-modal-container').remove();
     showToast('✅ ID guardado correctamente');
     renderDashboardSavedIds();
-  } catch(e) {
+  } catch (e) {
     showToast('❌ Error al guardar el ID');
   }
 }
@@ -2430,15 +2435,15 @@ async function saveNewId() {
 async function deleteSavedId(index) {
   if (!currentUser || !userProfile || !userProfile.savedIds) return;
   if (!confirm('¿Seguro que deseas eliminar este ID?')) return;
-  
+
   const savedIds = userProfile.savedIds;
   savedIds.splice(index, 1);
-  
+
   try {
     await firebase.database().ref('users/' + currentUser.uid + '/savedIds').set(savedIds);
     showToast('🗑️ ID eliminado');
     renderDashboardSavedIds();
-  } catch(e) {
+  } catch (e) {
     showToast('❌ Error al eliminar el ID');
   }
 }
@@ -2501,7 +2506,7 @@ function initCarousel() {
     clearInterval(carouselInterval);
     carouselInterval = setInterval(autoScroll, 3000);
   };
-  
+
   carousel.addEventListener('pointerdown', resetInterval);
   carousel.addEventListener('touchstart', resetInterval, { passive: true });
 }
