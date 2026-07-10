@@ -961,7 +961,13 @@ async function processWalletOrderAuto(order, isReseller = false) {
             if (errorLower.includes('ya fue usado') || errorLower.includes('ya existe') || errorLower.includes('already used')) {
               setStatus('completed', `Aprobado forzadamente (API indicó: ${errorMsg})`);
             } else {
-              setStatus('invalid-id', `Verifica que el ID o la cuenta sean correctos. El sistema rechazó la recarga. (${errorMsg})`);
+              let clientError = 'ID Inválido o producto no disponible';
+              if (errorLower.includes('saldo') || errorLower.includes('balance') || errorLower.includes('pin') || errorLower.includes('stock')) {
+                  clientError = 'Error temporal en el servidor. Por favor, contacta a soporte.';
+              } else if (errorLower.includes('id') || errorLower.includes('cuenta') || errorLower.includes('jugador') || errorLower.includes('not found')) {
+                  clientError = 'Verifica que el ID o la cuenta sean correctos.';
+              }
+              setStatus('invalid-id', clientError);
               if (typeof sendTelegramMessage === 'function') {
                 sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — #${order.id}</b>\n\nEl proveedor rechazó el pedido luego de procesar. El cliente debe corregir los datos. Mensaje de error: ${errorMsg}`);
               }
@@ -985,9 +991,15 @@ async function processWalletOrderAuto(order, isReseller = false) {
       if (errorLower.includes('ya fue usado') || errorLower.includes('ya existe') || errorLower.includes('already used')) {
         setStatus('completed', `Aprobado forzadamente (API indicó: ${errorMsg})`);
       } else {
-        setStatus('invalid-id', `Verifica que el ID o la cuenta sean correctos. Error: ${errorMsg}`);
+        let clientError = 'ID Inválido o producto no disponible';
+        if (errorLower.includes('saldo') || errorLower.includes('balance') || errorLower.includes('pin') || errorLower.includes('stock')) {
+            clientError = 'Error temporal en el servidor. Por favor, contacta a soporte.';
+        } else if (errorLower.includes('id') || errorLower.includes('cuenta') || errorLower.includes('jugador') || errorLower.includes('not found')) {
+            clientError = 'Verifica que el ID o la cuenta sean correctos.';
+        }
+        setStatus('invalid-id', clientError);
         if (typeof sendTelegramMessage === 'function') {
-          sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — #${order.id}</b>\n\nEl sistema rechazó el pedido automáticamente. El cliente debe corregir los datos.`);
+          sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — #${order.id}</b>\n\nEl sistema rechazó el pedido automáticamente. Mensaje de error: ${errorMsg}`);
         }
       }
     }
