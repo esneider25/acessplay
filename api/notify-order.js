@@ -131,8 +131,8 @@ function buildMessage(order) {
 function buildKeyboard(orderId, origin) {
   return [
     [
-      { text: '✅ Aprobar', url: `${origin}/admin.html?action=approve&order=${orderId}` },
-      { text: '❌ Rechazar', url: `${origin}/admin.html?action=reject&order=${orderId}` }
+      { text: '✅ Aprobar', callback_data: `approve_${orderId}` },
+      { text: '❌ Rechazar', callback_data: `reject_${orderId}` }
     ],
     [
       { text: '🔍 Ver en Panel Admin', url: `${origin}/admin.html` }
