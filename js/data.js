@@ -304,7 +304,7 @@ function initFirebaseData() {
   const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'telegram_config', 'discounts', 'messages'];
   const keysToLoad = isAdmin 
     ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', 'spam_tracker', 'order_counter', 'banners', 'landing_config']
-    : (userLoggedIn ? [...baseKeys, 'api_configs'] : baseKeys);
+    : baseKeys;
   
   const loadedKeys = new Set();
 

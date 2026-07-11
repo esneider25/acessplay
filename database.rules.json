@@ -64,7 +64,7 @@
       ".write": "auth != null" 
     },
     "api_configs": { 
-      ".read": "auth != null",
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "users": {
