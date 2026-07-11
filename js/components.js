@@ -722,6 +722,22 @@ function renderOrderTracking(orderId) {
 
   const cleanAdminNote = cleanStr(order.adminNote);
 
+  let codeStr = order.deliveredCode || null;
+  if (!codeStr && order.statusHistory) {
+      for (let i = order.statusHistory.length - 1; i >= 0; i--) {
+          const h = order.statusHistory[i];
+          if (h.note) {
+              if (h.note.includes('Código entregado:')) {
+                  codeStr = h.note.split('Código entregado:')[1].trim();
+                  break;
+              } else if (h.note.includes('Códigos entregados:')) {
+                  codeStr = h.note.split('Códigos entregados:')[1].trim();
+                  break;
+              }
+          }
+      }
+  }
+
   const timelineSteps = [
     { key: 'pending', label: 'Recibido', icon: '📋', desc: 'Tu pedido fue registrado exitosamente' },
     { key: 'processing', label: 'Procesando', icon: '⚙️', desc: 'Estamos verificando tu pago y procesando la recarga' },
@@ -859,6 +875,18 @@ function renderOrderTracking(orderId) {
             </div>
           ` : ''}
         </div>
+
+        ${codeStr ? `
+        <div class="tracking-card" style="margin-bottom: 24px; border: 1px solid var(--accent); background: linear-gradient(135deg, rgba(0,229,195,0.05), rgba(14,165,233,0.05)); text-align: center;">
+          <h3 style="color: var(--accent); justify-content: center; margin-bottom: 15px;">
+            🎟️ Código Comprado
+          </h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 10px;">Copia tu código para canjearlo:</p>
+          <div style="padding: 16px; background: rgba(0,0,0,0.3); border-radius: 8px; font-family: monospace; font-size: 1.3rem; color: #fff; letter-spacing: 1px; word-break: break-all; border: 1px dashed rgba(255,255,255,0.2);">
+            ${codeStr.replace(/\n/g, '<br>')}
+          </div>
+        </div>
+        ` : ''}
 
         <div class="tracking-details-grid">
           <div class="tracking-card">
