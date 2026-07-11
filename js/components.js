@@ -328,6 +328,12 @@ function renderProductDetail(productId) {
       const bgStyle = pkg.bgImage ? `background-image: url('${pkg.bgImage}'); background-size: cover; background-position: center; border-color: transparent;` : '';
       const bgClass = pkg.bgImage ? 'has-bg-img' : '';
       
+      const amtStr = pkg.amount ? (typeof pkg.amount === 'number' ? pkg.amount.toLocaleString() : pkg.amount.toString()) : '';
+      let amtStyle = '';
+      if (amtStr.length > 14) amtStyle = 'font-size: 1.05rem; line-height: 1.2; white-space: normal; word-break: break-word;';
+      else if (amtStr.length > 9) amtStyle = 'font-size: 1.45rem; line-height: 1.1; white-space: normal; word-break: break-word;';
+      else if (amtStr.length > 6) amtStyle = 'font-size: 1.9rem;';
+      
       if (pkg.isOutofStock) {
         return `
           <div class="package-card fade-in-up stagger-${(i % 7) + 1} ${bgClass}"
@@ -335,7 +341,7 @@ function renderProductDetail(productId) {
                onclick="showToast('⚠️ Este paquete está agotado por el momento.')"
                id="pkg-${product.id}-${i}">
             <div style="position: absolute; top: -10px; right: -10px; background: #ef5350; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;">Agotado</div>
-            <div class="package-amount">${pkg.amount ? pkg.amount.toLocaleString() : ''}</div>
+            <div class="package-amount" style="${amtStyle}">${amtStr}</div>
             ${(!pkg.hideCurrency && product.currency) ? `<div class="package-label">${product.currency}</div>` : ''}
           </div>
         `;
@@ -345,7 +351,7 @@ function renderProductDetail(productId) {
              style="${bgStyle}"
              onclick="selectPackage('${product.id}', ${i})"
              id="pkg-${product.id}-${i}">
-          <div class="package-amount">${pkg.amount ? pkg.amount.toLocaleString() : ''}</div>
+          <div class="package-amount" style="${amtStyle}">${amtStr}</div>
           ${(!pkg.hideCurrency && product.currency) ? `<div class="package-label">${product.currency}</div>` : ''}
         </div>
       `;
