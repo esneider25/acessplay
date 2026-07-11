@@ -1676,6 +1676,10 @@ async function processAutomaticTopup(orderId, fromModal = false) {
 
   // Si el producto no tiene API asignada, es un producto manual.
   if (isNaN(apiIdx) || !API_CONFIGS[apiIdx]) {
+    if (order.productType === 'code' && !order.deliveredCode) {
+      openApproveCodeModal(orderId);
+      return;
+    }
     completeOrderLocally(orderId, fromModal);
     return;
   }
@@ -1792,6 +1796,51 @@ function completeOrderLocally(orderId, fromModal, customNote = 'Aprobado y entre
     if (fromModal) closeAdminModal();
     sendTelegramMessage(`✅ <b>Pedido #${orderId} APROBADO</b>\nProducto: ${order.productName} — ${order.packageLabel}`);
   }
+}
+
+function openApproveCodeModal(orderId) {
+  const overlay = document.getElementById('admin-modal-overlay');
+  const modalContent = document.getElementById('admin-modal-content');
+  if (!overlay || !modalContent) return;
+
+  modalContent.innerHTML = `
+    <div class="admin-modal-header">
+      <h2 class="admin-modal-title">✅ Entregar Código — ${orderId}</h2>
+      <button class="admin-modal-close" onclick="closeAdminModal()">✕</button>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">Ingresa el código o gift card que deseas entregar al cliente:</p>
+      <input type="text" class="admin-form-input" id="approve-code-input" placeholder="Ej: ABCD-1234-EFGH" style="width: 100%; font-family: monospace; font-size: 1.1rem; padding: 12px;">
+    </div>
+    <div class="admin-modal-footer">
+      <button class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmApproveCodeOrder('${orderId}')">
+        ✅ Aprobar y Entregar
+      </button>
+    </div>
+  `;
+
+  overlay.classList.add('active');
+  setTimeout(() => document.getElementById('approve-code-input')?.focus(), 200);
+}
+
+function confirmApproveCodeOrder(orderId) {
+  const codeInput = document.getElementById('approve-code-input');
+  const code = codeInput ? codeInput.value.trim() : '';
+  let note = 'Aprobado y entregado';
+  let deliveredCode = null;
+
+  if (code) {
+      note = 'Código entregado: ' + code;
+      deliveredCode = code;
+  }
+  
+  const order = getOrderById(orderId);
+  if (order && deliveredCode) {
+      order.deliveredCode = deliveredCode;
+  }
+
+  completeOrderLocally(orderId, true, note);
 }
 
 function pollApiStatus(baseUrl, apiKey, orderId, fromModal) {
