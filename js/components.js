@@ -336,7 +336,7 @@ function renderProductDetail(productId) {
                id="pkg-${product.id}-${i}">
             <div style="position: absolute; top: -10px; right: -10px; background: #ef5350; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;">Agotado</div>
             <div class="package-amount">${pkg.amount.toLocaleString()}</div>
-            <div class="package-label">${product.currency}</div>
+            ${product.currency ? `<div class="package-label">${product.currency}</div>` : ''}
           </div>
         `;
       }
@@ -346,7 +346,7 @@ function renderProductDetail(productId) {
              onclick="selectPackage('${product.id}', ${i})"
              id="pkg-${product.id}-${i}">
           <div class="package-amount">${pkg.amount.toLocaleString()}</div>
-          <div class="package-label">${product.currency}</div>
+          ${product.currency ? `<div class="package-label">${product.currency}</div>` : ''}
         </div>
       `;
     }).join('');
