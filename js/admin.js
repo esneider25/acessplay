@@ -1629,6 +1629,11 @@ async function testApiConnection(idx) {
     });
   }
 
+  if (!api.enabled) {
+    showAdminToast(`❌ ${api.name || 'API'}: Debes encender el botón 'Habilitar' para probarla`, 'error');
+    return;
+  }
+
   if (!api.baseUrl) {
     showAdminToast(`❌ ${api.name || 'API'}: Ingresa una URL base`, 'error');
     return;
