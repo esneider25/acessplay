@@ -2064,6 +2064,10 @@ function renderTempPackages() {
         <label style="font-size: 0.75rem; color: var(--text-muted);">ID API (Opc.)</label>
         <input type="text" class="admin-form-input" style="padding: 6px 10px; font-size: 0.85rem;" value="${pkg.apiServiceId || ''}" onchange="updateTempPackageField(${idx}, 'apiServiceId', this.value)" placeholder="Ej. 341">
       </div>
+      <div style="display: flex; flex-direction: column; gap: 4px; flex: 1.5; min-width: 120px;">
+        <label style="font-size: 0.75rem; color: var(--text-muted);">Imagen de Fondo (URL)</label>
+        <input type="text" class="admin-form-input" style="padding: 6px 10px; font-size: 0.85rem;" value="${pkg.bgImage || ''}" onchange="updateTempPackageField(${idx}, 'bgImage', this.value)" placeholder="https://...">
+      </div>
       <div style="display: flex; flex-direction: column; gap: 4px; flex: 0.5; min-width: 60px; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
         <label style="font-size: 0.75rem; color: var(--text-muted); text-align: center; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 2px;">
           <span>Agotado</span>
@@ -2078,7 +2082,7 @@ function renderTempPackages() {
 function addTempPackage() {
   const currencyInput = document.getElementById('m-prod-currency');
   const currencyName = currencyInput ? currencyInput.value.trim() : 'Unidades';
-  adminState.tempPackages.push({ amount: 100, priceUsd: 1.00, label: `100 ${currencyName}`, isOutofStock: false });
+  adminState.tempPackages.push({ amount: 100, priceUsd: 1.00, label: `100 ${currencyName}`, isOutofStock: false, bgImage: '' });
   renderTempPackages();
 }
 
@@ -2095,6 +2099,7 @@ function updateTempPackageField(index, field, value) {
   else if (field === 'costUsd') pkg.costUsd = parseFloat(value) || 0.0;
   else if (field === 'apiServiceId') pkg.apiServiceId = value.trim();
   else if (field === 'isOutofStock') pkg.isOutofStock = value;
+  else if (field === 'bgImage') pkg.bgImage = value.trim();
   else pkg.label = value.trim();
 }
 
