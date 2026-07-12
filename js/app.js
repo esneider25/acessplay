@@ -1715,14 +1715,14 @@ window.verifyGameId = async function (productId) {
 
       if (name && typeof name === 'string' && name.trim() !== '' && !name.includes('@')) {
         appState.verifiedPlayerName = name;
-        resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${name}</b></span>`;
+        resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${escapeHTML(name)}</b></span>`;
       } else {
         // Fallback inteligente: buscar cualquier string que no sea un correo y tenga longitud de nombre
         let fallbackName = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && !v.includes('@'));
 
         if (fallbackName) {
           appState.verifiedPlayerName = fallbackName;
-          resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${fallbackName}</b></span>`;
+          resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${escapeHTML(fallbackName)}</b></span>`;
         } else {
           // Imprimir un mini-resumen de los datos recibidos para que el usuario pueda decirnos qué llaves llegaron
           const availableKeys = Object.keys(src).filter(k => typeof src[k] === 'string' || typeof src[k] === 'number').map(k => `${k}: ${src[k]}`).join(', ');

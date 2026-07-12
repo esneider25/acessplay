@@ -891,16 +891,16 @@ function renderOrderTracking(orderId) {
         <div class="tracking-details-grid">
           <div class="tracking-card">
             <h3>📦 Detalles del Pedido</h3>
-            <div class="tracking-detail-row"><span>Producto</span><span>${order.productName}</span></div>
+            <div class="tracking-detail-row"><span>Producto</span><span>${escapeHTML(order.productName)}</span></div>
             <div class="tracking-detail-row"><span>Tipo</span><span>${typeLabel}</span></div>
-            <div class="tracking-detail-row"><span>Paquete</span><span>${order.packageLabel}</span></div>
-            ${order.playerName ? `<div class="tracking-detail-row"><span>Jugador</span><span>${order.playerName}</span></div>` : ''}
-            ${order.gameId ? `<div class="tracking-detail-row"><span>ID Juego</span><span>${order.gameId}</span></div>` : ''}
-            ${order.accountEmail ? `<div class="tracking-detail-row"><span>Cuenta</span><span>${order.accountEmail}</span></div>` : ''}
-            ${order.accountPassword ? `<div class="tracking-detail-row"><span>Contraseña</span><span>${order.accountPassword}</span></div>` : ''}
+            <div class="tracking-detail-row"><span>Paquete</span><span>${escapeHTML(order.packageLabel)}</span></div>
+            ${order.playerName ? `<div class="tracking-detail-row"><span>Jugador</span><span>${escapeHTML(order.playerName)}</span></div>` : ''}
+            ${order.gameId ? `<div class="tracking-detail-row"><span>ID Juego</span><span>${escapeHTML(order.gameId)}</span></div>` : ''}
+            ${order.accountEmail ? `<div class="tracking-detail-row"><span>Cuenta</span><span>${escapeHTML(order.accountEmail)}</span></div>` : ''}
+            ${order.accountPassword ? `<div class="tracking-detail-row"><span>Contraseña</span><span>${escapeHTML(order.accountPassword)}</span></div>` : ''}
             <div class="tracking-detail-row"><span>Total Pagado</span><span>${order.paymentCurrency === 'usd' ? '$' + order.priceUsd.toFixed(2) + ' USD' : 'Bs. ' + formatBs(order.priceBs)}</span></div>
-            <div class="tracking-detail-row"><span>Método de Pago</span><span>${order.paymentMethodName}</span></div>
-            <div class="tracking-detail-row"><span>Contacto</span><span>${order.customerContact}</span></div>
+            <div class="tracking-detail-row"><span>Método de Pago</span><span>${escapeHTML(order.paymentMethodName)}</span></div>
+            <div class="tracking-detail-row"><span>Contacto</span><span>${escapeHTML(order.customerContact)}</span></div>
             <div class="tracking-detail-row"><span>Fecha</span><span>${new Date(order.createdAt).toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span></div>
           </div>
 
