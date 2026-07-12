@@ -1327,17 +1327,11 @@ function initUserChat() {
   if (!currentUser || userChatLoaded) return;
   userChatLoaded = true;
   
-  // Escuchar a toda la rama messages, ya que el admin y data.js usan un array global
-  firebase.database().ref('messages').on('value', snap => {
-    const allMessages = snap.val();
+  // Escuchar a la rama individual del usuario
+  firebase.database().ref('messages/' + currentUser.uid).on('value', snap => {
+    const userConv = snap.val();
     const container = document.getElementById('user-chat-messages');
     if (!container) return;
-    
-    let userConv = null;
-    if (allMessages) {
-      let msgArray = Array.isArray(allMessages) ? allMessages.filter(Boolean) : Object.values(allMessages);
-      userConv = msgArray.find(m => m.sessionId === currentUser.uid);
-    }
     
     if (!userConv || !userConv.messages || userConv.messages.length === 0) {
       container.innerHTML = `
@@ -1481,11 +1475,8 @@ function initNotifications() {
   });
   
   // Escuchar mensajes nuevos en el chat (si está cerrado)
-  firebase.database().ref('messages').on('value', snap => {
-    const allMessages = snap.val();
-    if (!allMessages) return;
-    let msgArray = Array.isArray(allMessages) ? allMessages.filter(Boolean) : Object.values(allMessages);
-    let userConv = msgArray.find(m => m.sessionId === currentUser.uid);
+  firebase.database().ref('messages/' + currentUser.uid).on('value', snap => {
+    const userConv = snap.val();
     
     // Only notify if message is from admin and not yet read (hasUnreadUser=true)
     if (userConv && userConv.hasUnreadUser) {

@@ -299,7 +299,7 @@ function initFirebaseData() {
   const isAdmin = window.location.pathname.includes('admin');
   const userLoggedIn = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
   
-  const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'telegram_config', 'discounts', 'messages'];
+  const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'telegram_config', 'discounts'];
   const keysToLoad = isAdmin 
     ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', 'spam_tracker', 'order_counter', 'banners', 'landing_config']
     : baseKeys;
@@ -548,15 +548,7 @@ function addMessage(sessionId, sender, text, contact = null) {
 
   // DB Transaction to avoid overwriting other chats
   if (typeof firebase !== 'undefined') {
-    firebase.database().ref('messages').transaction((currentMessages) => {
-      let msgsArray = [];
-      if (currentMessages) {
-        msgsArray = Array.isArray(currentMessages) ? currentMessages.filter(Boolean) : Object.values(currentMessages);
-      }
-      
-      let convIndex = msgsArray.findIndex(m => m && m.sessionId === sessionId);
-      let conv = convIndex !== -1 ? msgsArray[convIndex] : null;
-      
+    firebase.database().ref('messages/' + sessionId).transaction((conv) => {
       if (!conv) {
         conv = {
           sessionId: sessionId,
@@ -567,8 +559,6 @@ function addMessage(sessionId, sender, text, contact = null) {
           hasUnreadAdmin: false,
           hasUnreadUser: false
         };
-        msgsArray.push(conv);
-        convIndex = msgsArray.length - 1;
       } else if (contact) {
         conv.contact = contact;
       }
@@ -587,10 +577,25 @@ function addMessage(sessionId, sender, text, contact = null) {
       if (sender === 'user') conv.hasUnreadAdmin = true;
       else conv.hasUnreadUser = true;
       
-      msgsArray[convIndex] = conv;
-      return msgsArray;
+      return conv;
     });
   }
+}
+
+function syncUserChat(sessionId) {
+  if (typeof firebase === 'undefined' || window.location.pathname.includes('admin')) return;
+  firebase.database().ref('messages/' + sessionId).on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      const idx = MESSAGES.findIndex(m => m.sessionId === sessionId);
+      if (idx !== -1) {
+        MESSAGES[idx] = data;
+      } else {
+        MESSAGES.push(data);
+      }
+      if (typeof renderSupportMessages === 'function') renderSupportMessages();
+    }
+  });
 }
 
 function markMessagesAsRead(sessionId, reader) {
@@ -603,27 +608,20 @@ function markMessagesAsRead(sessionId, reader) {
   
   // DB Transaction
   if (typeof firebase !== 'undefined') {
-    firebase.database().ref('messages').transaction((currentMessages) => {
-      if (!currentMessages) return currentMessages;
-      let msgsArray = Array.isArray(currentMessages) ? currentMessages.filter(Boolean) : Object.values(currentMessages);
-      let convIndex = msgsArray.findIndex(m => m && m.sessionId === sessionId);
+    firebase.database().ref('messages/' + sessionId).transaction((conv) => {
+      if (!conv) return conv;
       
-      if (convIndex !== -1) {
-        let conv = msgsArray[convIndex];
-        let changed = false;
-        if (reader === 'admin' && conv.hasUnreadAdmin) {
-          conv.hasUnreadAdmin = false;
-          changed = true;
-        }
-        if (reader === 'user' && conv.hasUnreadUser) {
-          conv.hasUnreadUser = false;
-          changed = true;
-        }
-        if (changed) {
-          msgsArray[convIndex] = conv;
-          return msgsArray;
-        }
+      let changed = false;
+      if (reader === 'admin' && conv.hasUnreadAdmin) {
+        conv.hasUnreadAdmin = false;
+        changed = true;
       }
+      if (reader === 'user' && conv.hasUnreadUser) {
+        conv.hasUnreadUser = false;
+        changed = true;
+      }
+      if (changed) return conv;
+      return; // return undefined aborts the transaction
     });
   }
 }
