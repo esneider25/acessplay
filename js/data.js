@@ -139,8 +139,6 @@ let PAYMENT_METHODS = [];
 
 // ── Telegram Bot Configuration ──
 let TELEGRAM_CONFIG = {
-  botToken: '8542799283:AAG_JpLnKG1DNUjSqfHjncEn9Nr7imXaays',
-  chatId: '6012452103',
   enabled: true,
   notifyNewOrder: true,
   notifyWithPhoto: true
@@ -1010,12 +1008,10 @@ function saveTelegramConfig() {
 }
 
 async function sendTelegramMessage(text, inlineKeyboard) {
-  if (!TELEGRAM_CONFIG.enabled || !TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) return false;
+  if (!TELEGRAM_CONFIG.enabled) return false;
   try {
     const body = {
       type: 'message',
-      chatId: TELEGRAM_CONFIG.chatId,
-      botToken: TELEGRAM_CONFIG.botToken,
       text: text,
       inlineKeyboard: inlineKeyboard || null
     };
@@ -1034,7 +1030,7 @@ async function sendTelegramMessage(text, inlineKeyboard) {
 }
 
 async function sendTelegramPhoto(photoBlob, caption, inlineKeyboard) {
-  if (!TELEGRAM_CONFIG.enabled || !TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) return false;
+  if (!TELEGRAM_CONFIG.enabled) return false;
   try {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -1043,8 +1039,6 @@ async function sendTelegramPhoto(photoBlob, caption, inlineKeyboard) {
           const base64data = reader.result.split(',')[1];
           const body = {
             type: 'photo',
-            chatId: TELEGRAM_CONFIG.chatId,
-            botToken: TELEGRAM_CONFIG.botToken,
             text: caption,
             inlineKeyboard: inlineKeyboard || null,
             photoBase64: base64data

@@ -85,9 +85,9 @@ export default async function handler(req, res) {
       apiKey = api.apiKey || '';
       // data ya viene en req.body.data y se usará en el POST abajo
     } 
-    // CASO 2: Modo normal (ej: Probar Conexión desde el Admin Panel)
-    else if (!baseUrl || !endpoint) {
-      return res.status(400).json({ error: "Faltan parámetros baseUrl o endpoint." });
+    } 
+    else {
+      return res.status(403).json({ error: "Acceso denegado. El proxy solo permite verificación de IDs." });
     }
 
     // Ensure baseUrl doesn't end with slash if endpoint starts with one

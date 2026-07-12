@@ -814,7 +814,7 @@ async function _submitOrderLogic() {
     }
   }
   // Show success animation then redirect to tracking using the last order created
-  showOrderConfirmation(lastOrder);
+      showOrderConfirmation(lastOrder);
   return true;
 }
 
@@ -827,193 +827,6 @@ window.addEventListener('beforeunload', function (e) {
   }
 });
 
-async function processWalletOrderAuto(order, isReseller = false) {
-  const apiIdx = parseInt(order.apiProvider);
-  if (isNaN(apiIdx) || typeof API_CONFIGS === 'undefined' || !API_CONFIGS[apiIdx] || !API_CONFIGS[apiIdx].enabled) {
-    return;
-  }
-
-  const api = API_CONFIGS[apiIdx];
-  const apiProductId = parseInt(order.apiProductId);
-  if (isNaN(apiProductId)) return;
-
-  const baseUrl = api.baseUrl.endsWith('/') ? api.baseUrl.slice(0, -1) : api.baseUrl;
-
-  if (typeof firebase !== 'undefined') {
-    let noteMsg = 'Auto-procesando...';
-    if (order.paymentMethodId === 'wallet') noteMsg = 'Auto-procesando por pago con billetera...';
-    else if (isReseller) noteMsg = 'Auto-procesando por ser Revendedor VIP...';
-    else if ((order.statusHistory || []).length > 0) noteMsg = 'Re-procesando automáticamente ID rectificado...';
-
-    firebase.database().ref('orders/' + order.id).update({ status: 'processing', adminNote: noteMsg });
-  }
-
-  isProcessingOrder = true;
-
-  try {
-    const rectificationCount = (order.statusHistory || []).filter(h => h.note && h.note.includes('rectificó')).length;
-    const finalMerchantRef = rectificationCount > 0 ? `${order.id}_R${rectificationCount}` : order.id;
-
-    const payload = {
-      producto_id: apiProductId,
-      merchant_ref: finalMerchantRef,
-      cantidad: 1
-    };
-
-    if (order.gameId) {
-      if (order.productType === 'game-id-zone') {
-        const match = order.gameId.match(/ID:\s*(.+?)\s*\|\s*Zona:\s*(.+)/i);
-        if (match) {
-          payload.id_juego = match[1].trim();
-          payload.input2 = match[2].trim();
-        } else {
-          payload.id_juego = order.gameId;
-        }
-      } else {
-        payload.id_juego = order.gameId;
-      }
-    }
-
-    const proxyUrl = '/api/proxy';
-    const response = await fetch(proxyUrl, {
-      method: 'POST',
-      keepalive: true,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: "comprar",
-        method: "POST",
-        apiKey: api.apiKey,
-        baseUrl: baseUrl,
-        data: payload
-      })
-    });
-
-    const data = await response.json();
-
-    const setStatus = (newStatus, note) => {
-      if (typeof updateOrderStatus === 'function') {
-        updateOrderStatus(order.id, newStatus, note);
-      } else if (typeof firebase !== 'undefined') {
-        const updateData = { status: newStatus };
-        if (note) updateData.adminNote = note;
-        firebase.database().ref('orders/' + order.id).update(updateData);
-      }
-    };
-
-    if (data.ok && data.estado === 'completado') {
-      isProcessingOrder = false;
-      const methodSource = order.paymentMethodId === 'wallet' ? 'Pago con Saldo' : 'Usuario Revendedor';
-      let note = 'Aprobado y entregado de forma inmediata (' + methodSource + ')';
-      if (data.codigos && data.codigos.length > 0) note = 'Códigos entregados:\n' + data.codigos.join('\n');
-      else if (data.codigo) note = 'Código entregado: ' + data.codigo;
-
-      setStatus('completed', note);
-      if (typeof sendTelegramMessage === 'function') {
-        sendTelegramMessage(`✅ <b>PEDIDO AUTO-COMPLETADO — #${order.id}</b>\n\nEl pedido fue procesado y entregado exitosamente al cliente.\nNota: ${note}`);
-      }
-    } else if (data.ok && data.estado === 'procesando') {
-      if (typeof firebase !== 'undefined') {
-        firebase.database().ref('orders/' + order.id).update({ adminNote: 'En proceso automático (esperando confirmación...)' });
-      }
-
-      let attempts = 0;
-      const maxAttempts = 12; // 12 intentos * 5 seg = 60 seg (1 minuto)
-      const pollInterval = setInterval(async () => {
-        attempts++;
-        try {
-          const resp = await fetch(proxyUrl, {
-            method: 'POST',
-            keepalive: true,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              endpoint: `recargas/status?merchant_ref=${finalMerchantRef}`,
-              method: "GET",
-              apiKey: api.apiKey,
-              baseUrl: baseUrl
-            })
-          });
-          const pollData = await resp.json();
-          const estadoStr = String(pollData.estado || pollData.status || '').toLowerCase();
-
-          if (pollData.ok && (estadoStr === 'completado' || estadoStr === 'completed')) {
-            clearInterval(pollInterval);
-            isProcessingOrder = false;
-            let note = 'Aprobado y entregado automáticamente (luego de procesar)';
-            if (pollData.codigo) note = 'Código entregado: ' + pollData.codigo;
-            if (pollData.codigos && pollData.codigos.length > 0) note = 'Códigos entregados:\n' + pollData.codigos.join('\n');
-
-            setStatus('completed', note);
-            if (typeof sendTelegramMessage === 'function') {
-              sendTelegramMessage(`✅ <b>PEDIDO AUTO-COMPLETADO — #${order.id}</b>\n\nEl pedido fue procesado exitosamente luego de unos segundos.\nNota: ${note}`);
-            }
-          } else if (pollData.ok && (estadoStr === 'procesando' || estadoStr === 'processing')) {
-            if (attempts >= maxAttempts) {
-              clearInterval(pollInterval);
-              isProcessingOrder = false;
-              setStatus('completed', 'Marcado como completado automáticamente tras 1 minuto de espera en procesando.');
-            }
-          } else {
-            clearInterval(pollInterval);
-            isProcessingOrder = false;
-            let errorMsg = pollData.error || pollData.msg || pollData.estado || 'Rechazado';
-            const errorLower = String(errorMsg).toLowerCase();
-
-            if (errorLower.includes('ya fue usado') || errorLower.includes('ya existe') || errorLower.includes('already used')) {
-              setStatus('completed', `Aprobado forzadamente (API indicó: ${errorMsg})`);
-            } else {
-              let clientError = 'ID Inválido o producto no disponible';
-              if (errorLower.includes('saldo') || errorLower.includes('balance') || errorLower.includes('pin') || errorLower.includes('stock')) {
-                  clientError = 'Error temporal en el servidor. Por favor, contacta a soporte.';
-              } else if (errorLower.includes('id') || errorLower.includes('cuenta') || errorLower.includes('jugador') || errorLower.includes('not found')) {
-                  clientError = 'Verifica que el ID o la cuenta sean correctos.';
-              }
-              setStatus('invalid-id', clientError);
-              if (typeof sendTelegramMessage === 'function') {
-                sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — #${order.id}</b>\n\nEl proveedor rechazó el pedido luego de procesar. El cliente debe corregir los datos. Mensaje de error: ${errorMsg}`);
-              }
-            }
-          }
-        } catch (e) {
-          console.error("Error polling", e);
-          if (attempts >= maxAttempts) {
-            clearInterval(pollInterval);
-            isProcessingOrder = false;
-            setStatus('completed', 'Marcado como completado automáticamente tras 1 minuto de espera.');
-          }
-        }
-      }, 5000);
-
-    } else {
-      isProcessingOrder = false;
-      const errorMsg = data.error || data.estado || 'Rechazado';
-      const errorLower = String(errorMsg).toLowerCase();
-
-      if (errorLower.includes('ya fue usado') || errorLower.includes('ya existe') || errorLower.includes('already used')) {
-        setStatus('completed', `Aprobado forzadamente (API indicó: ${errorMsg})`);
-      } else {
-        let clientError = 'ID Inválido o producto no disponible';
-        if (errorLower.includes('saldo') || errorLower.includes('balance') || errorLower.includes('pin') || errorLower.includes('stock')) {
-            clientError = 'Error temporal en el servidor. Por favor, contacta a soporte.';
-        } else if (errorLower.includes('id') || errorLower.includes('cuenta') || errorLower.includes('jugador') || errorLower.includes('not found')) {
-            clientError = 'Verifica que el ID o la cuenta sean correctos.';
-        }
-        setStatus('invalid-id', clientError);
-        if (typeof sendTelegramMessage === 'function') {
-          sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — #${order.id}</b>\n\nEl sistema rechazó el pedido automáticamente. Mensaje de error: ${errorMsg}`);
-        }
-      }
-    }
-  } catch (error) {
-    isProcessingOrder = false;
-    console.error('Error auto proveedor:', error);
-    if (typeof firebase !== 'undefined') {
-      firebase.database().ref('orders/' + order.id).update({ status: 'pending', adminNote: 'Fallo conexión automática. Requiere revisión manual' });
-      if (typeof sendTelegramMessage === 'function') {
-        sendTelegramMessage(`❌ <b>FALLO PROVEEDOR — #${order.id}</b>\n\nOcurrió un error de conexión con el proveedor externo. Requiere revisión manual en el panel.`);
-      }
-    }
-  }
-}
 
 // ── Submit Wallet Recharge ──
 function submitWalletRecharge() {
@@ -1570,7 +1383,7 @@ async function sendSupportMessage() {
   if (quickActions) quickActions.style.display = 'none';
 
   // Notify Telegram using global TELEGRAM_CONFIG
-  if (typeof TELEGRAM_CONFIG !== 'undefined' && TELEGRAM_CONFIG.enabled && TELEGRAM_CONFIG.botToken && TELEGRAM_CONFIG.chatId) {
+  if (typeof TELEGRAM_CONFIG !== 'undefined' && TELEGRAM_CONFIG.enabled && TELEGRAM_CONFIG.chatId) {
     const tgMsg = `💬 <b>Nuevo Mensaje de Soporte</b>\n\n<b>Contacto:</b> ${contact}\n<b>Mensaje:</b> ${text}\n\n<i>Responde desde el Panel Admin</i>`;
     try {
       await fetch('/api/telegram', {
@@ -2466,4 +2279,5 @@ function initCarousel() {
   carousel.addEventListener('pointerdown', resetInterval);
   carousel.addEventListener('touchstart', resetInterval, { passive: true });
 }
+
 

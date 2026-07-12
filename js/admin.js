@@ -1673,231 +1673,7 @@ async function testApiConnection(idx) {
   }
 }
 
-async function processAutomaticTopup(orderId, fromModal = false) {
-  const order = getOrderById(orderId);
-  if (!order) return;
-
-  const apiIdx = parseInt(order.apiProvider);
-
-  // Si el producto no tiene API asignada, es un producto manual.
-  if (isNaN(apiIdx) || !API_CONFIGS[apiIdx]) {
-    if (order.productType === 'code' && !order.deliveredCode) {
-      openApproveCodeModal(orderId);
-      return;
-    }
-    completeOrderLocally(orderId, fromModal);
-    return;
-  }
-
-  // Si tiene API asignada pero está apagada en Configuración de APIs:
-  if (!API_CONFIGS[apiIdx].enabled) {
-    showAdminToast(`❌ Configuración: El Proveedor API está apagado. Enciéndelo primero.`, 'error');
-    return;
-  }
-
-  const api = API_CONFIGS[apiIdx];
-  const apiProductId = parseInt(order.apiProductId);
-
-  // Si tiene API asignada pero el paquete específico no tiene ID de Servicio:
-  if (isNaN(apiProductId)) {
-    showAdminToast(`❌ Error: El paquete de este pedido no tiene "ID Servicio API" asignado. Edita el producto.`, 'error');
-    return;
-  }
-
-  showAdminToast(`⏳ Procesando recarga por API para ${orderId}...`, 'info');
-
-  const baseUrl = api.baseUrl.endsWith('/') ? api.baseUrl.slice(0, -1) : api.baseUrl;
-
-  updateOrderStatus(orderId, 'processing', 'Procesando el pedido de forma automatizada...');
-  refreshOrdersView();
-
-  try {
-    const rectificationCount = (order.statusHistory || []).filter(h => h.note && h.note.includes('rectificó')).length;
-    const finalMerchantRef = rectificationCount > 0 ? `${orderId}_R${rectificationCount}` : orderId;
-
-    const payload = {
-      producto_id: apiProductId,
-      merchant_ref: finalMerchantRef,
-      cantidad: 1
-    };
-
-    if (order.gameId) {
-      if (order.productType === 'game-id-zone') {
-        const match = order.gameId.match(/ID:\s*(.+?)\s*\|\s*Zona:\s*(.+)/i);
-        if (match) {
-          payload.id_juego = match[1].trim();
-          payload.input2 = match[2].trim();
-        } else {
-          payload.id_juego = order.gameId;
-        }
-      } else {
-        payload.id_juego = order.gameId;
-      }
-    }
-
-    const proxyUrl = '/api/proxy';
-    const response = await fetch(proxyUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: "comprar",
-        method: "POST",
-        apiKey: api.apiKey,
-        baseUrl: baseUrl,
-        data: payload
-      })
-    });
-
-    const data = await response.json();
-
-    if (data.ok) {
-      if (data.estado === 'completado') {
-        let note = 'Aprobado y entregado automáticamente';
-        if (data.codigos && data.codigos.length > 0) {
-          note = 'Códigos entregados:\n' + data.codigos.join('\n');
-        } else if (data.codigo) {
-          note = 'Código entregado: ' + data.codigo;
-        }
-        showAdminToast(`✅ API: Recarga de ${orderId} exitosa.`, 'success');
-        completeOrderLocally(orderId, fromModal, note);
-      } else if (data.estado === 'procesando') {
-        showAdminToast(`⏳ API: Pedido ${orderId} en proceso. Monitoreando...`, 'info');
-        pollApiStatus(baseUrl, api.apiKey, orderId, fromModal);
-      } else {
-        showAdminToast(`⚠️ API: Pedido ${orderId} con estado: ${data.estado}`, 'info');
-      }
-    } else {
-      const refundMsg = data.reembolsado ? ' (Reembolsado al saldo)' : '';
-
-      const errorStr = (data.error || '').toLowerCase();
-      if (errorStr.includes('ya fue usado') || errorStr.includes('ya existe') || errorStr.includes('already used')) {
-        showAdminToast(`⚠️ API indica que ya fue procesado. Aprobando localmente...`, 'info');
-        completeOrderLocally(orderId, fromModal, `Aprobado forzadamente (API indicó: ${data.error})`);
-        return;
-      }
-
-      showAdminToast(`❌ API Error: ${data.error}${refundMsg}`, 'error');
-      updateOrderStatus(orderId, 'invalid-id', `Verifica que el ID o la cuenta sean correctos. El sistema rechazó la recarga. (${data.error}${refundMsg})`);
-      refreshOrdersView();
-      if (fromModal) closeAdminModal();
-
-      // Notify Admin via Telegram about the API error
-      sendTelegramMessage(`⚠️ <b>DATOS INVÁLIDOS — Pedido #${orderId}</b>\nLa API rechazó la recarga automática.\n\n<b>Motivo:</b> ${data.error}${refundMsg}\n\n<i>Estado cambiado a ID Inválido. El cliente debe corregir los datos.</i>`);
-    }
-  } catch (error) {
-    console.error('Error API Comprar:', error);
-    showAdminToast(`❌ Fallo de conexión con la API`, 'error');
-    updateOrderStatus(orderId, 'pending', 'Fallo en el sistema de recarga automatizada');
-    refreshOrdersView();
-    sendTelegramMessage(`⚠️ <b>FALLO DE CONEXIÓN API — Pedido #${orderId}</b>\nNo se pudo conectar con el proveedor API externo.\nEl pedido sigue en estado Pendiente.`);
-  }
-}
-
-function completeOrderLocally(orderId, fromModal, customNote = 'Aprobado y entregado') {
-  const order = updateOrderStatus(orderId, 'completed', customNote);
-  if (order) {
-    showAdminToast(`✅ Pedido ${orderId} completado`, 'success');
-    refreshOrdersView();
-    if (fromModal) closeAdminModal();
-    sendTelegramMessage(`✅ <b>Pedido #${orderId} APROBADO</b>\nProducto: ${order.productName} — ${order.packageLabel}`);
-  }
-}
-
-function openApproveCodeModal(orderId) {
-  const overlay = document.getElementById('admin-modal-overlay');
-  const modalContent = document.getElementById('admin-modal-content');
-  if (!overlay || !modalContent) return;
-
-  modalContent.innerHTML = `
-    <div class="admin-modal-header">
-      <h2 class="admin-modal-title">✅ Entregar Código — ${orderId}</h2>
-      <button class="admin-modal-close" onclick="closeAdminModal()">✕</button>
-    </div>
-    <div style="margin-bottom: 16px;">
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">Ingresa el código o gift card que deseas entregar al cliente:</p>
-      <input type="text" class="admin-form-input" id="approve-code-input" placeholder="Ej: ABCD-1234-EFGH" style="width: 100%; font-family: monospace; font-size: 1.1rem; padding: 12px;">
-    </div>
-    <div class="admin-modal-footer">
-      <button class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="confirmApproveCodeOrder('${orderId}')">
-        ✅ Aprobar y Entregar
-      </button>
-    </div>
-  `;
-
-  overlay.classList.add('active');
-  setTimeout(() => document.getElementById('approve-code-input')?.focus(), 200);
-}
-
-function confirmApproveCodeOrder(orderId) {
-  const codeInput = document.getElementById('approve-code-input');
-  const code = codeInput ? codeInput.value.trim() : '';
-  let note = 'Aprobado y entregado';
-  let deliveredCode = null;
-
-  if (code) {
-      note = 'Código entregado: ' + code;
-      deliveredCode = code;
-  }
-  
-  const order = getOrderById(orderId);
-  if (order && deliveredCode) {
-      order.deliveredCode = deliveredCode;
-  }
-
-  completeOrderLocally(orderId, true, note);
-}
-
-function pollApiStatus(baseUrl, apiKey, orderId, fromModal) {
-  let attempts = 0;
-  const maxAttempts = 15;
-
-  const interval = setInterval(async () => {
-    attempts++;
-    try {
-      const proxyUrl = '/api/proxy';
-      const resp = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          endpoint: `recargas/status?merchant_ref=${orderId}`,
-          method: "GET",
-          apiKey: apiKey,
-          baseUrl: baseUrl
-        })
-      });
-      const data = await resp.json();
-
-      if (data.ok) {
-        if (data.status === 'completed' || data.estado === 'completado') {
-          clearInterval(interval);
-
-          let note = 'Aprobado y entregado automáticamente (luego de procesar)';
-          if (data.codigo) {
-            note = 'Código entregado: ' + data.codigo;
-          }
-          completeOrderLocally(orderId, fromModal, note);
-        } else if (data.status === 'failed' || data.estado === 'cancelado') {
-          clearInterval(interval);
-          updateOrderStatus(orderId, 'rejected', 'El sistema canceló la recarga automáticamente');
-          refreshOrdersView();
-          showAdminToast(`❌ Proveedor canceló el pedido ${orderId}`, 'error');
-          if (fromModal) closeAdminModal();
-        } else {
-          if (attempts >= maxAttempts) {
-            clearInterval(interval);
-            showAdminToast(`⏳ Tiempo agotado revisando API para ${orderId}. Verifica manualmente.`, 'info');
-          }
-        }
-      } else {
-        clearInterval(interval);
-      }
-    } catch (e) {
-      console.error('Polling error', e);
-      if (attempts >= maxAttempts) clearInterval(interval);
-    }
-  }, 20000);
-}
+// Función delegada al backend
 
 function saveApis() {
   const inputs = document.querySelectorAll('.api-field');
@@ -2543,7 +2319,8 @@ function changeOrdersPage(delta) {
 
 function quickUpdateStatus(orderId, newStatus) {
   if (newStatus === 'completed') {
-    processAutomaticTopup(orderId, false);
+    // processAutomaticTopup(orderId, false);
+    showAdminToast('El Auto-Procesamiento ahora se realiza aprobando el pedido desde el Bot de Telegram.', 'info');
     return;
   }
   const order = updateOrderStatus(orderId, newStatus, ORDER_STATUSES[newStatus]?.label || '');
@@ -2768,7 +2545,7 @@ function openOrderDetailModal(orderId) {
 
 function quickUpdateStatusFromModal(orderId, newStatus) {
   if (newStatus === 'completed') {
-    processAutomaticTopup(orderId, true);
+      showAdminToast('El Auto-Procesamiento ahora se realiza aprobando el pedido desde el Bot de Telegram.', 'info');
     return;
   }
   const order = updateOrderStatus(orderId, newStatus, ORDER_STATUSES[newStatus]?.label || '');
@@ -4758,3 +4535,4 @@ window.fixWalletSpendingBug = async function() {
     if (btn) btn.innerHTML = "✨ Corregir Gastos de Billetera";
   }
 };
+
