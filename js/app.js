@@ -747,15 +747,32 @@ async function _submitOrderLogic() {
 
   if (appState.selectedPaymentId === 'wallet') {
     const currentWallet = (typeof userProfile !== 'undefined' && userProfile && userProfile.wallet) ? userProfile.wallet : 0;
-    const newWallet = currentWallet - finalUsd;
-    firebase.database().ref('users/' + currentUser.uid).update({ wallet: newWallet });
-    firebase.database().ref('users/' + currentUser.uid + '/transactions').push({
-      id: Date.now().toString(),
-      type: 'purchase',
-      amount: -finalUsd,
-      description: numberOfOrders > 1 ? `Compra Masiva (${numberOfOrders} IDs): ${product.name} - ${pkg.label}` : `Compra: ${product.name} - ${pkg.label}`,
-      date: Date.now()
-    });
+    if (currentWallet < finalUsd) {
+      if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
+      return Swal.fire('Error', 'Saldo insuficiente en tu monedero.', 'error');
+    }
+    try {
+      const idToken = await firebase.auth().currentUser.getIdToken();
+      const walletRes = await fetch('/api/wallet', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+        body: JSON.stringify({ action: 'purchase', amount: finalUsd })
+      });
+      const walletData = await walletRes.json();
+      if (walletData.error) throw new Error(walletData.error);
+      
+      firebase.database().ref('users/' + currentUser.uid + '/transactions').push({
+        id: Date.now().toString(),
+        type: 'purchase',
+        amount: -finalUsd,
+        description: numberOfOrders > 1 ? `Compra Masiva (${numberOfOrders} IDs): ${product.name} - ${pkg.label}` : `Compra: ${product.name} - ${pkg.label}`,
+        date: Date.now()
+      });
+    } catch (err) {
+      console.error(err);
+      if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
+      return Swal.fire('Error', 'Error al procesar el pago con monedero: ' + err.message, 'error');
+    }
   }
 
   // Subir captura a Firebase Storage ANTES de crear los pedidos para que todos compartan la misma foto

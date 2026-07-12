@@ -572,23 +572,34 @@ window.confirmRedeemPoints = function() {
   const modal = document.getElementById('redeem-points-modal');
   if (modal) modal.remove();
   
-  const newPoints = userProfile.points - cost;
-  const newWallet = (userProfile.wallet || 0) + dollars;
-  
-  firebase.database().ref('users/' + currentUser.uid).update({
-    points: newPoints,
-    wallet: newWallet
-  }).then(() => {
-    firebase.database().ref('users/' + currentUser.uid + '/transactions').push({
-      id: Date.now().toString(),
-      type: 'deposit',
-      amount: dollars,
-      description: `Canje de ${cost} AccessPoints`,
-      date: Date.now()
+  firebase.auth().currentUser.getIdToken().then(idToken => {
+    return fetch('/api/wallet', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        action: 'redeem',
+        amount: dollars,
+        cost: cost
+      })
     });
-    
-    usuarioToast(`🎉 ¡Canje exitoso! Se agregaron $${dollars} a tu billetera.`, 'success');
+  }).then(res => res.json()).then(data => {
+    if (data.error) {
+      usuarioToast(`❌ Error: ${data.error}`, 'error');
+    } else {
+      firebase.database().ref('users/' + currentUser.uid + '/transactions').push({
+        id: Date.now().toString(),
+        type: 'deposit',
+        amount: dollars,
+        description: `Canje de ${cost} AccessPoints`,
+        date: Date.now()
+      });
+      usuarioToast(`🎉 ¡Canje exitoso! Se agregaron $${dollars} a tu billetera.`, 'success');
+    }
   }).catch(err => {
+    console.error(err);
     usuarioToast('❌ Hubo un error al canjear.', 'error');
   });
 };
@@ -1292,10 +1303,15 @@ window.submitCashout = function() {
     createdAt: Date.now()
   };
   
-  // Deduct points instantly
-  firebase.database().ref('users/' + currentUser.uid).update({
-    points: currentPoints - amount
-  }).then(() => {
+  firebase.auth().currentUser.getIdToken().then(idToken => {
+    return fetch('/api/wallet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+      body: JSON.stringify({ action: 'cashout', amount: amount })
+    });
+  }).then(res => res.json()).then(data => {
+    if (data.error) throw new Error(data.error);
+    
     // Save transaction record in user's history
     firebase.database().ref('users/' + currentUser.uid + '/transactions').push({
       id: Date.now().toString(),
@@ -1306,7 +1322,7 @@ window.submitCashout = function() {
     });
     
     // Save withdrawal request
-withdrawRef.set(withdrawalData).then(() => {
+    withdrawRef.set(withdrawalData).then(() => {
       document.getElementById('cashout-modal').remove();
       usuarioToast('¡Solicitud de retiro enviada! El equipo la procesará pronto.', 'success');
       if (typeof renderDashboard === 'function') renderDashboard();

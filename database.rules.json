@@ -90,6 +90,15 @@
         },
         "isBlocked": {
           ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "wallet": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "points": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "totalSpent": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
         }
       }
     }

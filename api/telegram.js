@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   try {
     const { type, text, inlineKeyboard, photoBase64 } = req.body;
     
-    // El token ahora vive de forma segura en las variables de entorno de Vercel
+    // El token
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
