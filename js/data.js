@@ -438,7 +438,8 @@ const ORDER_STATUSES = {
   'processing': { label: 'Procesando', icon: '⚙️', color: '#42a5f5', bg: 'rgba(66,165,245,0.15)' },
   'completed': { label: 'Completado', icon: '✅', color: '#66bb6a', bg: 'rgba(102,187,106,0.15)' },
   'rejected': { label: 'Rechazado', icon: '❌', color: '#ef5350', bg: 'rgba(239,83,80,0.15)' },
-  'invalid-id': { label: 'ID Inválido', icon: '⚠️', color: '#ffa726', bg: 'rgba(255,167,38,0.15)' }
+  'invalid-id': { label: 'ID Inválido', icon: '⚠️', color: '#ffa726', bg: 'rgba(255,167,38,0.15)' },
+  'replaced': { label: 'Reemplazado', icon: '🔄', color: '#8b5cf6', bg: 'rgba(139,92,246,0.15)' }
 };
 
 // ── Discounts CRUD ──

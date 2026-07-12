@@ -1131,37 +1131,38 @@ function rectifyOrderId(orderId) {
 
   const order = orders[orderIndex];
   let newGameId = '';
+  let accountEmail = order.accountEmail || '';
+  let accountPassword = order.accountPassword || '';
 
   if (order.productType === 'account') {
-    const emailInput = document.getElementById('rectify-email-input');
-    const passInput = document.getElementById('rectify-pass-input');
+    const emailInput = document.getElementById(`rectify-email-input-${orderId}`);
+    const passInput = document.getElementById(`rectify-pass-input-${orderId}`);
     if (!emailInput || !emailInput.value.trim() || !passInput || !passInput.value.trim()) {
       showToast('⚠️ Ingresa correo y contraseña');
       return;
     }
-    order.accountEmail = emailInput.value.trim();
-    order.accountPassword = passInput.value.trim();
-    newGameId = `Correo: ${escapeHTML(order.accountEmail)} | Clave: ${order.accountPassword}`;
+    accountEmail = emailInput.value.trim();
+    accountPassword = passInput.value.trim();
+    newGameId = `Correo: ${escapeHTML(accountEmail)} | Clave: ${accountPassword}`;
   } else if (order.productType === 'game-id-zone') {
-    const idInput = document.getElementById('rectify-id-input');
-    const zoneInput = document.getElementById('rectify-zone-input');
+    const idInput = document.getElementById(`rectify-id-input-${orderId}`);
+    const zoneInput = document.getElementById(`rectify-zone-input-${orderId}`);
     if (!idInput || !idInput.value.trim() || !zoneInput || !zoneInput.value.trim()) {
       showToast('⚠️ Ingresa el ID y la Zona');
       return;
     }
     newGameId = `ID: ${idInput.value.trim()} | Zona: ${zoneInput.value.trim()}`;
-    order.gameId = newGameId;
   } else {
-    const input = document.getElementById('rectify-id-input');
+    const input = document.getElementById(`rectify-id-input-${orderId}`);
     if (!input || !input.value.trim()) {
       showToast('⚠️ Ingresa los datos correctos');
       input?.focus();
       return;
     }
     newGameId = input.value.trim();
-    order.gameId = newGameId;
   }
 
+  // 1. Mark the OLD order as replaced
   order.status = 'pending';
   order.statusHistory.push({
     status: 'pending',
@@ -1169,22 +1170,20 @@ function rectifyOrderId(orderId) {
     note: `El cliente rectificó los datos a: ${newGameId}`
   });
   order.updatedAt = new Date().toISOString();
-
-  orders[orderIndex] = order;
+  order.gameId = newGameId; // IMPORTANT: update the gameId on the existing order!
+  
   saveOrderToDb(order);
+
+  // Update local state
+  orders[orderIndex] = order;
   ORDERS = orders;
 
   showToast('✅ Datos actualizados y reenviados correctamente');
 
-  // Notify admin via Telegram
+  // Trigger web notification manually
   const msgText = `🔄 <b>PEDIDO RECTIFICADO — #${order.id}</b>\n\nEl cliente ha corregido sus datos.\nNuevos datos: <code>${newGameId}</code>`;
-  sendTelegramMessage(msgText, buildOrderKeyboard(order.id));
-
-  // Auto-process again if it was paid with wallet OR if it's an API order being rectified
-  if ((order.paymentMethodId === 'wallet' || order.apiProductId) && typeof window !== 'undefined') {
-    if (typeof processWalletOrderAuto === 'function') {
-      processWalletOrderAuto(order);
-    }
+  if (typeof sendTelegramMessage === 'function') {
+    sendTelegramMessage(msgText, buildOrderKeyboard(order.id));
   }
 }
 
