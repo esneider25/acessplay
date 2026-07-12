@@ -758,6 +758,20 @@ async function _submitOrderLogic() {
     });
   }
 
+  // Subir captura a Firebase Storage ANTES de crear los pedidos para que todos compartan la misma foto
+  let sharedScreenshotUrl = null;
+  if (appState.selectedScreenshot && appState.selectedPaymentId !== 'wallet') {
+    try {
+      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
+      const tempId = generateOrderRef(); // Usamos un ID temporal solo para el nombre de la foto
+      const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '.jpg');
+      await storageRef.put(compressedBlob);
+      sharedScreenshotUrl = await storageRef.getDownloadURL();
+    } catch (err) {
+      console.error('Error subiendo captura:', err);
+    }
+  }
+
   // Create the orders
   let lastOrder = null;
   const orderList = Array.isArray(gameId) ? gameId : [gameId];
@@ -767,7 +781,11 @@ async function _submitOrderLogic() {
     const orderPriceUsd = finalUsd / numberOfOrders;
     const orderPriceBs = priceBs / numberOfOrders;
 
+    const orderId = generateOrderRef();
+
     const order = createOrder({
+      id: orderId,
+      screenshot: sharedScreenshotUrl,
       userId: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.uid : null,
       userName: (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.displayName || currentUser.email) : null,
       productId: product.id,
@@ -1544,31 +1562,6 @@ function compressFileToBlob(file) {
 }
 
 async function triggerTelegramNotification(order) {
-  // ── Step 1: Save thumbnail to Firebase (keep existing behavior) ──
-  if (appState.selectedScreenshot) {
-    try {
-      // Usar Firebase Storage en lugar de texto
-      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
-      const storageRef = firebase.storage().ref('orders_screenshots/' + order.id + '.jpg');
-      await storageRef.put(compressedBlob);
-      const downloadURL = await storageRef.getDownloadURL();
-      
-      const orders = getOrders();
-      const o = orders.find(x => x.id === order.id);
-      if (o) {
-        o.screenshot = downloadURL;
-        order.screenshot = downloadURL;
-        try {
-          saveOrderToDb(order);
-        } catch (err) {
-          console.warn('Permiso denegado para miniatura (invitado), continuando con Telegram...');
-        }
-        ORDERS = orders;
-      }
-    } catch (e) {
-      console.error('Error uploading to Storage:', e);
-    }
-  }
 
   // ── Step 2: Build Telegram message ──
   const tgMsg = typeof buildOrderTelegramMessage === 'function'

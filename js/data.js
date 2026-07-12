@@ -701,7 +701,8 @@ function removeOrderFromDb(orderId) {
 function createOrder(data) {
   const orders = getOrders();
   const order = {
-    id: generateOrderRef(),
+    id: data.id || generateOrderRef(),
+    screenshot: data.screenshot || null,
     userId: data.userId || null,
     userName: data.userName || null,
     productId: data.productId,
