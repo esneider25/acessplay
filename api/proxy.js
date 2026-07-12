@@ -84,9 +84,7 @@ export default async function handler(req, res) {
       method = finalMethod;
       apiKey = api.apiKey || '';
       // data ya viene en req.body.data y se usará en el POST abajo
-    } 
-    } 
-    else {
+    } else {
       return res.status(403).json({ error: "Acceso denegado. El proxy solo permite verificación de IDs." });
     }
 
