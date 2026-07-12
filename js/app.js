@@ -1563,6 +1563,22 @@ function compressFileToBlob(file) {
 }
 
 async function triggerTelegramNotification(order) {
+  let shouldSendPhoto = true;
+  try {
+    const [notifySnap, photoSnap] = await Promise.all([
+      firebase.database().ref('telegram_config/notifyOnNewOrder').once('value'),
+      firebase.database().ref('telegram_config/notifyWithPhoto').once('value')
+    ]);
+    if (notifySnap.exists() && notifySnap.val() === false) {
+      console.log('Web notifications disabled by admin.');
+      return;
+    }
+    if (photoSnap.exists()) {
+      shouldSendPhoto = photoSnap.val();
+    }
+  } catch (e) {
+    console.error('Could not check telegram_config:', e);
+  }
 
   // ── Step 2: Build Telegram message ──
   const tgMsg = typeof buildOrderTelegramMessage === 'function'
@@ -1575,7 +1591,7 @@ async function triggerTelegramNotification(order) {
 
   // ── Step 3: Send via Telegram (through /api/telegram proxy) ──
   try {
-    if (appState.selectedScreenshot && TELEGRAM_CONFIG.notifyWithPhoto) {
+    if (appState.selectedScreenshot && shouldSendPhoto) {
       // Compress and send as photo with caption
       const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
       const photoSent = await sendTelegramPhoto(compressedBlob, tgMsg, keyboard);
