@@ -41,7 +41,7 @@
       ".indexOn": ["userId", "id"],
       "$orderId": {
         ".read": "!$orderId.beginsWith('AP-OLD-') || (auth != null && data.child('userId').val() === auth.uid) || (auth != null && auth.token.email === 'admin@accesplay.com')",
-        ".write": "auth != null && auth.token.email === 'admin@accesplay.com' || (!data.exists() && newData.child('status').val() === 'pending' && (auth == null || newData.child('userId').val() === auth.uid)) || (data.exists() && newData.child('status').val() === data.child('status').val() && newData.child('priceUsd').val() === data.child('priceUsd').val() && newData.child('priceBs').val() === data.child('priceBs').val() && (auth == null || data.child('userId').val() === auth.uid))",
+        ".write": "auth != null && auth.token.email === 'admin@accesplay.com' || (!data.exists() && newData.child('status').val() === 'pending' && (auth == null || newData.child('userId').val() === auth.uid)) || (data.exists() && (newData.child('status').val() === data.child('status').val() || (data.child('status').val() === 'invalid-id' && newData.child('status').val() === 'pending')) && newData.child('priceUsd').val() === data.child('priceUsd').val() && newData.child('priceBs').val() === data.child('priceBs').val() && (auth == null || data.child('userId').val() === auth.uid))",
         "roulettePlayed": {
           ".write": "true"
         }
@@ -57,12 +57,16 @@
       }
     },
     "telegram_config": { 
-      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "discounts": { 
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
+    },
+    "_sysTracking": {
+      ".read": "true",
+      ".write": "true"
     },
     "spam_tracker": { 
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'", 

@@ -1121,11 +1121,12 @@ async function lookupOrder() {
 }
 
 // ── Rectify Order ID ──
-function rectifyOrderId(orderId) {
+function rectifyOrderId(orderId, btnElement) {
   const orders = getOrders();
   const orderIndex = orders.findIndex(o => o.id === orderId);
   if (orderIndex === -1) {
     showToast('❌ Pedido no encontrado');
+    if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = 'Re-enviar Pedido'; }
     return;
   }
 
@@ -1139,6 +1140,7 @@ function rectifyOrderId(orderId) {
     const passInput = document.getElementById(`rectify-pass-input-${orderId}`);
     if (!emailInput || !emailInput.value.trim() || !passInput || !passInput.value.trim()) {
       showToast('⚠️ Ingresa correo y contraseña');
+      if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = 'Re-enviar Pedido'; }
       return;
     }
     accountEmail = emailInput.value.trim();
@@ -1149,6 +1151,7 @@ function rectifyOrderId(orderId) {
     const zoneInput = document.getElementById(`rectify-zone-input-${orderId}`);
     if (!idInput || !idInput.value.trim() || !zoneInput || !zoneInput.value.trim()) {
       showToast('⚠️ Ingresa el ID y la Zona');
+      if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = 'Re-enviar Pedido'; }
       return;
     }
     newGameId = `ID: ${idInput.value.trim()} | Zona: ${zoneInput.value.trim()}`;
@@ -1157,6 +1160,7 @@ function rectifyOrderId(orderId) {
     if (!input || !input.value.trim()) {
       showToast('⚠️ Ingresa los datos correctos');
       input?.focus();
+      if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = 'Re-enviar Pedido'; }
       return;
     }
     newGameId = input.value.trim();
