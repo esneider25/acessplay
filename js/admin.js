@@ -412,7 +412,7 @@ function renderDashboard(container, forcedOrders = null) {
       <div class="admin-cat-row" style="cursor: pointer;" onclick="switchTab('orders'); setTimeout(() => openOrderDetailModal('${order.id}'), 100);">
         <span style="display: flex; align-items: center; gap: 8px;">
           <span class="admin-order-ref" style="font-size: 0.75rem; padding: 3px 8px;">${order.id}</span>
-          <span style="font-size: 0.82rem;">${order.productName}</span>
+          <span style="font-size: 0.82rem;">${escapeHTML(order.productName)}</span>
         </span>
         <span class="admin-status-badge admin-status-${statusClass}" style="font-size: 0.7rem; padding: 3px 10px;">${statusInfo.icon} ${statusInfo.label}</span>
       </div>
@@ -2228,13 +2228,13 @@ function renderOrders(container) {
         <div class="admin-order-ref">${order.id}</div>
         <div class="admin-order-info">
           <div class="admin-order-product">
-            ${typeLabel} ${order.productName}
-            <span style="font-size: 0.78rem; font-weight: 400; color: var(--text-muted);">— ${order.packageLabel}</span>
+            ${typeLabel} ${escapeHTML(order.productName)}
+            <span style="font-size: 0.78rem; font-weight: 400; color: var(--text-muted);">— ${escapeHTML(order.packageLabel)}</span>
           </div>
           <div class="admin-order-meta">
             <span class="admin-order-meta-item">💰 $${order.priceUsd.toFixed(2)} | Bs. ${formatBs(order.priceBs)}</span>
             <span class="admin-order-meta-item">💳 ${order.paymentMethodName}</span>
-            <span class="admin-order-meta-item">📱 ${order.customerContact || 'Sin contacto'}</span>
+            <span class="admin-order-meta-item">📱 ${escapeHTML(order.customerContact || 'Sin contacto')}</span>
             <span class="admin-order-meta-item">📅 ${date.toLocaleDateString('es-VE', { day: '2-digit', month: 'short' })} ${date.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
         </div>
@@ -2407,8 +2407,8 @@ function openOrderDetailModal(orderId) {
       <div class="admin-detail-row">
         <span class="label">🎮 ID del Juego</span>
         <span class="value">
-          <strong>${order.gameId}</strong>
-          <button class="copy-btn" onclick="adminCopyText('${order.gameId}')" title="Copiar">📋</button>
+          <strong>${escapeHTML(order.gameId)}</strong>
+          <button class="copy-btn" onclick="adminCopyText('${escapeHTML(order.gameId)}')" title="Copiar">📋</button>
         </span>
       </div>
     `;
@@ -2418,7 +2418,7 @@ function openOrderDetailModal(orderId) {
         <span class="label">📧 Email / Usuario</span>
         <span class="value">
           <strong>${order.accountEmail || 'N/A'}</strong>
-          ${order.accountEmail ? `<button class="copy-btn" onclick="adminCopyText('${order.accountEmail}')" title="Copiar">📋</button>` : ''}
+          ${order.accountEmail ? `<button class="copy-btn" onclick="adminCopyText('${escapeHTML(order.accountEmail)}')" title="Copiar">📋</button>` : ''}
         </span>
       </div>
       <div class="admin-detail-row">
@@ -2477,7 +2477,7 @@ function openOrderDetailModal(orderId) {
         <h4>📦 Producto</h4>
         <div class="admin-detail-row">
           <span class="label">Producto</span>
-          <span class="value">${order.productName}</span>
+          <span class="value">${escapeHTML(order.productName)}</span>
         </div>
         <div class="admin-detail-row">
           <span class="label">Tipo</span>
@@ -2485,7 +2485,7 @@ function openOrderDetailModal(orderId) {
         </div>
         <div class="admin-detail-row">
           <span class="label">Paquete</span>
-          <span class="value">${order.packageLabel}</span>
+          <span class="value">${escapeHTML(order.packageLabel)}</span>
         </div>
         <div class="admin-detail-row">
           <span class="label">Precio USD</span>
@@ -2502,8 +2502,8 @@ function openOrderDetailModal(orderId) {
         <div class="admin-detail-row">
           <span class="label">Contacto</span>
           <span class="value">
-            ${order.customerContact || 'No proporcionado'}
-            ${order.customerContact ? `<button class="copy-btn" onclick="adminCopyText('${order.customerContact}')" title="Copiar">📋</button>` : ''}
+            ${escapeHTML(order.customerContact || 'No proporcionado')}
+            ${order.customerContact ? `<button class="copy-btn" onclick="adminCopyText('${escapeHTML(order.customerContact)}')" title="Copiar">📋</button>` : ''}
           </span>
         </div>
         <div class="admin-detail-row">
@@ -2521,7 +2521,7 @@ function openOrderDetailModal(orderId) {
     ${order.adminNote ? `
       <div style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 16px;">
         <span style="color: var(--text-muted); font-size: 0.82rem;">📝 Nota del admin:</span>
-        <div style="margin-top: 4px; font-size: 0.9rem;">${order.adminNote}</div>
+        <div style="margin-top: 4px; font-size: 0.9rem;">${escapeHTML(order.adminNote)}</div>
       </div>
     ` : ''}
 
@@ -2944,7 +2944,7 @@ function updateAdminMessagesUI() {
             ${unreadBadge}
           </div>
           <div style="color:var(--text-secondary); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-            ${lastMsg}
+            ${escapeHTML(lastMsg)}
           </div>
           <div style="color:var(--text-muted); font-size: 0.75rem; margin-top: 5px; text-align: right;">
             ${new Date(conv.updatedAt).toLocaleString('es-VE')}
@@ -2973,7 +2973,7 @@ function updateAdminMessagesUI() {
       messagesHtml += `
         <div style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:15px;">
           <div style="background:${bg}; color:${color}; padding:10px 15px; border-radius:15px; max-width:80%;">
-            ${msg.text}
+            ${escapeHTML(msg.text)}
           </div>
           <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">${time}</div>
         </div>
@@ -3432,7 +3432,7 @@ function renderCustomersTable(usersList) {
         <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; white-space: nowrap;">
           <div style="display: flex; gap: 5px; justify-content: center;">
             <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openCustomerInfoModal('${user.uid}')">ℹ️ Info</button>
-            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openEditWalletModal('${user.uid}', '${user.email}', ${wallet})">Editar Saldo</button>
+            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openEditWalletModal('${user.uid}', '${escapeHTML(user.email)}', ${wallet})">Editar Saldo</button>
           </div>
         </td>
       </tr>

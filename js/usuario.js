@@ -1353,7 +1353,7 @@ function initUserChat() {
       html += `
         <div style="display: flex; flex-direction: column; align-items: ${isUser ? 'flex-end' : 'flex-start'};">
           <div style="max-width: 80%; padding: 12px 16px; border-radius: 15px; ${isUser ? 'background: linear-gradient(135deg, var(--accent-color), var(--accent-hover)); color: white; border-bottom-right-radius: 4px;' : 'background: rgba(255,255,255,0.05); color: white; border-bottom-left-radius: 4px; border: 1px solid rgba(255,255,255,0.1);'}">
-            ${msg.text}
+            ${escapeHTML(msg.text)}
           </div>
           <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 5px; margin-${isUser ? 'right' : 'left'}: 5px;">
             ${time}
@@ -1394,7 +1394,7 @@ function sendUserChatMessage() {
     
     // Notify Telegram using global TELEGRAM_CONFIG
     if (typeof TELEGRAM_CONFIG !== 'undefined' && TELEGRAM_CONFIG.enabled && TELEGRAM_CONFIG.botToken && TELEGRAM_CONFIG.chatId) {
-      const tgMsg = `💬 <b>Nuevo Mensaje de Soporte (Usuario Registrado)</b>\n\n<b>Contacto:</b> ${contactName}\n<b>Mensaje:</b> ${text}\n\n<i>Responde desde el Panel Admin</i>`;
+      const tgMsg = `💬 <b>Nuevo Mensaje de Soporte (Usuario Registrado)</b>\n\n<b>Contacto:</b> ${contactName}\n<b>Mensaje:</b> ${escapeHTML(text)}\n\n<i>Responde desde el Panel Admin</i>`;
       fetch('/api/telegram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

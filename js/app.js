@@ -1105,7 +1105,7 @@ function rectifyOrderId(orderId) {
     }
     order.accountEmail = emailInput.value.trim();
     order.accountPassword = passInput.value.trim();
-    newGameId = `Correo: ${order.accountEmail} | Clave: ${order.accountPassword}`;
+    newGameId = `Correo: ${escapeHTML(order.accountEmail)} | Clave: ${order.accountPassword}`;
   } else if (order.productType === 'game-id-zone') {
     const idInput = document.getElementById('rectify-id-input');
     const zoneInput = document.getElementById('rectify-zone-input');
@@ -1276,7 +1276,7 @@ function renderSupportMessages() {
     const time = new Date(msg.timestamp).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
     html += `
       <div class="support-msg ${isUser ? 'support-msg--user' : 'support-msg--bot'}">
-        <div class="support-msg-bubble">${msg.text}</div>
+        <div class="support-msg-bubble">${escapeHTML(msg.text)}</div>
         <div class="support-msg-time">${time}</div>
       </div>
     `;
@@ -1384,7 +1384,7 @@ async function sendSupportMessage() {
 
   // Notify Telegram using global TELEGRAM_CONFIG
   if (typeof TELEGRAM_CONFIG !== 'undefined' && TELEGRAM_CONFIG.enabled && TELEGRAM_CONFIG.chatId) {
-    const tgMsg = `💬 <b>Nuevo Mensaje de Soporte</b>\n\n<b>Contacto:</b> ${contact}\n<b>Mensaje:</b> ${text}\n\n<i>Responde desde el Panel Admin</i>`;
+    const tgMsg = `💬 <b>Nuevo Mensaje de Soporte</b>\n\n<b>Contacto:</b> ${contact}\n<b>Mensaje:</b> ${escapeHTML(text)}\n\n<i>Responde desde el Panel Admin</i>`;
     try {
       await fetch('/api/telegram', {
         method: 'POST',
@@ -1573,7 +1573,7 @@ async function triggerTelegramNotification(order) {
   // ── Step 2: Build Telegram message ──
   const tgMsg = typeof buildOrderTelegramMessage === 'function'
     ? buildOrderTelegramMessage(order)
-    : `🤖 <b>NUEVO PEDIDO — ${order.id}</b>\n🔥 ${order.productName} (${order.packageLabel})\n💰 $${order.priceUsd} USD`;
+    : `🤖 <b>NUEVO PEDIDO — ${order.id}</b>\n🔥 ${escapeHTML(order.productName)} (${escapeHTML(order.packageLabel)})\n💰 $${order.priceUsd} USD`;
 
   const keyboard = typeof buildOrderKeyboard === 'function'
     ? buildOrderKeyboard(order.id)
