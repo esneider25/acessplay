@@ -39,6 +39,14 @@ export default async function handler(req, res) {
     
     if (!action) return res.status(400).json({ error: 'Falta action' });
 
+    // Validación CRÍTICA contra números negativos (Evita exploit de restar negativos para sumar)
+    if (amount !== undefined && (typeof amount !== 'number' || amount <= 0)) {
+      return res.status(400).json({ error: 'El monto debe ser un número positivo mayor a 0' });
+    }
+    if (cost !== undefined && (typeof cost !== 'number' || cost <= 0)) {
+      return res.status(400).json({ error: 'El costo debe ser un número positivo mayor a 0' });
+    }
+
     const userRef = admin.database().ref(`users/${uid}`);
     
     // Transacción atómica para evitar condiciones de carrera
