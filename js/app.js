@@ -1164,6 +1164,9 @@ function rectifyOrderId(orderId) {
 
   // 1. Mark the OLD order as replaced
   order.status = 'pending';
+  if (!Array.isArray(order.statusHistory)) {
+    order.statusHistory = order.statusHistory ? Object.values(order.statusHistory) : [];
+  }
   order.statusHistory.push({
     status: 'pending',
     timestamp: new Date().toISOString(),
