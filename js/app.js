@@ -764,7 +764,8 @@ async function _submitOrderLogic() {
     try {
       const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
       const tempId = generateOrderRef(); // Usamos un ID temporal solo para el nombre de la foto
-      const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '.jpg');
+      const randomSecret = Math.random().toString(36).substring(2, 10);
+      const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '_' + randomSecret + '.jpg');
       await storageRef.put(compressedBlob);
       sharedScreenshotUrl = await storageRef.getDownloadURL();
     } catch (err) {

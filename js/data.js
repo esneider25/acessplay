@@ -144,16 +144,17 @@ let TELEGRAM_CONFIG = {
   notifyWithPhoto: true
 };
 
-// ── Anti-Spam Configuration ──
-let SPAM_CONFIG = {
+// 🛡️ Anti-Spam Configuration 🛡️
+let _antiSpamConf = {
   maxOrdersPerHour: 5,
   maxOrdersPerDay: 15,
   cooldownMinutes: 30,
   blocklistEnabled: true
 };
+Object.freeze(_antiSpamConf);
 
-// ── Spam Tracker ──
-let SPAM_TRACKER = {
+// 🕵️ Spam Tracker 🕵️──
+let _sysTracking = {
   attempts: [],
   blocked: []
 };
@@ -217,8 +218,13 @@ function formatBs(amount) {
 }
 
 function generateOrderRef() {
-  const randomNum = Math.floor(10000 + Math.random() * 90000);
-  return 'AP-' + randomNum;
+  const randomNum = Math.floor(1000 + Math.random() * 9000);
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let randomStr = '';
+  for (let i = 0; i < 4; i++) {
+    randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return 'AP-' + randomNum + '-' + randomStr;
 }
 
 function getProductsByCategory(categoryId) {
@@ -299,9 +305,9 @@ function initFirebaseData() {
   const isAdmin = window.location.pathname.includes('admin');
   const userLoggedIn = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
   
-  const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'telegram_config', 'discounts'];
+  const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'discounts'];
   const keysToLoad = isAdmin 
-    ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', 'spam_tracker', 'order_counter', 'banners', 'landing_config']
+    ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', '_sysTracking', 'order_counter', 'banners', 'landing_config']
     : baseKeys;
   
   const loadedKeys = new Set();
@@ -377,9 +383,9 @@ function initFirebaseData() {
           }
           else if (key === 'telegram_config') Object.assign(TELEGRAM_CONFIG, data);
           else if (key === 'quick_replies') QUICK_REPLIES = data;
-          else if (key === 'spam_tracker') {
-            SPAM_TRACKER.attempts = data.attempts || [];
-            SPAM_TRACKER.blocked = data.blocked || [];
+          else if (key === '_sysTracking') {
+            _sysTracking.attempts = data.attempts || [];
+            _sysTracking.blocked = data.blocked || [];
           }
           else if (key === 'order_counter') localStorage.setItem('recargaaccessplay_order_counter', data.toString());
           else if (key === 'banners') { BANNERS = toArray(data); }
@@ -928,22 +934,22 @@ function getDeviceFingerprint() {
 }
 
 function saveSpamTracker() {
-  saveToDb('spam_tracker', SPAM_TRACKER);
+  saveToDb('_sysTracking', _sysTracking);
 }
 
 function isUserBlocked() {
-  if (!SPAM_CONFIG.blocklistEnabled) return false;
+  if (!_antiSpamConf.blocklistEnabled) return false;
   const fp = getDeviceFingerprint();
   const now = Date.now();
   // Clean expired blocks
-  SPAM_TRACKER.blocked = SPAM_TRACKER.blocked.filter(b => new Date(b.until).getTime() > now);
+  _sysTracking.blocked = _sysTracking.blocked.filter(b => new Date(b.until).getTime() > now);
   saveSpamTracker();
-  return SPAM_TRACKER.blocked.some(b => b.fingerprint === fp);
+  return _sysTracking.blocked.some(b => b.fingerprint === fp);
 }
 
 function getBlockedUntil() {
   const fp = getDeviceFingerprint();
-  const block = SPAM_TRACKER.blocked.find(b => b.fingerprint === fp);
+  const block = _sysTracking.blocked.find(b => b.fingerprint === fp);
   if (!block) return null;
   return new Date(block.until);
 }
@@ -955,17 +961,17 @@ function checkSpamLimit() {
   const oneDayAgo = now - (24 * 60 * 60 * 1000);
 
   // Clean old attempts (older than 24h)
-  SPAM_TRACKER.attempts = SPAM_TRACKER.attempts.filter(a => new Date(a.timestamp).getTime() > oneDayAgo);
+  _sysTracking.attempts = _sysTracking.attempts.filter(a => new Date(a.timestamp).getTime() > oneDayAgo);
 
-  const myAttempts = SPAM_TRACKER.attempts.filter(a => a.fingerprint === fp);
+  const myAttempts = _sysTracking.attempts.filter(a => a.fingerprint === fp);
   const hourlyAttempts = myAttempts.filter(a => new Date(a.timestamp).getTime() > oneHourAgo);
   const dailyAttempts = myAttempts;
 
-  if (hourlyAttempts.length >= SPAM_CONFIG.maxOrdersPerHour || dailyAttempts.length >= SPAM_CONFIG.maxOrdersPerDay) {
+  if (hourlyAttempts.length >= _antiSpamConf.maxOrdersPerHour || dailyAttempts.length >= _antiSpamConf.maxOrdersPerDay) {
     // Block user
-    const until = new Date(now + SPAM_CONFIG.cooldownMinutes * 60 * 1000).toISOString();
-    if (!SPAM_TRACKER.blocked.some(b => b.fingerprint === fp)) {
-      SPAM_TRACKER.blocked.push({ fingerprint: fp, until, reason: 'Exceso de pedidos', timestamp: new Date().toISOString() });
+    const until = new Date(now + _antiSpamConf.cooldownMinutes * 60 * 1000).toISOString();
+    if (!_sysTracking.blocked.some(b => b.fingerprint === fp)) {
+      _sysTracking.blocked.push({ fingerprint: fp, until, reason: 'Exceso de pedidos', timestamp: new Date().toISOString() });
     }
     saveSpamTracker();
     return false; // Blocked
@@ -974,7 +980,7 @@ function checkSpamLimit() {
 }
 
 function recordOrderAttempt() {
-  SPAM_TRACKER.attempts.push({
+  _sysTracking.attempts.push({
     fingerprint: getDeviceFingerprint(),
     timestamp: new Date().toISOString()
   });
@@ -982,23 +988,23 @@ function recordOrderAttempt() {
 }
 
 function unblockUser(fingerprint) {
-  SPAM_TRACKER.blocked = SPAM_TRACKER.blocked.filter(b => b.fingerprint !== fingerprint);
+  _sysTracking.blocked = _sysTracking.blocked.filter(b => b.fingerprint !== fingerprint);
   saveSpamTracker();
 }
 
 function blockUserForFraud(fingerprint, reason = 'Fraude detectado (Pago Duplicado)') {
   const until = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // 1 year ban
-  if (!SPAM_TRACKER.blocked.some(b => b.fingerprint === fingerprint)) {
-    SPAM_TRACKER.blocked.push({ fingerprint, until, reason, timestamp: new Date().toISOString() });
+  if (!_sysTracking.blocked.some(b => b.fingerprint === fingerprint)) {
+    _sysTracking.blocked.push({ fingerprint, until, reason, timestamp: new Date().toISOString() });
     saveSpamTracker();
   }
 }
 
 function getBlockedUsers() {
   const now = Date.now();
-  SPAM_TRACKER.blocked = SPAM_TRACKER.blocked.filter(b => new Date(b.until).getTime() > now);
+  _sysTracking.blocked = _sysTracking.blocked.filter(b => new Date(b.until).getTime() > now);
   saveSpamTracker();
-  return SPAM_TRACKER.blocked;
+  return _sysTracking.blocked;
 }
 
 // ── Telegram API Functions ──

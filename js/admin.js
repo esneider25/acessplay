@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.DATA_LOADED) initAdminApp();
       } else {
         adminAuthVerified = false;
-        if (window.DATA_LOADED) initAdminApp();
+        window.location.href = 'index.html';
       }
     });
   }
@@ -2711,7 +2711,7 @@ function renderTelegram(container) {
           <h2 class="admin-card-title">🛡️ Sistema Anti-Spam</h2>
         </div>
         <div>
-          <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 16px;">Usuarios bloqueados temporalmente por exceder el límite de pedidos (${SPAM_CONFIG.maxOrdersPerHour} por hora).</p>
+          <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 16px;">Usuarios bloqueados temporalmente por exceder el límite de pedidos (${_antiSpamConf.maxOrdersPerHour} por hora).</p>
           <div class="admin-blocked-users-list">
             ${blockedHtml}
           </div>

@@ -57,7 +57,7 @@
       }
     },
     "telegram_config": { 
-      ".read": "true",
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "discounts": { 
@@ -65,8 +65,8 @@
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "spam_tracker": { 
-      ".read": "true", 
-      ".write": "true" 
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'", 
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'" 
     },
     "order_counter": { 
       ".read": "true", 
