@@ -40,7 +40,7 @@
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".indexOn": ["userId", "id"],
       "$orderId": {
-        ".read": "true",
+        ".read": "!$orderId.beginsWith('AP-OLD-') || (auth != null && data.child('userId').val() === auth.uid) || (auth != null && auth.token.email === 'admin@accesplay.com')",
         ".write": "auth != null && auth.token.email === 'admin@accesplay.com' || (!data.exists() && newData.child('status').val() === 'pending' && (auth == null || newData.child('userId').val() === auth.uid)) || (data.exists() && newData.child('status').val() === data.child('status').val() && newData.child('priceUsd').val() === data.child('priceUsd').val() && newData.child('priceBs').val() === data.child('priceBs').val() && (auth == null || data.child('userId').val() === auth.uid))",
         "roulettePlayed": {
           ".write": "true"
