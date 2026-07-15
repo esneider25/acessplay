@@ -4389,7 +4389,7 @@ window.normalizeLegacyData = async function () {
 
 
 window.fixWalletSpendingBug = async function() {
-  if (!confirm("¿Corregir los gastos totales, pedidos y AccessPoints de los usuarios?\n\n(Esto recalculará totalSpent y AccessPoints basándose en los pedidos completados reales, descontando puntos ya canjeados/retirados)")) return;
+  if (!confirm("¿Corregir los gastos totales, pedidos, AccessPoints y Cashback de los usuarios?\n\n(Esto recalculará todo basándose en los pedidos completados reales, reembolsando el cashback perdido al Monedero)")) return;
   const btn = document.getElementById('btn-fix-wallet');
   if (btn) btn.innerHTML = "Corrigiendo...";
   
@@ -4407,9 +4407,14 @@ window.fixWalletSpendingBug = async function() {
     const ordersCountMap = {};
     const pointsEarnedMap = {};  // Puntos GANADOS por compras
     
-    // 1. Calcular puntos ganados por compras
+    // Agrupar pedidos por usuario para calcular el cashback cronológicamente
+    const userOrdersMap = {};
+
     Object.values(ordersData).forEach(o => {
       if ((o.status === 'completed' || o.status === 'completado') && o.userId) {
+        if (!userOrdersMap[o.userId]) userOrdersMap[o.userId] = [];
+        userOrdersMap[o.userId].push(o);
+
         if (o.productType !== 'wallet-recharge') {
           const price = Number(o.priceUsd) || 0;
           spentMap[o.userId] = (spentMap[o.userId] || 0) + price;
@@ -4427,26 +4432,61 @@ window.fixWalletSpendingBug = async function() {
       }
     });
 
+    // Calcular cashback esperado re-simulando las compras en orden cronológico
+    const expectedCashbackMap = {};
+    for (const uid in userOrdersMap) {
+      const userRole = usersData[uid]?.role || 'cliente';
+      if (userRole === 'revendedor') continue; // Revendedores no tienen cashback
+
+      const orders = userOrdersMap[uid];
+      // Ordenar cronológicamente
+      orders.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+      let simulatedSpent = 0;
+      let totalExpectedCashback = 0;
+
+      orders.forEach(o => {
+        if (o.productType !== 'wallet-recharge') {
+          const price = Number(o.priceUsd) || 0;
+          simulatedSpent += price;
+
+          if (!o.discountCode) {
+            const vip = typeof getVipLevel === 'function' ? getVipLevel(simulatedSpent) : { cashback: 0 };
+            const cashbackPercent = vip.cashback || 0;
+            if (cashbackPercent > 0) {
+              totalExpectedCashback += price * (cashbackPercent / 100);
+            }
+          }
+        }
+      });
+      expectedCashbackMap[uid] = totalExpectedCashback;
+    }
+
     // 2. Calcular puntos GASTADOS por retiros (cashouts) completados o pendientes
     const pointsWithdrawnMap = {};
     Object.values(withdrawalsData).forEach(w => {
       if (w.userId && w.amountPoints && w.status !== 'rejected') {
-        // Contar pending y completed (pending ya restó los puntos via la API wallet)
         pointsWithdrawnMap[w.userId] = (pointsWithdrawnMap[w.userId] || 0) + (Number(w.amountPoints) || 0);
       }
     });
 
-    // 3. Calcular puntos GASTADOS por canjes (redeem) desde las transacciones del usuario
+    // 3. Calcular puntos GASTADOS por canjes y CASHBACK RECIBIDO desde las transacciones del usuario
     const pointsRedeemedMap = {};
+    const actualCashbackMap = {};
+
     for (const uid in usersData) {
       if (usersData[uid].transactions) {
         Object.values(usersData[uid].transactions).forEach(tx => {
+          // Puntos canjeados
           if (tx.description && tx.description.includes('Canje de') && tx.description.includes('AccessPoints')) {
-            // Extraer la cantidad de puntos del texto: "Canje de 200 AccessPoints"
             const match = tx.description.match(/Canje de (\d+)/);
             if (match) {
               pointsRedeemedMap[uid] = (pointsRedeemedMap[uid] || 0) + parseInt(match[1]);
             }
+          }
+          // Cashback recibido
+          if (tx.description && tx.description.includes('Cashback VIP')) {
+            actualCashbackMap[uid] = (actualCashbackMap[uid] || 0) + (Number(tx.amount) || 0);
           }
         });
       }
@@ -4455,6 +4495,7 @@ window.fixWalletSpendingBug = async function() {
     const batchUpdates = {};
     let updatedUsers = 0;
     let pointsFixed = 0;
+    let cashbackFixed = 0;
 
     for (const uid in usersData) {
       const actualSpent = spentMap[uid] || 0;
@@ -4471,23 +4512,45 @@ window.fixWalletSpendingBug = async function() {
         changed = true;
       }
 
-      // Recalcular puntos solo para no-revendedores
+      // Recalcular puntos y cashback solo para no-revendedores
       if (userRole !== 'revendedor') {
+        // --- FIX PUNTOS ---
         const earnedFromPurchases = pointsEarnedMap[uid] || 0;
         const earnedFromReferrals = usersData[uid].referralsEarnedPoints || 0;
         const spentOnWithdrawals = pointsWithdrawnMap[uid] || 0;
         const spentOnRedemptions = pointsRedeemedMap[uid] || 0;
 
-        // Puntos correctos = ganados - gastados
         const correctPoints = (earnedFromPurchases + earnedFromReferrals) - spentOnWithdrawals - spentOnRedemptions;
-        const safePoints = Math.max(0, correctPoints); // Nunca negativo
+        const safePoints = Math.max(0, correctPoints);
         const currentPoints = usersData[uid].points || 0;
 
-        // Solo corregir si los puntos actuales son MENORES que los correctos
-        // (nunca quitamos puntos, solo restauramos los perdidos por el bug)
         if (currentPoints < safePoints) {
           batchUpdates['users/' + uid + '/points'] = safePoints;
           pointsFixed++;
+          changed = true;
+        }
+
+        // --- FIX CASHBACK ---
+        const expectedCashback = expectedCashbackMap[uid] || 0;
+        const actualCashback = actualCashbackMap[uid] || 0;
+        const missingCashback = expectedCashback - actualCashback;
+
+        // Si falta cashback (mayor a 1 centavo para ignorar errores de redondeo pequeños)
+        if (missingCashback > 0.01) {
+          const currentWallet = Number(usersData[uid].wallet) || 0;
+          batchUpdates['users/' + uid + '/wallet'] = currentWallet + missingCashback;
+          
+          // Registrar la transacción de compensación
+          const newTxRef = firebase.database().ref('users/' + uid + '/transactions').push();
+          batchUpdates['users/' + uid + '/transactions/' + newTxRef.key] = {
+            id: Date.now().toString(),
+            type: 'deposit',
+            amount: missingCashback,
+            description: `Recuperación de Cashback VIP pendiente (Corrección del sistema)`,
+            date: Date.now()
+          };
+          
+          cashbackFixed++;
           changed = true;
         }
       }
@@ -4499,7 +4562,7 @@ window.fixWalletSpendingBug = async function() {
       await firebase.database().ref().update(batchUpdates);
     }
     
-    alert(`✅ Corrección completada:\n\n• Usuarios actualizados: ${updatedUsers}\n• Puntos corregidos: ${pointsFixed} usuarios`);
+    alert(`✅ Corrección completada:\n\n• Usuarios actualizados: ${updatedUsers}\n• Puntos corregidos: ${pointsFixed} usuarios\n• Cashback recuperado: ${cashbackFixed} usuarios`);
     if (btn) btn.innerHTML = "✨ Corregir Gastos y Puntos";
   } catch (err) {
     alert("Error: " + err.message);
