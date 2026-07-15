@@ -4389,33 +4389,77 @@ window.normalizeLegacyData = async function () {
 
 
 window.fixWalletSpendingBug = async function() {
-  if (!confirm("¿Corregir los gastos totales y pedidos de los usuarios excluyendo recargas de billetera?")) return;
+  if (!confirm("¿Corregir los gastos totales, pedidos y AccessPoints de los usuarios?\n\n(Esto recalculará totalSpent y AccessPoints basándose en los pedidos completados reales, descontando puntos ya canjeados/retirados)")) return;
   const btn = document.getElementById('btn-fix-wallet');
   if (btn) btn.innerHTML = "Corrigiendo...";
   
   try {
-    const ordersSnap = await firebase.database().ref('orders').once('value');
+    const [ordersSnap, usersSnap, withdrawalsSnap] = await Promise.all([
+      firebase.database().ref('orders').once('value'),
+      firebase.database().ref('users').once('value'),
+      firebase.database().ref('withdrawals').once('value')
+    ]);
     const ordersData = ordersSnap.val() || {};
+    const usersData = usersSnap.val() || {};
+    const withdrawalsData = withdrawalsSnap.val() || {};
+
     const spentMap = {};
     const ordersCountMap = {};
+    const pointsEarnedMap = {};  // Puntos GANADOS por compras
     
+    // 1. Calcular puntos ganados por compras
     Object.values(ordersData).forEach(o => {
       if ((o.status === 'completed' || o.status === 'completado') && o.userId) {
         if (o.productType !== 'wallet-recharge') {
-          spentMap[o.userId] = (spentMap[o.userId] || 0) + (Number(o.priceUsd) || 0);
+          const price = Number(o.priceUsd) || 0;
+          spentMap[o.userId] = (spentMap[o.userId] || 0) + price;
+
+          const userRole = usersData[o.userId]?.role || 'cliente';
+          if (userRole !== 'revendedor') {
+            let earnedPoints = 0;
+            if (price < 5) earnedPoints = 2;
+            else if (price <= 12) earnedPoints = 4;
+            else earnedPoints = 7;
+            pointsEarnedMap[o.userId] = (pointsEarnedMap[o.userId] || 0) + earnedPoints;
+          }
         }
         ordersCountMap[o.userId] = (ordersCountMap[o.userId] || 0) + 1;
       }
     });
 
-    const usersSnap = await firebase.database().ref('users').once('value');
-    const usersData = usersSnap.val() || {};
+    // 2. Calcular puntos GASTADOS por retiros (cashouts) completados o pendientes
+    const pointsWithdrawnMap = {};
+    Object.values(withdrawalsData).forEach(w => {
+      if (w.userId && w.amountPoints && w.status !== 'rejected') {
+        // Contar pending y completed (pending ya restó los puntos via la API wallet)
+        pointsWithdrawnMap[w.userId] = (pointsWithdrawnMap[w.userId] || 0) + (Number(w.amountPoints) || 0);
+      }
+    });
+
+    // 3. Calcular puntos GASTADOS por canjes (redeem) desde las transacciones del usuario
+    const pointsRedeemedMap = {};
+    for (const uid in usersData) {
+      if (usersData[uid].transactions) {
+        Object.values(usersData[uid].transactions).forEach(tx => {
+          if (tx.description && tx.description.includes('Canje de') && tx.description.includes('AccessPoints')) {
+            // Extraer la cantidad de puntos del texto: "Canje de 200 AccessPoints"
+            const match = tx.description.match(/Canje de (\d+)/);
+            if (match) {
+              pointsRedeemedMap[uid] = (pointsRedeemedMap[uid] || 0) + parseInt(match[1]);
+            }
+          }
+        });
+      }
+    }
+
     const batchUpdates = {};
     let updatedUsers = 0;
+    let pointsFixed = 0;
 
     for (const uid in usersData) {
       const actualSpent = spentMap[uid] || 0;
       const actualOrders = ordersCountMap[uid] || 0;
+      const userRole = usersData[uid].role || 'cliente';
       
       let changed = false;
       if (usersData[uid].totalSpent !== actualSpent) {
@@ -4426,6 +4470,28 @@ window.fixWalletSpendingBug = async function() {
         batchUpdates['users/' + uid + '/totalOrders'] = actualOrders;
         changed = true;
       }
+
+      // Recalcular puntos solo para no-revendedores
+      if (userRole !== 'revendedor') {
+        const earnedFromPurchases = pointsEarnedMap[uid] || 0;
+        const earnedFromReferrals = usersData[uid].referralsEarnedPoints || 0;
+        const spentOnWithdrawals = pointsWithdrawnMap[uid] || 0;
+        const spentOnRedemptions = pointsRedeemedMap[uid] || 0;
+
+        // Puntos correctos = ganados - gastados
+        const correctPoints = (earnedFromPurchases + earnedFromReferrals) - spentOnWithdrawals - spentOnRedemptions;
+        const safePoints = Math.max(0, correctPoints); // Nunca negativo
+        const currentPoints = usersData[uid].points || 0;
+
+        // Solo corregir si los puntos actuales son MENORES que los correctos
+        // (nunca quitamos puntos, solo restauramos los perdidos por el bug)
+        if (currentPoints < safePoints) {
+          batchUpdates['users/' + uid + '/points'] = safePoints;
+          pointsFixed++;
+          changed = true;
+        }
+      }
+
       if (changed) updatedUsers++;
     }
 
@@ -4433,11 +4499,11 @@ window.fixWalletSpendingBug = async function() {
       await firebase.database().ref().update(batchUpdates);
     }
     
-    alert(`Se corrigieron los gastos y pedidos de ${updatedUsers} usuarios.`);
-    if (btn) btn.innerHTML = "✨ Corregir Gastos de Billetera";
+    alert(`✅ Corrección completada:\n\n• Usuarios actualizados: ${updatedUsers}\n• Puntos corregidos: ${pointsFixed} usuarios`);
+    if (btn) btn.innerHTML = "✨ Corregir Gastos y Puntos";
   } catch (err) {
     alert("Error: " + err.message);
-    if (btn) btn.innerHTML = "✨ Corregir Gastos de Billetera";
+    if (btn) btn.innerHTML = "✨ Corregir Gastos y Puntos";
   }
 };
 
