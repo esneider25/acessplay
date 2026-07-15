@@ -1393,6 +1393,12 @@ function startSupportSession() {
   if (bottomView) bottomView.style.display = 'block';
 
   const sessionId = getDeviceFingerprint();
+  
+  // BUG-2 FIX: Iniciar sincronización de mensajes para recibir respuestas del admin en tiempo real
+  if (typeof syncUserChat === 'function') {
+    syncUserChat(sessionId);
+  }
+
   // Call addMessage empty just to create session with contact if not exists
   let msgs = getMessagesForSession(sessionId);
   if (msgs.length === 0) {

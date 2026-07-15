@@ -758,10 +758,10 @@ function updateOrderStatus(orderId, newStatus, note) {
 
   if (newStatus === 'completed' && order.status !== 'completed' && order.userId) {
     if (order.productType === 'wallet-recharge') {
-      db.ref('users/' + order.userId + '/wallet').once('value').then(snap => {
-        const currentWallet = parseFloat(snap.val() || 0);
-        const amountToAdd = parseFloat(order.priceUsd || 0);
-        db.ref('users/' + order.userId + '/wallet').set(currentWallet + amountToAdd);
+      // Transacción atómica para evitar race conditions en el saldo
+      const amountToAdd = parseFloat(order.priceUsd || 0);
+      db.ref('users/' + order.userId + '/wallet').transaction(current => {
+        return (parseFloat(current) || 0) + amountToAdd;
       });
       if (typeof addTransaction === 'function') {
         addTransaction(order.userId, 'deposit', parseFloat(order.priceUsd || 0), 'Recarga de monedero aprobada');
@@ -880,10 +880,10 @@ function updateOrderStatus(orderId, newStatus, note) {
   if (newStatus === 'rejected' && order.status !== 'rejected' && order.userId && order.paymentMethodId === 'wallet' && order.productType !== 'wallet-recharge') {
     if (typeof firebase !== 'undefined') {
       const fdb = firebase.database();
-      fdb.ref('users/' + order.userId + '/wallet').once('value').then(snap => {
-        const currentWallet = parseFloat(snap.val() || 0);
-        const amountToRefund = parseFloat(order.priceUsd || 0);
-        fdb.ref('users/' + order.userId + '/wallet').set(currentWallet + amountToRefund);
+      // Transacción atómica para evitar race conditions en el reembolso
+      const amountToRefund = parseFloat(order.priceUsd || 0);
+      fdb.ref('users/' + order.userId + '/wallet').transaction(current => {
+        return (parseFloat(current) || 0) + amountToRefund;
       });
       fdb.ref('users/' + order.userId + '/transactions').push({
         id: Date.now().toString(),
@@ -926,6 +926,9 @@ function deleteOrder(orderId) {
 }
 
 // ── Anti-Spam Functions ──
+// Client-side rate limiting uses localStorage (since _sysTracking in Firebase is now admin-only)
+// Admin-side block/unblock still uses Firebase for central management
+
 function getDeviceFingerprint() {
   const nav = navigator;
   const raw = [nav.userAgent, screen.width, screen.height, nav.language, nav.hardwareConcurrency || ''].join('|');
@@ -934,23 +937,48 @@ function getDeviceFingerprint() {
   return 'fp-' + Math.abs(hash).toString(36);
 }
 
+function _getLocalSpamData() {
+  try {
+    return JSON.parse(localStorage.getItem('_ap_spam') || '{"attempts":[],"blocked":[]}');
+  } catch (e) { return { attempts: [], blocked: [] }; }
+}
+
+function _saveLocalSpamData(data) {
+  try { localStorage.setItem('_ap_spam', JSON.stringify(data)); } catch (e) {}
+}
+
 function saveSpamTracker() {
-  saveToDb('_sysTracking', _sysTracking);
+  // Solo el admin puede escribir a _sysTracking en Firebase
+  const isAdmin = window.location.pathname.includes('admin');
+  if (isAdmin) {
+    saveToDb('_sysTracking', _sysTracking);
+  }
+  // Siempre guardar localmente como fallback
+  _saveLocalSpamData({ attempts: _sysTracking.attempts, blocked: _sysTracking.blocked });
 }
 
 function isUserBlocked() {
   if (!_antiSpamConf.blocklistEnabled) return false;
   const fp = getDeviceFingerprint();
   const now = Date.now();
+  
+  // Combinar datos de Firebase (si admin los cargó) con datos locales
+  const localData = _getLocalSpamData();
+  const allBlocked = [..._sysTracking.blocked, ...localData.blocked];
+  
   // Clean expired blocks
-  _sysTracking.blocked = _sysTracking.blocked.filter(b => new Date(b.until).getTime() > now);
-  saveSpamTracker();
-  return _sysTracking.blocked.some(b => b.fingerprint === fp);
+  const activeBlocks = allBlocked.filter(b => new Date(b.until).getTime() > now);
+  _sysTracking.blocked = activeBlocks;
+  _saveLocalSpamData({ attempts: _getLocalSpamData().attempts, blocked: activeBlocks });
+  
+  return activeBlocks.some(b => b.fingerprint === fp);
 }
 
 function getBlockedUntil() {
   const fp = getDeviceFingerprint();
-  const block = _sysTracking.blocked.find(b => b.fingerprint === fp);
+  const localData = _getLocalSpamData();
+  const allBlocked = [..._sysTracking.blocked, ...localData.blocked];
+  const block = allBlocked.find(b => b.fingerprint === fp);
   if (!block) return null;
   return new Date(block.until);
 }
@@ -961,19 +989,28 @@ function checkSpamLimit() {
   const oneHourAgo = now - (60 * 60 * 1000);
   const oneDayAgo = now - (24 * 60 * 60 * 1000);
 
+  // Usar datos locales para rate limiting del cliente
+  const localData = _getLocalSpamData();
+  let attempts = localData.attempts || [];
+  
   // Clean old attempts (older than 24h)
-  _sysTracking.attempts = _sysTracking.attempts.filter(a => new Date(a.timestamp).getTime() > oneDayAgo);
+  attempts = attempts.filter(a => new Date(a.timestamp).getTime() > oneDayAgo);
 
-  const myAttempts = _sysTracking.attempts.filter(a => a.fingerprint === fp);
+  const myAttempts = attempts.filter(a => a.fingerprint === fp);
   const hourlyAttempts = myAttempts.filter(a => new Date(a.timestamp).getTime() > oneHourAgo);
   const dailyAttempts = myAttempts;
 
   if (hourlyAttempts.length >= _antiSpamConf.maxOrdersPerHour || dailyAttempts.length >= _antiSpamConf.maxOrdersPerDay) {
-    // Block user
+    // Block user locally
     const until = new Date(now + _antiSpamConf.cooldownMinutes * 60 * 1000).toISOString();
-    if (!_sysTracking.blocked.some(b => b.fingerprint === fp)) {
-      _sysTracking.blocked.push({ fingerprint: fp, until, reason: 'Exceso de pedidos', timestamp: new Date().toISOString() });
+    const blocked = localData.blocked || [];
+    if (!blocked.some(b => b.fingerprint === fp)) {
+      blocked.push({ fingerprint: fp, until, reason: 'Exceso de pedidos', timestamp: new Date().toISOString() });
     }
+    _saveLocalSpamData({ attempts, blocked });
+    // También intentar guardar en Firebase si es admin
+    _sysTracking.attempts = attempts;
+    _sysTracking.blocked = blocked;
     saveSpamTracker();
     return false; // Blocked
   }
@@ -981,19 +1018,26 @@ function checkSpamLimit() {
 }
 
 function recordOrderAttempt() {
-  _sysTracking.attempts.push({
+  const localData = _getLocalSpamData();
+  const attempts = localData.attempts || [];
+  attempts.push({
     fingerprint: getDeviceFingerprint(),
     timestamp: new Date().toISOString()
   });
+  _saveLocalSpamData({ attempts, blocked: localData.blocked || [] });
+  // Sincronizar con _sysTracking para que admin lo vea
+  _sysTracking.attempts = attempts;
   saveSpamTracker();
 }
 
 function unblockUser(fingerprint) {
+  // Admin function: writes to Firebase
   _sysTracking.blocked = _sysTracking.blocked.filter(b => b.fingerprint !== fingerprint);
   saveSpamTracker();
 }
 
 function blockUserForFraud(fingerprint, reason = 'Fraude detectado (Pago Duplicado)') {
+  // Admin function: writes to Firebase
   const until = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(); // 1 year ban
   if (!_sysTracking.blocked.some(b => b.fingerprint === fingerprint)) {
     _sysTracking.blocked.push({ fingerprint, until, reason, timestamp: new Date().toISOString() });

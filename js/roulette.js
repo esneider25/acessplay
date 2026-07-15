@@ -57,9 +57,19 @@ async function spinRoulette(orderId, productId) {
 
   let isWinner = false;
   try {
+    // Obtener token de autenticación para la API segura
+    let authToken = '';
+    try {
+      const user = firebase.auth().currentUser;
+      if (user) authToken = await user.getIdToken();
+    } catch (e) { console.warn('No auth token available'); }
+
+    const fetchHeaders = { 'Content-Type': 'application/json' };
+    if (authToken) fetchHeaders['Authorization'] = 'Bearer ' + authToken;
+
     const res = await fetch('/api/spin-roulette', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: fetchHeaders,
       body: JSON.stringify({ orderId })
     });
     const data = await res.json();

@@ -31,8 +31,8 @@
     "messages": { 
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       "$sessionId": {
-         ".read": "auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId) || $sessionId.matches(/^fp-/)",
-         ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId) || $sessionId.matches(/^fp-/)"
+         ".read": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || $sessionId.matches(/^fp-/)",
+         ".write": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || ($sessionId.matches(/^fp-/) && newData.exists())"
       }
     },
     "orders": { 
@@ -43,7 +43,7 @@
         ".read": "!$orderId.beginsWith('AP-OLD-') || (auth != null && data.child('userId').val() === auth.uid) || (auth != null && auth.token.email === 'admin@accesplay.com')",
         ".write": "auth != null && auth.token.email === 'admin@accesplay.com' || (!data.exists() && newData.child('status').val() === 'pending' && (auth == null || newData.child('userId').val() === auth.uid)) || (data.exists() && (newData.child('status').val() === data.child('status').val() || (data.child('status').val() === 'invalid-id' && newData.child('status').val() === 'pending')) && newData.child('priceUsd').val() === data.child('priceUsd').val() && newData.child('priceBs').val() === data.child('priceBs').val() && (auth == null || data.child('userId').val() === auth.uid))",
         "roulettePlayed": {
-          ".write": "true"
+          ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
         }
       }
     },
@@ -65,8 +65,12 @@
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "_sysTracking": {
-      ".read": "true",
-      ".write": "true"
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
+    },
+    "admin_logs": {
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "spam_tracker": { 
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'", 
@@ -74,7 +78,7 @@
     },
     "order_counter": { 
       ".read": "true", 
-      ".write": "auth != null" 
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'" 
     },
     "api_configs": { 
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
@@ -102,6 +106,27 @@
           ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
         },
         "totalSpent": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "referralsCount": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "referralsEarnedPoints": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "hasMadeFirstPurchase": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "referredBy": {
+          ".validate": "!data.exists() || data.val() == newData.val() || newData.val() == null || auth.token.email === 'admin@accesplay.com'"
+        },
+        "referralCode": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "referralLimit": {
+          ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
+        },
+        "autoProcess": {
           ".validate": "!data.exists() || data.val() == newData.val() || auth.token.email === 'admin@accesplay.com'"
         }
       }

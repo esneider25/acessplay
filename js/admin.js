@@ -2319,9 +2319,8 @@ function changeOrdersPage(delta) {
 
 function quickUpdateStatus(orderId, newStatus) {
   if (newStatus === 'completed') {
-    // processAutomaticTopup(orderId, false);
-    showAdminToast('El Auto-Procesamiento ahora se realiza aprobando el pedido desde el Bot de Telegram.', 'info');
-    return;
+    // BUG-1 FIX: Ya no bloqueamos la actualización desde el panel admin.
+    // updateOrderStatus se encargará de asignar saldo de billetera, puntos y cashback.
   }
   const order = updateOrderStatus(orderId, newStatus, ORDER_STATUSES[newStatus]?.label || '');
   if (order) {
@@ -2545,8 +2544,7 @@ function openOrderDetailModal(orderId) {
 
 function quickUpdateStatusFromModal(orderId, newStatus) {
   if (newStatus === 'completed') {
-      showAdminToast('El Auto-Procesamiento ahora se realiza aprobando el pedido desde el Bot de Telegram.', 'info');
-    return;
+    // BUG-1 FIX: Permitir completar desde el modal del admin
   }
   const order = updateOrderStatus(orderId, newStatus, ORDER_STATUSES[newStatus]?.label || '');
   if (order) {
@@ -3391,82 +3389,7 @@ function adminDeleteQuickReply(id) {
 }
 
 
-function renderCustomersTable(usersList) {
-  const tbody = document.getElementById('customers-table-body');
-  if (!tbody) return;
 
-  if (usersList.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 20px; color: var(--text-secondary);">No hay clientes registrados o que coincidan con la búsqueda.</td></tr>`;
-    return;
-  }
-
-  const itemsPerPage = 10;
-  const totalPages = Math.ceil(usersList.length / itemsPerPage);
-
-  if (adminState.crmPage < 1) adminState.crmPage = 1;
-  if (adminState.crmPage > totalPages && totalPages > 0) adminState.crmPage = totalPages;
-
-  const startIndex = (adminState.crmPage - 1) * itemsPerPage;
-  const displayList = usersList.slice(startIndex, startIndex + itemsPerPage);
-
-  let html = displayList.map(user => {
-    const dateStr = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A';
-    const wallet = user.wallet || 0;
-    return `
-      <tr class="customer-row">
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${user.email || 'N/A'}</td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${user.name || '-'}</td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${user.whatsapp || 'N/A'}</td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); white-space: nowrap;">${dateStr}</td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: right; color: #0ea5e9; font-weight: bold; white-space: nowrap;">${wallet.toFixed(2)}</td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; white-space: nowrap;">
-          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openRoleModal('${user.uid}', '${user.role || 'cliente'}', ${user.discountPercentage || 0}, ${user.referralLimit || 30}, ${!!user.autoProcessExternal})">
-            ${(user.role === 'revendedor') ? '💼 Revend (+' + (user.discountPercentage || 0) + '%)' : (user.role === 'influencer' ? '✨ Influencer' : '👤 Cliente')}
-          </button>
-        </td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; white-space: nowrap;">
-          <button class="btn ${user.isBlocked ? 'btn-danger' : 'btn-secondary'}" style="padding: 6px 12px; font-size: 0.8rem;" onclick="toggleBlockUser('${user.uid}', ${!!user.isBlocked})">
-            ${user.isBlocked ? '🚫 Bloqueado' : '✅ Activo'}
-          </button>
-        </td>
-        <td style="padding: 12px; border-bottom: 1px solid var(--border-color); text-align: center; white-space: nowrap;">
-          <div style="display: flex; gap: 5px; justify-content: center;">
-            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openCustomerInfoModal('${user.uid}')">ℹ️ Info</button>
-            <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;" onclick="openEditWalletModal('${user.uid}', '${escapeHTML(user.email)}', ${wallet})">Editar Saldo</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  if (totalPages > 1) {
-    html += `
-      <tr>
-        <td colspan="8" style="padding: 15px; text-align: center; background: var(--card-bg);">
-          <div style="display: flex; justify-content: center; align-items: center; gap: 15px;">
-            <button class="btn btn-secondary" onclick="adminState.crmPage--; filterCustomersSearch(adminState.customersSearch)" ${adminState.crmPage === 1 ? 'disabled' : ''}>Anterior</button>
-            <span style="color: var(--text-color); font-weight: bold;">Página ${adminState.crmPage} de ${totalPages}</span>
-            <button class="btn btn-secondary" onclick="adminState.crmPage++; filterCustomersSearch(adminState.customersSearch)" ${adminState.crmPage === totalPages ? 'disabled' : ''}>Siguiente</button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }
-
-  tbody.innerHTML = html;
-}
-
-function filterCustomersSearch(searchTerm) {
-  if (!window.ADMIN_CUSTOMERS) return;
-  const term = searchTerm.toLowerCase().trim();
-  const filtered = window.ADMIN_CUSTOMERS.filter(u =>
-    (u.email && u.email.toLowerCase().includes(term)) ||
-    (u.name && u.name.toLowerCase().includes(term)) ||
-    (u.whatsapp && u.whatsapp.toLowerCase().includes(term)) ||
-    (u.cedula && u.cedula.toLowerCase().includes(term))
-  );
-  renderCustomersTable(filtered);
-}
 
 function openEditWalletModal(uid, email, currentWallet) {
   const overlay = document.getElementById('admin-modal-overlay');
@@ -4463,25 +4386,7 @@ window.normalizeLegacyData = async function () {
 };
 
 
-window.filterCrmTable = function (val) {
-  const query = val.toLowerCase().trim();
-  const rows = document.querySelectorAll('.admin-crm-row');
-  let visibleCount = 0;
 
-  rows.forEach(row => {
-    if (row.getAttribute('data-search').includes(query)) {
-      row.style.display = 'grid'; // because admin-crm-row uses CSS grid
-      visibleCount++;
-    } else {
-      row.style.display = 'none';
-    }
-  });
-
-  const noRes = document.getElementById('crm-no-results');
-  if (noRes) {
-    noRes.style.display = visibleCount === 0 ? 'block' : 'none';
-  }
-};
 
 window.fixWalletSpendingBug = async function() {
   if (!confirm("¿Corregir los gastos totales y pedidos de los usuarios excluyendo recargas de billetera?")) return;
