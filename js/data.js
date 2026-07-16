@@ -159,7 +159,15 @@ let _sysTracking = {
   blocked: []
 };
 
-// ── API Configurations (up to 4 slots) ──
+// ── API Configurations (up to 10 slots) ──
+// Each API has a 'mapping' object that tells the universal proxy how to talk to it.
+// mapping.authType: 'x-api-key' | 'bearer' | 'query' | 'none'
+// mapping.authHeader: custom header name (default: 'X-API-Key')
+// mapping.balanceEndpoint: path to check balance (e.g., '/saldo', '/wallet')
+// mapping.balanceMethod: HTTP method for balance check (default: 'GET')
+// mapping.successPath: dot-notation path to success boolean (e.g., 'ok', 'success')
+// mapping.balancePath: dot-notation path to balance value (e.g., 'saldo', 'data.balance')
+// mapping.errorPath: dot-notation path to error message (e.g., 'error', 'message')
 let API_CONFIGS = [
   {
     id: 'api-1',
@@ -168,7 +176,16 @@ let API_CONFIGS = [
     apiKey: '',
     port: '443',
     enabled: true,
-    description: 'Verificador Puerto 1'
+    description: 'Verificador Puerto 1',
+    mapping: {
+      authType: 'x-api-key',
+      authHeader: 'X-API-Key',
+      balanceEndpoint: '/saldo',
+      balanceMethod: 'GET',
+      successPath: 'ok',
+      balancePath: 'saldo',
+      errorPath: 'error'
+    }
   },
   {
     id: 'api-2',
@@ -177,7 +194,16 @@ let API_CONFIGS = [
     apiKey: '',
     port: '443',
     enabled: true,
-    description: 'Verificador Puerto 2'
+    description: 'Verificador Puerto 2',
+    mapping: {
+      authType: 'none',
+      authHeader: '',
+      balanceEndpoint: '',
+      balanceMethod: 'GET',
+      successPath: 'ok',
+      balancePath: 'saldo',
+      errorPath: 'error'
+    }
   },
   {
     id: 'api-3',
@@ -186,7 +212,16 @@ let API_CONFIGS = [
     apiKey: '',
     port: '443',
     enabled: true,
-    description: 'Verificador Puerto 3'
+    description: 'Verificador Puerto 3',
+    mapping: {
+      authType: 'none',
+      authHeader: '',
+      balanceEndpoint: '',
+      balanceMethod: 'GET',
+      successPath: 'success',
+      balancePath: 'saldo',
+      errorPath: 'error'
+    }
   },
   {
     id: 'api-4',
@@ -195,7 +230,16 @@ let API_CONFIGS = [
     apiKey: '',
     port: '8080',
     enabled: false,
-    description: 'Endpoint personalizado para integraciones'
+    description: 'Endpoint personalizado para integraciones',
+    mapping: {
+      authType: 'x-api-key',
+      authHeader: 'X-API-Key',
+      balanceEndpoint: '/saldo',
+      balanceMethod: 'GET',
+      successPath: 'ok',
+      balancePath: 'saldo',
+      errorPath: 'error'
+    }
   }
 ];
 

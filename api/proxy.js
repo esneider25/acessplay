@@ -85,38 +85,48 @@ export default async function handler(req, res) {
       apiKey = api.apiKey || '';
       // data ya viene en req.body.data y se usará en el POST abajo
     } else if (action === 'test_connection') {
-      // Allow testing connection from admin panel
+      // ── UNIVERSAL TEST CONNECTION (mapping-driven) ──
+      const m = req.body.mapping || {};
+      
       if (!baseUrl) {
         return res.status(400).json({ error: "Falta la URL base." });
       }
 
-      // Check if it's Recargas America based on URL
-      if (baseUrl.includes('recargasamerica.com')) {
-        endpoint = 'wallet';
-      } else if (!endpoint) {
-        endpoint = 'saldo';
-      }
+      endpoint = m.balanceEndpoint || '/saldo';
+      method = m.balanceMethod || 'GET';
+      // apiKey already comes from req.body
     } else {
       return res.status(403).json({ error: "Acceso denegado. Acción no permitida en este proxy." });
     }
 
-    // Ensure baseUrl doesn't end with slash if endpoint starts with one
+    // ── UNIVERSAL REQUEST BUILDER ──
+    const mapping = req.body.mapping || {};
+    
+    // Build final URL
     let safeBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
-    let safeEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-    
-    // For Recargas America API, don't append /saldo or /wallet if it's already in the path
-    if (safeBaseUrl.includes('/wallet') || safeBaseUrl.includes('/saldo')) {
-        safeEndpoint = '';
-    }
-    
+    let safeEndpoint = endpoint ? (endpoint.startsWith('/') ? endpoint : `/${endpoint}`) : '';
     const url = `${safeBaseUrl}${safeEndpoint}`;
     
-    // Determine Auth Header dynamically based on URL
+    // Build auth headers dynamically from mapping
     let authHeaders = { "Content-Type": "application/json" };
-    if (url.includes('recargasamerica.com')) {
+    const authType = mapping.authType || 'x-api-key';
+    
+    if (authType === 'bearer') {
       authHeaders["Authorization"] = `Bearer ${apiKey || ""}`;
-    } else {
-      authHeaders["X-API-Key"] = apiKey || "";
+    } else if (authType === 'x-api-key') {
+      const headerName = mapping.authHeader || 'X-API-Key';
+      authHeaders[headerName] = apiKey || "";
+    } else if (authType === 'query') {
+      // For query-based auth, append api_key to URL
+      const separator = url.includes('?') ? '&' : '?';
+      // We'll handle this below
+    }
+    // authType === 'none' → no auth header added
+
+    let finalUrl = url;
+    if (authType === 'query' && apiKey) {
+      const separator = finalUrl.includes('?') ? '&' : '?';
+      finalUrl = `${finalUrl}${separator}api_key=${encodeURIComponent(apiKey)}`;
     }
 
     const fetchOptions = {
@@ -124,12 +134,12 @@ export default async function handler(req, res) {
       headers: authHeaders
     };
 
-    if (method === "POST" && data) {
+    if ((method === "POST" || method === "PUT") && data) {
       fetchOptions.body = JSON.stringify(data);
     }
 
-    // Perform the actual request to TiendaGiftVen
-    const response = await fetch(url, fetchOptions);
+    // Perform the actual request to the external API
+    const response = await fetch(finalUrl, fetchOptions);
     const textResult = await response.text();
     
     let result;
