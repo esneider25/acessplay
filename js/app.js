@@ -783,10 +783,25 @@ async function _submitOrderLogic() {
       const tempId = generateOrderRef(); // Usamos un ID temporal solo para el nombre de la foto
       const randomSecret = Math.random().toString(36).substring(2, 10);
       const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '_' + randomSecret + '.jpg');
-      await storageRef.put(compressedBlob);
+      
+      const uploadTask = storageRef.put(compressedBlob);
+      let isUploadFinished = false;
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          if (!isUploadFinished) {
+            uploadTask.cancel();
+            reject(new Error('Tiempo de espera agotado. Verifica tu conexión a internet.'));
+          }
+        }, 20000); // 20 segundos máximo para subir
+      });
+
+      await Promise.race([uploadTask, timeoutPromise]);
+      isUploadFinished = true;
       sharedScreenshotUrl = await storageRef.getDownloadURL();
     } catch (err) {
       console.error('Error subiendo captura:', err);
+      showToast('⚠️ Error al subir captura: ' + (err.message || 'Intenta de nuevo.'));
+      return false; // ABORT ORDER
     }
   }
 
@@ -834,7 +849,13 @@ async function _submitOrderLogic() {
 
     // Handle Telegram notification
     if (typeof triggerTelegramNotification === 'function') {
-      await triggerTelegramNotification(order);
+      try {
+        const tgPromise = triggerTelegramNotification(order);
+        const tgTimeout = new Promise((resolve) => setTimeout(resolve, 15000));
+        await Promise.race([tgPromise, tgTimeout]);
+      } catch (err) {
+        console.warn('Error en Telegram notification:', err);
+      }
     }
 
     lastOrder = order;
@@ -865,19 +886,72 @@ window.addEventListener('beforeunload', function (e) {
 
 
 // ── Submit Wallet Recharge ──
-function submitWalletRecharge() {
+async function submitWalletRecharge() {
+  const btnSubmit = document.getElementById('btn-submit');
+  if (btnSubmit && btnSubmit.dataset.processing === 'true') return;
+  if (btnSubmit) {
+    btnSubmit.dataset.processing = 'true';
+    btnSubmit.disabled = true;
+    btnSubmit.innerHTML = '⏳ Procesando...';
+  }
+
+  try {
+    const success = await _submitWalletRechargeLogic();
+    if (!success && btnSubmit) {
+      btnSubmit.dataset.processing = 'false';
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '🤖 Confirmar Recarga';
+    }
+  } catch (err) {
+    console.error("Error en recarga:", err);
+    if (btnSubmit) {
+      btnSubmit.dataset.processing = 'false';
+      btnSubmit.disabled = false;
+      btnSubmit.innerHTML = '🤖 Confirmar Recarga';
+    }
+  }
+}
+
+async function _submitWalletRechargeLogic() {
   if (!currentUser) {
     showToast('⚠️ Debes iniciar sesión para recargar tu monedero');
-    return;
+    return false;
   }
   const amount = appState.selectedPackageIndex;
   const method = PAYMENT_METHODS.find(m => m.id === appState.selectedPaymentId);
 
-  if (!amount) { showToast('⚠️ Selecciona un monto'); return; }
-  if (!method) { showToast('⚠️ Selecciona un método de pago'); return; }
+  if (!amount) { showToast('⚠️ Selecciona un monto'); return false; }
+  if (!method) { showToast('⚠️ Selecciona un método de pago'); return false; }
   if (!appState.selectedScreenshot) {
     showToast('⚠️ Sube la captura del comprobante');
-    return;
+    return false;
+  }
+
+  let sharedScreenshotUrl = null;
+  try {
+    const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
+    const tempId = generateOrderRef();
+    const randomSecret = Math.random().toString(36).substring(2, 10);
+    const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '_' + randomSecret + '.jpg');
+    
+    const uploadTask = storageRef.put(compressedBlob);
+    let isUploadFinished = false;
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        if (!isUploadFinished) {
+          uploadTask.cancel();
+          reject(new Error('Tiempo de espera agotado. Verifica tu conexión a internet.'));
+        }
+      }, 20000);
+    });
+
+    await Promise.race([uploadTask, timeoutPromise]);
+    isUploadFinished = true;
+    sharedScreenshotUrl = await storageRef.getDownloadURL();
+  } catch (err) {
+    console.error('Error subiendo captura:', err);
+    showToast('⚠️ Error al subir captura: ' + (err.message || 'Intenta de nuevo.'));
+    return false;
   }
 
   const priceBs = parseFloat(usdToBs(amount));
@@ -897,16 +971,24 @@ function submitWalletRecharge() {
     paymentCurrency: method.currency || 'bs',
     customerContact: currentUser.email,
     accountEmail: currentUser.email,
+    screenshot: sharedScreenshotUrl,
     ocrNumbers: appState.selectedScreenshotOcr || [],
   });
 
-  recordOrderAttempt();
+  if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
 
   if (typeof triggerTelegramNotification === 'function') {
-    triggerTelegramNotification(order);
+    try {
+      const tgPromise = triggerTelegramNotification(order);
+      const tgTimeout = new Promise((resolve) => setTimeout(resolve, 15000));
+      await Promise.race([tgPromise, tgTimeout]);
+    } catch (err) {
+      console.warn('Error en Telegram notification:', err);
+    }
   }
 
   showOrderConfirmation(order);
+  return true;
 }
 
 function showOrderConfirmation(order) {
