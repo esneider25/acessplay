@@ -1550,6 +1550,9 @@ function saveExchangeRate() {
 // 6. APIs CONFIGURATION
 // ════════════════════════════════════════
 function renderApis(container) {
+  const MAX_API_PORTS = 10;
+  const MIN_API_PORTS = 2;
+
   const apiCards = API_CONFIGS.map((api, idx) => `
     <div class="admin-api-card ${api.enabled ? 'enabled' : ''}">
       <div class="admin-api-card-header">
@@ -1557,7 +1560,14 @@ function renderApis(container) {
           <span class="admin-api-status-dot"></span>
           ${api.enabled ? 'Activa' : 'Inactiva'}
         </div>
-        <span class="admin-api-card-number">Puerto ${idx + 1}</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span class="admin-api-card-number">Puerto ${idx + 1}</span>
+          ${API_CONFIGS.length > MIN_API_PORTS ? `
+            <button class="admin-api-delete-btn" onclick="removeApiPort(${idx})" title="Eliminar Puerto ${idx + 1}">
+              🗑️
+            </button>
+          ` : ''}
+        </div>
       </div>
       <div class="admin-api-card-body">
         <div class="admin-form-group">
@@ -1598,17 +1608,37 @@ function renderApis(container) {
     </div>
   `).join('');
 
+  const canAdd = API_CONFIGS.length < MAX_API_PORTS;
+
   container.innerHTML = `
     <div class="admin-header">
       <div>
         <h1 class="admin-title">Configuración de APIs</h1>
-        <p class="admin-subtitle">Gestiona hasta ${API_CONFIGS.length} conexiones de API externas</p>
+        <p class="admin-subtitle">Gestiona tus conexiones de API externas (${API_CONFIGS.length}/${MAX_API_PORTS} puertos)</p>
       </div>
-      <button class="btn btn-primary" onclick="saveApis()">
-        <span>💾</span> Guardar APIs
-      </button>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        ${canAdd ? `
+          <button class="btn btn-secondary" onclick="addApiPort()" style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-size: 1.1rem;">➕</span> Agregar Puerto
+          </button>
+        ` : ''}
+        <button class="btn btn-primary" onclick="saveApis()">
+          <span>💾</span> Guardar APIs
+        </button>
+      </div>
     </div>
-    <div class="admin-apis-grid">${apiCards}</div>
+    <div class="admin-apis-grid">
+      ${apiCards}
+      ${canAdd ? `
+        <div class="admin-api-card admin-api-add-card" onclick="addApiPort()">
+          <div class="admin-api-add-card-inner">
+            <span class="admin-api-add-icon">➕</span>
+            <span class="admin-api-add-text">Agregar Nuevo Puerto</span>
+            <span class="admin-api-add-hint">${API_CONFIGS.length}/${MAX_API_PORTS} puertos usados</span>
+          </div>
+        </div>
+      ` : ''}
+    </div>
   `;
 }
 
@@ -1687,6 +1717,74 @@ function saveApis() {
   saveToDb('api_configs', API_CONFIGS);
   showAdminToast('✅ Configuración de APIs guardada', 'success');
   renderActiveTab();
+}
+
+function addApiPort() {
+  const MAX_API_PORTS = 10;
+  if (API_CONFIGS.length >= MAX_API_PORTS) {
+    showAdminToast(`❌ Máximo ${MAX_API_PORTS} puertos de API permitidos`, 'error');
+    return;
+  }
+
+  // Save current unsaved input values before adding
+  syncApiFieldsFromDom();
+
+  const newIdx = API_CONFIGS.length + 1;
+  API_CONFIGS.push({
+    id: `api-${newIdx}`,
+    name: '',
+    baseUrl: '',
+    apiKey: '',
+    port: '443',
+    enabled: false,
+    description: `Puerto ${newIdx}`
+  });
+
+  saveToDb('api_configs', API_CONFIGS);
+  showAdminToast(`✅ Puerto ${newIdx} agregado correctamente`, 'success');
+  renderActiveTab();
+}
+
+function removeApiPort(idx) {
+  const MIN_API_PORTS = 2;
+  if (API_CONFIGS.length <= MIN_API_PORTS) {
+    showAdminToast(`❌ Se requieren al menos ${MIN_API_PORTS} puertos de API`, 'error');
+    return;
+  }
+
+  const api = API_CONFIGS[idx];
+  const apiName = api.name || `Puerto ${idx + 1}`;
+
+  if (!confirm(`¿Estás seguro de eliminar "${apiName}"?\n\nEsto eliminará toda la configuración de este puerto. Los productos que usen este puerto deberán reasignarse manualmente.`)) {
+    return;
+  }
+
+  // Save current unsaved input values before removing
+  syncApiFieldsFromDom();
+
+  API_CONFIGS.splice(idx, 1);
+
+  // Re-index IDs
+  API_CONFIGS.forEach((a, i) => {
+    a.id = `api-${i + 1}`;
+  });
+
+  saveToDb('api_configs', API_CONFIGS);
+  showAdminToast(`🗑️ "${apiName}" eliminado`, 'success');
+  renderActiveTab();
+}
+
+function syncApiFieldsFromDom() {
+  const inputs = document.querySelectorAll('.api-field');
+  inputs.forEach(input => {
+    const idx = parseInt(input.getAttribute('data-api-idx'));
+    const field = input.getAttribute('data-field');
+    const val = input.value.trim();
+    if (idx >= 0 && idx < API_CONFIGS.length) {
+      if (field === 'apiKey' && val === '****************') return;
+      API_CONFIGS[idx][field] = val;
+    }
+  });
 }
 
 // ════════════════════════════════════════
