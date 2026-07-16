@@ -1680,6 +1680,7 @@ async function testApiConnection(idx) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        action: "test_connection",
         endpoint: "saldo",
         method: "GET",
         apiKey: api.apiKey,

@@ -84,21 +84,44 @@ export default async function handler(req, res) {
       method = finalMethod;
       apiKey = api.apiKey || '';
       // data ya viene en req.body.data y se usará en el POST abajo
+    } else if (action === 'test_connection') {
+      // Allow testing connection from admin panel
+      if (!baseUrl) {
+        return res.status(400).json({ error: "Falta la URL base." });
+      }
+
+      // Check if it's Recargas America based on URL
+      if (baseUrl.includes('recargasamerica.com')) {
+        endpoint = 'wallet';
+      } else if (!endpoint) {
+        endpoint = 'saldo';
+      }
     } else {
-      return res.status(403).json({ error: "Acceso denegado. El proxy solo permite verificación de IDs." });
+      return res.status(403).json({ error: "Acceso denegado. Acción no permitida en este proxy." });
     }
 
     // Ensure baseUrl doesn't end with slash if endpoint starts with one
     let safeBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     let safeEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    
+    // For Recargas America API, don't append /saldo or /wallet if it's already in the path
+    if (safeBaseUrl.includes('/wallet') || safeBaseUrl.includes('/saldo')) {
+        safeEndpoint = '';
+    }
+    
     const url = `${safeBaseUrl}${safeEndpoint}`;
     
+    // Determine Auth Header dynamically based on URL
+    let authHeaders = { "Content-Type": "application/json" };
+    if (url.includes('recargasamerica.com')) {
+      authHeaders["Authorization"] = `Bearer ${apiKey || ""}`;
+    } else {
+      authHeaders["X-API-Key"] = apiKey || "";
+    }
+
     const fetchOptions = {
       method: method || "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-Key": apiKey || ""
-      }
+      headers: authHeaders
     };
 
     if (method === "POST" && data) {
