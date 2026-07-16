@@ -157,6 +157,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error("Proxy error:", error);
-    res.status(500).json({ error: "Error interno de conexión con la API externa." });
+    res.status(500).json({ error: `Error interno en proxy: ${error.message}`, stack: error.stack });
   }
 }
