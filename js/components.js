@@ -452,7 +452,7 @@ function renderProductDetail(productId) {
       <div class="form-group">
         <label for="account-email">📧 Correo o usuario de la cuenta</label>
         <input type="text" class="form-input" id="account-email"
-               placeholder="tu-correo@ejemplo.com" autocomplete="off">
+               placeholder="ingresa tu usuario" autocomplete="off">
       </div>
       <div class="form-group">
         <label for="account-password">🔒 Contraseña de la cuenta</label>
