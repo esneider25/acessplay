@@ -30,7 +30,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    let { action, endpoint, method, apiKey, baseUrl, apiIdx, data } = req.body;
+    let body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    let { action, endpoint, method, apiKey, baseUrl, apiIdx, data } = body;
     
     // CASO 1: VERIFICADOR DE ID DE JUEGO (Modo 100% Seguro)
     if (action === 'verify_id' && apiIdx !== undefined) {
