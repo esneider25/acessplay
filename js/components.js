@@ -708,16 +708,25 @@ function renderOrderTracking(orderId) {
   const cleanStr = (str) => {
     if (!str) return str;
     
-    // Si es un error de saldo del proveedor, ocultarlo por completo al cliente
-    if (str.toLowerCase().includes('saldo insuficiente') || 
-        str.toLowerCase().includes('insufficient balance')) {
+    const lowerStr = str.toLowerCase();
+    
+    // Si es un error de saldo del proveedor, falta de stock o falta de pines, ocultarlo por completo al cliente
+    if (lowerStr.includes('saldo insuficiente') || 
+        lowerStr.includes('insufficient balance') ||
+        lowerStr.includes('stock') ||
+        lowerStr.includes('pines')) {
       return 'Procesando pedido...';
     }
 
     let clean = str;
-    // Ocultar nombre del proveedor
+    // Ocultar cualquier variación del nombre del proveedor
     clean = clean.replace(/TiendaGiftVen:\s*/gi, '');
     clean = clean.replace(/TiendaGiftVen/gi, 'Sistema');
+    clean = clean.replace(/apigiftven:\s*/gi, '');
+    clean = clean.replace(/apigiftven/gi, 'Sistema');
+    clean = clean.replace(/api giftven/gi, 'Sistema');
+    clean = clean.replace(/apigirtven/gi, 'Sistema');
+    clean = clean.replace(/giftven/gi, 'Sistema');
     
     clean = clean.replace(/Enviando a API externa\.\.\./gi, 'Procesando el pedido de forma automatizada...');
     clean = clean.replace(/Aprobado y entregado por API/gi, 'Aprobado y entregado automáticamente');
