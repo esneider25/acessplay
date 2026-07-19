@@ -768,6 +768,64 @@ async function _submitOrderLogic() {
         description: numberOfOrders > 1 ? `Compra Masiva (${numberOfOrders} IDs): ${product.name} - ${pkg.label}` : `Compra: ${product.name} - ${pkg.label}`,
         date: Date.now()
       });
+
+      // --- CALCULATE AND AWARD UPFRONT VIP CASHBACK, POINTS, AND TOTAL SPENT FOR WALLET PURCHASES ---
+      if (!discountCode && typeof userProfile !== 'undefined' && userProfile && userProfile.role !== 'revendedor') {
+        const userId = currentUser.uid;
+        
+        firebase.database().ref('users/' + userId).transaction(userData => {
+          if (userData === null) return userData;
+          
+          let currentPoints = userData.points || 0;
+          let totalSpent = userData.totalSpent || 0;
+          
+          let newSpent = totalSpent + finalUsd;
+          userData.totalSpent = newSpent;
+          
+          // 1. Calculate Points
+          let earnedPoints = 0;
+          if (finalUsd < 5) earnedPoints = 2;
+          else if (finalUsd <= 12) earnedPoints = 4;
+          else earnedPoints = 7;
+          
+          userData.points = currentPoints + earnedPoints;
+          return userData;
+        }).then(async (txResult) => {
+          if (!txResult.committed) return;
+          const p = txResult.snapshot.val();
+          const newSpent = p.totalSpent || 0;
+          
+          if (typeof getVipLevel === 'function') {
+            const vip = getVipLevel(newSpent);
+            const cashbackPercent = vip.cashback || 0;
+            
+            if (cashbackPercent > 0) {
+              const cashbackAmount = finalUsd * (cashbackPercent / 100);
+              try {
+                const cbRes = await fetch('/api/wallet', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+                  body: JSON.stringify({ action: 'cashback', amount: cashbackAmount })
+                });
+                const cbData = await cbRes.json();
+                if (!cbData.error) {
+                  firebase.database().ref('users/' + userId + '/transactions').push({
+                    id: Date.now().toString(),
+                    type: 'deposit',
+                    amount: cashbackAmount,
+                    description: `Cashback VIP (${cashbackPercent.toFixed(1)}%) por pedido`,
+                    date: Date.now()
+                  });
+                }
+              } catch (cbErr) {
+                console.warn('No se pudo otorgar cashback inmediato:', cbErr);
+              }
+            }
+          }
+        });
+      }
+      // --------------------------------------------------------------------------------------------
+
     } catch (err) {
       console.error(err);
       if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
