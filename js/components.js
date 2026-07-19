@@ -707,7 +707,18 @@ function renderOrderTracking(orderId) {
 
   const cleanStr = (str) => {
     if (!str) return str;
+    
+    // Si es un error de saldo del proveedor, ocultarlo por completo al cliente
+    if (str.toLowerCase().includes('saldo insuficiente') || 
+        str.toLowerCase().includes('insufficient balance')) {
+      return 'Procesando pedido...';
+    }
+
     let clean = str;
+    // Ocultar nombre del proveedor
+    clean = clean.replace(/TiendaGiftVen:\s*/gi, '');
+    clean = clean.replace(/TiendaGiftVen/gi, 'Sistema');
+    
     clean = clean.replace(/Enviando a API externa\.\.\./gi, 'Procesando el pedido de forma automatizada...');
     clean = clean.replace(/Aprobado y entregado por API/gi, 'Aprobado y entregado automáticamente');
     clean = clean.replace(/El proveedor rechazó la recarga/gi, 'El sistema rechazó la recarga');
