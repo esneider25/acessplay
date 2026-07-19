@@ -4735,7 +4735,7 @@ window.fixWalletSpendingBug = async function() {
         if (!userOrdersMap[o.userId]) userOrdersMap[o.userId] = [];
         userOrdersMap[o.userId].push(o);
 
-        if (o.productType !== 'wallet-recharge') {
+        if (o.productType !== 'wallet-recharge' && !o.discountCode) {
           const price = Number(o.priceUsd) || 0;
           spentMap[o.userId] = (spentMap[o.userId] || 0) + price;
 
@@ -4766,7 +4766,7 @@ window.fixWalletSpendingBug = async function() {
       let totalExpectedCashback = 0;
 
       orders.forEach(o => {
-        if (o.productType !== 'wallet-recharge') {
+        if (o.productType !== 'wallet-recharge' && !o.discountCode) {
           const price = Number(o.priceUsd) || 0;
           simulatedSpent += price;
 
