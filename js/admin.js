@@ -3078,7 +3078,10 @@ function renderDiscounts(container) {
           ${d.perClientLimit ? `<span style="background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px;">👤 Límite Cliente: ${d.perClientLimit}</span>` : ''}
         </div>
       </div>
-      <button class="btn btn-secondary" style="padding: 6px 12px; color: #ff6b6b; border-color: rgba(220,53,69,0.2);" onclick="adminDeleteDiscount('${d.code}')" title="Eliminar cupón">🗑️ Eliminar</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary" style="padding: 6px 12px;" onclick="adminEditDiscount('${d.code}')" title="Editar cupón">✏️ Editar</button>
+        <button class="btn btn-secondary" style="padding: 6px 12px; color: #ff6b6b; border-color: rgba(220,53,69,0.2);" onclick="adminDeleteDiscount('${d.code}')" title="Eliminar cupón">🗑️ Eliminar</button>
+      </div>
     </div>
   `).join('') : '<p style="color: var(--text-muted); padding: 20px; text-align: center; background: rgba(0,0,0,0.2); border-radius: 8px;">No hay cupones activos.</p>';
 
@@ -3152,12 +3155,44 @@ function adminCreateDiscount(event) {
   const globalLimit = document.getElementById('discount-global-limit').value || null;
   const clientLimit = document.getElementById('discount-client-limit').value || null;
 
+  if (window.editingDiscountCode) {
+    deleteDiscount(window.editingDiscountCode);
+    window.editingDiscountCode = null;
+  }
+
   if (createDiscount(code, type, value, expiryDate, globalLimit, clientLimit)) {
-    showAdminToast('✅ Cupón creado exitosamente', 'success');
+    showAdminToast('✅ Cupón guardado exitosamente', 'success');
     renderActiveTab();
   } else {
     showAdminToast('⚠️ Ese código ya existe', 'error');
   }
+}
+
+function adminEditDiscount(code) {
+  const discounts = getDiscounts();
+  const d = discounts.find(x => x.code === code);
+  if (!d) return;
+  
+  document.getElementById('discount-code').value = d.code;
+  document.getElementById('discount-code').setAttribute('readonly', 'true');
+  document.getElementById('discount-code').style.opacity = '0.7';
+  document.getElementById('discount-type').value = d.type;
+  document.getElementById('discount-value').value = d.value;
+  
+  if (d.expiryDate) {
+    document.getElementById('discount-expiry').value = d.expiryDate.split('T')[0];
+  } else {
+    document.getElementById('discount-expiry').value = '';
+  }
+  
+  document.getElementById('discount-global-limit').value = d.globalLimit || '';
+  document.getElementById('discount-client-limit').value = d.perClientLimit || '';
+  
+  const btn = document.querySelector('#admin-discount-form button[type="submit"]');
+  btn.innerHTML = '💾 Actualizar Cupón';
+  
+  window.editingDiscountCode = d.code;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function adminDeleteDiscount(code) {
