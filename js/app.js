@@ -779,25 +779,7 @@ async function _submitOrderLogic() {
   let sharedScreenshotUrl = null;
   if (appState.selectedScreenshot && appState.selectedPaymentId !== 'wallet') {
     try {
-      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
-      const tempId = generateOrderRef(); // Usamos un ID temporal solo para el nombre de la foto
-      const randomSecret = Math.random().toString(36).substring(2, 10);
-      const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '_' + randomSecret + '.jpg');
-      
-      const uploadTask = storageRef.put(compressedBlob);
-      let isUploadFinished = false;
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
-          if (!isUploadFinished) {
-            uploadTask.cancel();
-            reject(new Error('Tiempo de espera agotado. Verifica tu conexión a internet.'));
-          }
-        }, 20000); // 20 segundos máximo para subir
-      });
-
-      await Promise.race([uploadTask, timeoutPromise]);
-      isUploadFinished = true;
-      sharedScreenshotUrl = await storageRef.getDownloadURL();
+      sharedScreenshotUrl = await uploadScreenshotWithRetry(appState.selectedScreenshot);
     } catch (err) {
       console.error('Error subiendo captura:', err);
       showToast('⚠️ Error al subir captura: ' + (err.message || 'Intenta de nuevo.'));
@@ -870,8 +852,9 @@ async function _submitOrderLogic() {
       }
     }
   }
+
   // Show success animation then redirect to tracking using the last order created
-      showOrderConfirmation(lastOrder);
+  showOrderConfirmation(lastOrder);
   return true;
 }
 
@@ -929,25 +912,7 @@ async function _submitWalletRechargeLogic() {
 
   let sharedScreenshotUrl = null;
   try {
-    const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
-    const tempId = generateOrderRef();
-    const randomSecret = Math.random().toString(36).substring(2, 10);
-    const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '_' + randomSecret + '.jpg');
-    
-    const uploadTask = storageRef.put(compressedBlob);
-    let isUploadFinished = false;
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        if (!isUploadFinished) {
-          uploadTask.cancel();
-          reject(new Error('Tiempo de espera agotado. Verifica tu conexión a internet.'));
-        }
-      }, 20000);
-    });
-
-    await Promise.race([uploadTask, timeoutPromise]);
-    isUploadFinished = true;
-    sharedScreenshotUrl = await storageRef.getDownloadURL();
+    sharedScreenshotUrl = await uploadScreenshotWithRetry(appState.selectedScreenshot);
   } catch (err) {
     console.error('Error subiendo captura:', err);
     showToast('⚠️ Error al subir captura: ' + (err.message || 'Intenta de nuevo.'));
@@ -1636,6 +1601,87 @@ function generateThumbnail(file) {
   });
 }
 
+// ── Robust Firebase Storage Upload ──
+// Wraps UploadTask in a proper Promise with progress-aware timeout and retry
+function uploadToFirebaseStorage(blob, timeoutMs = 45000) {
+  return new Promise((resolve, reject) => {
+    const tempId = generateOrderRef();
+    const randomSecret = Math.random().toString(36).substring(2, 10);
+    const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '_' + randomSecret + '.jpg');
+
+    const uploadTask = storageRef.put(blob);
+    let settled = false;
+    let timeoutId = null;
+
+    // Progress-aware timeout: resets every time bytes are transferred
+    function resetTimeout() {
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        if (!settled) {
+          settled = true;
+          uploadTask.cancel();
+          reject(new Error('Tiempo de espera agotado. Intenta de nuevo.'));
+        }
+      }, timeoutMs);
+    }
+
+    resetTimeout(); // Start initial timeout
+
+    uploadTask.on('state_changed',
+      (snapshot) => {
+        // Progress callback — reset timeout on every progress event
+        resetTimeout();
+      },
+      (error) => {
+        // Error callback
+        if (timeoutId) clearTimeout(timeoutId);
+        if (!settled) {
+          settled = true;
+          if (error.code === 'storage/canceled') {
+            reject(new Error('Tiempo de espera agotado. Intenta de nuevo.'));
+          } else {
+            reject(error);
+          }
+        }
+      },
+      async () => {
+        // Complete callback
+        if (timeoutId) clearTimeout(timeoutId);
+        if (!settled) {
+          settled = true;
+          try {
+            const url = await storageRef.getDownloadURL();
+            resolve(url);
+          } catch (e) {
+            reject(e);
+          }
+        }
+      }
+    );
+  });
+}
+
+async function uploadScreenshotWithRetry(file, maxRetries = 1) {
+  const compressedBlob = await compressFileToBlob(file);
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const url = await uploadToFirebaseStorage(compressedBlob, 45000);
+      return url;
+    } catch (err) {
+      console.warn(`Upload attempt ${attempt + 1} failed:`, err.message);
+      if (attempt < maxRetries) {
+        // Wait 2 seconds before retrying
+        await new Promise(r => setTimeout(r, 2000));
+      } else {
+        throw err;
+      }
+    }
+  }
+}
+
+
+
 function compressFileToBlob(file) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -1691,19 +1737,16 @@ async function triggerTelegramNotification(order) {
     console.error('Could not check telegram_config:', e);
   }
 
-  // ── Step 2: Build Telegram message ──
   const tgMsg = typeof buildOrderTelegramMessage === 'function'
     ? buildOrderTelegramMessage(order)
-    : `🤖 <b>NUEVO PEDIDO — ${order.id}</b>\n🔥 ${escapeHTML(order.productName)} (${escapeHTML(order.packageLabel)})\n💰 $${order.priceUsd} USD`;
+    : `\u{1F916} <b>NUEVO PEDIDO \u2014 ${order.id}</b>\n\u{1F525} ${escapeHTML(order.productName)} (${escapeHTML(order.packageLabel)})\n\u{1F4B0} $${order.priceUsd} USD`;
 
   const keyboard = typeof buildOrderKeyboard === 'function'
     ? buildOrderKeyboard(order.id)
     : null;
 
-  // ── Step 3: Send via Telegram (through /api/telegram proxy) ──
   try {
     if (appState.selectedScreenshot && shouldSendPhoto) {
-      // Compress and send as photo with caption
       const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
       const photoSent = await sendTelegramPhoto(compressedBlob, tgMsg, keyboard);
       if (!photoSent) {
@@ -1711,7 +1754,6 @@ async function triggerTelegramNotification(order) {
         await sendTelegramMessage(tgMsg, keyboard);
       }
     } else {
-      // Send text-only message
       await sendTelegramMessage(tgMsg, keyboard);
     }
   } catch (e) {
