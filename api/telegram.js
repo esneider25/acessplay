@@ -51,9 +51,12 @@ export default async function handler(req, res) {
     }
 
     if (type === 'message') {
+      // Fix para Telegram HTML: Telegram no soporta &#39; ni &quot; en el parse_mode HTML
+      let safeText = text ? text.replace(/&#39;/g, "'").replace(/&quot;/g, '"') : '';
+      
       const body = {
         chat_id: chatId,
-        text: text,
+        text: safeText,
         parse_mode: 'HTML'
       };
       if (inlineKeyboard) {
@@ -69,10 +72,13 @@ export default async function handler(req, res) {
     }
 
     else if (type === 'photo') {
+      // Fix para Telegram HTML: Telegram no soporta &#39; ni &quot; en el parse_mode HTML
+      let safeCaption = text ? text.replace(/&#39;/g, "'").replace(/&quot;/g, '"') : '';
+      
       // Use native Node 18+ FormData
       const formData = new FormData();
       formData.append('chat_id', chatId);
-      formData.append('caption', text || '');
+      formData.append('caption', safeCaption);
       formData.append('parse_mode', 'HTML');
 
       if (inlineKeyboard) {

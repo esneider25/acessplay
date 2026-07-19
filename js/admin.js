@@ -3098,7 +3098,7 @@ function renderDiscounts(container) {
         <form id="admin-discount-form" onsubmit="adminCreateDiscount(event)">
           <div class="admin-form-group">
             <label class="admin-form-label">Código (Ej: VERANO20)</label>
-            <input type="text" id="discount-code" class="admin-form-input" required style="text-transform: uppercase;" placeholder="CÓDIGO" pattern="[A-Za-z0-9]+" title="Solo letras y números, sin espacios">
+            <input type="text" id="discount-code" class="admin-form-input" required style="text-transform: uppercase;" placeholder="CÓDIGO" pattern="[A-Za-zÑñ0-9\-_]+" title="Solo letras, números y guiones, sin espacios">
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div class="admin-form-group">

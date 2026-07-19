@@ -502,7 +502,7 @@ function createDiscount(code, type, value, expiryDate = null, globalLimit = null
     code: newCode,
     type: type, // 'percentage' or 'fixed'
     value: parseFloat(value),
-    expiryDate: expiryDate ? new Date(expiryDate).toISOString() : null,
+    expiryDate: expiryDate ? new Date(expiryDate + 'T23:59:59').toISOString() : null,
     globalLimit: globalLimit ? parseInt(globalLimit) : null,
     perClientLimit: perClientLimit ? parseInt(perClientLimit) : null,
     active: true,
@@ -535,8 +535,16 @@ function validateDiscount(code, contact = null) {
     return null;
   }
 
-  if (d.perClientLimit && contact) {
-    const clientUses = allOrdersWithCode.filter(o => o.customerContact === contact).length;
+  if (d.perClientLimit) {
+    let clientUses = 0;
+    const uid = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser ? firebase.auth().currentUser.uid : null;
+    
+    if (uid) {
+      clientUses = allOrdersWithCode.filter(o => o.userId === uid).length;
+    } else if (contact) {
+      clientUses = allOrdersWithCode.filter(o => o.customerContact === contact).length;
+    }
+    
     if (clientUses >= d.perClientLimit) {
       return null;
     }
