@@ -22,9 +22,9 @@ export default async function handler(req, res) {
   try {
     const { type, text, inlineKeyboard, photoBase64 } = req.body;
     
-    // El token
-    const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    // El token (primero intenta variables de entorno, luego el body)
+    const botToken = process.env.TELEGRAM_BOT_TOKEN || req.body?.botToken;
+    const chatId = process.env.TELEGRAM_CHAT_ID || req.body?.chatId;
 
     if (!botToken || !chatId) {
       return res.status(500).json({ error: "Credenciales de Telegram no configuradas en el servidor." });
