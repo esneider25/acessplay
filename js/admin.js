@@ -1299,8 +1299,11 @@ function renderPayments(container) {
     let detailFieldsHtml = '';
     Object.entries(method.details || {}).forEach(([key, val]) => {
       detailFieldsHtml += `
-        <div class="admin-form-group">
-          <label class="admin-form-label">${formatPaymentLabel(key)}</label>
+        <div class="admin-form-group" style="position: relative;">
+          <label class="admin-form-label" style="display: flex; justify-content: space-between; align-items: center;">
+            ${formatPaymentLabel(key)}
+            <button class="btn" onclick="removeFieldFromPaymentMethod('${method.id}', '${key}')" style="background: transparent; color: #ef4444; padding: 0; font-size: 0.9rem;" title="Eliminar campo">🗑️</button>
+          </label>
           <input type="text" class="admin-form-input payment-detail-input"
                  data-method-id="${method.id}" data-detail-key="${key}" value="${val}">
         </div>
@@ -1320,6 +1323,21 @@ function renderPayments(container) {
         </div>
         <div class="admin-payment-details-form" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-top: 15px;">
           ${detailFieldsHtml}
+        </div>
+        <div style="margin-top: 15px; display: flex; gap: 10px; align-items: center;">
+          <select id="add-field-select-${method.id}" class="admin-form-input" style="width: auto; max-width: 250px;">
+            <option value="">+ Añadir campo...</option>
+            <option value="titular">Titular</option>
+            <option value="cedula">Cédula / Rif</option>
+            <option value="telefono">Teléfono</option>
+            <option value="banco">Banco de origen</option>
+            <option value="cuenta">Nro. de Cuenta</option>
+            <option value="nota">Nota / Referencia</option>
+            <option value="binanceId">Binance Pay ID</option>
+            <option value="wallet">Wallet (USDT)</option>
+            <option value="red">Red</option>
+          </select>
+          <button class="btn btn-secondary" onclick="addFieldToPaymentMethod('${method.id}')" style="padding: 8px 12px; font-size: 0.9rem;" title="Añadir campo seleccionado">➕ Añadir</button>
         </div>
         <div class="admin-form-group" style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
           <label class="admin-form-label">Moneda a cobrar al cliente</label>
@@ -1493,6 +1511,37 @@ function deletePaymentMethod(id) {
       saveToDb('payment_methods', PAYMENT_METHODS);
       renderActiveTab();
       showAdminToast('🗑️ Método eliminado', 'success');
+    }
+  }
+}
+
+function addFieldToPaymentMethod(methodId) {
+  const select = document.getElementById(`add-field-select-${methodId}`);
+  const field = select.value;
+  if (!field) return;
+
+  const method = PAYMENT_METHODS.find(m => m.id === methodId);
+  if (method) {
+    if (!method.details) method.details = {};
+    if (method.details[field] !== undefined) {
+      showAdminToast('El campo ya existe en este método', 'error');
+      return;
+    }
+    method.details[field] = "";
+    saveToDb('payment_methods', PAYMENT_METHODS);
+    renderActiveTab();
+    showAdminToast('Campo añadido', 'success');
+  }
+}
+
+function removeFieldFromPaymentMethod(methodId, fieldKey) {
+  if (confirm("¿Eliminar este campo?")) {
+    const method = PAYMENT_METHODS.find(m => m.id === methodId);
+    if (method && method.details) {
+      delete method.details[fieldKey];
+      saveToDb('payment_methods', PAYMENT_METHODS);
+      renderActiveTab();
+      showAdminToast('Campo eliminado', 'success');
     }
   }
 }
