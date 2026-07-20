@@ -2404,13 +2404,22 @@ function updateTempPackageField(index, field, value) {
   if (!pkg) return;
   if (field === 'amount') pkg.amount = value;
   else if (field === 'priceUsd') pkg.priceUsd = parseFloat(value) || 0.0;
-  else if (field === 'costUsd') pkg.costUsd = parseFloat(value) || 0.0;
+  else if (field === 'costUsd') {
+    pkg.costUsd = parseFloat(value) || 0.0;
+    // Auto-calculate price
+    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null) ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
+    if (pkg.costUsd > 0) pkg.priceUsd = parseFloat((pkg.costUsd + (pkg.costUsd * margin / 100)).toFixed(2));
+    renderTempPackages();
+  }
   else if (field === 'customMargin') {
     if (value === '' || value === null || value === undefined) {
       delete pkg.customMargin;
     } else {
       pkg.customMargin = parseFloat(value);
     }
+    // Auto-calculate price
+    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null) ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
+    if (pkg.costUsd > 0) pkg.priceUsd = parseFloat((pkg.costUsd + (pkg.costUsd * margin / 100)).toFixed(2));
     renderTempPackages();
   }
   else if (field === 'apiServiceId') pkg.apiServiceId = value.trim();
