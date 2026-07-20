@@ -48,6 +48,7 @@ let CATEGORIES = [];
 // ── Exchange Rate ──
 let EXCHANGE_RATE = {
   usdToBs: 58.50,
+  profitMargin: 0,
   lastUpdated: new Date().toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric' })
 };
 
@@ -259,6 +260,24 @@ function usdToBs(usd) {
 
 function formatBs(amount) {
   return parseFloat(amount).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ── Profit Margin: recalculate priceUsd from costUsd + margin ──
+function applyProfitMargin(globalMargin) {
+  let updated = 0;
+  PRODUCTS.forEach(product => {
+    (product.packages || []).forEach(pkg => {
+      if (pkg.costUsd && pkg.costUsd > 0) {
+        const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '') 
+          ? parseFloat(pkg.customMargin) 
+          : globalMargin;
+        pkg.priceUsd = parseFloat((pkg.costUsd + (pkg.costUsd * margin / 100)).toFixed(2));
+        updated++;
+      }
+    });
+  });
+  saveToDb('products', PRODUCTS);
+  return updated;
 }
 
 function generateOrderRef() {
