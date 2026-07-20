@@ -560,7 +560,7 @@ function renderProductDetail(productId) {
 function renderPaymentDetails(methodId) {
   const method = PAYMENT_METHODS.find(m => m.id === methodId);
   if (!method) return '';
-  const rows = Object.entries(method.details).map(([key, val]) => `
+  const rows = Object.entries(method.details || {}).map(([key, val]) => `
     <div class="payment-detail-row">
       <span class="label">${formatDetailLabel(key)}</span>
       <span class="value">

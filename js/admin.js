@@ -1419,7 +1419,7 @@ function addPaymentMethod() {
       
       <div class="admin-form-group" style="margin-top: 20px;">
         <label class="admin-form-label" style="margin-bottom: 12px; display: block; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-          ¿Qué datos le pedirás al cliente para este pago? (Selecciona los necesarios)
+          ¿Qué datos tuyos (del administrador) necesitas mostrarle al cliente para que realice el pago? (Selecciona los necesarios)
         </label>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid var(--border);">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
