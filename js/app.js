@@ -1436,46 +1436,64 @@ function toggleSupportChat() {
   const widget = document.getElementById('support-widget');
   if (widget) {
     widget.classList.toggle('open');
-    if (widget.classList.contains('open')) {
-      const sessionId = getDeviceFingerprint();
-      const contact = localStorage.getItem('support_contact');
-
-      const loginView = document.getElementById('support-login-view');
-      const messagesView = document.getElementById('support-messages');
-      const bottomView = document.getElementById('support-chat-bottom');
-
-      if (!contact) {
-        if (loginView) loginView.style.display = 'flex';
-        if (messagesView) messagesView.style.display = 'none';
-        if (bottomView) bottomView.style.display = 'none';
-        const contactInput = document.getElementById('support-contact-input');
-        if (contactInput) setTimeout(() => contactInput.focus(), 300);
-      } else {
-        if (loginView) loginView.style.display = 'none';
-        if (messagesView) messagesView.style.display = 'flex';
-        if (bottomView) bottomView.style.display = 'block';
-
-        markMessagesAsRead(sessionId, 'user');
-        if (typeof renderDynamicQuickActions === 'function') renderDynamicQuickActions();
-        renderSupportMessages();
-
-        const input = document.getElementById('support-input');
-        if (input) setTimeout(() => input.focus(), 300);
-
-        if (!chatPollingInterval) {
-          chatPollingInterval = setInterval(() => {
-            if (widget.classList.contains('open') && localStorage.getItem('support_contact')) {
-              renderSupportMessages();
-              markMessagesAsRead(sessionId, 'user');
-            }
-          }, 5000);
-        }
-      }
-    } else {
-      if (chatPollingInterval) {
+    if (!widget.classList.contains('open')) {
+      widget.classList.remove('chat-active');
+      if (typeof chatPollingInterval !== 'undefined' && chatPollingInterval) {
         clearInterval(chatPollingInterval);
         chatPollingInterval = null;
       }
+    }
+  }
+}
+
+function openSupportWebChat() {
+  const widget = document.getElementById('support-widget');
+  if (widget) {
+    widget.classList.add('chat-active');
+    const sessionId = getDeviceFingerprint();
+    const contact = localStorage.getItem('support_contact');
+
+    const loginView = document.getElementById('support-login-view');
+    const messagesView = document.getElementById('support-messages');
+    const bottomView = document.getElementById('support-chat-bottom');
+
+    if (!contact) {
+      if (loginView) loginView.style.display = 'flex';
+      if (messagesView) messagesView.style.display = 'none';
+      if (bottomView) bottomView.style.display = 'none';
+      const contactInput = document.getElementById('support-contact-input');
+      if (contactInput) setTimeout(() => contactInput.focus(), 300);
+    } else {
+      if (loginView) loginView.style.display = 'none';
+      if (messagesView) messagesView.style.display = 'flex';
+      if (bottomView) bottomView.style.display = 'block';
+
+      markMessagesAsRead(sessionId, 'user');
+      if (typeof renderDynamicQuickActions === 'function') renderDynamicQuickActions();
+      renderSupportMessages();
+
+      const input = document.getElementById('support-input');
+      if (input) setTimeout(() => input.focus(), 300);
+
+      if (typeof chatPollingInterval !== 'undefined' && !chatPollingInterval) {
+        chatPollingInterval = setInterval(() => {
+          if (widget.classList.contains('open') && localStorage.getItem('support_contact')) {
+            renderSupportMessages();
+            markMessagesAsRead(sessionId, 'user');
+          }
+        }, 5000);
+      }
+    }
+  }
+}
+
+function closeSupportWebChat() {
+  const widget = document.getElementById('support-widget');
+  if (widget) {
+    widget.classList.remove('chat-active');
+    if (typeof chatPollingInterval !== 'undefined' && chatPollingInterval) {
+      clearInterval(chatPollingInterval);
+      chatPollingInterval = null;
     }
   }
 }
