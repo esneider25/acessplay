@@ -4252,7 +4252,7 @@ async function showUserDetailsModal(uid) {
               <input type="password" id="admin-force-confirm-${uid}" class="admin-form-input" placeholder="Confirmar contraseña" style="width: 100%; padding-right: 40px; background: rgba(0,0,0,0.2);">
               <i class="ph ph-eye" id="toggle-force-confirm-${uid}" onclick="togglePasswordVisibility('admin-force-confirm-${uid}', 'toggle-force-confirm-${uid}')" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: var(--text-secondary);"></i>
             </div>
-            <button class="btn btn-primary" onclick="forceCustomerPassword('${uid}')" style="width: 100%; justify-content: center; margin-top: 5px;">
+            <button class="btn btn-primary" onclick="forceCustomerPassword('${uid}', this)" style="width: 100%; justify-content: center; margin-top: 5px;">
               💾 Actualizar Contraseña del Cliente
             </button>
           </div>
@@ -4308,30 +4308,54 @@ async function showUserDetailsModal(uid) {
   }
 };
 
-window.forceCustomerPassword = async function (uid) {
-  const pass = document.getElementById(`admin-force-pass-${uid}`).value.trim();
-  const confirm = document.getElementById(`admin-force-confirm-${uid}`).value.trim();
+window.forceCustomerPassword = async function (uid, btnElement) {
+  const passInput = document.getElementById(`admin-force-pass-${uid}`);
+  const confirmInput = document.getElementById(`admin-force-confirm-${uid}`);
+  const pass = passInput ? passInput.value.trim() : '';
+  const confirm = confirmInput ? confirmInput.value.trim() : '';
 
   if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
   if (pass !== confirm) return alert("Las contraseñas no coinciden.");
 
-  const btn = event.target;
-  const originalText = btn.innerHTML;
-  btn.innerHTML = 'Actualizando...';
-  btn.disabled = true;
+  const btn = btnElement || (typeof event !== 'undefined' ? (event.target || event.srcElement) : null);
+  const originalText = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.innerHTML = 'Actualizando...';
+    btn.disabled = true;
+  }
 
   try {
-    await firebase.database().ref('users/' + uid).update({
-      password: pass
+    const currentUser = firebase.auth().currentUser;
+    if (!currentUser) throw new Error("No hay una sesión de administrador activa.");
+
+    const idToken = await currentUser.getIdToken();
+    const response = await fetch('/api/admin-update-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + idToken
+      },
+      body: JSON.stringify({
+        targetUid: uid,
+        newPassword: pass
+      })
     });
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Error al actualizar contraseña.');
+    }
+
     alert("Contraseña actualizada con éxito.");
-    document.getElementById(`admin-force-pass-${uid}`).value = '';
-    document.getElementById(`admin-force-confirm-${uid}`).value = '';
+    if (passInput) passInput.value = '';
+    if (confirmInput) confirmInput.value = '';
   } catch (error) {
     alert("Error guardando la contraseña: " + error.message);
   } finally {
-    btn.innerHTML = originalText;
-    btn.disabled = false;
+    if (btn) {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
   }
 };
 

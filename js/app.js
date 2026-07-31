@@ -1553,17 +1553,9 @@ async function sendSupportMessage() {
   const quickActions = document.getElementById('support-quick-actions');
   if (quickActions) quickActions.style.display = 'none';
 
-  // Notify Telegram using global TELEGRAM_CONFIG
-  if (typeof TELEGRAM_CONFIG !== 'undefined' && TELEGRAM_CONFIG.enabled && TELEGRAM_CONFIG.chatId) {
-    const tgMsg = `💬 <b>Nuevo Mensaje de Soporte</b>\n\n<b>Contacto:</b> ${contact}\n<b>Mensaje:</b> ${escapeHTML(text)}\n\n<i>Responde desde el Panel Admin</i>`;
-    try {
-      await fetch('/api/telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'message', botToken: TELEGRAM_CONFIG.botToken, chatId: TELEGRAM_CONFIG.chatId, text: tgMsg })
-      });
-    } catch (e) { console.error('Telegram error', e); }
-  }
+  // Notify Telegram using global TELEGRAM_CONFIG (Ahora manejado por el Robot Tiendas)
+  // fetch API removido porque el Cerebro Central procesa los mensajes
+
 
   // Smart bot auto-replies for quick actions
   setTimeout(() => {

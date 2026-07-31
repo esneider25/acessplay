@@ -1408,15 +1408,9 @@ function sendUserChatMessage() {
     const contactName = (typeof userProfile !== 'undefined' && userProfile?.name) ? userProfile.name : (currentUser.displayName || currentUser.email);
     addMessage(currentUser.uid, 'user', text, contactName);
     
-    // Notify Telegram using global TELEGRAM_CONFIG
-    if (typeof TELEGRAM_CONFIG !== 'undefined' && TELEGRAM_CONFIG.enabled && TELEGRAM_CONFIG.botToken && TELEGRAM_CONFIG.chatId) {
-      const tgMsg = `💬 <b>Nuevo Mensaje de Soporte (Usuario Registrado)</b>\n\n<b>Contacto:</b> ${contactName}\n<b>Mensaje:</b> ${escapeHTML(text)}\n\n<i>Responde desde el Panel Admin</i>`;
-      fetch('/api/telegram', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'message', botToken: TELEGRAM_CONFIG.botToken, chatId: TELEGRAM_CONFIG.chatId, text: tgMsg })
-      }).catch(e => console.error('Telegram error', e));
-    }
+    // Notify Telegram using global TELEGRAM_CONFIG (Ahora manejado por el Robot Tiendas)
+    // fetch API removido porque el Cerebro Central procesa los mensajes
+
   }
 }
 
