@@ -985,6 +985,7 @@ async function _submitWalletRechargeLogic() {
   }
 
   let sharedScreenshotUrl = null;
+  let manualRef = null;
   try {
     const uploadRes = await uploadScreenshotWithRetry(appState.selectedScreenshot);
     if (uploadRes === false) {
@@ -995,6 +996,7 @@ async function _submitWalletRechargeLogic() {
       if (uploadRes.manualRef) {
         if (!appState.selectedScreenshotOcr) appState.selectedScreenshotOcr = [];
         appState.selectedScreenshotOcr.unshift(uploadRes.manualRef);
+        manualRef = uploadRes.manualRef;
       }
     } else if (typeof uploadRes === 'string') {
       sharedScreenshotUrl = uploadRes;
@@ -1024,7 +1026,7 @@ async function _submitWalletRechargeLogic() {
     accountEmail: currentUser.email,
     screenshot: sharedScreenshotUrl,
     ocrNumbers: appState.selectedScreenshotOcr || [],
-    manualRef: (uploadRes && typeof uploadRes === 'object' && uploadRes.manualRef) ? uploadRes.manualRef : null,
+    manualRef: manualRef,
   });
 
   if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
