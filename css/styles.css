@@ -362,13 +362,85 @@ body {
   padding: 40px 20px 80px;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
-.products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px; max-width: 1200px; margin: 0 auto;
+/* ── Catalog Carousel ── */
+.products-carousel-wrapper {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 10px;
 }
+.products-carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 10px 5px 20px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.products-carousel::-webkit-scrollbar { display: none; }
+
+/* Carousel Navigation Buttons */
+.carousel-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  opacity: 0.85;
+}
+.carousel-nav-btn:hover {
+  opacity: 1;
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px var(--accent-glow);
+  transform: translateY(-50%) scale(1.1);
+}
+.carousel-nav-btn.hidden { opacity: 0; pointer-events: none; }
+.carousel-nav-left { left: -8px; }
+.carousel-nav-right { right: -8px; }
+
+/* Scroll Indicator Dots */
+.carousel-scroll-indicator {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 0;
+}
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.carousel-dot.active {
+  background: var(--accent);
+  width: 24px;
+  border-radius: 4px;
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
 .empty-catalog {
-  grid-column: 1 / -1; text-align: center; padding: 60px 20px;
+  width: 100%; text-align: center; padding: 60px 20px;
   color: var(--text-muted); font-size: 1.1rem;
 }
 
@@ -378,6 +450,11 @@ body {
   border: 1px solid var(--border); border-radius: var(--radius-lg);
   padding: 0; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  /* Carousel item sizing */
+  flex: 0 0 260px;
+  min-width: 220px;
+  max-width: 300px;
+  scroll-snap-align: start;
 }
 .game-card::before {
   content: ''; position: absolute; inset: 0;
@@ -947,7 +1024,6 @@ body {
   .nav-links.open { display: flex; }
   .mobile-toggle { display: block; }
   .hero-stats { gap: 24px; }
-  .products-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
   .packages-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .payment-methods { grid-template-columns: 1fr; }
   .order-form { padding: 24px 18px; }
@@ -957,7 +1033,6 @@ body {
   .pf-step-line { width: 30px; }
 }
 @media (max-width: 480px) {
-  .products-grid { grid-template-columns: 1fr; }
   .packages-grid { grid-template-columns: 1fr 1fr; }
   .hero h1 { font-size: 2rem; }
   .hero-cta-group { flex-direction: column; align-items: center; }
@@ -1678,47 +1753,28 @@ body {
   }
   .cat-pill { flex-shrink: 0; white-space: nowrap; font-size: 0.85rem; padding: 8px 16px; }
 
-  /* Game Cards Grid */
-  .products-grid { 
-    grid-template-columns: 1fr; 
-    gap: 12px; 
+  /* Mobile Carousel Adjustments */
+  .products-carousel-wrapper {
+    padding: 0 5px;
   }
-  .game-card { 
-    display: flex; 
-    flex-direction: row; 
-    align-items: center; 
-    text-align: left; 
-    padding: 10px; 
-    height: auto;
-    min-height: 80px;
+  .game-card {
+    flex: 0 0 200px;
+    min-width: 160px;
+    max-width: 240px;
   }
-  .game-card-banner { 
-    height: 70px; 
-    width: 70px; 
-    flex-shrink: 0;
-    margin-right: 14px;
-    border-radius: var(--radius-sm);
+  .game-card-banner {
+    height: 120px;
   }
-  .game-card-badge { 
-    display: block; 
-    top: 2px; 
-    right: 2px; 
-    font-size: 0.5rem; 
-    padding: 2px 4px; 
+  .game-card-title {
+    font-size: 1.1rem;
   }
   .game-card-body {
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    flex: 1;
-    min-width: 0;
+    padding: 15px;
   }
-  .product-category-tag { display: none; }
-  .game-card-title { font-size: 1.05rem; margin-bottom: 4px; white-space: normal; line-height: 1.2; }
-  .game-card-currency { font-size: 0.8rem; margin-bottom: 4px; }
-  .game-card-price-range { margin-top: 0; }
-  .game-card-price-range .price { font-size: 0.9rem; }
+  .game-card-badge {
+    top: 8px;
+    right: 8px;
+  }
 
   /* Order Configuration */
   .game-detail { padding: 90px 20px 40px; }

@@ -208,6 +208,7 @@ function renderApp() {
       initCounters();
       initScrollObserver();
       initCarousel();
+      if (typeof initCatalogCarousel === 'function') initCatalogCarousel();
       if (config.announcementEnabled && config.announcementMessage && termsAccepted) {
         setTimeout(() => showAnnouncementModal(config.announcementMessage), 500);
       }
@@ -396,6 +397,7 @@ function filterCategory(categoryId) {
         newSection.style.opacity = '1';
         newSection.style.transform = 'translateY(0)';
         initScrollObserver();
+        if (typeof initCatalogCarousel === 'function') initCatalogCarousel();
       });
     }, 200);
   }
@@ -2435,5 +2437,84 @@ function initCarousel() {
   carousel.addEventListener('pointerdown', resetInterval);
   carousel.addEventListener('touchstart', resetInterval, { passive: true });
 }
+// ── Catalog Carousel Controls ──
+function scrollCatalogCarousel(direction) {
+  const carousel = document.getElementById('products-grid');
+  if (!carousel) return;
+  
+  // Calculate scroll amount based on card width + gap
+  const cardWidth = carousel.querySelector('.game-card')?.offsetWidth || 260;
+  const gap = 20;
+  const scrollAmount = (cardWidth + gap) * 2 * direction; // scroll 2 cards at a time
+  
+  carousel.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+}
 
+function initCatalogCarousel() {
+  const carousel = document.getElementById('products-grid');
+  const indicatorContainer = document.getElementById('carousel-scroll-indicator');
+  const btnLeft = document.getElementById('catalog-nav-left');
+  const btnRight = document.getElementById('catalog-nav-right');
+  
+  if (!carousel || !indicatorContainer) return;
+  
+  const cards = carousel.querySelectorAll('.game-card');
+  if (cards.length === 0) return;
 
+  // Clear existing indicators
+  indicatorContainer.innerHTML = '';
+  
+  // Create indicators based on total width
+  const updateIndicators = () => {
+    const totalWidth = carousel.scrollWidth - carousel.clientWidth;
+    if (totalWidth <= 0) {
+      indicatorContainer.style.display = 'none';
+      if (btnLeft) btnLeft.classList.add('hidden');
+      if (btnRight) btnRight.classList.add('hidden');
+      return;
+    }
+    
+    indicatorContainer.style.display = 'flex';
+    
+    // Manage buttons visibility
+    if (btnLeft) {
+      if (carousel.scrollLeft <= 10) btnLeft.classList.add('hidden');
+      else btnLeft.classList.remove('hidden');
+    }
+    if (btnRight) {
+      if (carousel.scrollLeft >= totalWidth - 10) btnRight.classList.add('hidden');
+      else btnRight.classList.remove('hidden');
+    }
+
+    // Determine how many dots to show (max 5 for UX)
+    const numDots = Math.min(Math.ceil(carousel.scrollWidth / carousel.clientWidth), 5);
+    
+    if (indicatorContainer.children.length !== numDots) {
+      indicatorContainer.innerHTML = '';
+      for (let i = 0; i < numDots; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+        dot.onclick = () => {
+          const scrollPos = (totalWidth / (numDots - 1 || 1)) * i;
+          carousel.scrollTo({ left: scrollPos, behavior: 'smooth' });
+        };
+        indicatorContainer.appendChild(dot);
+      }
+    } else {
+      // Update active dot
+      const scrollPercent = carousel.scrollLeft / totalWidth;
+      const activeIndex = Math.round(scrollPercent * (numDots - 1));
+      
+      Array.from(indicatorContainer.children).forEach((dot, index) => {
+        if (index === activeIndex) dot.classList.add('active');
+        else dot.classList.remove('active');
+      });
+    }
+  };
+
+  carousel.addEventListener('scroll', updateIndicators, { passive: true });
+  window.addEventListener('resize', updateIndicators);
+  
+  // Initial check
+  updateIndicators();
+}

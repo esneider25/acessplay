@@ -260,9 +260,18 @@ function renderCatalogSection(activeCategory) {
         </div>
 
         ${categoryPills}
-        <div class="products-grid" id="products-grid">
-          ${cards.length > 0 ? cards : '<div class="empty-catalog"><p>No hay productos en esta categoría.</p></div>'}
+        <div class="products-carousel-wrapper" id="products-carousel-wrapper">
+          <button class="carousel-nav-btn carousel-nav-left" id="catalog-nav-left" onclick="scrollCatalogCarousel(-1)" aria-label="Anterior">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div class="products-carousel" id="products-grid">
+            ${cards.length > 0 ? cards : '<div class="empty-catalog"><p>No hay productos en esta categoría.</p></div>'}
+          </div>
+          <button class="carousel-nav-btn carousel-nav-right" id="catalog-nav-right" onclick="scrollCatalogCarousel(1)" aria-label="Siguiente">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
         </div>
+        <div class="carousel-scroll-indicator" id="carousel-scroll-indicator"></div>
       </div>
     </section>
   `;
