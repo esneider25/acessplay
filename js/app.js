@@ -1725,14 +1725,16 @@ function uploadToFirebaseStorage(blob, timeoutMs = 30000) {
             body: JSON.stringify({ imageBase64: base64data, path: path })
           });
 
+          if (!res.ok) {
+            throw new Error(`Error de proxy: ${res.status}`);
+          }
+          
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          
           if (!settled) {
             settled = true;
             clearTimeout(timeoutId);
-            if (!res.ok) {
-              throw new Error(`Error de proxy: ${res.status}`);
-            }
-            const data = await res.json();
-            if (data.error) throw new Error(data.error);
             resolve(data.url);
           }
         } catch (e) {
