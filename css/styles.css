@@ -1755,25 +1755,39 @@ body {
 
   /* Mobile Carousel Adjustments */
   .products-carousel-wrapper {
-    padding: 0 5px;
+    padding: 0; /* Remove padding to let cards flow to edges */
+  }
+  .carousel-nav-btn {
+    display: none !important; /* Hide arrows on mobile, users swipe */
   }
   .game-card {
-    flex: 0 0 200px;
-    min-width: 160px;
-    max-width: 240px;
+    flex: 0 0 150px;
+    min-width: 140px;
+    max-width: 200px;
+    padding: 0;
   }
   .game-card-banner {
-    height: 120px;
-  }
-  .game-card-title {
-    font-size: 1.1rem;
+    height: 110px;
   }
   .game-card-body {
-    padding: 15px;
+    padding: 12px 10px;
+  }
+  .game-card-title {
+    font-size: 0.95rem;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .game-card-currency {
+    font-size: 0.75rem;
+  }
+  .game-card-price-range .price {
+    font-size: 0.85rem;
   }
   .game-card-badge {
-    top: 8px;
-    right: 8px;
+    top: 6px;
+    right: 6px;
+    font-size: 0.55rem;
+    padding: 2px 6px;
   }
 
   /* Order Configuration */
