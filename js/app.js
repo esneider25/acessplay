@@ -1700,45 +1700,54 @@ function generateThumbnail(file) {
 
 // ── Robust Firebase Storage Upload ──
 function uploadToFirebaseStorage(blob, timeoutMs = 20000) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const tempId = generateOrderRef();
     const randomSecret = Math.random().toString(36).substring(2, 10);
-    const storageRef = firebase.storage().ref('orders_screenshots/' + tempId + '_' + randomSecret + '.jpg');
-
-    const uploadTask = storageRef.put(blob);
+    const path = 'orders_screenshots/' + tempId + '_' + randomSecret + '.jpg';
+    
     let settled = false;
-
-    // Strict 20-second timeout without reset on progress
     const timeoutId = setTimeout(() => {
       if (!settled) {
         settled = true;
-        try { uploadTask.cancel(); } catch (e) {}
         reject(new Error('Tiempo de espera agotado (20s).'));
       }
     }, timeoutMs);
 
-    uploadTask.on('state_changed',
-      (snapshot) => {},
-      (error) => {
-        if (timeoutId) clearTimeout(timeoutId);
-        if (!settled) {
-          settled = true;
-          reject(error);
-        }
-      },
-      async () => {
-        if (timeoutId) clearTimeout(timeoutId);
-        if (!settled) {
-          settled = true;
-          try {
-            const url = await storageRef.getDownloadURL();
-            resolve(url);
-          } catch (e) {
-            reject(e);
-          }
-        }
+    try {
+      const bucket = firebase.app().options.storageBucket;
+      const url = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?name=${encodeURIComponent(path)}`;
+      
+      const headers = { 'Content-Type': blob.type || 'image/jpeg' };
+      const user = firebase.auth().currentUser;
+      if (user) {
+         const token = await user.getIdToken();
+         headers['Authorization'] = `Firebase ${token}`;
       }
-    );
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: headers,
+        body: blob
+      });
+
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeoutId);
+        if (!res.ok) {
+          throw new Error(`Error de conexion: ${res.status}`);
+        }
+        const data = await res.json();
+        const downloadToken = data.downloadTokens || '';
+        const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media&token=${downloadToken}`;
+        resolve(downloadUrl);
+      }
+    } catch (err) {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timeoutId);
+        reject(err);
+      }
+    }
   });
 }
 
