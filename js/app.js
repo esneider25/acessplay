@@ -837,9 +837,10 @@ async function _submitOrderLogic() {
 
   // Subir captura a Firebase Storage ANTES de crear los pedidos para que todos compartan la misma foto
   let sharedScreenshotUrl = null;
+  let uploadRes = null;
   if (appState.selectedScreenshot && appState.selectedPaymentId !== 'wallet') {
     try {
-      const uploadRes = await uploadScreenshotWithRetry(appState.selectedScreenshot);
+      uploadRes = await uploadScreenshotWithRetry(appState.selectedScreenshot);
       if (uploadRes === false) {
         return false; // User cancelled modal
       }
