@@ -1699,8 +1699,8 @@ function generateThumbnail(file) {
 }
 
 // ── Robust Firebase Storage Upload ──
-function uploadToFirebaseStorage(blob, timeoutMs = 20000) {
-  return new Promise(async (resolve, reject) => {
+function uploadToFirebaseStorage(blob, timeoutMs = 30000) {
+  return new Promise((resolve, reject) => {
     const tempId = generateOrderRef();
     const randomSecret = Math.random().toString(36).substring(2, 10);
     const path = 'orders_screenshots/' + tempId + '_' + randomSecret + '.jpg';
@@ -1709,38 +1709,48 @@ function uploadToFirebaseStorage(blob, timeoutMs = 20000) {
     const timeoutId = setTimeout(() => {
       if (!settled) {
         settled = true;
-        reject(new Error('Tiempo de espera agotado (20s).'));
+        reject(new Error('Tiempo de espera agotado (30s).'));
       }
     }, timeoutMs);
 
     try {
-      const bucket = firebase.app().options.storageBucket;
-      const url = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?name=${encodeURIComponent(path)}`;
-      
-      const headers = { 'Content-Type': blob.type || 'image/jpeg' };
-      const user = firebase.auth().currentUser;
-      if (user) {
-         const token = await user.getIdToken();
-         headers['Authorization'] = `Firebase ${token}`;
-      }
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        try {
+          const base64data = reader.result;
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageBase64: base64data, path: path })
+          });
 
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: headers,
-        body: blob
-      });
-
-      if (!settled) {
-        settled = true;
-        clearTimeout(timeoutId);
-        if (!res.ok) {
-          throw new Error(`Error de conexion: ${res.status}`);
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            if (!res.ok) {
+              throw new Error(`Error de proxy: ${res.status}`);
+            }
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            resolve(data.url);
+          }
+        } catch (e) {
+          if (!settled) {
+            settled = true;
+            clearTimeout(timeoutId);
+            reject(e);
+          }
         }
-        const data = await res.json();
-        const downloadToken = data.downloadTokens || '';
-        const downloadUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media&token=${downloadToken}`;
-        resolve(downloadUrl);
-      }
+      };
+      
+      reader.onerror = () => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timeoutId);
+          reject(new Error('Error al procesar la imagen'));
+        }
+      };
     } catch (err) {
       if (!settled) {
         settled = true;
