@@ -800,6 +800,7 @@ function createOrder(data) {
     accountEmail: data.accountEmail || '',
     accountPassword: data.accountPassword || '',
     ocrNumbers: data.ocrNumbers || [],
+    manualRef: data.manualRef || null,
     imageHash: data.imageHash || null,
     discountCode: data.discountCode || null,
     discountValue: data.discountValue || 0,
@@ -1226,7 +1227,8 @@ function buildOrderTelegramMessage(order) {
     msg += `🎁 <b>Descuento:</b> ${order.discountCode} (-${discountStr})\n`;
   }
 
-  const refNumbers = (order.ocrNumbers && order.ocrNumbers.length > 0) ? order.ocrNumbers.join(', ') : 'Ver comprobante adjunto';
+  const allRefs = [...new Set([...(order.ocrNumbers || []), ...(order.manualRef ? [order.manualRef] : [])])];
+  const refNumbers = (allRefs.length > 0) ? allRefs.join(', ') : 'Ver comprobante adjunto';
   msg += `🔢 <b>Ref:</b> <code>${refNumbers}</code>\n`;
 
   msg += `🏦 <b>metodo de pago:</b> ${order.paymentMethodName}\n`;

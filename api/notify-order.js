@@ -109,7 +109,8 @@ function buildMessage(order) {
     msg += `🎁 <b>Descuento:</b> ${escapeHtml(order.discountCode)} (-${discountStr})\n`;
   }
 
-  const refNumbers = (order.ocrNumbers && order.ocrNumbers.length > 0) ? order.ocrNumbers.join(', ') : 'Ver comprobante adjunto';
+  const allRefs = [...new Set([...(order.ocrNumbers || []), ...(order.manualRef ? [order.manualRef] : [])])];
+  const refNumbers = (allRefs.length > 0) ? allRefs.join(', ') : 'Ver comprobante adjunto';
   msg += `🔢 <b>Ref:</b> <code>${escapeHtml(refNumbers)}</code>\n`;
 
   msg += `🏦 <b>metodo de pago:</b> ${escapeHtml(order.paymentMethodName)}\n`;

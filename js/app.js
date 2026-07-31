@@ -890,6 +890,7 @@ async function _submitOrderLogic() {
       accountEmail: accountEmail,
       accountPassword: accountPassword,
       ocrNumbers: appState.selectedScreenshotOcr || [],
+      manualRef: (uploadRes && typeof uploadRes === 'object' && uploadRes.manualRef) ? uploadRes.manualRef : null,
       imageHash: appState.selectedScreenshotHash || null,
       discountCode: discountCode,
       discountValue: discountValue / numberOfOrders,
@@ -1020,6 +1021,7 @@ async function _submitWalletRechargeLogic() {
     accountEmail: currentUser.email,
     screenshot: sharedScreenshotUrl,
     ocrNumbers: appState.selectedScreenshotOcr || [],
+    manualRef: (uploadRes && typeof uploadRes === 'object' && uploadRes.manualRef) ? uploadRes.manualRef : null,
   });
 
   if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
