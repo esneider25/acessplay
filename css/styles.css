@@ -1767,10 +1767,12 @@ body {
     padding: 0;
   }
   .game-card-banner {
-    height: 110px;
+    height: 140px;
   }
   .game-card-banner img {
-    object-position: top center; /* Prevent heads from getting cropped */
+    object-position: center;
+    object-fit: contain !important; /* Ensure the whole poster fits without cropping */
+    padding: 5px; /* Add a tiny bit of breathing room inside the box */
   }
   .product-category-tag {
     display: none; /* Hide to save space on mobile */
