@@ -1557,11 +1557,15 @@ function renderExchange(container) {
 
   PRODUCTS.forEach(product => {
     (product.packages || []).forEach(pkg => {
-      if (pkg.costUsd && pkg.costUsd > 0) {
+      const hasCustom = pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '';
+      const effectiveMargin = hasCustom ? parseFloat(pkg.customMargin) : currentMargin;
+      const costUsd = (pkg.costUsd && pkg.costUsd > 0) 
+        ? pkg.costUsd 
+        : (pkg.priceUsd > 0 ? parseFloat((pkg.priceUsd / (1 + (effectiveMargin / 100))).toFixed(2)) : 0);
+
+      if (costUsd > 0) {
         totalPackages++;
-        const hasCustom = pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '';
-        const effectiveMargin = hasCustom ? parseFloat(pkg.customMargin) : currentMargin;
-        const newPrice = parseFloat((pkg.costUsd + (pkg.costUsd * effectiveMargin / 100)).toFixed(2));
+        const newPrice = parseFloat((costUsd + (costUsd * effectiveMargin / 100)).toFixed(2));
         const diff = newPrice - pkg.priceUsd;
         const diffColor = diff > 0 ? '#4ade80' : diff < 0 ? '#f87171' : '#94a3b8';
         const diffSign = diff > 0 ? '+' : '';
@@ -1569,7 +1573,7 @@ function renderExchange(container) {
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
             <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">${product.name}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-muted);">${pkg.label || pkg.amount}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: #f59e0b; font-weight: 600;">$${pkg.costUsd.toFixed(2)}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: #f59e0b; font-weight: 600;">$${costUsd.toFixed(2)}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">$${pkg.priceUsd.toFixed(2)}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: #0ea5e9; font-weight: 600;">$${newPrice.toFixed(2)}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: ${diffColor}; font-weight: 600;">${diffSign}$${diff.toFixed(2)}</td>
@@ -1715,12 +1719,18 @@ function previewMarginChanges() {
   if (!tbody) return;
 
   let rows = '';
+  let totalCount = 0;
   PRODUCTS.forEach(product => {
     (product.packages || []).forEach(pkg => {
-      if (pkg.costUsd && pkg.costUsd > 0) {
-        const hasCustom = pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '';
-        const effectiveMargin = hasCustom ? parseFloat(pkg.customMargin) : newMargin;
-        const newPrice = parseFloat((pkg.costUsd + (pkg.costUsd * effectiveMargin / 100)).toFixed(2));
+      const hasCustom = pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '';
+      const effectiveMargin = hasCustom ? parseFloat(pkg.customMargin) : newMargin;
+      const costUsd = (pkg.costUsd && pkg.costUsd > 0) 
+        ? pkg.costUsd 
+        : (pkg.priceUsd > 0 ? parseFloat((pkg.priceUsd / (1 + (effectiveMargin / 100))).toFixed(2)) : 0);
+
+      if (costUsd > 0) {
+        totalCount++;
+        const newPrice = parseFloat((costUsd + (costUsd * effectiveMargin / 100)).toFixed(2));
         const diff = newPrice - pkg.priceUsd;
         const diffColor = diff > 0 ? '#4ade80' : diff < 0 ? '#f87171' : '#94a3b8';
         const diffSign = diff > 0 ? '+' : '';
@@ -1728,7 +1738,7 @@ function previewMarginChanges() {
           <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
             <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">${product.name}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-muted);">${pkg.label || pkg.amount}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: #f59e0b; font-weight: 600;">$${pkg.costUsd.toFixed(2)}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: #f59e0b; font-weight: 600;">$${costUsd.toFixed(2)}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">$${pkg.priceUsd.toFixed(2)}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: #0ea5e9; font-weight: 600;">$${newPrice.toFixed(2)}</td>
             <td style="padding: 8px 10px; font-size: 0.8rem; color: ${diffColor}; font-weight: 600;">${diffSign}$${diff.toFixed(2)}</td>
@@ -1738,6 +1748,9 @@ function previewMarginChanges() {
       }
     });
   });
+
+  const totalPkgEl = document.getElementById('margin-total-packages');
+  if (totalPkgEl) totalPkgEl.textContent = totalCount;
 
   tbody.innerHTML = rows || '<tr><td colspan="7" style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.85rem;">No hay paquetes con costo de proveedor definido.</td></tr>';
 }
@@ -2439,7 +2452,10 @@ function renderTempPackages() {
 function addTempPackage() {
   const currencyInput = document.getElementById('m-prod-currency');
   const currencyName = currencyInput ? currencyInput.value.trim() : 'Unidades';
-  adminState.tempPackages.push({ amount: 100, priceUsd: 1.00, label: `100 ${currencyName}`, isOutofStock: false, bgImage: '' });
+  const margin = EXCHANGE_RATE.profitMargin || 0;
+  const defaultPrice = 1.00;
+  const defaultCost = parseFloat((defaultPrice / (1 + (margin / 100))).toFixed(2));
+  adminState.tempPackages.push({ amount: 100, priceUsd: defaultPrice, costUsd: defaultCost, label: `100 ${currencyName}`, isOutofStock: false, bgImage: '' });
   renderTempPackages();
 }
 
@@ -2452,11 +2468,17 @@ function updateTempPackageField(index, field, value) {
   const pkg = adminState.tempPackages[index];
   if (!pkg) return;
   if (field === 'amount') pkg.amount = value;
-  else if (field === 'priceUsd') pkg.priceUsd = parseFloat(value) || 0.0;
+  else if (field === 'priceUsd') {
+    pkg.priceUsd = parseFloat(value) || 0.0;
+    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '') ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
+    if (!pkg.costUsd || pkg.costUsd <= 0) {
+      if (pkg.priceUsd > 0) pkg.costUsd = parseFloat((pkg.priceUsd / (1 + (margin / 100))).toFixed(2));
+    }
+  }
   else if (field === 'costUsd') {
     pkg.costUsd = parseFloat(value) || 0.0;
     // Auto-calculate price
-    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null) ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
+    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '') ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
     if (pkg.costUsd > 0) pkg.priceUsd = parseFloat((pkg.costUsd + (pkg.costUsd * margin / 100)).toFixed(2));
     renderTempPackages();
   }
@@ -2467,7 +2489,7 @@ function updateTempPackageField(index, field, value) {
       pkg.customMargin = parseFloat(value);
     }
     // Auto-calculate price
-    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null) ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
+    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '') ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
     if (pkg.costUsd > 0) pkg.priceUsd = parseFloat((pkg.costUsd + (pkg.costUsd * margin / 100)).toFixed(2));
     renderTempPackages();
   }
@@ -2504,6 +2526,10 @@ function saveProduct() {
     if (pkg.priceUsd <= 0) {
       showAdminToast(`❌ El paquete #${i + 1} tiene precio inválido`, 'error');
       return;
+    }
+    const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '') ? pkg.customMargin : (EXCHANGE_RATE.profitMargin || 0);
+    if ((!pkg.costUsd || pkg.costUsd <= 0) && pkg.priceUsd > 0) {
+      pkg.costUsd = parseFloat((pkg.priceUsd / (1 + (margin / 100))).toFixed(2));
     }
     if (!pkg.label && pkg.amount) pkg.label = productCurrency ? `${pkg.amount} ${productCurrency}` : `${pkg.amount}`;
   }

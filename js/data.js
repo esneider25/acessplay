@@ -267,6 +267,13 @@ function applyProfitMargin(globalMargin) {
   let updated = 0;
   PRODUCTS.forEach(product => {
     (product.packages || []).forEach(pkg => {
+      // Si el costo del proveedor no está cargado pero existe un precio, derivar costUsd automáticamente
+      if ((!pkg.costUsd || pkg.costUsd <= 0) && pkg.priceUsd > 0) {
+        const marginForDerive = (pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '') 
+          ? parseFloat(pkg.customMargin) 
+          : globalMargin;
+        pkg.costUsd = parseFloat((pkg.priceUsd / (1 + (marginForDerive / 100))).toFixed(2));
+      }
       if (pkg.costUsd && pkg.costUsd > 0) {
         const margin = (pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '') 
           ? parseFloat(pkg.customMargin) 
