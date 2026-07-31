@@ -837,7 +837,19 @@ async function _submitOrderLogic() {
   let sharedScreenshotUrl = null;
   if (appState.selectedScreenshot && appState.selectedPaymentId !== 'wallet') {
     try {
-      sharedScreenshotUrl = await uploadScreenshotWithRetry(appState.selectedScreenshot);
+      const uploadRes = await uploadScreenshotWithRetry(appState.selectedScreenshot);
+      if (uploadRes === false) {
+        return false; // User cancelled modal
+      }
+      if (uploadRes && typeof uploadRes === 'object') {
+        sharedScreenshotUrl = uploadRes.url || null;
+        if (uploadRes.manualRef) {
+          if (!appState.selectedScreenshotOcr) appState.selectedScreenshotOcr = [];
+          appState.selectedScreenshotOcr.unshift(uploadRes.manualRef);
+        }
+      } else if (typeof uploadRes === 'string') {
+        sharedScreenshotUrl = uploadRes;
+      }
     } catch (err) {
       console.error('Error subiendo captura:', err);
       showToast('⚠️ Error al subir captura: ' + (err.message || 'Intenta de nuevo.'));
@@ -970,7 +982,19 @@ async function _submitWalletRechargeLogic() {
 
   let sharedScreenshotUrl = null;
   try {
-    sharedScreenshotUrl = await uploadScreenshotWithRetry(appState.selectedScreenshot);
+    const uploadRes = await uploadScreenshotWithRetry(appState.selectedScreenshot);
+    if (uploadRes === false) {
+      return false; // User cancelled modal
+    }
+    if (uploadRes && typeof uploadRes === 'object') {
+      sharedScreenshotUrl = uploadRes.url || null;
+      if (uploadRes.manualRef) {
+        if (!appState.selectedScreenshotOcr) appState.selectedScreenshotOcr = [];
+        appState.selectedScreenshotOcr.unshift(uploadRes.manualRef);
+      }
+    } else if (typeof uploadRes === 'string') {
+      sharedScreenshotUrl = uploadRes;
+    }
   } catch (err) {
     console.error('Error subiendo captura:', err);
     showToast('⚠️ Error al subir captura: ' + (err.message || 'Intenta de nuevo.'));
@@ -1670,8 +1694,7 @@ function generateThumbnail(file) {
 }
 
 // ── Robust Firebase Storage Upload ──
-// Wraps UploadTask in a proper Promise with progress-aware timeout and retry
-function uploadToFirebaseStorage(blob, timeoutMs = 45000) {
+function uploadToFirebaseStorage(blob, timeoutMs = 20000) {
   return new Promise((resolve, reject) => {
     const tempId = generateOrderRef();
     const randomSecret = Math.random().toString(36).substring(2, 10);
@@ -1679,41 +1702,26 @@ function uploadToFirebaseStorage(blob, timeoutMs = 45000) {
 
     const uploadTask = storageRef.put(blob);
     let settled = false;
-    let timeoutId = null;
 
-    // Progress-aware timeout: resets every time bytes are transferred
-    function resetTimeout() {
-      if (timeoutId) clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        if (!settled) {
-          settled = true;
-          uploadTask.cancel();
-          reject(new Error('Tiempo de espera agotado. Intenta de nuevo.'));
-        }
-      }, timeoutMs);
-    }
-
-    resetTimeout(); // Start initial timeout
+    // Strict 20-second timeout without reset on progress
+    const timeoutId = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        try { uploadTask.cancel(); } catch (e) {}
+        reject(new Error('Tiempo de espera agotado (20s).'));
+      }
+    }, timeoutMs);
 
     uploadTask.on('state_changed',
-      (snapshot) => {
-        // Progress callback — reset timeout on every progress event
-        resetTimeout();
-      },
+      (snapshot) => {},
       (error) => {
-        // Error callback
         if (timeoutId) clearTimeout(timeoutId);
         if (!settled) {
           settled = true;
-          if (error.code === 'storage/canceled') {
-            reject(new Error('Tiempo de espera agotado. Intenta de nuevo.'));
-          } else {
-            reject(error);
-          }
+          reject(error);
         }
       },
       async () => {
-        // Complete callback
         if (timeoutId) clearTimeout(timeoutId);
         if (!settled) {
           settled = true;
@@ -1729,23 +1737,107 @@ function uploadToFirebaseStorage(blob, timeoutMs = 45000) {
   });
 }
 
-async function uploadScreenshotWithRetry(file, maxRetries = 1) {
+async function uploadScreenshotWithRetry(file) {
   const compressedBlob = await compressFileToBlob(file);
 
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      const url = await uploadToFirebaseStorage(compressedBlob, 45000);
-      return url;
-    } catch (err) {
-      console.warn(`Upload attempt ${attempt + 1} failed:`, err.message);
-      if (attempt < maxRetries) {
-        // Wait 2 seconds before retrying
-        await new Promise(r => setTimeout(r, 2000));
-      } else {
-        throw err;
-      }
-    }
+  try {
+    const url = await uploadToFirebaseStorage(compressedBlob, 20000);
+    return { url: url };
+  } catch (err) {
+    console.warn("Upload de captura superó los 20s o falló:", err.message);
+    return await promptManualReferenceModal(file);
   }
+}
+
+function promptManualReferenceModal(file) {
+  return new Promise((resolve) => {
+    const existingModal = document.getElementById('timeout-ref-modal-container');
+    if (existingModal) existingModal.remove();
+
+    const modalContainer = document.createElement('div');
+    modalContainer.id = 'timeout-ref-modal-container';
+    
+    const existingOcr = (appState.selectedScreenshotOcr && appState.selectedScreenshotOcr.length > 0) 
+      ? appState.selectedScreenshotOcr[0] 
+      : '';
+
+    modalContainer.innerHTML = `
+      <div class="modal-overlay active" style="z-index: 99999; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.85); padding: 15px;">
+        <div class="modal payment-flow-modal" style="text-align: center; max-width: 440px; width: 100%; border: 1px solid rgba(14, 165, 233, 0.4); background: #0f172a; padding: 25px 20px; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.9);">
+          <div style="font-size: 3rem; margin-bottom: 8px;">⏱️</div>
+          <h3 style="color: #0ea5e9; margin-bottom: 8px; font-size: 1.3rem; font-weight: 700;">Envío de comprobante demorado</h3>
+          <p style="color: #94a3b8; margin-bottom: 18px; line-height: 1.5; font-size: 0.92rem; text-align: center;">
+            La subida de la imagen tardó más de 20 segundos debido a la conexión.<br>
+            <strong style="color: #e2e8f0;">Para no hacerte esperar más</strong>, ingresa los <u style="color: #38bdf8;">últimos 6 dígitos</u> del número de referencia de tu pago:
+          </p>
+          
+          <div style="margin-bottom: 20px; text-align: left;">
+            <label style="display: block; color: #f1f5f9; font-size: 0.85rem; margin-bottom: 6px; font-weight: 600;">
+              Últimos 6 dígitos de referencia:
+            </label>
+            <input type="text" id="manual-ref-input" maxlength="12" placeholder="Ej: 123456" 
+                   value="${existingOcr}"
+                   style="width: 100%; padding: 14px 16px; border-radius: 10px; border: 1px solid rgba(14, 165, 233, 0.5); background: rgba(0,0,0,0.5); color: #fff; font-size: 1.25rem; text-align: center; letter-spacing: 2px; font-weight: bold; outline: none; box-sizing: border-box;">
+            <div id="manual-ref-error" style="color: #ef4444; font-size: 0.82rem; margin-top: 6px; display: none; text-align: center;">
+              ⚠️ Ingresa al menos los últimos 4 a 6 dígitos del pago.
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button id="btn-confirm-manual-ref" class="btn-primary" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px; font-weight: bold; background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; cursor: pointer; color: white;">
+              🚀 Confirmar Pedido con Referencia
+            </button>
+            <button id="btn-retry-upload-image" style="width: 100%; padding: 11px; font-size: 0.88rem; border-radius: 10px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; cursor: pointer;">
+              🔄 Reintentar subir imagen
+            </button>
+            <button id="btn-cancel-manual-ref" style="width: 100%; padding: 8px; font-size: 0.8rem; background: transparent; border: none; color: #64748b; cursor: pointer; text-decoration: underline;">
+              Cancelar y volver
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalContainer);
+
+    const refInput = document.getElementById('manual-ref-input');
+    const errDiv = document.getElementById('manual-ref-error');
+    setTimeout(() => refInput && refInput.focus(), 100);
+
+    document.getElementById('btn-confirm-manual-ref').addEventListener('click', () => {
+      const val = refInput.value.trim().replace(/\s+/g, '');
+      if (!val || val.length < 4) {
+        errDiv.style.display = 'block';
+        refInput.focus();
+        return;
+      }
+      modalContainer.remove();
+      resolve({ url: null, manualRef: val });
+    });
+
+    refInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        document.getElementById('btn-confirm-manual-ref').click();
+      }
+    });
+
+    document.getElementById('btn-retry-upload-image').addEventListener('click', async () => {
+      modalContainer.remove();
+      try {
+        const compressedBlob = await compressFileToBlob(file);
+        const url = await uploadToFirebaseStorage(compressedBlob, 20000);
+        resolve({ url: url });
+      } catch (retryErr) {
+        const result = await promptManualReferenceModal(file);
+        resolve(result);
+      }
+    });
+
+    document.getElementById('btn-cancel-manual-ref').addEventListener('click', () => {
+      modalContainer.remove();
+      resolve(false);
+    });
+  });
 }
 
 
