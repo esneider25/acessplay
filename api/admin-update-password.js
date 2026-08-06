@@ -13,8 +13,45 @@ if (!admin.apps.length) {
 }
 
 export default async function handler(req, res) {
+  // Rate Limiting
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+  const now = Date.now();
+  if (!global.rateLimitAdminUpdate) global.rateLimitAdminUpdate = new Map();
+  const rateLimit = global.rateLimitAdminUpdate;
+  const RATE_LIMIT_WINDOW = 60000;
+  const MAX_REQUESTS = 10;
+  
+  if (rateLimit.has(ip)) {
+    const data = rateLimit.get(ip);
+    if (now - data.startTime > RATE_LIMIT_WINDOW) {
+      rateLimit.set(ip, { count: 1, startTime: now });
+    } else {
+      data.count++;
+      if (data.count > MAX_REQUESTS) {
+        return res.status(429).json({ error: 'Too many requests, please try again later.' });
+      }
+      rateLimit.set(ip, data);
+    }
+  } else {
+    rateLimit.set(ip, { count: 1, startTime: now });
+  }
+
+  // Cleanup old entries
+  if (Math.random() < 0.05) {
+    for (const [key, value] of rateLimit.entries()) {
+      if (now - value.startTime > RATE_LIMIT_WINDOW) rateLimit.delete(key);
+    }
+  }
+
+  // Allow CORS securely
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  const allowedOrigins = ['https://accesplay.com', 'https://admin.accesplay.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://accesplay.com');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -57,10 +94,7 @@ export default async function handler(req, res) {
       password: newPassword
     });
 
-    // 2. Update Realtime Database user object
-    await admin.database().ref(`users/${targetUid}`).update({
-      password: newPassword
-    });
+    // (Password is intentionally NOT saved in Realtime Database for security reasons)
 
     return res.status(200).json({ success: true, message: 'Contraseña actualizada con éxito' });
 

@@ -1,7 +1,43 @@
 export default async function handler(req, res) {
-  // Allow CORS
+  // Rate Limiting
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+  const now = Date.now();
+  if (!global.rateLimitTelegram) global.rateLimitTelegram = new Map();
+  const rateLimit = global.rateLimitTelegram;
+  const RATE_LIMIT_WINDOW = 60000;
+  const MAX_REQUESTS = 10;
+  
+  if (rateLimit.has(ip)) {
+    const data = rateLimit.get(ip);
+    if (now - data.startTime > RATE_LIMIT_WINDOW) {
+      rateLimit.set(ip, { count: 1, startTime: now });
+    } else {
+      data.count++;
+      if (data.count > MAX_REQUESTS) {
+        return res.status(429).json({ error: 'Too many requests, please try again later.' });
+      }
+      rateLimit.set(ip, data);
+    }
+  } else {
+    rateLimit.set(ip, { count: 1, startTime: now });
+  }
+
+  // Cleanup old entries
+  if (Math.random() < 0.05) {
+    for (const [key, value] of rateLimit.entries()) {
+      if (now - value.startTime > RATE_LIMIT_WINDOW) rateLimit.delete(key);
+    }
+  }
+
+  // Allow CORS securely
   res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  const allowedOrigins = ['https://accesplay.com', 'https://admin.accesplay.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://accesplay.com');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
@@ -14,7 +50,8 @@ export default async function handler(req, res) {
 
   // ── Verificar clave secreta de API para evitar spam externo ──
   const apiSecret = process.env.TELEGRAM_API_SECRET;
-  const providedSecret = req.headers['x-api-secret'] || req.body?.apiSecret;
+  const providedSecret = req.headers['x-api-secret'] || (req.body && req.body.apiSecret);
+  // Ensure we always require the secret if we want to be secure, or at least if it's set.
   if (apiSecret && providedSecret !== apiSecret) {
     return res.status(403).json({ error: 'Acceso no autorizado' });
   }
@@ -22,9 +59,9 @@ export default async function handler(req, res) {
   try {
     const { type, text, inlineKeyboard, photoBase64 } = req.body;
     
-    // El token (primero intenta variables de entorno, luego el body)
-    const botToken = process.env.TELEGRAM_BOT_TOKEN || req.body?.botToken;
-    const chatId = process.env.TELEGRAM_CHAT_ID || req.body?.chatId;
+    // Only use environment variables for tokens to prevent exploitation
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
 
     if (!botToken || !chatId) {
       return res.status(500).json({ error: "Credenciales de Telegram no configuradas en el servidor." });

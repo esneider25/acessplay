@@ -57,11 +57,11 @@
       }
     },
     "telegram_config": { 
-      ".read": "true",
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "discounts": { 
-      ".read": "true",
+      ".read": "auth != null",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "_sysTracking": {
@@ -77,7 +77,7 @@
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'" 
     },
     "order_counter": { 
-      ".read": "true", 
+      ".read": "auth != null", 
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'" 
     },
     "api_configs": { 
