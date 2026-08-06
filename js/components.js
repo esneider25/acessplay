@@ -959,10 +959,10 @@ function renderOrderLookup() {
         <div class="tracking-lookup-container">
           <div class="tracking-lookup-icon">🔍</div>
           <h2>Mis Pedidos</h2>
-          <p>Ingresa tu número de referencia, correo electrónico o teléfono para ver tu historial de pedidos.</p>
+          <p>Ingresa tu número de referencia (Ej: AP-1234) para ver el estado de tu pedido.</p>
           <div class="tracking-lookup-form">
             <input type="text" class="form-input" id="lookup-input"
-                   placeholder="Ej: 0001, juan@gmail.com, o +58412..." autocomplete="off"
+                   placeholder="Ej: AP-1234" autocomplete="off"
                    onkeydown="if(event.key==='Enter')lookupOrder()">
             <button class="hero-btn-primary" onclick="lookupOrder()">
               Buscar

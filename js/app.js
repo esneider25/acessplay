@@ -1251,8 +1251,13 @@ async function lookupOrder() {
       showToast('❌ Error al buscar pedido');
     }
   } else {
-    // Búsqueda por correo/teléfono: ahora requiere inicio de sesión para el historial completo
-    showToast('⚠️ Para buscar por correo/teléfono debes Iniciar Sesión, o usa tu número de pedido (Ej: AP-1234)', 'info');
+    // Búsqueda por correo/teléfono:
+    if (firebase.auth().currentUser) {
+      showToast('Tus pedidos están en tu perfil', 'info');
+      navigateTo('dashboard');
+    } else {
+      showToast('⚠️ Para buscar por correo/teléfono debes Iniciar Sesión, o usa tu número de pedido (Ej: AP-1234)', 'info');
+    }
   }
 }
 
