@@ -1219,10 +1219,10 @@ async function lookupOrder() {
   const val = input.value.trim();
 
   let orderIdToTrack = null;
-  if (/^\d{1,6}$/.test(val)) {
-    orderIdToTrack = 'AP-' + val;
-  } else if (/^AP-\d{1,6}$/i.test(val)) {
+  if (/^AP-/i.test(val)) {
     orderIdToTrack = val.toUpperCase();
+  } else if (/^\d{1,6}(?:-[A-Za-z0-9]+)?$/.test(val)) {
+    orderIdToTrack = 'AP-' + val.toUpperCase();
   }
 
   if (orderIdToTrack) {
