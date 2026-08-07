@@ -343,8 +343,15 @@ function renderProductDetail(productId) {
       else if (amtStr.length > 9) amtStyle = 'font-size: 1.45rem; line-height: 1.1; white-space: normal; word-break: break-word;';
       else if (amtStr.length > 6) amtStyle = 'font-size: 1.9rem;';
       
-      const priceHtml = (pkg.priceUsd !== undefined && pkg.priceUsd !== null) 
-        ? `<div class="package-price-badge" data-usd="${pkg.priceUsd.toFixed(2)}" data-bs="${formatBs(usdToBs(pkg.priceUsd))}">Bs. ${formatBs(usdToBs(pkg.priceUsd))}</div>`
+      let displayPriceUsd = pkg.priceUsd;
+      if (typeof userProfile !== 'undefined' && userProfile && userProfile.role === 'revendedor' && userProfile.discountPercentage > 0 && product.id !== 'wallet-recharge') {
+        if (pkg.costUsd && pkg.costUsd > 0) {
+          displayPriceUsd = pkg.costUsd + (pkg.costUsd * (userProfile.discountPercentage / 100));
+        }
+      }
+
+      const priceHtml = (displayPriceUsd !== undefined && displayPriceUsd !== null) 
+        ? `<div class="package-price-badge" data-usd="${displayPriceUsd.toFixed(2)}" data-bs="${formatBs(usdToBs(displayPriceUsd))}">Bs. ${formatBs(usdToBs(displayPriceUsd))}</div>`
         : '';
 
       if (pkg.isOutofStock) {
