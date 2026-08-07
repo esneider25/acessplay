@@ -123,9 +123,27 @@ function showAnnouncementModal(message) {
 
   const modalContainer = document.createElement('div');
   modalContainer.id = 'announcement-modal-container';
-  modalContainer.innerHTML = `
-    <div class="modal-overlay active" style="z-index: 9999; backdrop-filter: blur(5px);">
-      <div class="modal payment-flow-modal" style="text-align: center; max-width: 500px; border: 1px solid rgba(0, 229, 195, 0.3); background: var(--bg-card); padding: 35px 25px;">
+
+  // Detect if message is a direct image URL or contains HTML image tags
+  const isImageUrl = message.trim().match(/^https?:\/\/.*\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i) != null;
+  const isHtmlImage = message.includes('<img');
+
+  let contentHtml = '';
+  
+  if (isImageUrl || isHtmlImage) {
+    // Style for full image popup
+    contentHtml = `
+      <div class="modal payment-flow-modal" style="text-align: center; max-width: 480px; width: 100%; background: transparent; padding: 0; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.9);">
+        ${isImageUrl ? `<img src="${message.trim()}" style="width: 100%; border-radius: 16px 16px 0 0; display: block; object-fit: contain; max-height: 70vh;">` : `<div style="width: 100%; border-radius: 16px 16px 0 0; overflow: hidden; background: #000; display: flex; justify-content: center;">${message}</div>`}
+        <button id="announcement-modal-btn" style="width: 100%; padding: 18px; font-size: 1.05rem; border-radius: 0 0 16px 16px; font-weight: bold; background: #22c55e; color: white; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s;">
+          ✓ He leído y acepto la información
+        </button>
+      </div>
+    `;
+  } else {
+    // Standard text style
+    contentHtml = `
+      <div class="modal payment-flow-modal" style="text-align: center; max-width: 500px; width: 100%; border: 1px solid rgba(0, 229, 195, 0.3); background: var(--bg-card); padding: 35px 25px; border-radius: 16px;">
         <div style="font-size: 3.5rem; margin-bottom: 15px; text-shadow: 0 0 15px rgba(0, 229, 195, 0.4);">📢</div>
         <h3 style="color: #0ea5e9; margin-bottom: 15px; font-size: 1.5rem;">Aviso Importante</h3>
         <div style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6; font-size: 1.05rem; text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
@@ -135,6 +153,12 @@ function showAnnouncementModal(message) {
           Entendido 👍
         </button>
       </div>
+    `;
+  }
+
+  modalContainer.innerHTML = `
+    <div class="modal-overlay active" style="z-index: 99999; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.85); padding: 15px;">
+      ${contentHtml}
     </div>
   `;
   document.body.appendChild(modalContainer);
