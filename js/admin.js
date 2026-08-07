@@ -3756,34 +3756,8 @@ function renderSettings(container) {
           <textarea id="setting-announcement-msg" class="admin-form-textarea" rows="3" placeholder="Si subes una imagen arriba, este texto se ignorará.">${config.announcementMessage || ''}</textarea>
         </div>
       </div>
-
-      <script>
-        async function uploadAnnouncementImage(input) {
-          if (!input.files || !input.files[0]) return;
-          const file = input.files[0];
-          const status = document.getElementById('announcement-upload-status');
-          status.innerText = 'Subiendo... ⏳';
-          try {
-            const storageRef = firebase.storage().ref();
-            const fileRef = storageRef.child('settings/announcement_' + Date.now() + '_' + file.name);
-            await fileRef.put(file);
-            const url = await fileRef.getDownloadURL();
-            document.getElementById('setting-announcement-image-url').value = url;
-            document.getElementById('announcement-image-preview').src = url;
-            document.getElementById('announcement-image-preview-container').style.display = 'block';
-            status.innerText = '✅ Subida con éxito';
-          } catch (e) {
-            console.error('Error uploading:', e);
-            status.innerText = '❌ Error al subir';
-          }
-        }
-        function removeAnnouncementImage() {
-          document.getElementById('setting-announcement-image-url').value = '';
-          document.getElementById('announcement-image-preview').src = '';
-          document.getElementById('announcement-image-preview-container').style.display = 'none';
-        }
-      </script>
-
+      </div>
+      
       <div class="admin-card" style="grid-column: 1 / -1;">
         <div class="admin-card-header">
           <h3 class="admin-card-title">📜 Términos y Condiciones</h3>
@@ -3856,6 +3830,32 @@ window.renderTermsEditor = function () {
   `).join('') + `
     <button class="btn-secondary" onclick="window.currentTermsEditorData.push({title:'', titleColor:'#0ea5e9', desc:'', descColor:'#e2e8f0'}); window.renderTermsEditor()" style="width: 100%; border-style: dashed; padding: 12px; margin-top: 10px; justify-content: center;">+ Agregar Nueva Sección</button>
   `;
+};
+
+window.uploadAnnouncementImage = async function(input) {
+  if (!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  const status = document.getElementById('announcement-upload-status');
+  status.innerText = 'Subiendo... ⏳';
+  try {
+    const storageRef = firebase.storage().ref();
+    const fileRef = storageRef.child('settings/announcement_' + Date.now() + '_' + file.name);
+    await fileRef.put(file);
+    const url = await fileRef.getDownloadURL();
+    document.getElementById('setting-announcement-image-url').value = url;
+    document.getElementById('announcement-image-preview').src = url;
+    document.getElementById('announcement-image-preview-container').style.display = 'block';
+    status.innerText = '✅ Subida con éxito';
+  } catch (e) {
+    console.error('Error uploading:', e);
+    status.innerText = '❌ Error al subir';
+  }
+};
+
+window.removeAnnouncementImage = function() {
+  document.getElementById('setting-announcement-image-url').value = '';
+  document.getElementById('announcement-image-preview').src = '';
+  document.getElementById('announcement-image-preview-container').style.display = 'none';
 };
 
 function adminSaveSettings() {
