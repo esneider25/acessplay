@@ -3837,11 +3837,44 @@ window.uploadAnnouncementImage = async function(input) {
   const file = input.files[0];
   const status = document.getElementById('announcement-upload-status');
   status.innerText = 'Subiendo... ⏳';
+  
   try {
-    const storageRef = firebase.storage().ref();
-    const fileRef = storageRef.child('settings/announcement_' + Date.now() + '_' + file.name);
-    await fileRef.put(file);
-    const url = await fileRef.getDownloadURL();
+    const url = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = async () => {
+        try {
+          const base64data = reader.result;
+          const headers = { 'Content-Type': 'application/json' };
+          if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+            try {
+              const token = await firebase.auth().currentUser.getIdToken();
+              headers['Authorization'] = `Bearer ${token}`;
+            } catch (e) {
+              console.warn("Could not get auth token for upload", e);
+            }
+          }
+          
+          const path = 'settings/announcement_' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+          const res = await fetch('/api/upload', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ imageBase64: base64data, path: path })
+          });
+          
+          if (!res.ok) throw new Error(`Error de servidor: ${res.status}`);
+          
+          const data = await res.json();
+          if (data.error) throw new Error(data.error);
+          
+          resolve(data.url);
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.onerror = () => reject(new Error("Error leyendo el archivo"));
+    });
+
     document.getElementById('setting-announcement-image-url').value = url;
     document.getElementById('announcement-image-preview').src = url;
     document.getElementById('announcement-image-preview-container').style.display = 'block';
