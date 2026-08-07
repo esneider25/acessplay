@@ -3819,7 +3819,7 @@ function renderSettings(container) {
               <optgroup label="Productos">
                 ${typeof PRODUCTS !== 'undefined' ? PRODUCTS.map(p => `<option value="product:${p.id}" ${config.announcementLink === `product:${p.id}` ? 'selected' : ''}>${p.name}</option>`).join('') : ''}
               </optgroup>
-              <option value="external" ${config.announcementLink && config.announcementLink.startsWith('http') ? 'selected' : ''}>🌐 URL Externa (Ej: WhatsApp)</option>
+              <option value="external" ${config.announcementLink && config.announcementLink.startsWith('http') ? 'selected' : ''}>🌐 URL Externa</option>
             </select>
             <input type="url" id="setting-announcement-link" class="admin-form-input" style="flex: 1; display: ${config.announcementLink && config.announcementLink.startsWith('http') ? 'block' : 'none'};" placeholder="https://..." value="${config.announcementLink && config.announcementLink.startsWith('http') ? config.announcementLink : ''}">
           </div>
