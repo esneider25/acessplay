@@ -118,23 +118,34 @@ window.handleStoreInstallClick = function () {
 };
 
 // ── Render ──
-function showAnnouncementModal(message) {
+function showAnnouncementModal(config) {
   if (sessionStorage.getItem('recargaaccessplay_announcement_seen') === 'true') return;
 
   const modalContainer = document.createElement('div');
   modalContainer.id = 'announcement-modal-container';
 
-  // Detect if message is a direct image URL or contains HTML image tags
-  const isImageUrl = message.trim().match(/^https?:\/\/.*\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i) != null;
+  const imageUrl = config.announcementImageUrl;
+  const message = config.announcementMessage || '';
+  const link = config.announcementLink;
+
+  // Detect if message is a direct image URL or contains HTML image tags (fallback if they didn't use the new upload field)
+  const isImageUrlText = message.trim().match(/^https?:\/\/.*\.(jpeg|jpg|gif|png|webp|svg)(\?.*)?$/i) != null;
   const isHtmlImage = message.includes('<img');
 
   let contentHtml = '';
   
-  if (isImageUrl || isHtmlImage) {
+  if (imageUrl || isImageUrlText || isHtmlImage) {
+    const finalImageSrc = imageUrl || (isImageUrlText ? message.trim() : null);
+    const imgElement = finalImageSrc 
+      ? `<img src="${finalImageSrc}" style="width: 100%; border-radius: 16px 16px 0 0; display: block; object-fit: contain; max-height: 70vh;">` 
+      : `<div style="width: 100%; border-radius: 16px 16px 0 0; overflow: hidden; background: #000; display: flex; justify-content: center;">${message}</div>`;
+      
+    const imageWithLink = link ? `<a href="${link}" target="_blank" style="display: block;">${imgElement}</a>` : imgElement;
+
     // Style for full image popup
     contentHtml = `
       <div class="modal payment-flow-modal" style="text-align: center; max-width: 480px; width: 100%; background: transparent; padding: 0; border: none; box-shadow: 0 20px 50px rgba(0,0,0,0.9);">
-        ${isImageUrl ? `<img src="${message.trim()}" style="width: 100%; border-radius: 16px 16px 0 0; display: block; object-fit: contain; max-height: 70vh;">` : `<div style="width: 100%; border-radius: 16px 16px 0 0; overflow: hidden; background: #000; display: flex; justify-content: center;">${message}</div>`}
+        ${imageWithLink}
         <button id="announcement-modal-btn" style="width: 100%; padding: 18px; font-size: 1.05rem; border-radius: 0 0 16px 16px; font-weight: bold; background: #22c55e; color: white; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: background 0.2s;">
           ✓ He leído y acepto la información
         </button>
@@ -233,8 +244,8 @@ function renderApp() {
       initScrollObserver();
       initCarousel();
       if (typeof initCatalogCarousel === 'function') initCatalogCarousel();
-      if (config.announcementEnabled && config.announcementMessage && termsAccepted) {
-        setTimeout(() => showAnnouncementModal(config.announcementMessage), 500);
+      if (config.announcementEnabled && (config.announcementMessage || config.announcementImageUrl) && termsAccepted) {
+        setTimeout(() => showAnnouncementModal(config), 500);
       }
     });
   } else if (appState.currentView === 'product') {

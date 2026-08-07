@@ -3722,19 +3722,67 @@ function renderSettings(container) {
 
       <div class="admin-card" style="grid-column: 1 / -1;">
         <div class="admin-card-header">
-          <h3 class="admin-card-title">📢 Mensaje Emergente (Aviso Inicial)</h3>
+          <h3 class="admin-card-title">📢 Aviso Inicial (Popup Promocional)</h3>
         </div>
         <div class="admin-form-group">
           <label class="admin-form-label" style="display: flex; justify-content: space-between; align-items: center;">
-            <span>Activar Mensaje al entrar a la página</span>
+            <span>Activar Popup Promocional</span>
             <input type="checkbox" id="setting-announcement-enabled" ${config.announcementEnabled ? 'checked' : ''} style="width: 24px; height: 24px; accent-color: #0ea5e9; cursor: pointer;">
           </label>
         </div>
+        
+        <div class="admin-form-group" style="margin-top: 15px;">
+          <label class="admin-form-label">Subir Imagen Promocional (Recomendado)</label>
+          <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+            <input type="file" id="announcement-image-upload" accept="image/*" style="display: none;" onchange="uploadAnnouncementImage(this)">
+            <button class="btn btn-secondary" onclick="document.getElementById('announcement-image-upload').click()">📷 Subir Imagen desde el dispositivo</button>
+            <span id="announcement-upload-status" style="font-size: 0.9rem; color: var(--text-secondary);"></span>
+          </div>
+          <div id="announcement-image-preview-container" style="display: ${config.announcementImageUrl ? 'block' : 'none'}; margin-bottom: 15px;">
+            <img id="announcement-image-preview" src="${config.announcementImageUrl || ''}" style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <button class="btn-secondary" style="margin-top: 10px; background: rgba(2ef, 68, 68, 0.1); color: #ef4444;" onclick="removeAnnouncementImage()">🗑️ Quitar Imagen</button>
+          </div>
+          <input type="hidden" id="setting-announcement-image-url" value="${config.announcementImageUrl || ''}">
+        </div>
+
         <div class="admin-form-group">
-          <label class="admin-form-label">Contenido del Mensaje <span style="font-weight: 400; color:var(--text-muted);">(Permite HTML básico)</span></label>
-          <textarea id="setting-announcement-msg" class="admin-form-textarea" rows="3">${config.announcementMessage || ''}</textarea>
+          <label class="admin-form-label">Enlace de Redirección (Opcional)</label>
+          <input type="url" id="setting-announcement-link" class="admin-form-input" placeholder="https://tu-enlace.com o https://wa.me/..." value="${config.announcementLink || ''}">
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">Si colocas un enlace aquí, el cliente será redirigido al hacer click en la imagen.</p>
+        </div>
+
+        <div class="admin-form-group" style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+          <label class="admin-form-label">Mensaje de Texto (Alternativa a la imagen) <span style="font-weight: 400; color:var(--text-muted);">(Permite HTML básico)</span></label>
+          <textarea id="setting-announcement-msg" class="admin-form-textarea" rows="3" placeholder="Si subes una imagen arriba, este texto se ignorará.">${config.announcementMessage || ''}</textarea>
         </div>
       </div>
+
+      <script>
+        async function uploadAnnouncementImage(input) {
+          if (!input.files || !input.files[0]) return;
+          const file = input.files[0];
+          const status = document.getElementById('announcement-upload-status');
+          status.innerText = 'Subiendo... ⏳';
+          try {
+            const storageRef = firebase.storage().ref();
+            const fileRef = storageRef.child('settings/announcement_' + Date.now() + '_' + file.name);
+            await fileRef.put(file);
+            const url = await fileRef.getDownloadURL();
+            document.getElementById('setting-announcement-image-url').value = url;
+            document.getElementById('announcement-image-preview').src = url;
+            document.getElementById('announcement-image-preview-container').style.display = 'block';
+            status.innerText = '✅ Subida con éxito';
+          } catch (e) {
+            console.error('Error uploading:', e);
+            status.innerText = '❌ Error al subir';
+          }
+        }
+        function removeAnnouncementImage() {
+          document.getElementById('setting-announcement-image-url').value = '';
+          document.getElementById('announcement-image-preview').src = '';
+          document.getElementById('announcement-image-preview-container').style.display = 'none';
+        }
+      </script>
 
       <div class="admin-card" style="grid-column: 1 / -1;">
         <div class="admin-card-header">
@@ -3819,13 +3867,15 @@ function adminSaveSettings() {
   const maintenance = document.getElementById('setting-maintenance').checked;
   const announcementEnabled = document.getElementById('setting-announcement-enabled').checked;
   const announcementMessage = document.getElementById('setting-announcement-msg').value;
+  const announcementImageUrl = document.getElementById('setting-announcement-image-url').value;
+  const announcementLink = document.getElementById('setting-announcement-link').value.trim();
   const enableRouletteEl = document.getElementById('setting-enable-roulette');
   const enableRoulette = enableRouletteEl ? enableRouletteEl.checked : true;
   const rouletteProbEl = document.getElementById('setting-roulette-probability');
   const rouletteWinProbability = rouletteProbEl ? parseInt(rouletteProbEl.value) : 2;
   const termsAndConditions = window.currentTermsEditorData || [];
 
-  saveSettings({ whatsapp, whatsappChannel, instagram, telegram, schedule, maintenance, announcementEnabled, announcementMessage, enableRoulette, rouletteWinProbability, termsAndConditions });
+  saveSettings({ whatsapp, whatsappChannel, instagram, telegram, schedule, maintenance, announcementEnabled, announcementMessage, announcementImageUrl, announcementLink, enableRoulette, rouletteWinProbability, termsAndConditions });
   showAdminToast('✅ Configuración guardada', 'success');
 }
 
