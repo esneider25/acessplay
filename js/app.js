@@ -140,7 +140,14 @@ function showAnnouncementModal(config) {
       ? `<img src="${finalImageSrc}" style="width: 100%; border-radius: 16px 16px 0 0; display: block; object-fit: contain; max-height: 70vh;">` 
       : `<div style="width: 100%; border-radius: 16px 16px 0 0; overflow: hidden; background: #000; display: flex; justify-content: center;">${message}</div>`;
       
-    const imageWithLink = link ? `<a href="${link}" target="_blank" style="display: block;">${imgElement}</a>` : imgElement;
+    let imageWithLink = imgElement;
+    if (link) {
+      if (link.startsWith('http')) {
+        imageWithLink = `<a href="${link}" target="_blank" style="display: block;">${imgElement}</a>`;
+      } else {
+        imageWithLink = `<a href="#" onclick="handleAnnouncementClick(event, '${link}')" style="display: block;">${imgElement}</a>`;
+      }
+    }
 
     // Style for full image popup
     contentHtml = `
@@ -152,6 +159,15 @@ function showAnnouncementModal(config) {
       </div>
     `;
   } else {
+    let textLinkBtnHtml = '';
+    if (link) {
+      if (link.startsWith('http')) {
+        textLinkBtnHtml = `<a href="${link}" target="_blank" class="btn-secondary" style="width: 100%; display: block; margin-bottom: 15px; padding: 12px; border-radius: 12px; font-weight: bold; text-decoration: none;">🔗 Más Información</a>`;
+      } else {
+        textLinkBtnHtml = `<button onclick="handleAnnouncementClick(event, '${link}')" class="btn-secondary" style="width: 100%; margin-bottom: 15px; padding: 12px; border-radius: 12px; font-weight: bold;">🔗 Más Información</button>`;
+      }
+    }
+
     // Standard text style
     contentHtml = `
       <div class="modal payment-flow-modal" style="text-align: center; max-width: 500px; width: 100%; border: 1px solid rgba(0, 229, 195, 0.3); background: var(--bg-card); padding: 35px 25px; border-radius: 16px;">
@@ -160,12 +176,30 @@ function showAnnouncementModal(config) {
         <div style="color: var(--text-secondary); margin-bottom: 30px; line-height: 1.6; font-size: 1.05rem; text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px;">
           ${message}
         </div>
+        ${textLinkBtnHtml}
         <button id="announcement-modal-btn" class="btn-primary" style="width: 100%; padding: 14px; font-size: 1.1rem; border-radius: 12px; font-weight: bold; box-shadow: 0 4px 15px rgba(0, 229, 195, 0.3);">
           Entendido 👍
         </button>
       </div>
     `;
   }
+
+window.handleAnnouncementClick = function(e, link) {
+  e.preventDefault();
+  const modalContainer = document.getElementById('announcement-modal-container');
+  if (modalContainer) {
+    sessionStorage.setItem('recargaaccessplay_announcement_seen', 'true');
+    const overlay = modalContainer.querySelector('.modal-overlay');
+    if (overlay) overlay.classList.remove('active');
+    setTimeout(() => modalContainer.remove(), 300);
+  }
+  
+  if (link.startsWith('product:')) {
+    if (typeof navigateTo === 'function') navigateTo('product', link.split(':')[1]);
+  } else {
+    if (typeof scrollToSection === 'function') scrollToSection(link);
+  }
+};
 
   modalContainer.innerHTML = `
     <div class="modal-overlay active" style="z-index: 99999; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.85); padding: 15px;">

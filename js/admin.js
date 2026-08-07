@@ -2005,6 +2005,7 @@ async function testApiConnection(idx) {
 
   showAdminToast(`🔌 Conectando con ${api.name || 'API'}...`, 'info');
 
+  try {
     let token = '';
     if (firebase.auth().currentUser) {
       token = await firebase.auth().currentUser.getIdToken();
@@ -3810,8 +3811,19 @@ function renderSettings(container) {
 
         <div class="admin-form-group">
           <label class="admin-form-label">Enlace de Redirección (Opcional)</label>
-          <input type="url" id="setting-announcement-link" class="admin-form-input" placeholder="https://tu-enlace.com o https://wa.me/..." value="${config.announcementLink || ''}">
-          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">Si colocas un enlace aquí, el cliente será redirigido al hacer click en la imagen.</p>
+          <div style="display: flex; gap: 10px;">
+            <select id="setting-announcement-link-type" class="admin-form-input" style="flex: 1;" onchange="document.getElementById('setting-announcement-link').style.display = this.value === 'external' ? 'block' : 'none'">
+              <option value="">(Ninguno)</option>
+              <option value="catalog" ${config.announcementLink === 'catalog' ? 'selected' : ''}>Catálogo</option>
+              <option value="how-it-works" ${config.announcementLink === 'how-it-works' ? 'selected' : ''}>¿Cómo Funciona?</option>
+              <optgroup label="Productos">
+                ${typeof PRODUCTS !== 'undefined' ? PRODUCTS.map(p => `<option value="product:${p.id}" ${config.announcementLink === `product:${p.id}` ? 'selected' : ''}>${p.name}</option>`).join('') : ''}
+              </optgroup>
+              <option value="external" ${config.announcementLink && config.announcementLink.startsWith('http') ? 'selected' : ''}>🌐 URL Externa (Ej: WhatsApp)</option>
+            </select>
+            <input type="url" id="setting-announcement-link" class="admin-form-input" style="flex: 1; display: ${config.announcementLink && config.announcementLink.startsWith('http') ? 'block' : 'none'};" placeholder="https://..." value="${config.announcementLink && config.announcementLink.startsWith('http') ? config.announcementLink : ''}">
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px;">Si colocas un enlace aquí, el cliente será redirigido al hacer click en el anuncio.</p>
         </div>
 
         <div class="admin-form-group" style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
@@ -3964,7 +3976,10 @@ function adminSaveSettings() {
   const announcementEnabled = document.getElementById('setting-announcement-enabled').checked;
   const announcementMessage = document.getElementById('setting-announcement-msg').value;
   const announcementImageUrl = document.getElementById('setting-announcement-image-url').value;
-  const announcementLink = document.getElementById('setting-announcement-link').value.trim();
+  let announcementLink = document.getElementById('setting-announcement-link-type').value;
+  if (announcementLink === 'external') {
+    announcementLink = document.getElementById('setting-announcement-link').value.trim();
+  }
   const enableRouletteEl = document.getElementById('setting-enable-roulette');
   const enableRoulette = enableRouletteEl ? enableRouletteEl.checked : true;
   const rouletteProbEl = document.getElementById('setting-roulette-probability');
