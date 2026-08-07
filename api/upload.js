@@ -65,18 +65,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Auth Verification
+  // Optional Auth Verification (allow guests but verify if token provided)
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'No autorizado' });
-  }
-
-  const idToken = authHeader.split('Bearer ')[1];
-  let decodedToken;
-  try {
-    decodedToken = await admin.auth().verifyIdToken(idToken);
-  } catch (error) {
-    return res.status(401).json({ error: 'Token inválido o expirado' });
+  let decodedToken = null;
+  
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const idToken = authHeader.split('Bearer ')[1];
+    try {
+      decodedToken = await admin.auth().verifyIdToken(idToken);
+    } catch (error) {
+      console.warn("Invalid token in upload", error);
+      // We don't fail here because we want to allow guest uploads anyway
+      // return res.status(401).json({ error: 'Token inválido o expirado' });
+    }
   }
 
   try {

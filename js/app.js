@@ -1726,9 +1726,18 @@ function uploadToFirebaseStorage(blob, timeoutMs = 30000) {
       reader.onloadend = async () => {
         try {
           const base64data = reader.result;
+          const headers = { 'Content-Type': 'application/json' };
+          if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+            try {
+              const token = await firebase.auth().currentUser.getIdToken();
+              headers['Authorization'] = `Bearer ${token}`;
+            } catch (e) {
+              console.warn("Could not get auth token for upload", e);
+            }
+          }
           const res = await fetch('/api/upload', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({ imageBase64: base64data, path: path })
           });
 
