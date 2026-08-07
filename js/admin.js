@@ -3561,8 +3561,9 @@ function renderMessages(main) {
       </header>
       <div style="display: grid; grid-template-columns: 350px 1fr; gap: 20px; align-items: start; margin-top: 20px;" class="admin-messages-grid">
         <div class="admin-card" style="padding: 15px; max-height: 600px; overflow-y: auto; display: flex; flex-direction: column;">
-          <div class="admin-card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px;">
+          <div class="admin-card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
             <h3 class="admin-card-title">Bandeja de Entrada</h3>
+            <button class="btn-secondary" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 6px 12px; font-size: 0.85rem;" onclick="deleteAllMessages()">🗑️ Limpiar Historial</button>
           </div>
           <div id="admin-chat-list" style="flex: 1; overflow-y: auto; padding-right: 5px;">
             <!-- List loaded via JS -->
@@ -3577,6 +3578,20 @@ function renderMessages(main) {
 
   updateAdminMessagesUI();
 }
+
+window.deleteAllMessages = async function() {
+  if (confirm('¿Estás seguro de que deseas eliminar TODAS las conversaciones del historial? Esta acción liberará espacio, pero no se puede deshacer.')) {
+    try {
+      await firebase.database().ref('messages').remove();
+      if (typeof showAdminToast === 'function') showAdminToast('🗑️ Historial de mensajes eliminado', 'success');
+      currentChatSessionId = null;
+      updateAdminMessagesUI();
+    } catch (e) {
+      console.error(e);
+      if (typeof showAdminToast === 'function') showAdminToast('❌ Error al eliminar historial', 'error');
+    }
+  }
+};
 
 function updateAdminMessagesUI() {
   const allConversations = getMessages();
