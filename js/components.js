@@ -1195,9 +1195,9 @@ window.acceptTerms = function() {
       container.remove();
       // Show announcement if exists
       const config = typeof getSettings === 'function' ? getSettings() : {};
-      if (config.announcementEnabled && config.announcementMessage) {
+      if (config.announcementEnabled && (config.announcementMessage || config.announcementImageUrl)) {
         if (typeof showAnnouncementModal === 'function') {
-          showAnnouncementModal(config.announcementMessage);
+          showAnnouncementModal(config);
         }
       }
     }, 300);
