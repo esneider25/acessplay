@@ -4008,7 +4008,7 @@ function adminSaveSettings() {
 // Global polling for admin panel
 setInterval(() => {
   // Always update badge
-  updateAdminSidebarBadges();
+  if (typeof updateAdminSidebarBadges === 'function') updateAdminSidebarBadges();
   checkAdminNotifications();
 
   // If we are in messages tab, update UI without losing focus

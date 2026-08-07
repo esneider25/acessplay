@@ -30,6 +30,7 @@
     },
     "messages": { 
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
       "$sessionId": {
          ".read": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || $sessionId.matches(/^fp-/)",
          ".write": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || ($sessionId.matches(/^fp-/) && newData.exists())"
@@ -62,7 +63,7 @@
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "discounts": { 
-      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "_sysTracking": {
