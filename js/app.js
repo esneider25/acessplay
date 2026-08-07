@@ -906,6 +906,23 @@ async function _submitOrderLogic() {
 
     const orderId = generateOrderRef();
 
+    let secureAccountPassword = accountPassword;
+    if (secureAccountPassword) {
+      try {
+        const encryptRes = await fetch('/api/crypto', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'encrypt', payload: secureAccountPassword })
+        });
+        if (encryptRes.ok) {
+          const encData = await encryptRes.json();
+          secureAccountPassword = encData.result || secureAccountPassword;
+        }
+      } catch (e) {
+        console.warn('Failed to encrypt password', e);
+      }
+    }
+
     const order = createOrder({
       id: orderId,
       screenshot: sharedScreenshotUrl,
@@ -926,7 +943,7 @@ async function _submitOrderLogic() {
       customerContact: contactInput.value.trim(),
       gameId: singleGameId,
       accountEmail: accountEmail,
-      accountPassword: accountPassword,
+      accountPassword: secureAccountPassword,
       ocrNumbers: appState.selectedScreenshotOcr || [],
       manualRef: (uploadRes && typeof uploadRes === 'object' && uploadRes.manualRef) ? uploadRes.manualRef : null,
       imageHash: appState.selectedScreenshotHash || null,

@@ -86,6 +86,14 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Faltan datos de la imagen.' });
     }
 
+    if (imageBase64.length > 5 * 1024 * 1024) { // Roughly 5MB in base64
+      return res.status(400).json({ error: 'La imagen es demasiado grande.' });
+    }
+
+    if (!path.startsWith('orders_screenshots/') && !path.startsWith('settings/')) {
+      return res.status(400).json({ error: 'Ruta de subida no permitida.' });
+    }
+
     if (!admin.apps.length) {
       return res.status(500).json({ error: "Firebase Admin no configurado en Vercel." });
     }

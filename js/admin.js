@@ -2005,11 +2005,17 @@ async function testApiConnection(idx) {
 
   showAdminToast(`🔌 Conectando con ${api.name || 'API'}...`, 'info');
 
-  try {
+    let token = '';
+    if (firebase.auth().currentUser) {
+      token = await firebase.auth().currentUser.getIdToken();
+    }
     const proxyUrl = '/api/proxy';
     const response = await fetch(proxyUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify({
         action: "test_connection",
         apiKey: api.apiKey,
@@ -2987,9 +2993,9 @@ function openOrderDetailModal(orderId) {
       <div class="admin-detail-row">
         <span class="label">🔒 Contraseña</span>
         <span class="value">
-          <span id="order-pass-display" style="font-family: monospace;">••••••••</span>
-          <button class="copy-btn" onclick="toggleOrderPassword('${order.accountPassword || ''}')" title="Mostrar" id="order-pass-toggle">👁️</button>
-          ${order.accountPassword ? `<button class="copy-btn" onclick="adminCopyText('${order.accountPassword}')" title="Copiar">📋</button>` : ''}
+          <span id="order-pass-display" style="font-family: monospace;" data-password="${escapeHTML(order.accountPassword || '')}">••••••••</span>
+          <button class="copy-btn" onclick="toggleOrderPassword()" title="Mostrar" id="order-pass-toggle">👁️</button>
+          ${order.accountPassword ? `<button class="copy-btn" onclick="adminCopyPassword()" title="Copiar">📋</button>` : ''}
         </span>
       </div>
     `;
@@ -3118,17 +3124,74 @@ function quickUpdateStatusFromModal(orderId, newStatus) {
   }
 }
 
-function toggleOrderPassword(password) {
+async function toggleOrderPassword() {
   const display = document.getElementById('order-pass-display');
   const toggleBtn = document.getElementById('order-pass-toggle');
   if (!display) return;
+  const password = display.getAttribute('data-password');
   if (display.textContent === '••••••••') {
-    display.textContent = password;
+    if (toggleBtn) toggleBtn.innerHTML = '<span class="tracking-spinner" style="font-size:0.8rem">⏳</span>';
+    
+    // Decrypt if it contains ':' (our iv:encrypted format)
+    let decryptedPassword = password;
+    if (password && password.includes(':')) {
+      try {
+        const token = await firebase.auth().currentUser.getIdToken();
+        const res = await fetch('/api/crypto', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ action: 'decrypt', payload: password })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          decryptedPassword = data.result || password;
+        }
+      } catch (e) {
+        console.error("Error decrypting password", e);
+      }
+    }
+    
+    display.textContent = decryptedPassword;
+    display.setAttribute('data-decrypted', decryptedPassword);
     if (toggleBtn) toggleBtn.textContent = '🙈';
   } else {
     display.textContent = '••••••••';
     if (toggleBtn) toggleBtn.textContent = '👁️';
   }
+}
+
+async function adminCopyPassword() {
+  const display = document.getElementById('order-pass-display');
+  if (!display) return;
+  let textToCopy = display.getAttribute('data-decrypted');
+  
+  if (!textToCopy) {
+    // Need to decrypt first
+    const password = display.getAttribute('data-password');
+    let decryptedPassword = password;
+    if (password && password.includes(':')) {
+      try {
+        const token = await firebase.auth().currentUser.getIdToken();
+        const res = await fetch('/api/crypto', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ action: 'decrypt', payload: password })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          decryptedPassword = data.result || password;
+        }
+      } catch (e) {}
+    }
+    textToCopy = decryptedPassword;
+  }
+  adminCopyText(textToCopy);
 }
 
 function adminCopyText(text) {

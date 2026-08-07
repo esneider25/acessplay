@@ -123,6 +123,23 @@ export default async function handler(req, res) {
       // data ya viene en req.body.data y se usará en el POST abajo
     } else if (action === 'test_connection') {
       // ── UNIVERSAL TEST CONNECTION (mapping-driven) ──
+      // Authentication check for test_connection to prevent SSRF
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Falta Token de Autenticación Admin' });
+      }
+      try {
+        const idToken = authHeader.split('Bearer ')[1];
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const userSnap = await admin.database().ref(`users/${decodedToken.uid}`).once('value');
+        const userData = userSnap.val() || {};
+        if (decodedToken.email !== 'admin@accesplay.com' && userData.role !== 'admin') {
+          return res.status(403).json({ error: 'Acceso denegado: Requiere permisos de administrador' });
+        }
+      } catch (e) {
+        return res.status(401).json({ error: 'Token inválido o expirado' });
+      }
+      
       const m = req.body.mapping || {};
       
       if (!baseUrl) {
