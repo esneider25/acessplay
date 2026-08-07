@@ -528,6 +528,27 @@ function selectPayment(methodId) {
     if (screenshotGroup) screenshotGroup.style.display = 'block';
   }
   updateOrderSummary();
+  updatePackagePriceCurrency(methodId);
+}
+
+// ── Dynamic Price Currency Switch on Package Cards ──
+function updatePackagePriceCurrency(methodId) {
+  let isUsd = false;
+  if (methodId === 'wallet') {
+    isUsd = true;
+  } else {
+    const method = PAYMENT_METHODS.find(m => m.id === methodId);
+    isUsd = method && method.currency === 'usd';
+  }
+  document.querySelectorAll('.package-price-badge').forEach(badge => {
+    if (isUsd) {
+      badge.textContent = '$' + badge.dataset.usd;
+      badge.classList.add('show-usd');
+    } else {
+      badge.textContent = 'Bs. ' + badge.dataset.bs;
+      badge.classList.remove('show-usd');
+    }
+  });
 }
 
 // ── Discounts ──

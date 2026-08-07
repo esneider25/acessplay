@@ -343,6 +343,10 @@ function renderProductDetail(productId) {
       else if (amtStr.length > 9) amtStyle = 'font-size: 1.45rem; line-height: 1.1; white-space: normal; word-break: break-word;';
       else if (amtStr.length > 6) amtStyle = 'font-size: 1.9rem;';
       
+      const priceHtml = (pkg.priceUsd !== undefined && pkg.priceUsd !== null) 
+        ? `<div class="package-price-badge" data-usd="${pkg.priceUsd.toFixed(2)}" data-bs="${formatBs(usdToBs(pkg.priceUsd))}">Bs. ${formatBs(usdToBs(pkg.priceUsd))}</div>`
+        : '';
+
       if (pkg.isOutofStock) {
         return `
           <div class="package-card fade-in-up stagger-${(i % 7) + 1} ${bgClass}"
@@ -352,6 +356,7 @@ function renderProductDetail(productId) {
             <div style="position: absolute; top: -10px; right: -10px; background: #ef5350; color: white; font-size: 0.65rem; padding: 2px 8px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2;">Agotado</div>
             <div class="package-amount" style="${amtStyle}">${amtStr}</div>
             ${(!pkg.hideCurrency && product.currency) ? `<div class="package-label">${product.currency}</div>` : ''}
+            ${priceHtml}
           </div>
         `;
       }
@@ -362,6 +367,7 @@ function renderProductDetail(productId) {
              id="pkg-${product.id}-${i}">
           <div class="package-amount" style="${amtStyle}">${amtStr}</div>
           ${(!pkg.hideCurrency && product.currency) ? `<div class="package-label">${product.currency}</div>` : ''}
+          ${priceHtml}
         </div>
       `;
     }).join('');
