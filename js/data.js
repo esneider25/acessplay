@@ -913,73 +913,7 @@ function updateOrderStatus(orderId, newStatus, note) {
           }
         }
 
-        // --- LÓGICA DE REFERIDOS ---
-        if (p.referredBy) {
-          db.ref('users').orderByChild('referralCode').equalTo(p.referredBy).once('value').then(refSnap => {
-            if (refSnap.exists()) {
-              const referrerUid = Object.keys(refSnap.val())[0];
-              const referrerData = refSnap.val()[referrerUid];
-
-              const referrerRole = referrerData.role || 'cliente';
-              // Solo clientes, influencers y partners pueden ganar por referidos
-              if (referrerRole !== 'cliente' && referrerRole !== 'influencer' && referrerRole !== 'partner') return;
-
-              const maxReferrals = (referrerRole === 'influencer' || referrerRole === 'partner') ? (referrerData.referralLimit || 100) : 10;
-
-              let refPoints = referrerData.points || 0;
-              let refCount = referrerData.referralsCount || 0;
-              let refEarned = referrerData.referralsEarnedPoints || 0;
-
-              let referrerReward = 0;
-              let isFirst = false;
-
-              if (!p.hasMadeFirstPurchase) {
-                // Si ya tiene el máximo de amigos, quitamos el referido para que este usuario ya no genere ganancias
-                if (refCount >= maxReferrals) {
-                  db.ref('users/' + order.userId).update({ referredBy: null, hasMadeFirstPurchase: true });
-                  return;
-                }
-                referrerReward = 12;
-                isFirst = true;
-                db.ref('users/' + order.userId).update({ hasMadeFirstPurchase: true });
-              } else {
-                let baseReward = referrerRole === 'partner' ? 3 : 2;
-                if (price >= 2) referrerReward = baseReward;
-                else referrerReward = 1;
-              }
-
-              if (referrerReward > 0) {
-                if (isFirst) refCount++;
-
-                let newRole = referrerRole;
-                if (referrerRole === 'influencer' && refCount >= 100) {
-                  newRole = 'partner';
-                }
-
-                // FIX: También usar transacción para los puntos del referidor
-                db.ref('users/' + referrerUid).transaction(refUser => {
-                  if (refUser === null) return refUser;
-                  refUser.points = (refUser.points || 0) + referrerReward;
-                  refUser.referralsCount = isFirst ? (refUser.referralsCount || 0) + 1 : (refUser.referralsCount || 0);
-                  refUser.referralsEarnedPoints = (refUser.referralsEarnedPoints || 0) + referrerReward;
-                  if (referrerRole === 'influencer' && (refUser.referralsCount || 0) >= 100) {
-                    refUser.role = 'partner';
-                  }
-                  return refUser;
-                });
-
-                db.ref('users/' + referrerUid + '/transactions').push({
-                  id: Date.now().toString(),
-                  type: 'deposit',
-                  amount: 0,
-                  description: `Bono referido (${p.name || 'Amigo'}): +${referrerReward} PTS`,
-                  date: Date.now()
-                });
-              }
-            }
-          });
-        }
-        // ---------------------------
+        // --- LÓGICA DE REFERIDOS MOVIDA AL FINAL DEL BLOQUE ---
 
         // --- LÓGICA DE TORNEOS (COPAS) ---
         if (order.productId) {
@@ -1010,6 +944,67 @@ function updateOrderStatus(orderId, newStatus, note) {
         // ---------------------------
       });
     }
+
+    // --- LÓGICA DE REFERIDOS (Para compras de productos Y recargas de monedero) ---
+    const priceForRef = parseFloat(order.priceUsd || 0);
+    db.ref('users/' + order.userId).once('value').then(userSnap => {
+      const p = userSnap.val() || {};
+      if (p.referredBy) {
+        db.ref('users').orderByChild('referralCode').equalTo(p.referredBy).once('value').then(refSnap => {
+          if (refSnap.exists()) {
+            const referrerUid = Object.keys(refSnap.val())[0];
+            const referrerData = refSnap.val()[referrerUid];
+
+            const referrerRole = referrerData.role || 'cliente';
+            if (referrerRole !== 'cliente' && referrerRole !== 'influencer' && referrerRole !== 'partner') return;
+
+            const maxReferrals = (referrerRole === 'influencer' || referrerRole === 'partner') ? (referrerData.referralLimit || 100) : 10;
+
+            let refCount = referrerData.referralsCount || 0;
+            let referrerReward = 0;
+            let isFirst = false;
+
+            if (!p.hasMadeFirstPurchase) {
+              if (refCount >= maxReferrals) {
+                db.ref('users/' + order.userId).update({ referredBy: null, hasMadeFirstPurchase: true });
+                return;
+              }
+              referrerReward = 12;
+              isFirst = true;
+              db.ref('users/' + order.userId).update({ hasMadeFirstPurchase: true });
+            } else {
+              let baseReward = referrerRole === 'partner' ? 3 : 2;
+              if (priceForRef >= 2) referrerReward = baseReward;
+              else referrerReward = 1;
+            }
+
+            if (referrerReward > 0) {
+              if (isFirst) refCount++;
+
+              db.ref('users/' + referrerUid).transaction(refUser => {
+                if (refUser === null) return refUser;
+                refUser.points = (refUser.points || 0) + referrerReward;
+                refUser.referralsCount = isFirst ? (refUser.referralsCount || 0) + 1 : (refUser.referralsCount || 0);
+                refUser.referralsEarnedPoints = (refUser.referralsEarnedPoints || 0) + referrerReward;
+                if (referrerRole === 'influencer' && (refUser.referralsCount || 0) >= 100) {
+                  refUser.role = 'partner';
+                }
+                return refUser;
+              });
+
+              db.ref('users/' + referrerUid + '/transactions').push({
+                id: Date.now().toString(),
+                type: 'deposit',
+                amount: 0,
+                description: `Bono referido (${p.name || 'Amigo'}): +${referrerReward} PTS`,
+                date: Date.now()
+              });
+            }
+          }
+        });
+      }
+    });
+    // ---------------------------
   }
 
   if (newStatus === 'rejected' && order.status !== 'rejected' && order.userId && order.paymentMethodId === 'wallet' && order.productType !== 'wallet-recharge') {
