@@ -350,6 +350,12 @@ function renderApp() {
 
 // ── Navigation ──
 function navigateTo(view, param) {
+  // Fix cross-page navigation (e.g. from torneos.html)
+  if (!document.getElementById('app') && view !== 'dashboard') {
+    window.location.href = 'index.html';
+    return;
+  }
+
   if (view === 'home') {
     appState.currentView = 'home';
     appState.selectedProductId = null;
@@ -384,6 +390,11 @@ function navigateTo(view, param) {
 }
 
 function scrollToSection(sectionId) {
+  if (!document.getElementById('app')) {
+    window.location.href = 'index.html';
+    return;
+  }
+
   if (appState.currentView !== 'home') {
     navigateTo('home');
     setTimeout(() => {

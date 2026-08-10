@@ -29,7 +29,7 @@ function renderNavbar() {
               : `<a onclick="showAuthModal()" class="nav-cta" style="background: linear-gradient(135deg, #4f46e5, #3b82f6); cursor:pointer;">Iniciar Sesión</a>`
             }
           </li>
-          <li><a class="nav-cta" onclick="scrollToSection('catalog')">Recargar 🎮</a></li>
+          <li><a href="torneos.html" class="nav-cta">🏆 Torneos</a></li>
           <li id="pwa-nav-item"><a id="pwa-install-app-btn" onclick="window.handleStoreInstallClick()" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer; color: white;">📲 Instalar App</a></li>
           <li><a class="theme-toggle-btn" onclick="toggleTheme()" style="cursor:pointer; font-size: 1.2rem;" title="Cambiar Tema">🌓</a></li>
         </ul>

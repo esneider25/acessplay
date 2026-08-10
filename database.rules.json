@@ -28,6 +28,22 @@
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
+    "tournaments": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      "$tournamentId": {
+        ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
+        "participants": {
+           "$uid": {
+             ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com')"
+           }
+        }
+      }
+    },
+    "product_stats": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
+    },
     "messages": { 
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",

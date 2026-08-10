@@ -980,6 +980,34 @@ function updateOrderStatus(orderId, newStatus, note) {
           });
         }
         // ---------------------------
+
+        // --- LÓGICA DE TORNEOS (COPAS) ---
+        if (order.productId) {
+          const statsRef = db.ref('product_stats/' + order.productId + '/completedOrdersCount');
+          statsRef.transaction(currentCount => {
+            return (currentCount || 0) + 1;
+          }, (error, committed, snapshot) => {
+            if (error) {
+              console.error('Error actualizando contador de pedidos:', error);
+            } else if (committed && snapshot.val() > 0) {
+              const newCount = snapshot.val();
+              if (newCount % 200 === 0) {
+                const tournamentId = 'torneo-' + order.productId + '-' + Date.now();
+                db.ref('tournaments/' + tournamentId).set({
+                  id: tournamentId,
+                  productId: order.productId,
+                  productName: order.productName || order.productId,
+                  title: 'Copa ' + (order.productName || order.productId) + ' #' + (newCount / 200),
+                  status: 'registration_open',
+                  createdAt: new Date().toISOString(),
+                  maxParticipants: 100,
+                  prize: 'Diamantes / Saldo'
+                });
+              }
+            }
+          });
+        }
+        // ---------------------------
       });
     }
   }

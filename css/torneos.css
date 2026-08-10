@@ -1,0 +1,185 @@
+/* ============================================================
+   AccessPlay — Torneos CSS
+   ============================================================ */
+
+.torneos-header {
+  background: radial-gradient(circle at center, rgba(14, 165, 233, 0.15) 0%, transparent 70%);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.torneos-header::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 300px;
+  background: var(--accent);
+  filter: blur(150px);
+  opacity: 0.2;
+  z-index: 0;
+}
+
+.torneos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.torneo-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.torneo-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+  box-shadow: 0 10px 30px rgba(0, 210, 255, 0.15);
+}
+
+.torneo-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--coral));
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.torneo-card:hover::before {
+  opacity: 1;
+}
+
+.torneo-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.badge-upcoming {
+  background: rgba(163, 184, 204, 0.15);
+  color: #a3b8cc;
+  border: 1px solid rgba(163, 184, 204, 0.3);
+}
+
+.badge-open {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+  box-shadow: 0 0 10px rgba(14, 165, 233, 0.2);
+}
+
+.badge-ongoing {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-completed {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.torneo-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  font-family: var(--font-display);
+  color: var(--text-primary);
+}
+
+.torneo-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.torneo-info-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.torneo-progress-container {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  height: 8px;
+  width: 100%;
+  margin-bottom: 8px;
+  overflow: hidden;
+  position: relative;
+}
+
+.torneo-progress-bar {
+  background: linear-gradient(90deg, var(--accent), var(--coral));
+  height: 100%;
+  border-radius: 10px;
+  width: 0%;
+  transition: width 1s ease-in-out;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.torneo-progress-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.torneo-btn {
+  background: linear-gradient(135deg, var(--electric), var(--accent));
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  width: 100%;
+  transition: var(--transition);
+  text-align: center;
+  margin-top: auto;
+}
+
+.torneo-btn:hover {
+  box-shadow: 0 5px 15px var(--electric-glow);
+  transform: scale(1.02);
+}
+
+.torneo-btn:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.torneo-btn.btn-joined {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
