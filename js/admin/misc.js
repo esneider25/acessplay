@@ -1762,33 +1762,41 @@ function renderTournaments(container) {
       const max = torneo.maxParticipants || 100;
       
       let badgeColor = '#ffb74d'; // pending / upcoming
-      if (torneo.status === 'registration_open') badgeColor = '#42a5f5';
-      if (torneo.status === 'ongoing') badgeColor = '#8b5cf6';
-      if (torneo.status === 'completed') badgeColor = '#66bb6a';
+      const status = torneo.status || 'upcoming';
+      if (status === 'registration_open') badgeColor = '#42a5f5';
+      if (status === 'ongoing') badgeColor = '#8b5cf6';
+      if (status === 'completed') badgeColor = '#66bb6a';
+
+      const title = torneo.title || 'Torneo Sin Nombre';
+      const productName = torneo.productName || 'Producto Desconocido';
+      let dateStr = 'Fecha desconocida';
+      try {
+        if (torneo.createdAt) dateStr = new Date(torneo.createdAt).toLocaleDateString();
+      } catch (e) {}
 
       listHtml += `
         <div style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center;">
           <div style="flex: 1; min-width: 250px;">
             <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px;">
-              <h3 style="margin:0; font-family: var(--font-display);">${torneo.title}</h3>
-              <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${torneo.status.toUpperCase()}</span>
+              <h3 style="margin:0; font-family: var(--font-display);">${title}</h3>
+              <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${status.toUpperCase()}</span>
             </div>
-            <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: var(--text-secondary);">Producto: ${torneo.productName} | Creado: ${new Date(torneo.createdAt).toLocaleDateString()}</p>
+            <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: var(--text-secondary);">Producto: ${productName} | Creado: ${dateStr}</p>
             <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Participantes: ${count} / ${max}</p>
             ${torneo.winnerName ? `<p style="margin: 5px 0 0 0; color: gold; font-weight: bold;">👑 Ganador: ${torneo.winnerName}</p>` : ''}
           </div>
           
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <select class="admin-form-input" style="width: auto; padding: 6px 12px;" onchange="updateTournamentStatus('${torneo.id}', this.value)">
-              <option value="upcoming" ${torneo.status === 'upcoming' ? 'selected' : ''}>Próximo</option>
-              <option value="registration_open" ${torneo.status === 'registration_open' ? 'selected' : ''}>Inscripción Abierta</option>
-              <option value="ongoing" ${torneo.status === 'ongoing' ? 'selected' : ''}>En Curso</option>
-              <option value="completed" ${torneo.status === 'completed' ? 'selected' : ''}>Finalizado</option>
+              <option value="upcoming" ${status === 'upcoming' ? 'selected' : ''}>Próximo</option>
+              <option value="registration_open" ${status === 'registration_open' ? 'selected' : ''}>Inscripción Abierta</option>
+              <option value="ongoing" ${status === 'ongoing' ? 'selected' : ''}>En Curso</option>
+              <option value="completed" ${status === 'completed' ? 'selected' : ''}>Finalizado</option>
             </select>
             
             <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Ver Inscritos</button>
             <button class="btn btn-danger" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Eliminar</button>
-            ${torneo.status === 'completed' && !torneo.winnerName ? `<button class="btn btn-primary" onclick="setTournamentWinner('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Declarar Ganador</button>` : ''}
+            ${status === 'completed' && !torneo.winnerName ? `<button class="btn btn-primary" onclick="setTournamentWinner('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Declarar Ganador</button>` : ''}
           </div>
         </div>
       `;
