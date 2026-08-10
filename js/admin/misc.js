@@ -1742,66 +1742,70 @@ function renderTournaments(container) {
     const listContainer = document.getElementById('tournaments-list');
     if (!listContainer) return; // Tab changed
 
-    let torneos = [];
-    snapshot.forEach(child => {
-      torneos.push(child.val());
-    });
-    
-    // Sort descending by creation date
-    torneos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    if (torneos.length === 0) {
-      listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No hay torneos creados aún.</p>';
-      return;
-    }
-
-    let listHtml = '';
-    torneos.forEach(torneo => {
-      const participants = torneo.participants || {};
-      const count = Object.keys(participants).length;
-      const max = torneo.maxParticipants || 100;
+    try {
+      let torneos = [];
+      snapshot.forEach(child => {
+        torneos.push(child.val());
+      });
       
-      let badgeColor = '#ffb74d'; // pending / upcoming
-      const status = torneo.status || 'upcoming';
-      if (status === 'registration_open') badgeColor = '#42a5f5';
-      if (status === 'ongoing') badgeColor = '#8b5cf6';
-      if (status === 'completed') badgeColor = '#66bb6a';
+      // Sort descending by creation date
+      torneos.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-      const title = torneo.title || 'Torneo Sin Nombre';
-      const productName = torneo.productName || 'Producto Desconocido';
-      let dateStr = 'Fecha desconocida';
-      try {
-        if (torneo.createdAt) dateStr = new Date(torneo.createdAt).toLocaleDateString();
-      } catch (e) {}
+      if (torneos.length === 0) {
+        listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No hay torneos creados aún.</p>';
+        return;
+      }
 
-      listHtml += `
-        <div style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center;">
-          <div style="flex: 1; min-width: 250px;">
-            <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px;">
-              <h3 style="margin:0; font-family: var(--font-display);">${title}</h3>
-              <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${status.toUpperCase()}</span>
+      let listHtml = '';
+      torneos.forEach(torneo => {
+        const participants = torneo.participants || {};
+        const count = Object.keys(participants).length;
+        const max = torneo.maxParticipants || 100;
+        
+        let badgeColor = '#ffb74d'; // pending / upcoming
+        const status = torneo.status || 'upcoming';
+        if (status === 'registration_open') badgeColor = '#42a5f5';
+        if (status === 'ongoing') badgeColor = '#8b5cf6';
+        if (status === 'completed') badgeColor = '#66bb6a';
+
+        const title = torneo.title || 'Torneo Sin Nombre';
+        const productName = torneo.productName || 'Producto Desconocido';
+        let dateStr = 'Fecha desconocida';
+        try {
+          if (torneo.createdAt) dateStr = new Date(torneo.createdAt).toLocaleDateString();
+        } catch (e) {}
+
+        listHtml += `
+          <div style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center;">
+            <div style="flex: 1; min-width: 250px;">
+              <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px;">
+                <h3 style="margin:0; font-family: var(--font-display);">${title}</h3>
+                <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${status.toUpperCase()}</span>
+              </div>
+              <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: var(--text-secondary);">Producto: ${productName} | Creado: ${dateStr}</p>
+              <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Participantes: ${count} / ${max}</p>
+              ${torneo.winnerName ? `<p style="margin: 5px 0 0 0; color: gold; font-weight: bold;">👑 Ganador: ${torneo.winnerName}</p>` : ''}
             </div>
-            <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: var(--text-secondary);">Producto: ${productName} | Creado: ${dateStr}</p>
-            <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Participantes: ${count} / ${max}</p>
-            ${torneo.winnerName ? `<p style="margin: 5px 0 0 0; color: gold; font-weight: bold;">👑 Ganador: ${torneo.winnerName}</p>` : ''}
-          </div>
-          
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <select class="admin-form-input" style="width: auto; padding: 6px 12px;" onchange="updateTournamentStatus('${torneo.id}', this.value)">
-              <option value="upcoming" ${status === 'upcoming' ? 'selected' : ''}>Próximo</option>
-              <option value="registration_open" ${status === 'registration_open' ? 'selected' : ''}>Inscripción Abierta</option>
-              <option value="ongoing" ${status === 'ongoing' ? 'selected' : ''}>En Curso</option>
-              <option value="completed" ${status === 'completed' ? 'selected' : ''}>Finalizado</option>
-            </select>
             
-            <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Ver Inscritos</button>
-            <button class="btn btn-danger" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Eliminar</button>
-            ${status === 'completed' && !torneo.winnerName ? `<button class="btn btn-primary" onclick="setTournamentWinner('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Declarar Ganador</button>` : ''}
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select class="admin-form-input" style="width: auto; padding: 6px 12px;" onchange="updateTournamentStatus('${torneo.id}', this.value)">
+                <option value="upcoming" ${status === 'upcoming' ? 'selected' : ''}>Próximo</option>
+                <option value="registration_open" ${status === 'registration_open' ? 'selected' : ''}>Inscripción Abierta</option>
+                <option value="ongoing" ${status === 'ongoing' ? 'selected' : ''}>En Curso</option>
+                <option value="completed" ${status === 'completed' ? 'selected' : ''}>Finalizado</option>
+              </select>
+              
+              <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Ver Inscritos</button>
+              <button class="btn btn-danger" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Eliminar</button>
+              ${status === 'completed' && !torneo.winnerName ? `<button class="btn btn-primary" onclick="setTournamentWinner('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Declarar Ganador</button>` : ''}
+            </div>
           </div>
-        </div>
-      `;
-    });
-    listContainer.innerHTML = listHtml;
+        `;
+      });
+      listContainer.innerHTML = listHtml;
+    } catch(err) {
+      listContainer.innerHTML = '<div style="color:red; padding: 20px;">Error rendering tournaments: ' + err.message + '<br><pre>' + err.stack + '</pre></div>';
+    }
   });
 }
 
