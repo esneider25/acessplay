@@ -1738,7 +1738,7 @@ function renderTournaments(container) {
   `;
   container.innerHTML = html;
 
-  firebase.database().ref('tournaments').orderByChild('createdAt').on('value', snapshot => {
+  firebase.database().ref('tournaments').on('value', snapshot => {
     const listContainer = document.getElementById('tournaments-list');
     if (!listContainer) return; // Tab changed
 
@@ -1880,7 +1880,8 @@ window.openAdminModal = window.openAdminModal || function(html) {
   const content = document.getElementById('admin-modal-content');
   if (overlay && content) {
     content.innerHTML = html;
-    overlay.style.display = 'flex';
+    overlay.style.display = '';
+    overlay.classList.add('active');
   } else {
     alert('Modal fallback (Revisar consola):\n\n' + html.replace(/<[^>]*>?/gm, ''));
   }
@@ -1888,7 +1889,10 @@ window.openAdminModal = window.openAdminModal || function(html) {
 
 window.closeAdminModal = window.closeAdminModal || function() {
   const overlay = document.getElementById('admin-modal-overlay');
-  if (overlay) overlay.style.display = 'none';
+  if (overlay) {
+    overlay.style.display = '';
+    overlay.classList.remove('active');
+  }
 };
 
 window.showCreateTournamentModal = function() {
