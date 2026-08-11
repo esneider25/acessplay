@@ -644,7 +644,7 @@ window.openDetailModal = function(tournamentId) {
             <span style="font-weight:600; color:var(--text-primary);">${entry.playerName || 'Jugador'}</span>
           </div>
           <div style="color:var(--accent); font-weight:bold;">
-            ${entry.kills || 0} pts
+            ${entry.kills || 0} kills
           </div>
         </div>
       `;
@@ -656,7 +656,7 @@ window.openDetailModal = function(tournamentId) {
         <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow:hidden;">
           <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(0,0,0,0.3); font-size:0.85rem; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">
             <div style="display:flex; gap:15px;"><span style="width:25px; text-align:center;">#</span> <span>Jugador</span></div>
-            <div>Puntaje</div>
+            <div>Kills</div>
           </div>
           ${tableRows}
         </div>
