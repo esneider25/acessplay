@@ -456,7 +456,8 @@ window.openInscriptionModal = function(tournamentId) {
   
   let paymentHtml = '';
   if (torneo.entryFee && torneo.entryFee > 0) {
-    const feeBs = (torneo.entryFee * (window.EXCHANGE_RATE?.usdToBs || 1)).toFixed(2);
+    const exchangeRate = window.EXCHANGE_RATE?.tournamentsUsdToBs || window.EXCHANGE_RATE?.usdToBs || 1;
+    const feeBs = (torneo.entryFee * exchangeRate).toFixed(2);
     
     let pmOptions = '<option value="wallet">Mi Billetera Virtual</option>';
     if (typeof PAYMENT_METHODS !== 'undefined') {

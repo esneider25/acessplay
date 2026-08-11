@@ -49,6 +49,56 @@ function renderExchange(container) {
       
       <!-- Card 1: Tasa de Cambio -->
       <div class="admin-card" style="position: relative; overflow: hidden;">
+// 5. EXCHANGE RATE & PROFIT MARGIN
+// ════════════════════════════════════════
+function renderExchange(container) {
+  // Build preview table rows from all products/packages
+  let previewRows = '';
+  let totalPackages = 0;
+  const currentMargin = EXCHANGE_RATE.profitMargin || 0;
+
+  PRODUCTS.forEach(product => {
+    (product.packages || []).forEach(pkg => {
+      const hasCustom = pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '';
+      const effectiveMargin = hasCustom ? parseFloat(pkg.customMargin) : currentMargin;
+      const costUsd = (pkg.costUsd && pkg.costUsd > 0) 
+        ? pkg.costUsd 
+        : (pkg.priceUsd > 0 ? parseFloat((pkg.priceUsd / (1 + (effectiveMargin / 100))).toFixed(2)) : 0);
+
+      if (costUsd > 0) {
+        totalPackages++;
+        const newPrice = parseFloat((costUsd + (costUsd * effectiveMargin / 100)).toFixed(2));
+        const diff = newPrice - costUsd;
+        const diffColor = diff > 0 ? '#4ade80' : diff < 0 ? '#f87171' : '#94a3b8';
+        const diffSign = diff > 0 ? '+' : '';
+        previewRows += `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">${product.name}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-muted);">${pkg.label || pkg.amount}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: #f59e0b; font-weight: 600;">$${costUsd.toFixed(2)}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">$${pkg.priceUsd.toFixed(2)}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: #0ea5e9; font-weight: 600;">$${newPrice.toFixed(2)}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; color: ${diffColor}; font-weight: 600;">${diffSign}$${diff.toFixed(2)}</td>
+            <td style="padding: 8px 10px; font-size: 0.8rem; text-align: center;">${hasCustom ? `<span style="background: rgba(139,92,246,0.15); color: #a78bfa; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">🎯 ${pkg.customMargin}%</span>` : `<span style="background: rgba(14,165,233,0.1); color: #38bdf8; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">🌍 ${currentMargin}%</span>`}</td>
+          </tr>
+        `;
+      }
+    });
+  });
+
+  container.innerHTML = `
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Tasa de Cambio & Márgenes</h1>
+        <p class="admin-subtitle">Configura la tasa USD → Bs. y el porcentaje de ganancia para todos los productos.</p>
+      </div>
+    </div>
+
+    <!-- ── Two Cards Side by Side ── -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px;">
+      
+      <!-- Card 1: Tasa de Cambio -->
+      <div class="admin-card" style="position: relative; overflow: hidden;">
         <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0ea5e9, #06b6d4);"></div>
         <div class="admin-card-header" style="padding-bottom: 8px;">
           <h2 class="admin-card-title" style="display: flex; align-items: center; gap: 8px;">
@@ -56,9 +106,17 @@ function renderExchange(container) {
           </h2>
         </div>
         <div class="admin-form-group">
-          <label class="admin-form-label" for="exchange-rate-input">Tasa en Bolívares (Bs. / 1 USD)</label>
+          <label class="admin-form-label" for="exchange-rate-input">Tasa Tienda (Bs. / 1 USD)</label>
           <div style="display: flex; gap: 12px; align-items: center;">
             <input type="number" step="0.01" class="admin-form-input" id="exchange-rate-input" value="${EXCHANGE_RATE.usdToBs}" style="font-size: 1.25rem; font-weight: bold;">
+            <span style="font-weight: 600; font-size: 1.1rem; color: var(--text-secondary);">Bs.</span>
+          </div>
+        </div>
+        
+        <div class="admin-form-group" style="margin-top: 15px;">
+          <label class="admin-form-label" for="exchange-rate-tournaments-input" style="color:var(--accent);">Tasa Torneos (Bs. / 1 USD)</label>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <input type="number" step="0.01" class="admin-form-input" id="exchange-rate-tournaments-input" value="${EXCHANGE_RATE.tournamentsUsdToBs || EXCHANGE_RATE.usdToBs}" style="font-size: 1.25rem; font-weight: bold; border-color:rgba(14,165,233,0.3);">
             <span style="font-weight: 600; font-size: 1.1rem; color: var(--text-secondary);">Bs.</span>
           </div>
         </div>
@@ -230,16 +288,18 @@ function saveAndApplyMargin() {
 
 function saveExchangeRate() {
   const input = document.getElementById('exchange-rate-input');
-  if (!input) return;
+  const inputTournaments = document.getElementById('exchange-rate-tournaments-input');
+  if (!input || !inputTournaments) return;
   const rateVal = parseFloat(input.value);
-  if (isNaN(rateVal) || rateVal <= 0) {
-    showAdminToast('❌ La tasa debe ser un número válido mayor a cero.', 'error');
+  const rateTournamentsVal = parseFloat(inputTournaments.value);
+  if (isNaN(rateVal) || rateVal <= 0 || isNaN(rateTournamentsVal) || rateTournamentsVal <= 0) {
+    showAdminToast('❌ Las tasas deben ser números válidos mayores a cero.', 'error');
     return;
   }
   EXCHANGE_RATE.usdToBs = rateVal;
+  EXCHANGE_RATE.tournamentsUsdToBs = rateTournamentsVal;
   EXCHANGE_RATE.lastUpdated = new Date().toLocaleDateString('es-VE', { day: '2-digit', month: 'short', year: 'numeric' });
   saveToDb('exchange_rate', EXCHANGE_RATE);
-  showAdminToast(`✅ Nueva tasa: 1 USD = Bs. ${rateVal.toFixed(2)}`, 'success');
+  showAdminToast(`✅ Tasas actualizadas: Tienda ${rateVal.toFixed(2)} | Torneos ${rateTournamentsVal.toFixed(2)}`, 'success');
   renderActiveTab();
 }
-
