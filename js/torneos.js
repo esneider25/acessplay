@@ -261,15 +261,11 @@ function renderTorneos(torneos) {
     } else if (torneo.status === 'ongoing') {
       actionButton = `<button class="torneo-btn" disabled>⚔️ Torneo en progreso</button>`;
     } else if (torneo.status === 'completed') {
-      const winners = torneo.winners || [];
-      if (winners.length > 0) {
-        let winnersHTML = winners.map((w, i) => {
-          const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
-          return `<span>${medals[i] || '🏅'} ${w.name}</span>`;
-        }).join(' · ');
-        actionButton = `<div style="text-align:center; padding:12px; background:rgba(255,215,0,0.06); border-radius:var(--radius-sm); color:#fbbf24; border:1px solid rgba(255,215,0,0.2); font-size:0.9rem;">${winnersHTML}</div>`;
-      } else if (torneo.winnerName) {
-        actionButton = `<div style="text-align:center; padding:12px; background:rgba(255,215,0,0.06); border-radius:var(--radius-sm); color:#fbbf24; border:1px solid rgba(255,215,0,0.2);">👑 Ganador: ${torneo.winnerName}</div>`;
+      const leaderboard = torneo.leaderboard || [];
+      if (leaderboard.length > 0) {
+        const sorted = [...leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+        const champ = sorted[0].playerName;
+        actionButton = `<div style="text-align:center; padding:12px; background:rgba(255,215,0,0.06); border-radius:var(--radius-sm); color:#fbbf24; border:1px solid rgba(255,215,0,0.2);">👑 Campeón: ${champ}</div>`;
       } else {
         actionButton = `<button class="torneo-btn" disabled>Torneo Finalizado</button>`;
       }
@@ -336,7 +332,7 @@ function renderHallOfFame(torneos) {
   const container = document.getElementById('hall-of-fame-list');
   if (!container) return;
   
-  const completed = torneos.filter(t => t.status === 'completed' && (t.winnerName || (t.winners && t.winners.length > 0)));
+  const completed = torneos.filter(t => t.status === 'completed' && (t.leaderboard && t.leaderboard.length > 0));
   
   if (completed.length === 0) {
     container.innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column:1/-1; padding:20px;">Aún no hay campeones registrados. ¡Sé el primero!</p>';
@@ -345,10 +341,10 @@ function renderHallOfFame(torneos) {
   
   let html = '';
   completed.slice(0, 8).forEach(torneo => {
-    const winners = torneo.winners || [];
-    const winnerDisplay = winners.length > 0
-      ? winners.map(w => w.name).join(', ')
-      : (torneo.winnerName || 'Sin nombre');
+    const sorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+    const champion = sorted[0];
+    const winnerDisplay = champion ? champion.playerName : 'Sin nombre';
+    const killsStr = champion ? (champion.kills || 0) + ' Pts/Kills' : '';
     
     let dateStr = '';
     try { dateStr = new Date(torneo.createdAt).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }); } catch(e) {}
@@ -356,10 +352,10 @@ function renderHallOfFame(torneos) {
     html += `
       <div class="hof-epic-card">
         <div class="hof-epic-card-inner">
-          <div class="hof-epic-icon">🏆</div>
+          <div class="hof-epic-icon">👑</div>
           <h4 class="hof-epic-title">${torneo.title}</h4>
-          <div class="hof-epic-winners">${winnerDisplay}</div>
-          <div class="hof-epic-date">${dateStr}</div>
+          <div class="hof-epic-winners" style="color: #fbbf24; text-transform: uppercase;">${winnerDisplay}</div>
+          <div class="hof-epic-date" style="margin-top: 4px;">⭐ ${killsStr} | 📅 ${dateStr}</div>
         </div>
       </div>
     `;
@@ -619,18 +615,22 @@ window.openDetailModal = function(tournamentId) {
     leaderboardHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Resultados no disponibles o el torneo está en curso.</p>';
   }
   
-  // Winners
+  // Winners automated from Leaderboard
   let winnersHTML = '';
-  const winners = torneo.winners || [];
-  if (winners.length > 0) {
+  if (torneo.status === 'completed' && torneo.leaderboard && torneo.leaderboard.length > 0) {
+    const lbSorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
     const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
-    winnersHTML = '<div class="torneo-detail-section"><h4>🏆 Ganadores Oficiales</h4><div style="margin-top:10px;">';
-    winners.forEach((w, i) => {
+    const limit = Math.max(3, prizes.length);
+    const topPlayers = lbSorted.slice(0, limit);
+    
+    winnersHTML = '<div class="torneo-detail-section"><h4>🏆 Campeones del Torneo</h4><div style="margin-top:10px;">';
+    topPlayers.forEach((p, i) => {
+      const rewardStr = prizes[i] ? ' — ' + prizes[i].reward : '';
       winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
         <span style="font-size:1.6rem;">${medals[i] || '🏅'}</span>
         <div>
-          <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${w.name}</div>
-          <div style="font-size:0.85rem; color:var(--text-secondary);">${w.place || ''} — ${w.reward || ''}</div>
+          <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${p.playerName}</div>
+          <div style="font-size:0.85rem; color:var(--text-secondary);">${i + 1}° Lugar${rewardStr} (${p.kills || 0} Pts/Kills)</div>
         </div>
       </div>`;
     });

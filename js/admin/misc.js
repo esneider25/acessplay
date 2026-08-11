@@ -2262,16 +2262,7 @@ window.manageTournamentResults = function(id) {
       leaderboardRows = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--text-muted);">Sin resultados aún</td></tr>';
     }
     
-    // Winners section
-    let winnersSection = '';
-    if (winners.length > 0) {
-      const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
-      winnersSection = '<div style="margin-bottom:20px;"><h4 style="margin-bottom:10px;">🏆 Ganadores actuales</h4>';
-      winners.forEach((w, i) => {
-        winnersSection += `<div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; margin:3px; background:rgba(255,215,0,0.06); border:1px solid rgba(255,215,0,0.15); border-radius:20px; font-size:0.85rem; color:#fbbf24;">${medals[i] || '🏅'} ${w.name} (${w.reward || ''})</div>`;
-      });
-      winnersSection += `<div style="margin-top:8px;"><button class="btn btn-danger" onclick="clearWinners('${id}')" style="padding:5px 12px; font-size:0.8rem;">Borrar ganadores</button></div></div>`;
-    }
+    // Winners section removed completely as champions are derived automatically from the leaderboard
 
     let html = `
       <div style="padding:20px;">
@@ -2280,10 +2271,10 @@ window.manageTournamentResults = function(id) {
         
         ${winnersSection}
         
-        <h4 style="margin-bottom:10px;">📋 Tabla de Posiciones (Kills)</h4>
+        <h4 style="margin-bottom:10px;">📋 Tabla de Posiciones (Puntaje / Kills)</h4>
         <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
           <input type="text" id="lb-player" class="admin-form-input" placeholder="Nombre del jugador" style="flex:2; padding:8px 10px; min-width:150px;">
-          <input type="number" id="lb-kills" class="admin-form-input" placeholder="Kills" style="flex:1; padding:8px 10px; min-width:80px;">
+          <input type="number" id="lb-kills" class="admin-form-input" placeholder="Kills/Pts" style="flex:1; padding:8px 10px; min-width:80px;">
           <button class="btn btn-primary" onclick="addLeaderboardEntry('${id}')" style="padding:8px 14px; font-size:0.85rem;">+ Agregar</button>
         </div>
         
@@ -2293,7 +2284,7 @@ window.manageTournamentResults = function(id) {
               <tr style="border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02);">
                 <th style="padding:8px; text-align:left;">#</th>
                 <th style="padding:8px; text-align:left;">Jugador</th>
-                <th style="padding:8px; text-align:left;">Kills</th>
+                <th style="padding:8px; text-align:left;">Puntaje/Kills</th>
                 <th style="padding:8px; text-align:left;"></th>
               </tr>
             </thead>
@@ -2309,16 +2300,6 @@ window.manageTournamentResults = function(id) {
             <button class="btn btn-primary" onclick="processOCR('${id}')" id="ocr-process-btn" style="padding: 8px 15px; font-size: 0.85rem;">🔍 Escanear Imagen</button>
           </div>
           <div id="ocr-status" style="margin-top: 10px; font-size: 0.85rem; color: #fbbf24; font-weight: bold; display: none;"></div>
-        </div>
-        
-        <div style="margin-top:20px;">
-          <h4 style="margin-bottom:10px;">🏆 Agregar Ganador Manual</h4>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <input type="text" id="winner-name" class="admin-form-input" placeholder="Nombre del ganador" style="flex:2; padding:8px 10px; min-width:120px;">
-            <input type="text" id="winner-place" class="admin-form-input" placeholder="Ej: 1° Lugar" style="flex:1; padding:8px 10px; min-width:80px;">
-            <input type="text" id="winner-reward" class="admin-form-input" placeholder="Premio" style="flex:1; padding:8px 10px; min-width:80px;">
-            <button class="btn btn-primary" onclick="addWinner('${id}')" style="padding:8px 14px; font-size:0.85rem;">+ Ganador</button>
-          </div>
         </div>
         
         <div style="margin-top: 20px; text-align: right;">
@@ -2443,9 +2424,6 @@ function runTesseract(file, tournamentId, statusDiv, btn) {
       if (match) {
         let playerName = match[1].trim();
         let kills = parseInt(match[2]);
-        
-        // Remove the leading rank number if it exists (e.g., "1 Luciana 777" -> "Luciana 777")
-        // Sometimes Tesseract sees weird characters instead of a number, so we strip common rank prefixes
         playerName = playerName.replace(/^[\dOIl]+\s+/, '').trim();
         
         if (playerName.length > 0 && kills >= 0 && kills < 100) {
@@ -2455,7 +2433,7 @@ function runTesseract(file, tournamentId, statusDiv, btn) {
           }
         }
       } else {
-        // Fallback to generic parsing for other games
+        // Fallback to generic parsing for OCR garbled texts
         const cleanLine = line.replace(/[^\w\s\d-]/gi, '').trim();
         if (!cleanLine) return;
         
@@ -2463,12 +2441,23 @@ function runTesseract(file, tournamentId, statusDiv, btn) {
         let playerName = '';
         let kills = 0;
         
-        if (parts.length >= 2 && !isNaN(parts[parts.length - 1])) {
-          kills = parseInt(parts.pop());
-          playerName = parts.join(' ');
+        // If the last word is not a number, and the second to last IS a number
+        // (This handles random garbage text like "Elmincnes" or "TElmincnes" at the end)
+        if (parts.length >= 2 && isNaN(parts[parts.length - 1]) && !isNaN(parts[parts.length - 2])) {
+           kills = parseInt(parts[parts.length - 2]);
+           parts.pop(); // remove garbage word
+           parts.pop(); // remove number
+           playerName = parts.join(' ');
+        } else if (parts.length >= 2 && !isNaN(parts[parts.length - 1])) {
+           kills = parseInt(parts.pop());
+           playerName = parts.join(' ');
         } else if (parts.length >= 2 && !isNaN(parts[0])) {
-          kills = parseInt(parts.shift());
-          playerName = parts.join(' ');
+           kills = parseInt(parts.shift());
+           playerName = parts.join(' ');
+        }
+        
+        if (playerName) {
+          playerName = playerName.replace(/^[\dOIl]+\s+/, '').trim();
         }
         
         if (playerName.length > 2 && kills >= 0 && kills < 100) {
@@ -2502,29 +2491,6 @@ function runTesseract(file, tournamentId, statusDiv, btn) {
   });
 }
 
-window.addWinner = function(id) {
-  const name = document.getElementById('winner-name').value.trim();
-  const place = document.getElementById('winner-place').value.trim() || '1° Lugar';
-  const reward = document.getElementById('winner-reward').value.trim() || 'Premio especial';
-  if (!name) return alert('Escribe el nombre del ganador.');
-  
-  firebase.database().ref('tournaments/' + id + '/winners').once('value').then(snap => {
-    const winners = snap.val() || [];
-    winners.push({ name, place, reward });
-    const winnerNames = winners.map(w => w.name).join(', ');
-    firebase.database().ref('tournaments/' + id).update({ winners, winnerName: winnerNames }).then(() => {
-      manageTournamentResults(id);
-    });
-  });
-};
-
-window.clearWinners = function(id) {
-  if (confirm('¿Borrar todos los ganadores de este torneo?')) {
-    firebase.database().ref('tournaments/' + id).update({ winners: null, winnerName: null }).then(() => {
-      manageTournamentResults(id);
-    });
-  }
-};
 
 window.openAdminModal = window.openAdminModal || function(html) {
   const overlay = document.getElementById('admin-modal-overlay');
