@@ -2082,14 +2082,32 @@ window.viewTournamentParticipants = function(id) {
         if (p.teamMembers && p.teamMembers.length > 0) {
           teamInfo = `<br><span style="font-size:0.75rem; color:var(--accent);">👥 Equipo: ` + p.teamMembers.map(tm => `${tm.gameName} (${tm.gameId})`).join(', ') + `</span>`;
         }
+        let paymentBadge = '';
+        let paymentActions = '';
+        if (p.paymentStatus === 'pending_payment') {
+          paymentBadge = `<span style="background:rgba(245,158,11,0.2); color:#fbbf24; padding:2px 6px; border-radius:4px; font-size:0.7rem; display:inline-block; margin-bottom:4px;">⏳ Pendiente</span><br><span style="font-size:0.7rem; color:var(--text-muted);">Ref: ${p.paymentRef || 'N/A'}</span>`;
+          paymentActions = `
+            <button class="btn btn-primary" onclick="approveTournamentPayment('${id}', '${p.uid}')" style="padding: 4px; font-size: 1rem; background:transparent; border:none; box-shadow:none; color:#4ade80;" title="Aprobar Pago">✅</button>
+            <button class="btn btn-secondary" onclick="rejectTournamentPayment('${id}', '${p.uid}')" style="padding: 4px; font-size: 1rem; background:transparent; border:none; box-shadow:none; color:#ef4444;" title="Rechazar Pago">❌</button>
+          `;
+        } else if (p.paymentStatus === 'approved') {
+          paymentBadge = `<span style="background:rgba(34,197,94,0.2); color:#4ade80; padding:2px 6px; border-radius:4px; font-size:0.7rem;">✅ Aprobado (${p.paymentMethod})</span>`;
+        } else if (p.paymentStatus === 'rejected') {
+          paymentBadge = `<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 6px; border-radius:4px; font-size:0.7rem;">❌ Rechazado</span>`;
+        } else {
+          paymentBadge = `<span style="font-size:0.7rem; color:var(--text-muted);">Gratis</span>`;
+        }
+        
         tableRows += `
           <tr style="border-bottom: 1px solid var(--border);">
             <td style="padding: 8px;">${i + 1}</td>
             <td style="padding: 8px;">${p.name || 'Sin nombre'}</td>
             <td style="padding: 8px;">${p.gameName || '-'}${teamInfo}</td>
             <td style="padding: 8px;">${p.gameId || '-'}</td>
+            <td style="padding: 8px; text-align: center;">${paymentBadge}</td>
             <td style="padding: 8px;">${new Date(p.joinedAt).toLocaleString()}</td>
-            <td style="padding: 8px; text-align: center;">
+            <td style="padding: 8px; text-align: center; white-space: nowrap;">
+              ${paymentActions}
               <button class="btn btn-secondary" onclick="removeParticipant('${id}', '${p.uid}')" style="padding: 4px; font-size: 1rem; color: #ef4444; border:none; background:transparent;" title="Expulsar">🗑️</button>
             </td>
           </tr>
@@ -2114,6 +2132,7 @@ window.viewTournamentParticipants = function(id) {
                 <th style="padding: 10px; text-align: left;">Nombre</th>
                 <th style="padding: 10px; text-align: left;">IGN</th>
                 <th style="padding: 10px; text-align: left;">Game ID</th>
+                <th style="padding: 10px; text-align: center;">Estado/Pago</th>
                 <th style="padding: 10px; text-align: left;">Fecha</th>
                 <th style="padding: 10px; text-align: center;">Acción</th>
               </tr>
@@ -2138,6 +2157,28 @@ window.removeParticipant = function(tournamentId, userId) {
     }).catch(err => {
       alert('Error: ' + err.message);
     });
+  }
+};
+
+window.approveTournamentPayment = function(tournamentId, userId) {
+  if (confirm('¿Aprobar el pago de esta inscripción?')) {
+    firebase.database().ref(`tournaments/${tournamentId}/participants/${userId}`).update({
+      paymentStatus: 'approved'
+    }).then(() => {
+      alert('Pago aprobado.');
+      viewTournamentParticipants(tournamentId);
+    }).catch(err => alert('Error: ' + err.message));
+  }
+};
+
+window.rejectTournamentPayment = function(tournamentId, userId) {
+  if (confirm('¿Rechazar el pago de esta inscripción? El estado cambiará a rechazado.')) {
+    firebase.database().ref(`tournaments/${tournamentId}/participants/${userId}`).update({
+      paymentStatus: 'rejected'
+    }).then(() => {
+      alert('Pago rechazado.');
+      viewTournamentParticipants(tournamentId);
+    }).catch(err => alert('Error: ' + err.message));
   }
 };
 
@@ -2644,7 +2685,9 @@ window.showCreateTournamentModal = function() {
           </div>
         </div>
         
-        <div>
+          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Precio de Inscripción ($)</label>
+          <input type="number" id="ct-entry-fee" class="admin-form-input" style="width: 100%; padding: 10px; margin-bottom: 14px;" value="0" min="0" step="0.01">
+          
           <label class="admin-form-label" style="margin-bottom: 5px; display: block;">🏅 Premios</label>
           <div id="ct-prizes-list" style="display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; gap:8px; align-items:center;">
@@ -2686,6 +2729,7 @@ window.showCreateTournamentModal = function() {
       const bannerUrl = document.getElementById('ct-banner').value.trim();
       const maxP = parseInt(document.getElementById('ct-max').value) || 100;
       const deadline = document.getElementById('ct-deadline').value;
+      const entryFee = parseFloat(document.getElementById('ct-entry-fee').value) || 0;
       
       // Collect prizes
       const prizeInputs = document.querySelectorAll('.ct-prize-input');
@@ -2718,6 +2762,7 @@ window.showCreateTournamentModal = function() {
         status: 'registration_open',
         createdAt: new Date().toISOString(),
         maxParticipants: maxP,
+        entryFee: entryFee,
         prize: prizes.length > 0 ? prizes[0].reward : 'Premios Especiales'
       };
       

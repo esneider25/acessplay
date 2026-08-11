@@ -449,6 +449,32 @@ window.openInscriptionModal = function(tournamentId) {
     `;
   }
   
+  let paymentHtml = '';
+  if (torneo.entryFee && torneo.entryFee > 0) {
+    paymentHtml = `
+      <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">💳 Pago de Inscripción ($${torneo.entryFee.toFixed(2)})</h4>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Este torneo requiere el pago de una inscripción por equipo.</p>
+      
+      <div class="torneo-form-group">
+        <label class="torneo-form-label">Método de Pago</label>
+        <select class="torneo-form-input" id="insc-payment-method" onchange="toggleInscPaymentMethod()" required>
+          <option value="wallet">Mi Billetera Virtual</option>
+          <option value="pagomovil">Pago Móvil / Transferencia</option>
+        </select>
+      </div>
+      
+      <div id="insc-pm-details" style="display:none; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; border:1px dashed var(--border); margin-bottom:15px;">
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Realiza el pago a los siguientes datos y escribe la referencia:</p>
+        <div style="font-size:0.85rem; font-family:var(--font-mono); color:var(--text-primary); margin-bottom:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px;">
+          Banco: <span id="insc-bank-name">Cargando...</span><br>
+          Teléfono: <span id="insc-bank-phone">Cargando...</span><br>
+          Cédula: <span id="insc-bank-id">Cargando...</span>
+        </div>
+        <input class="torneo-form-input" id="insc-payment-ref" type="text" placeholder="Número de Referencia (Ej: 123456)">
+      </div>
+    `;
+  }
+  
   content.innerHTML = `
     <h3>⚡ Inscripción</h3>
     <p class="torneo-modal-subtitle">${torneo.title} - ${gm.toUpperCase()}</p>
@@ -470,13 +496,34 @@ window.openInscriptionModal = function(tournamentId) {
       </div>
       
       ${extraMembersHtml}
+      ${paymentHtml}
       
       <div style="display:flex; gap:10px; margin-top:24px;">
         <button type="button" class="torneo-btn btn-login" onclick="closeTorneoModal()" style="flex:1;">Cancelar</button>
-        <button type="submit" class="torneo-btn" style="flex:2;">⚡ Confirmar Inscripción</button>
+        <button type="submit" class="torneo-btn" id="insc-submit-btn" style="flex:2;">⚡ Confirmar Inscripción</button>
       </div>
     </form>
   `;
+  
+  window.toggleInscPaymentMethod = function() {
+    const method = document.getElementById('insc-payment-method').value;
+    const pmDetails = document.getElementById('insc-pm-details');
+    const refInput = document.getElementById('insc-payment-ref');
+    if (method === 'pagomovil') {
+      pmDetails.style.display = 'block';
+      refInput.required = true;
+      // Fetch bank details from settings
+      firebase.database().ref('settings/bankDetails').once('value').then(snap => {
+        const val = snap.val() || {};
+        document.getElementById('insc-bank-name').innerText = val.bankName || 'Bancamiga';
+        document.getElementById('insc-bank-phone').innerText = val.phone || '04121234567';
+        document.getElementById('insc-bank-id').innerText = val.idCard || 'V-12345678';
+      });
+    } else {
+      pmDetails.style.display = 'none';
+      refInput.required = false;
+    }
+  };
   
   document.getElementById('torneo-inscription-modal').classList.add('active');
   
@@ -508,26 +555,100 @@ window.openInscriptionModal = function(tournamentId) {
       
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
-      submitBtn.innerText = 'Inscribiendo...';
+      submitBtn.innerText = 'Procesando...';
       
-      firebase.database().ref('tournaments/' + tournamentId + '/participants/' + user.uid).set({
-        uid: user.uid,
-        name: name,
-        email: user.email,
-        gameId: gameId,
-        gameName: gameName,
-        teamMembers: teamMembers.length > 0 ? teamMembers : null,
-        joinedAt: new Date().toISOString()
-      }).then(() => {
-        closeTorneoModal();
-        launchConfetti();
-        renderTorneos(torneosData);
-      }).catch(err => {
-        console.error('Error al inscribirse:', err);
-        submitBtn.disabled = false;
-        submitBtn.innerText = '⚡ Confirmar Inscripción';
-        alert('Ocurrió un error al inscribirte. Verifica tu conexión.');
-      });
+      const processInscription = function(paymentStatus, paymentMethod, paymentRef = null) {
+        const participantData = {
+          uid: user.uid,
+          name: name,
+          email: user.email,
+          gameId: gameId,
+          gameName: gameName,
+          teamMembers: teamMembers.length > 0 ? teamMembers : null,
+          joinedAt: new Date().toISOString(),
+          paymentStatus: paymentStatus,
+          paymentMethod: paymentMethod,
+          paymentRef: paymentRef
+        };
+        
+        firebase.database().ref('tournaments/' + tournamentId + '/participants/' + user.uid).set(participantData)
+          .then(() => {
+            closeTorneoModal();
+            if (paymentStatus === 'approved' || paymentStatus === 'free') {
+              launchConfetti();
+              alert('✅ ¡Inscripción exitosa!');
+            } else {
+              alert('⏳ Tu inscripción está pendiente. En breve un administrador validará tu pago y confirmará tu cupo.');
+            }
+            renderTorneos(torneosData);
+          }).catch(err => {
+            console.error('Error al inscribirse:', err);
+            submitBtn.disabled = false;
+            submitBtn.innerText = '⚡ Confirmar Inscripción';
+            alert('Ocurrió un error al inscribirte. Verifica tu conexión.');
+          });
+      };
+      
+      if (torneo.entryFee && torneo.entryFee > 0) {
+        const paymentMethod = document.getElementById('insc-payment-method').value;
+        
+        if (paymentMethod === 'wallet') {
+          // Check balance and deduct
+          firebase.database().ref('users/' + user.uid + '/wallet/balance').once('value').then(snap => {
+            const currentBalance = snap.val() || 0;
+            if (currentBalance >= torneo.entryFee) {
+              const newBalance = currentBalance - torneo.entryFee;
+              const updates = {};
+              updates['users/' + user.uid + '/wallet/balance'] = newBalance;
+              
+              const txId = 'tx_' + Date.now();
+              updates['users/' + user.uid + '/wallet/transactions/' + txId] = {
+                type: 'tournament_fee',
+                amount: -torneo.entryFee,
+                description: 'Inscripción a ' + torneo.title,
+                timestamp: new Date().toISOString()
+              };
+              
+              firebase.database().ref().update(updates).then(() => {
+                processInscription('approved', 'wallet');
+              }).catch(err => {
+                submitBtn.disabled = false;
+                submitBtn.innerText = '⚡ Confirmar Inscripción';
+                alert('Error al procesar pago: ' + err.message);
+              });
+            } else {
+              submitBtn.disabled = false;
+              submitBtn.innerText = '⚡ Confirmar Inscripción';
+              alert('❌ Saldo insuficiente en tu Billetera Virtual. Tienes $' + currentBalance.toFixed(2));
+            }
+          });
+        } else if (paymentMethod === 'pagomovil') {
+          const paymentRef = document.getElementById('insc-payment-ref').value.trim();
+          if (!paymentRef) {
+            alert('Por favor ingresa el número de referencia.');
+            submitBtn.disabled = false;
+            submitBtn.innerText = '⚡ Confirmar Inscripción';
+            return;
+          }
+          
+          processInscription('pending_payment', 'pagomovil', paymentRef);
+          
+          // Send Telegram Notification
+          if (typeof sendTelegramMessage === 'function') {
+            const tgMessage = `🏆 *NUEVA INSCRIPCIÓN PENDIENTE*\n\n` +
+                              `*Torneo:* ${torneo.title}\n` +
+                              `*Jugador:* ${gameName}\n` +
+                              `*Monto:* $${torneo.entryFee.toFixed(2)}\n` +
+                              `*Método:* Pago Móvil\n` +
+                              `*Ref:* ${paymentRef}\n\n` +
+                              `Revisa el Panel de Admin para aprobar el pago.`;
+            sendTelegramMessage(tgMessage);
+          }
+        }
+      } else {
+        // Free tournament
+        processInscription('free', 'none');
+      }
     });
   }, 100);
 };
