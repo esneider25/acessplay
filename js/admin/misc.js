@@ -2261,52 +2261,78 @@ window.manageTournamentResults = function(id) {
   firebase.database().ref('tournaments/' + id).once('value').then(snap => {
     const torneo = snap.val();
     const leaderboard = torneo.leaderboard || [];
-    const winners = torneo.winners || [];
+    const participants = torneo.participants || {};
+    
+    // Flatten participants into individual players
+    let allPlayers = [];
+    Object.values(participants).forEach(p => {
+      const pName = p.gameName || p.name || 'Sin Nombre';
+      if (!allPlayers.includes(pName)) allPlayers.push(pName);
+      
+      if (p.teamMembers && p.teamMembers.length > 0) {
+        p.teamMembers.forEach(tm => {
+          const tmName = tm.gameName || 'Compañero';
+          if (!allPlayers.includes(tmName)) allPlayers.push(tmName);
+        });
+      }
+    });
+    
+    // Add any players from the existing leaderboard that might not be in participants (e.g. manual additions)
+    leaderboard.forEach(entry => {
+      if (entry.playerName && !allPlayers.includes(entry.playerName)) {
+        allPlayers.push(entry.playerName);
+      }
+    });
+    
+    // Build lookup for existing kills
+    const killsMap = {};
+    leaderboard.forEach(entry => {
+      killsMap[entry.playerName] = entry.kills || 0;
+    });
     
     let leaderboardRows = '';
-    if (leaderboard.length > 0) {
-      leaderboard.forEach((entry, i) => {
+    if (allPlayers.length > 0) {
+      // Sort alphabetically for easier finding
+      allPlayers.sort().forEach((playerName, i) => {
+        const currentKills = killsMap[playerName] || 0;
         leaderboardRows += `
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:8px;">${i + 1}</td>
-            <td style="padding:8px;">${entry.playerName || ''}</td>
-            <td style="padding:8px;">${entry.kills || 0}</td>
-            <td style="padding:8px;"><button class="btn btn-danger" onclick="removeLeaderboardEntry('${id}', ${i})" style="padding:3px 8px; font-size:0.75rem;">✕</button></td>
+            <td style="padding:8px;">${playerName}</td>
+            <td style="padding:8px;">
+              <input type="number" class="admin-form-input bulk-kill-input" data-player="${playerName.replace(/"/g, '&quot;')}" value="${currentKills}" min="0" style="width:70px; padding:6px; margin:0;">
+            </td>
           </tr>`;
       });
     } else {
-      leaderboardRows = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--text-muted);">Sin resultados aún</td></tr>';
+      leaderboardRows = '<tr><td colspan="3" style="text-align:center; padding:15px; color:var(--text-muted);">No hay jugadores inscritos</td></tr>';
     }
-    
-    // Winners section removed completely as champions are derived automatically from the leaderboard
 
     let html = `
       <div style="padding:20px;">
         <h3>📊 Resultados: ${torneo.title}</h3>
         <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">${torneo.productName || ''}</p>
         
-        <h4 style="margin-bottom:10px;">📋 Tabla de Posiciones (Puntaje / Kills)</h4>
-        <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-          <input type="text" id="lb-player" class="admin-form-input" placeholder="Nombre del jugador" style="flex:2; padding:8px 10px; min-width:150px;">
-          <input type="number" id="lb-kills" class="admin-form-input" placeholder="Kills/Pts" style="flex:1; padding:8px 10px; min-width:80px;">
-          <button class="btn btn-primary" onclick="addLeaderboardEntry('${id}')" style="padding:8px 14px; font-size:0.85rem;">+ Agregar</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <h4 style="margin:0;">📋 Kills Individuales</h4>
+          <button class="btn btn-primary" onclick="saveBulkLeaderboard('${id}')" style="padding:8px 15px;">💾 Guardar Puntuaciones</button>
         </div>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa las kills exactas de cada jugador individual. Los que tengan 0 no aparecerán en el top.</p>
         
-        <div style="max-height:300px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
+        <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
           <table style="width:100%; border-collapse:collapse;">
             <thead>
               <tr style="border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02);">
-                <th style="padding:8px; text-align:left;">#</th>
+                <th style="padding:8px; text-align:left; width:40px;">#</th>
                 <th style="padding:8px; text-align:left;">Jugador</th>
-                <th style="padding:8px; text-align:left;">Puntaje/Kills</th>
-                <th style="padding:8px; text-align:left;"></th>
+                <th style="padding:8px; text-align:left; width:100px;">Kills</th>
               </tr>
             </thead>
-            <tbody id="leaderboard-tbody">${leaderboardRows}</tbody>
+            <tbody>${leaderboardRows}</tbody>
           </table>
         </div>
         
-        <div style="margin-top: 20px; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2); padding: 15px; border-radius: var(--radius-sm);">
+        <div style="margin-top: 25px; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2); padding: 15px; border-radius: var(--radius-sm);">
           <h4 style="margin-bottom: 8px; color: var(--accent-light);">📸 Capturas de Resultados</h4>
           <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Sube los captures de pantalla de las posiciones finales para que los usuarios puedan verlas en los detalles del torneo.</p>
           
@@ -2335,6 +2361,27 @@ window.manageTournamentResults = function(id) {
   });
 };
 
+window.saveBulkLeaderboard = function(id) {
+  const inputs = document.querySelectorAll('.bulk-kill-input');
+  const newLeaderboard = [];
+  
+  inputs.forEach(input => {
+    const kills = parseInt(input.value) || 0;
+    const playerName = input.getAttribute('data-player');
+    if (kills > 0) {
+      newLeaderboard.push({ playerName, kills });
+    }
+  });
+  
+  newLeaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
+  
+  firebase.database().ref('tournaments/' + id + '/leaderboard').set(newLeaderboard).then(() => {
+    alert('✅ Puntuaciones guardadas exitosamente.');
+    manageTournamentResults(id);
+  });
+};
+
+// Se mantienen por compatibilidad, aunque ya no se usan en la nueva UI
 window.addLeaderboardEntry = function(id) {
   const playerName = document.getElementById('lb-player').value.trim();
   const kills = parseInt(document.getElementById('lb-kills').value) || 0;

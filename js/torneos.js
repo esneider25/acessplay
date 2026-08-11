@@ -327,50 +327,82 @@ function renderTorneos(torneos) {
   startCountdowns();
 }
 
-// ── Hall of Fame ──
+// ── Hall of Fame (Global Top 10) ──
 function renderHallOfFame(torneos) {
   const container = document.getElementById('hall-of-fame-list');
   if (!container) return;
   
-  const completed = torneos.filter(t => {
-    if (t.status !== 'completed') return false;
-    const hasWinners = t.winners && t.winners.length > 0;
-    const hasLeaderboard = t.leaderboard && t.leaderboard.length > 0;
-    return hasWinners || hasLeaderboard;
+  const playerStats = {};
+  
+  // Aggregate stats across all completed tournaments
+  torneos.forEach(t => {
+    if (t.status === 'completed' && t.leaderboard && t.leaderboard.length > 0) {
+      t.leaderboard.forEach(entry => {
+        if (!entry.playerName) return;
+        const name = entry.playerName.trim();
+        if (!playerStats[name]) {
+          playerStats[name] = { name: name, kills: 0, gamesPlayed: 0 };
+        }
+        playerStats[name].kills += (parseInt(entry.kills) || 0);
+        playerStats[name].gamesPlayed += 1;
+      });
+    }
   });
   
-  if (completed.length === 0) {
+  const topPlayers = Object.values(playerStats)
+    .sort((a, b) => b.kills - a.kills)
+    .slice(0, 10);
+  
+  if (topPlayers.length === 0) {
     container.innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column:1/-1; padding:20px;">Aún no hay campeones registrados. ¡Sé el primero!</p>';
     return;
   }
   
-  let html = '';
-  completed.slice(0, 10).forEach(torneo => {
-    let winnerDisplay = 'Sin nombre';
+  let html = '<div class="hof-global-leaderboard" style="grid-column:1/-1; display:flex; flex-direction:column; gap:10px;">';
+  
+  topPlayers.forEach((player, i) => {
+    let rankBadge = '';
+    let cardStyle = 'background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);';
+    let nameStyle = 'color: white; font-weight: 600;';
     
-    if (torneo.winners && torneo.winners.length > 0) {
-      const champion = torneo.winners[0];
-      winnerDisplay = champion ? (champion.name || champion.playerName || 'Sin nombre') : 'Sin nombre';
-    } else if (torneo.leaderboard && torneo.leaderboard.length > 0) {
-      const sorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
-      winnerDisplay = sorted[0].playerName || 'Sin nombre';
+    if (i === 0) {
+      rankBadge = '👑';
+      cardStyle = 'background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02)); border: 1px solid rgba(255, 215, 0, 0.3);';
+      nameStyle = 'color: #fbbf24; font-weight: 800; font-size: 1.2rem;';
+    } else if (i === 1) {
+      rankBadge = '🥈';
+      nameStyle = 'color: #9ca3af; font-weight: 700;';
+    } else if (i === 2) {
+      rankBadge = '🥉';
+      nameStyle = 'color: #b45309; font-weight: 700;';
+    } else {
+      rankBadge = `<span style="color:var(--text-muted); font-size:1.2rem; font-weight:bold;">#${i+1}</span>`;
     }
     
-    let dateStr = '';
-    try { dateStr = new Date(torneo.createdAt).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }); } catch(e) {}
-    
     html += `
-      <div class="hof-epic-card">
-        <div class="hof-epic-card-inner">
-          <div class="hof-epic-icon">👑</div>
-          <h4 class="hof-epic-title">${torneo.title}</h4>
-          <div class="hof-epic-winners" style="color: #fbbf24; text-transform: uppercase;">${winnerDisplay}</div>
-          <div class="hof-epic-date" style="margin-top: 4px;">📅 ${dateStr}</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border-radius:12px; ${cardStyle} transition: 0.3s; cursor:default;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+        
+        <div style="display:flex; align-items:center; gap:20px;">
+          <div style="width:30px; text-align:center; font-size:1.5rem;">${rankBadge}</div>
+          <div style="${nameStyle}">${player.name}</div>
         </div>
+        
+        <div style="display:flex; gap:30px; align-items:center;">
+          <div style="text-align:center;">
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Partidas</div>
+            <div style="font-weight:600; color:var(--text-secondary);">${player.gamesPlayed}</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Kills Totales</div>
+            <div style="font-weight:800; color:var(--accent); font-size:1.2rem;">${player.kills}</div>
+          </div>
+        </div>
+        
       </div>
     `;
   });
   
+  html += '</div>';
   container.innerHTML = html;
 }
 
