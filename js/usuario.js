@@ -207,6 +207,9 @@ function renderApp() {
         <div class="nav-item" onclick="switchSection('orders')" id="nav-orders">
           <i class="ph ph-package"></i> <span>Mis Pedidos</span>
         </div>
+        <div class="nav-item" onclick="switchSection('tournaments')" id="nav-tournaments">
+          <i class="ph ph-trophy"></i> <span>Mis Torneos</span>
+        </div>
         <div class="nav-item" onclick="switchSection('wallet')" id="nav-wallet">
           <i class="ph ph-wallet"></i> <span>Billetera</span>
         </div>
@@ -1521,3 +1524,116 @@ function triggerNotification(title, body) {
     });
   }
 }
+window.renderDashboardTournaments = async function() {
+  const container = document.getElementById('dashboard-tournaments-container');
+  if (!container || !currentUser) return;
+  
+  try {
+    const snap = await firebase.database().ref('tournaments').once('value');
+    const allTournaments = snap.val() || {};
+    
+    const myTournaments = [];
+    Object.keys(allTournaments).forEach(key => {
+      const t = allTournaments[key];
+      t.id = key;
+      if (t.participants && t.participants[currentUser.uid]) {
+        myTournaments.push(t);
+      }
+    });
+    
+    // Sort so most recent (ongoing/registration_open) are first
+    myTournaments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    
+    if (myTournaments.length === 0) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:50px 20px; background:rgba(255,255,255,0.02); border-radius:var(--radius-lg); border:1px dashed rgba(255,255,255,0.1);">
+          <i class="ph ph-trophy" style="font-size:3rem; color:var(--text-muted); margin-bottom:15px;"></i>
+          <h3 style="color:var(--text-secondary);">No estás inscrito en ningún torneo</h3>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Explora nuestra tienda para encontrar torneos activos.</p>
+          <button class="btn btn-primary" onclick="navigateTo('home')">Ir a la Tienda</button>
+        </div>
+      `;
+      return;
+    }
+    
+    let html = '<div style="display:grid; gap:20px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">';
+    
+    myTournaments.forEach(t => {
+      const statusLabels = {
+        'upcoming': { text: 'Próximo', color: '#ffb74d' },
+        'registration_open': { text: 'Inscripción Abierta', color: '#42a5f5' },
+        'ongoing': { text: 'En Curso', color: '#8b5cf6' },
+        'completed': { text: 'Finalizado', color: '#66bb6a' }
+      };
+      
+      const st = statusLabels[t.status] || { text: t.status, color: '#fff' };
+      
+      // Credentials box
+      let credsHtml = '';
+      if (t.credentials && t.credentials.roomId && t.status !== 'completed') {
+        credsHtml = `
+          <div style="margin-top: 15px; background: linear-gradient(135deg, rgba(0, 229, 195, 0.1), rgba(0, 229, 195, 0.02)); border: 1px solid rgba(0, 229, 195, 0.3); border-radius: var(--radius-sm); padding: 15px; position:relative; overflow:hidden;">
+            <div style="position:absolute; top:0; left:0; width:4px; height:100%; background:var(--accent);"></div>
+            <h4 style="margin:0 0 10px 0; color:var(--accent-light); font-size:0.95rem; display:flex; align-items:center; gap:6px;"><i class="ph-fill ph-key"></i> Credenciales de la Sala</h4>
+            
+            <div style="display:flex; gap:10px; margin-bottom:8px;">
+              <div style="flex:1;">
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:3px;">ID de la Sala</div>
+                <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; font-family:monospace; font-size:1.1rem; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                  ${t.credentials.roomId}
+                  <i class="ph ph-copy" style="cursor:pointer; opacity:0.7;" onclick="navigator.clipboard.writeText('${t.credentials.roomId}'); this.style.color='var(--accent)';"></i>
+                </div>
+              </div>
+            </div>
+            
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;">
+                <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:3px;">Contraseña</div>
+                <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; font-family:monospace; font-size:1.1rem; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+                  ${t.credentials.password || 'Sin contraseña'}
+                  <i class="ph ph-copy" style="cursor:pointer; opacity:0.7;" onclick="navigator.clipboard.writeText('${t.credentials.password || ''}'); this.style.color='var(--accent)';"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (t.status === 'upcoming' || t.status === 'registration_open') {
+        credsHtml = `
+          <div style="margin-top: 15px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.1); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+            <i class="ph ph-lock-key" style="font-size: 1.5rem; color: var(--text-muted); margin-bottom: 5px;"></i>
+            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Las credenciales se publicarán cuando inicie el torneo.</p>
+          </div>
+        `;
+      } else if (t.status === 'completed') {
+         credsHtml = `
+          <div style="margin-top: 15px; background: rgba(102, 187, 106, 0.05); border: 1px solid rgba(102, 187, 106, 0.2); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
+            <p style="margin: 0; font-size: 0.85rem; color: #66bb6a;">El torneo ha finalizado.</p>
+          </div>
+        `;
+      }
+      
+      let dateStr = '';
+      try { if (t.createdAt) dateStr = new Date(t.createdAt).toLocaleDateString(); } catch(e) {}
+      
+      html += `
+        <div class="glass-card" style="padding: 20px; border-top: 2px solid ${st.color};">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+            <h3 style="margin:0; font-family:var(--font-display); font-size:1.2rem;">${t.title}</h3>
+            <span style="background:${st.color}20; color:${st.color}; padding:3px 8px; border-radius:12px; font-size:0.75rem; border:1px solid ${st.color}40; white-space:nowrap;">${st.text}</span>
+          </div>
+          <p style="margin:0 0 5px 0; color:var(--text-secondary); font-size:0.85rem;">🎮 ${t.productName || ''}</p>
+          <p style="margin:0; color:var(--text-muted); font-size:0.8rem;">📅 Creado: ${dateStr}</p>
+          
+          ${credsHtml}
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+  } catch(err) {
+    console.error("Error rendering tournaments:", err);
+    container.innerHTML = `<div style="color:red; padding:20px;">Error al cargar tus torneos.</div>`;
+  }
+};

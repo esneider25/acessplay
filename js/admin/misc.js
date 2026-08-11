@@ -2728,3 +2728,96 @@ window.uploadTournamentBanner = function(inputId, btnId) {
   fileInput.click();
 };
 
+window.openAdminModal = window.openAdminModal || function(html) {
+  const overlay = document.getElementById('admin-modal-overlay');
+  const content = document.getElementById('admin-modal-content');
+  if (overlay && content) {
+    content.innerHTML = html;
+    overlay.style.display = 'flex';
+  }
+};
+
+window.closeAdminModal = window.closeAdminModal || function() {
+  const overlay = document.getElementById('admin-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+};
+
+window.manageTournamentCredentials = function(id) {
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    const creds = torneo.credentials || { roomId: '', password: '' };
+    
+    let html = `
+      <div style="padding:20px;">
+        <h3>🔑 Credenciales de Sala</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">${torneo.title} — Configura los datos para que los jugadores puedan unirse a la partida.</p>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:var(--text-secondary);">ID de la Sala</label>
+          <input type="text" id="cred-room-id" class="admin-form-input" placeholder="Ej: 1234567" value="${creds.roomId}" style="width:100%;">
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:var(--text-secondary);">Contraseña</label>
+          <input type="text" id="cred-password" class="admin-form-input" placeholder="Ej: 1234" value="${creds.password}" style="width:100%;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; cursor:pointer;">
+            <input type="checkbox" id="cred-notify" checked>
+            Enviar notificación automática a los inscritos
+          </label>
+        </div>
+        
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="saveTournamentCredentials('${id}')">💾 Guardar y Enviar</button>
+        </div>
+      </div>
+    `;
+    openAdminModal(html);
+  });
+};
+
+window.saveTournamentCredentials = function(id) {
+  const roomId = document.getElementById('cred-room-id').value.trim();
+  const password = document.getElementById('cred-password').value.trim();
+  const notify = document.getElementById('cred-notify').checked;
+  
+  const updateData = {
+    'credentials/roomId': roomId,
+    'credentials/password': password
+  };
+  
+  firebase.database().ref('tournaments/' + id).update(updateData).then(() => {
+    alert('✅ Credenciales guardadas exitosamente.');
+    closeAdminModal();
+    
+    if (notify) {
+      // Fetch participants and send notifications
+      firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+        const torneo = snap.val();
+        const participants = torneo.participants || {};
+        
+        const timestamp = new Date().toISOString();
+        const promises = [];
+        
+        Object.keys(participants).forEach(uid => {
+          const notifRef = firebase.database().ref('users/' + uid + '/notifications').push();
+          promises.push(notifRef.set({
+            title: `🔑 Sala Lista: ${torneo.title}`,
+            body: `Las credenciales de la sala ya están publicadas. Entra a "Mis Torneos" para verlas.`,
+            type: 'tournament',
+            link: '/usuario.html',
+            timestamp: timestamp,
+            read: false
+          }));
+        });
+        
+        Promise.all(promises).then(() => {
+          console.log('Notificaciones enviadas a ' + promises.length + ' jugadores.');
+        });
+      });
+    }
+  });
+};
