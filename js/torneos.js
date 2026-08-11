@@ -434,7 +434,7 @@ window.openInscriptionModal = function(tournamentId) {
       <div class="torneo-form-group">
         <div style="display:flex; gap:5px;">
           <input class="torneo-form-input tm-id" type="text" required placeholder="ID del Juego (Miembro 2)">
-          <input class="torneo-form-input tm-ign" type="text" required placeholder="IGN (Miembro 2)">
+          <input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador (Miembro 2)">
         </div>
       </div>
     `;
@@ -443,15 +443,15 @@ window.openInscriptionModal = function(tournamentId) {
       <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">🎯 Miembros del Escuadrón</h4>
       <div class="torneo-form-group">
         <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 2</label>
-        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="IGN"></div>
+        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
       </div>
       <div class="torneo-form-group">
         <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 3</label>
-        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="IGN"></div>
+        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
       </div>
       <div class="torneo-form-group">
         <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 4</label>
-        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="IGN"></div>
+        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
       </div>
     `;
   }
@@ -507,7 +507,7 @@ window.openInscriptionModal = function(tournamentId) {
         <p class="torneo-form-hint" style="margin-top:2px;">Tu ID numérico dentro del juego</p>
       </div>
       <div class="torneo-form-group">
-        <label class="torneo-form-label">Nombre en el juego (IGN)</label>
+        <label class="torneo-form-label">Nombre en el juego (Jugador)</label>
         <input class="torneo-form-input" id="insc-game-name" type="text" required placeholder="Ej: ProPlayer99">
       </div>
       

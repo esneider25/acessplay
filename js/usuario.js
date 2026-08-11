@@ -1658,9 +1658,10 @@ window.renderDashboardTournaments = async function() {
          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tu Registro:</div>
             <div style="font-size: 0.85rem; display:flex; flex-wrap:wrap; gap:12px; color: var(--text-primary);">
-              ${myEntry.ign ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>IGN:</strong> ${myEntry.ign}</div>` : ''}
-              ${myEntry.id ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>ID:</strong> ${myEntry.id}</div>` : ''}
-              ${myEntry.teamName ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Equipo:</strong> ${myEntry.teamName}</div>` : ''}
+              ${myEntry.gameName ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Jugador:</strong> ${myEntry.gameName}</div>` : ''}
+              ${myEntry.gameId ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>ID:</strong> ${myEntry.gameId}</div>` : ''}
+              ${myEntry.name ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Titular:</strong> ${myEntry.name}</div>` : ''}
+              ${myEntry.teamMembers && myEntry.teamMembers.length > 0 ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Equipo:</strong> +${myEntry.teamMembers.length} Miembro(s)</div>` : ''}
             </div>
          </div>`;
       }
