@@ -1483,9 +1483,20 @@ let notificationsInitialized = false;
 let previousOrdersState = {};
 let inAppNotifications = [];
 
-window.markNotificationAsRead = function(id) {
+window.handleNotificationClick = function(id, type, isRead) {
   if (!currentUser) return;
-  firebase.database().ref('users/' + currentUser.uid + '/notifications/' + id).update({ read: true });
+  
+  if (!isRead) {
+    firebase.database().ref('users/' + currentUser.uid + '/notifications/' + id).update({ read: true });
+  }
+  
+  if (type === 'order') {
+    switchSection('orders');
+  } else if (type === 'tournament') {
+    switchSection('tournaments');
+  } else if (type === 'wallet' || type === 'referral') {
+    switchSection('wallet');
+  }
 };
 
 window.renderInAppNotifications = function() {
@@ -1510,9 +1521,9 @@ window.renderInAppNotifications = function() {
   }
   
   container.innerHTML = inAppNotifications.map(notif => `
-    <div onclick="${!notif.read ? `markNotificationAsRead('${notif.id}')` : ''}" style="padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); background: ${notif.read ? 'transparent' : 'rgba(0, 229, 195, 0.05)'}; display: flex; gap: 15px; align-items: flex-start; cursor: ${notif.read ? 'default' : 'pointer'}; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='${notif.read ? 'transparent' : 'rgba(0, 229, 195, 0.05)'}'">
+    <div onclick="handleNotificationClick('${notif.id}', '${notif.type || ''}', ${notif.read})" style="padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); background: ${notif.read ? 'transparent' : 'rgba(0, 229, 195, 0.05)'}; display: flex; gap: 15px; align-items: flex-start; cursor: pointer; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='${notif.read ? 'transparent' : 'rgba(0, 229, 195, 0.05)'}'">
       <div style="width: 40px; height: 40px; border-radius: 50%; background: ${notif.read ? 'rgba(255,255,255,0.05)' : 'var(--accent-glow)'}; display: flex; align-items: center; justify-content: center; color: ${notif.read ? 'var(--text-secondary)' : 'var(--accent)'}; font-size: 1.2rem; flex-shrink: 0;">
-        <i class="${notif.type === 'tournament' ? 'ph-fill ph-trophy' : 'ph-fill ph-bell-ringing'}"></i>
+        <i class="${notif.type === 'tournament' ? 'ph-fill ph-trophy' : (notif.type === 'order' ? 'ph-fill ph-package' : (notif.type === 'wallet' ? 'ph-fill ph-wallet' : 'ph-fill ph-bell-ringing'))}"></i>
       </div>
       <div style="flex: 1;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
