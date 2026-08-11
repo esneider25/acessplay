@@ -237,6 +237,11 @@ function renderTorneos(torneos) {
     if (torneo.gameMode) {
       tagsHTML += `<span class="torneo-tag">${getGameModeIcon(torneo.gameMode)} ${getGameModeLabel(torneo.gameMode)}</span>`;
     }
+    if (torneo.entryFee && torneo.entryFee > 0) {
+      tagsHTML += `<span class="torneo-tag" style="color:#fbbf24; border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.1);">💎 $${torneo.entryFee.toFixed(2)}</span>`;
+    } else {
+      tagsHTML += `<span class="torneo-tag" style="color:#4ade80; border-color:rgba(74,222,128,0.3); background:rgba(74,222,128,0.1);">🆓 GRATIS</span>`;
+    }
     tagsHTML += '</div>';
     
     // Action Button
@@ -451,26 +456,34 @@ window.openInscriptionModal = function(tournamentId) {
   
   let paymentHtml = '';
   if (torneo.entryFee && torneo.entryFee > 0) {
+    const feeBs = (torneo.entryFee * (window.EXCHANGE_RATE?.usdToBs || 1)).toFixed(2);
+    
+    let pmOptions = '<option value="wallet">Mi Billetera Virtual</option>';
+    if (typeof PAYMENT_METHODS !== 'undefined') {
+      PAYMENT_METHODS.forEach(pm => {
+        if (pm.id !== 'wallet') pmOptions += `<option value="${pm.id}">${pm.name}</option>`;
+      });
+    } else {
+      pmOptions += '<option value="pagomovil">Pago Móvil / Transferencia</option>';
+    }
+
     paymentHtml = `
-      <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">💳 Pago de Inscripción ($${torneo.entryFee.toFixed(2)})</h4>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Este torneo requiere el pago de una inscripción por equipo.</p>
+      <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">💳 Pago de Inscripción</h4>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Costo del torneo: <strong style="color:var(--text-primary);">$${torneo.entryFee.toFixed(2)} USD</strong> (Aprox. Bs. ${feeBs})</p>
       
       <div class="torneo-form-group">
         <label class="torneo-form-label">Método de Pago</label>
         <select class="torneo-form-input" id="insc-payment-method" onchange="toggleInscPaymentMethod()" required>
-          <option value="wallet">Mi Billetera Virtual</option>
-          <option value="pagomovil">Pago Móvil / Transferencia</option>
+          ${pmOptions}
         </select>
       </div>
       
       <div id="insc-pm-details" style="display:none; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; border:1px dashed var(--border); margin-bottom:15px;">
         <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Realiza el pago a los siguientes datos y escribe la referencia:</p>
-        <div style="font-size:0.85rem; font-family:var(--font-mono); color:var(--text-primary); margin-bottom:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px;">
-          Banco: <span id="insc-bank-name">Cargando...</span><br>
-          Teléfono: <span id="insc-bank-phone">Cargando...</span><br>
-          Cédula: <span id="insc-bank-id">Cargando...</span>
+        <div id="insc-pm-dynamic-info" style="font-size:0.85rem; font-family:var(--font-mono); color:var(--text-primary); margin-bottom:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px;">
+          <!-- Loaded dynamically -->
         </div>
-        <input class="torneo-form-input" id="insc-payment-ref" type="text" placeholder="Número de Referencia (Ej: 123456)">
+        <input class="torneo-form-input" id="insc-payment-ref" type="text" placeholder="Número de Referencia / ID">
       </div>
     `;
   }
@@ -506,19 +519,26 @@ window.openInscriptionModal = function(tournamentId) {
   `;
   
   window.toggleInscPaymentMethod = function() {
-    const method = document.getElementById('insc-payment-method').value;
+    const methodId = document.getElementById('insc-payment-method').value;
     const pmDetails = document.getElementById('insc-pm-details');
     const refInput = document.getElementById('insc-payment-ref');
-    if (method === 'pagomovil') {
+    const dynamicInfo = document.getElementById('insc-pm-dynamic-info');
+    
+    if (methodId !== 'wallet') {
       pmDetails.style.display = 'block';
       refInput.required = true;
-      // Fetch bank details from settings
-      firebase.database().ref('settings/bankDetails').once('value').then(snap => {
-        const val = snap.val() || {};
-        document.getElementById('insc-bank-name').innerText = val.bankName || 'Bancamiga';
-        document.getElementById('insc-bank-phone').innerText = val.phone || '04121234567';
-        document.getElementById('insc-bank-id').innerText = val.idCard || 'V-12345678';
-      });
+      
+      let html = '';
+      if (typeof PAYMENT_METHODS !== 'undefined') {
+        const pm = PAYMENT_METHODS.find(m => m.id === methodId);
+        if (pm && pm.details) {
+          for (const [key, val] of Object.entries(pm.details)) {
+            html += `<strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${val}<br>`;
+          }
+        }
+      }
+      if (!html) html = 'Datos de pago no configurados.';
+      dynamicInfo.innerHTML = html;
     } else {
       pmDetails.style.display = 'none';
       refInput.required = false;
@@ -622,7 +642,7 @@ window.openInscriptionModal = function(tournamentId) {
               alert('❌ Saldo insuficiente en tu Billetera Virtual. Tienes $' + currentBalance.toFixed(2));
             }
           });
-        } else if (paymentMethod === 'pagomovil') {
+        } else if (paymentMethod !== 'wallet') {
           const paymentRef = document.getElementById('insc-payment-ref').value.trim();
           if (!paymentRef) {
             alert('Por favor ingresa el número de referencia.');
@@ -631,7 +651,7 @@ window.openInscriptionModal = function(tournamentId) {
             return;
           }
           
-          processInscription('pending_payment', 'pagomovil', paymentRef);
+          processInscription('pending_payment', paymentMethod, paymentRef);
           
           // Send Telegram Notification
           if (typeof sendTelegramMessage === 'function') {
@@ -639,7 +659,7 @@ window.openInscriptionModal = function(tournamentId) {
                               `*Torneo:* ${torneo.title}\n` +
                               `*Jugador:* ${gameName}\n` +
                               `*Monto:* $${torneo.entryFee.toFixed(2)}\n` +
-                              `*Método:* Pago Móvil\n` +
+                              `*Método:* ${paymentMethod}\n` +
                               `*Ref:* ${paymentRef}\n\n` +
                               `Revisa el Panel de Admin para aprobar el pago.`;
             sendTelegramMessage(tgMessage);
