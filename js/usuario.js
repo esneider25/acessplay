@@ -1654,6 +1654,52 @@ window.renderDashboardTournaments = async function() {
       const myEntry = t.participants[currentUser.uid];
       let myInfoHtml = '';
       if (myEntry) {
+         let teamHtml = '';
+         if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
+           teamHtml = `<div style="width:100%; margin-top:5px; font-size:0.8rem; color:var(--text-secondary);"><strong>Compañeros:</strong> `;
+           teamHtml += myEntry.teamMembers.map(tm => `<span style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px; margin-right:6px; display:inline-block; margin-bottom:6px;">Jugador: ${tm.gameName || 'Sin Nombre'} (ID: ${tm.gameId || 'N/A'})</span>`).join('');
+           teamHtml += `</div>`;
+         }
+         
+         let resultsHtml = '';
+         if (t.status === 'completed' && t.leaderboard) {
+            let myKills = 0;
+            const lbLider = t.leaderboard.find(l => l.playerName === myEntry.gameName);
+            if (lbLider) myKills = lbLider.kills || 0;
+            
+            let myTeamKillsHtml = '';
+            let totalTeamKills = myKills;
+            
+            if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
+              myEntry.teamMembers.forEach(tm => {
+                const lbTm = t.leaderboard.find(l => l.playerName === tm.gameName);
+                const tmKills = lbTm ? (lbTm.kills || 0) : 0;
+                totalTeamKills += tmKills;
+                myTeamKillsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${tm.gameName || 'Compañero'}:</span> <strong>${tmKills} Kills</strong></div>`;
+              });
+              
+              resultsHtml = `
+                <div style="margin-top: 15px; padding: 12px; background: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.3); border-radius: 6px;">
+                  <div style="font-size:0.75rem; color:#66bb6a; text-transform:uppercase; margin-bottom:8px; font-weight:bold;"><i class="ph-fill ph-chart-bar"></i> Tus Resultados</div>
+                  <div style="font-size:0.85rem; color:var(--text-primary);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${myEntry.gameName} (Tú):</span> <strong>${myKills} Kills</strong></div>
+                    ${myTeamKillsHtml}
+                    <div style="border-top:1px dashed rgba(102, 187, 106, 0.3); margin-top:6px; padding-top:6px; display:flex; justify-content:space-between; color:#4ade80;"><span>Total Equipo:</span> <strong>${totalTeamKills} Kills</strong></div>
+                  </div>
+                </div>
+              `;
+            } else {
+              resultsHtml = `
+                <div style="margin-top: 15px; padding: 12px; background: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.3); border-radius: 6px;">
+                  <div style="font-size:0.75rem; color:#66bb6a; text-transform:uppercase; margin-bottom:8px; font-weight:bold;"><i class="ph-fill ph-chart-bar"></i> Tus Resultados</div>
+                  <div style="font-size:0.85rem; color:var(--text-primary); display:flex; justify-content:space-between;">
+                    <span>Kills logradas:</span> <strong>${myKills}</strong>
+                  </div>
+                </div>
+              `;
+            }
+         }
+
          myInfoHtml = `
          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tu Registro:</div>
@@ -1661,8 +1707,9 @@ window.renderDashboardTournaments = async function() {
               ${myEntry.gameName ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Jugador:</strong> ${myEntry.gameName}</div>` : ''}
               ${myEntry.gameId ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>ID:</strong> ${myEntry.gameId}</div>` : ''}
               ${myEntry.name ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Titular:</strong> ${myEntry.name}</div>` : ''}
-              ${myEntry.teamMembers && myEntry.teamMembers.length > 0 ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Equipo:</strong> +${myEntry.teamMembers.length} Miembro(s)</div>` : ''}
+              ${teamHtml}
             </div>
+            ${resultsHtml}
          </div>`;
       }
       
