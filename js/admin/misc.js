@@ -2290,20 +2290,72 @@ window.manageTournamentResults = function(id) {
       killsMap[entry.playerName] = entry.kills || 0;
     });
     
+    // Build grouped rows
     let leaderboardRows = '';
-    if (allPlayers.length > 0) {
-      // Sort alphabetically for easier finding
-      allPlayers.sort().forEach((playerName, i) => {
-        const currentKills = killsMap[playerName] || 0;
+    const groupedParticipants = Object.values(participants);
+    
+    if (groupedParticipants.length > 0 || leaderboard.length > 0) {
+      let index = 1;
+      
+      groupedParticipants.forEach((p) => {
+        const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
+        const pName = p.gameName || p.name || 'Sin Nombre';
+        
+        if (teamType !== 'Solo') {
+          leaderboardRows += `
+            <tr style="background:rgba(255,255,255,0.05);">
+              <td colspan="3" style="padding:6px 10px; font-size:0.75rem; color:var(--accent); font-weight:bold; text-transform:uppercase;">
+                👥 Equipo ${teamType} - Líder: ${pName}
+              </td>
+            </tr>
+          `;
+        }
+        
+        // Captain row
+        const capKills = killsMap[pName] || 0;
         leaderboardRows += `
           <tr style="border-bottom:1px solid var(--border);">
-            <td style="padding:8px;">${i + 1}</td>
-            <td style="padding:8px;">${playerName}</td>
+            <td style="padding:8px; color:var(--text-muted);">${index++}</td>
+            <td style="padding:8px; font-weight:500;">${pName} ${teamType !== 'Solo' ? '<span style="font-size:0.7rem; color:var(--text-muted);">(Líder)</span>' : ''}</td>
             <td style="padding:8px;">
-              <input type="number" class="admin-form-input bulk-kill-input" data-player="${playerName.replace(/"/g, '&quot;')}" value="${currentKills}" min="0" style="width:70px; padding:6px; margin:0;">
+              <input type="number" class="admin-form-input bulk-kill-input" data-player="${pName.replace(/"/g, '&quot;')}" value="${capKills}" min="0" style="width:70px; padding:6px; margin:0;">
             </td>
-          </tr>`;
+          </tr>
+        `;
+        
+        // Team members rows
+        if (p.teamMembers && p.teamMembers.length > 0) {
+          p.teamMembers.forEach(tm => {
+            const tmName = tm.gameName || 'Compañero';
+            const tmKills = killsMap[tmName] || 0;
+            leaderboardRows += `
+              <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:8px; color:var(--text-muted);">${index++}</td>
+                <td style="padding:8px;">${tmName}</td>
+                <td style="padding:8px;">
+                  <input type="number" class="admin-form-input bulk-kill-input" data-player="${tmName.replace(/"/g, '&quot;')}" value="${tmKills}" min="0" style="width:70px; padding:6px; margin:0;">
+                </td>
+              </tr>
+            `;
+          });
+        }
       });
+      
+      // Also render players in leaderboard that aren't in participants (manual additions)
+      leaderboard.forEach(entry => {
+        if (entry.playerName && !allPlayers.includes(entry.playerName)) {
+          leaderboardRows += `
+            <tr style="border-bottom:1px solid var(--border);">
+              <td style="padding:8px; color:var(--text-muted);">${index++}</td>
+              <td style="padding:8px;">${entry.playerName} <span style="font-size:0.7rem; color:var(--text-muted);">(Manual)</span></td>
+              <td style="padding:8px;">
+                <input type="number" class="admin-form-input bulk-kill-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${entry.kills}" min="0" style="width:70px; padding:6px; margin:0;">
+              </td>
+            </tr>
+          `;
+        }
+      });
+      
     } else {
       leaderboardRows = '<tr><td colspan="3" style="text-align:center; padding:15px; color:var(--text-muted);">No hay jugadores inscritos</td></tr>';
     }
@@ -2368,9 +2420,8 @@ window.saveBulkLeaderboard = function(id) {
   inputs.forEach(input => {
     const kills = parseInt(input.value) || 0;
     const playerName = input.getAttribute('data-player');
-    if (kills > 0) {
-      newLeaderboard.push({ playerName, kills });
-    }
+    // Save EVERYONE, even with 0 kills, as requested by the user
+    newLeaderboard.push({ playerName, kills });
   });
   
   newLeaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
