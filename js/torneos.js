@@ -587,18 +587,44 @@ window.openDetailModal = function(tournamentId) {
   const participantsList = Object.values(participants);
   let participantsHTML = '';
   if (participantsList.length > 0) {
-    participantsHTML = '<div class="torneo-detail-participants" style="margin-top: 15px;">';
-    participantsList.slice(0, 50).forEach((p, i) => {
-      const avatar = avatars[i % avatars.length];
-      let teamStr = '';
-      if (p.teamMembers && p.teamMembers.length > 0) {
-        teamStr = ` <span style="font-size:0.75rem; opacity:0.7;">(+${p.teamMembers.length})</span>`;
+    participantsHTML = '<div class="torneo-detail-participants-grouped" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">';
+    
+    // Solo players can be grouped together, or we can list every entry as its own block.
+    // It's better to list every registration entry as a block to show the team context.
+    participantsList.forEach((p, i) => {
+      const avatarCap = avatars[i % avatars.length];
+      const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
+      const capName = p.gameName || p.name || 'Jugador';
+      
+      if (teamType === 'Solo') {
+        participantsHTML += `
+          <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName}</span></span>
+            </div>
+          </div>
+        `;
+      } else {
+        let membersHTML = `<span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName} <span style="font-size:0.65rem; opacity:0.6;">(Líder)</span></span></span>`;
+        p.teamMembers.forEach((tm, tmIdx) => {
+          const avatarTm = avatars[(i + tmIdx + 1) % avatars.length];
+          const tmName = tm.gameName || 'Compañero';
+          membersHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatarTm}</span> <span>${tmName}</span></span>`;
+        });
+        
+        participantsHTML += `
+          <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; font-weight:bold; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
+              👥 Equipo ${teamType}
+            </div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              ${membersHTML}
+            </div>
+          </div>
+        `;
       }
-      participantsHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatar}</span> <span>${p.gameName || p.name || 'Jugador'}${teamStr}</span></span>`;
     });
-    if (participantsList.length > 50) {
-      participantsHTML += `<span class="torneo-detail-participant">+${participantsList.length - 50} más</span>`;
-    }
+    
     participantsHTML += '</div>';
   } else {
     participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Aún no hay inscritos en este torneo.</p>';
