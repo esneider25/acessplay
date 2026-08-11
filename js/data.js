@@ -845,6 +845,13 @@ function updateOrderStatus(orderId, newStatus, note) {
       if (typeof addTransaction === 'function') {
         addTransaction(order.userId, 'deposit', parseFloat(order.priceUsd || 0), 'Recarga de monedero aprobada');
       }
+      db.ref('users/' + order.userId + '/notifications').push({
+        title: 'Recarga Exitosa 💵',
+        body: `Tu recarga de monedero por $${amountToAdd.toFixed(2)} ha sido procesada con éxito.`,
+        type: 'wallet',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
     } else {
       // Product Purchase: Update points, spent, and cashback
       // FIX: Usar transacción atómica para evitar race conditions cuando se aprueban
@@ -909,6 +916,13 @@ function updateOrderStatus(orderId, newStatus, note) {
               amount: cashbackAmount,
               description: `Cashback VIP (${cashbackPercent.toFixed(1)}%) por pedido #${order.id}`,
               date: Date.now()
+            });
+            db.ref('users/' + order.userId + '/notifications').push({
+              title: 'Cashback Recibido 💰',
+              body: `Has recibido $${cashbackAmount.toFixed(2)} de cashback por tu compra.`,
+              type: 'wallet',
+              timestamp: new Date().toISOString(),
+              read: false
             });
           }
         }
@@ -1010,6 +1024,14 @@ function updateOrderStatus(orderId, newStatus, note) {
                 description: `Bono referido (${p.name || 'Amigo'}): +${referrerReward} PTS`,
                 date: Date.now()
               });
+              
+              db.ref('users/' + referrerUid + '/notifications').push({
+                title: '¡Puntos de Referido! 🎉',
+                body: `Has ganado ${referrerReward} puntos gracias a las compras de tu referido ${p.name || 'Amigo'}.`,
+                type: 'referral',
+                timestamp: new Date().toISOString(),
+                read: false
+              });
             }
           }
         });
@@ -1045,6 +1067,19 @@ function updateOrderStatus(orderId, newStatus, note) {
     note: note || (ORDER_STATUSES[newStatus]?.label || '')
   });
   order.updatedAt = new Date().toISOString();
+  
+  if (newStatus !== 'pending' && order.userId) {
+    const statusLabels = { processing: 'Procesando ⚙️', completed: 'Completado ✅', rejected: 'Rechazado ❌', 'invalid-id': 'ID Inválido ⚠️' };
+    const statusText = statusLabels[newStatus] || newStatus.toUpperCase();
+    db.ref('users/' + order.userId + '/notifications').push({
+      title: 'Actualización de Pedido 📦',
+      body: `Tu pedido de ${order.productName || 'producto'} ahora está: ${statusText}.`,
+      type: 'order',
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+  }
+  
   saveOrderToDb(order);
   ORDERS = orders;
   return order;

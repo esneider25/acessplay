@@ -1529,16 +1529,6 @@ window.renderInAppNotifications = function() {
 function initNotifications() {
   if (notificationsInitialized || !currentUser) return;
   
-  if (!('Notification' in window)) {
-    console.log('El navegador no soporta notificaciones');
-    return;
-  }
-  
-  // Solicitar permiso
-  if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-    Notification.requestPermission();
-  }
-  
   notificationsInitialized = true;
   
   // Escuchar notificaciones internas (in-app)
@@ -1553,46 +1543,6 @@ function initNotifications() {
       inAppNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     }
     renderInAppNotifications();
-  });
-  
-  // Escuchar cambios en los pedidos del usuario
-  firebase.database().ref('users/' + currentUser.uid + '/orders').on('value', async snap => {
-    const ordersMap = snap.val();
-    if (!ordersMap) return;
-    
-    // Check for status changes
-    for (const orderId of Object.keys(ordersMap)) {
-      const orderSnap = await firebase.database().ref('orders/' + orderId).once('value');
-      const orderData = orderSnap.val();
-      if (!orderData) continue;
-      
-      const prevStatus = previousOrdersState[orderId];
-      const newStatus = orderData.status;
-      
-      if (prevStatus && prevStatus !== newStatus && newStatus !== 'pending') {
-        // Status changed, trigger notification
-        triggerNotification('Actualización de Pedido', `Tu pedido de ${orderData.productName || 'producto'} ahora está: ${newStatus.toUpperCase()}`);
-      }
-      
-      previousOrdersState[orderId] = newStatus;
-    }
-  });
-  
-  // Escuchar mensajes nuevos en el chat (si está cerrado)
-  firebase.database().ref('messages/' + currentUser.uid).on('value', snap => {
-    const userConv = snap.val();
-    
-    // Only notify if message is from admin and not yet read (hasUnreadUser=true)
-    if (userConv && userConv.hasUnreadUser) {
-      // Check if chat is currently open
-      const secSupport = document.getElementById('sec-support');
-      if (!(secSupport && secSupport.classList.contains('active'))) {
-         const lastMsg = userConv.messages[userConv.messages.length - 1];
-         if (lastMsg && lastMsg.sender === 'admin') {
-           triggerNotification('Nuevo mensaje de Soporte', lastMsg.text);
-         }
-      }
-    }
   });
 }
 
