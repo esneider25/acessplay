@@ -1850,6 +1850,7 @@ function renderTournaments(container) {
                 <div style="width: 1px; height: 24px; background: var(--border); margin: 0 4px;"></div>
                 
                 ${status === 'completed' ? `<button class="btn btn-secondary" onclick="sorteoTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Sorteo">🎲</button>` : ''}
+                <button class="btn btn-secondary" onclick="manageTournamentCredentials('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Credenciales Sala">🔑</button>
                 <button class="btn btn-secondary" onclick="editTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Editar">✏️</button>
                 <button class="btn btn-secondary" onclick="duplicateTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Duplicar">📋</button>
                 <button class="btn btn-secondary" onclick="deleteTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none; color:#ef4444;" title="Eliminar">🗑️</button>

@@ -308,6 +308,7 @@ async function loadDashboardData() {
 
   renderDashboardSavedIds();
   renderDashboardTransactions();
+  renderDashboardTournaments();
   initUserChat();
 }
 
@@ -865,6 +866,16 @@ function renderDashboardContent() {
         <button class="btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 1.05rem;" id="btn-change-password" onclick="changeUserPassword()">
           <i class="ph ph-key"></i> Actualizar Contraseña
         </button>
+      </div>
+    </section>
+
+    <!-- SECTION: MIS TORNEOS -->
+    <section id="sec-tournaments" class="panel-section">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+        <h2 style="margin:0; display:flex; align-items:center; gap:10px;"><i class="ph-fill ph-trophy" style="color:#fbbf24;"></i> Mis Torneos</h2>
+      </div>
+      <div id="dashboard-tournaments-container">
+        <div style="text-align:center; padding:40px; color:var(--text-muted);">Cargando torneos...</div>
       </div>
     </section>
 
