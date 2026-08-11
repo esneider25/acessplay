@@ -236,6 +236,13 @@ function renderApp() {
       </main>
 
     </div>
+    
+    <!-- Floating Notification Bell -->
+    <div onclick="switchSection('notifications')" id="floating-notification-bell" style="position: fixed; top: 90px; right: 30px; z-index: 1000; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+      <i class="ph ph-bell" style="font-size: 1.5rem; color: white;"></i>
+      <span id="notif-badge" style="display:none; position:absolute; top: -5px; right: -5px; background: var(--accent); color: var(--bg-surface); font-size: 0.75rem; font-weight: bold; padding: 2px 6px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">0</span>
+    </div>
+    
     <div id="terms-modal-container"></div>
   `;
   
@@ -908,6 +915,21 @@ function renderDashboardContent() {
         </div>
       </div>
     </section>
+    
+    <!-- SECTION: NOTIFICACIONES -->
+    <section id="sec-notifications" class="panel-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="font-family: var(--font-display); font-size: 1.8rem; margin: 0;">🔔 Centro de Notificaciones</h2>
+      </div>
+      <div class="glass-card" style="padding: 0;">
+        <div id="notifications-list" style="display: flex; flex-direction: column; max-height: 600px; overflow-y: auto;">
+          <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
+            <div class="spinner" style="margin: 0 auto 15px;"></div>
+            Cargando notificaciones...
+          </div>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -1459,6 +1481,50 @@ window.switchSection = function(sectionId) {
 
 let notificationsInitialized = false;
 let previousOrdersState = {};
+let inAppNotifications = [];
+
+window.markNotificationAsRead = function(id) {
+  if (!currentUser) return;
+  firebase.database().ref('users/' + currentUser.uid + '/notifications/' + id).update({ read: true });
+};
+
+window.renderInAppNotifications = function() {
+  const container = document.getElementById('notifications-list');
+  const badge = document.getElementById('notif-badge');
+  if (!container) return;
+  
+  const unreadCount = inAppNotifications.filter(n => !n.read).length;
+  if (badge) {
+    badge.innerText = unreadCount;
+    badge.style.display = unreadCount > 0 ? 'inline-block' : 'none';
+  }
+  
+  if (inAppNotifications.length === 0) {
+    container.innerHTML = `
+      <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
+        <i class="ph-fill ph-bell-slash" style="font-size: 3rem; opacity: 0.3; margin-bottom: 10px; display: block;"></i>
+        No tienes notificaciones
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = inAppNotifications.map(notif => `
+    <div onclick="${!notif.read ? `markNotificationAsRead('${notif.id}')` : ''}" style="padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); background: ${notif.read ? 'transparent' : 'rgba(0, 229, 195, 0.05)'}; display: flex; gap: 15px; align-items: flex-start; cursor: ${notif.read ? 'default' : 'pointer'}; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='${notif.read ? 'transparent' : 'rgba(0, 229, 195, 0.05)'}'">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: ${notif.read ? 'rgba(255,255,255,0.05)' : 'var(--accent-glow)'}; display: flex; align-items: center; justify-content: center; color: ${notif.read ? 'var(--text-secondary)' : 'var(--accent)'}; font-size: 1.2rem; flex-shrink: 0;">
+        <i class="${notif.type === 'tournament' ? 'ph-fill ph-trophy' : 'ph-fill ph-bell-ringing'}"></i>
+      </div>
+      <div style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+          <h4 style="margin: 0; font-size: 1rem; color: ${notif.read ? 'var(--text-secondary)' : 'white'};">${notif.title}</h4>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">${new Date(notif.timestamp).toLocaleDateString()}</span>
+        </div>
+        <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">${notif.body}</p>
+      </div>
+      ${!notif.read ? `<div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px;"></div>` : ''}
+    </div>
+  `).join('');
+};
 
 function initNotifications() {
   if (notificationsInitialized || !currentUser) return;
@@ -1474,6 +1540,20 @@ function initNotifications() {
   }
   
   notificationsInitialized = true;
+  
+  // Escuchar notificaciones internas (in-app)
+  firebase.database().ref('users/' + currentUser.uid + '/notifications').on('value', snap => {
+    const data = snap.val();
+    inAppNotifications = [];
+    if (data) {
+      Object.keys(data).forEach(key => {
+        inAppNotifications.push({ id: key, ...data[key] });
+      });
+      // Ordenar de mas reciente a mas antiguo
+      inAppNotifications.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    }
+    renderInAppNotifications();
+  });
   
   // Escuchar cambios en los pedidos del usuario
   firebase.database().ref('users/' + currentUser.uid + '/orders').on('value', async snap => {
