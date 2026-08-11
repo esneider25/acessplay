@@ -354,12 +354,12 @@ function renderHallOfFame(torneos) {
     try { dateStr = new Date(torneo.createdAt).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }); } catch(e) {}
     
     html += `
-      <div class="hall-of-fame-card">
-        <div class="hall-of-fame-icon">🏆</div>
-        <div class="hall-of-fame-info">
-          <h4>${torneo.title}</h4>
-          <p><span class="winner-name">${winnerDisplay}</span></p>
-          <p>${dateStr}</p>
+      <div class="hof-epic-card">
+        <div class="hof-epic-card-inner">
+          <div class="hof-epic-icon">🏆</div>
+          <h4 class="hof-epic-title">${torneo.title}</h4>
+          <div class="hof-epic-winners">${winnerDisplay}</div>
+          <div class="hof-epic-date">${dateStr}</div>
         </div>
       </div>
     `;
@@ -383,25 +383,53 @@ window.openInscriptionModal = function(tournamentId) {
   if (torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date()) {
     alert('⏰ Las inscripciones para este torneo ya cerraron.');
     return;
-  }
-  
-  const count = Object.keys(torneo.participants || {}).length;
-  if (count >= (torneo.maxParticipants || 100)) {
-    alert('🚫 Este torneo ya está lleno.');
+    if (typeof openAuthModal === 'function') openAuthModal();
+    else alert('Debes iniciar sesión para inscribirte.');
     return;
   }
   
-  let userName = user.displayName || user.email;
-  if (typeof userProfile !== 'undefined' && userProfile && userProfile.name) {
-    userName = userProfile.name;
+  const torneo = torneosData.find(t => t.id === tournamentId);
+  if (!torneo) return;
+  
+  const userName = user.displayName || user.email.split('@')[0];
+  const content = document.getElementById('torneo-modal-content');
+  const gm = torneo.gameMode || 'solo';
+  
+  let extraMembersHtml = '';
+  if (gm === 'duo') {
+    extraMembersHtml = `
+      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👥 Miembro 2</h4>
+      <div class="torneo-form-group">
+        <div style="display:flex; gap:5px;">
+          <input class="torneo-form-input tm-id" type="text" required placeholder="ID del Juego (Miembro 2)">
+          <input class="torneo-form-input tm-ign" type="text" required placeholder="IGN (Miembro 2)">
+        </div>
+      </div>
+    `;
+  } else if (gm === 'squad') {
+    extraMembersHtml = `
+      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">🎯 Miembros del Escuadrón</h4>
+      <div class="torneo-form-group">
+        <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 2</label>
+        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="IGN"></div>
+      </div>
+      <div class="torneo-form-group">
+        <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 3</label>
+        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="IGN"></div>
+      </div>
+      <div class="torneo-form-group">
+        <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 4</label>
+        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="IGN"></div>
+      </div>
+    `;
   }
   
-  const content = document.getElementById('torneo-modal-content');
   content.innerHTML = `
     <h3>⚡ Inscripción</h3>
-    <p class="torneo-modal-subtitle">${torneo.title}</p>
+    <p class="torneo-modal-subtitle">${torneo.title} - ${gm.toUpperCase()}</p>
     
-    <form id="inscription-form">
+    <form id="inscription-form" style="max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-right: -5px;">
+      <h4 style="margin-top: 10px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👑 Lider (Tú)</h4>
       <div class="torneo-form-group">
         <label class="torneo-form-label">Tu nombre</label>
         <input class="torneo-form-input" id="insc-name" type="text" value="${userName}" required placeholder="Tu nombre">
@@ -409,13 +437,14 @@ window.openInscriptionModal = function(tournamentId) {
       <div class="torneo-form-group">
         <label class="torneo-form-label">ID del juego</label>
         <input class="torneo-form-input" id="insc-game-id" type="text" required placeholder="Ej: 123456789">
-        <p class="torneo-form-hint">Tu ID numérico dentro del juego (${torneo.productName || 'el juego'})</p>
+        <p class="torneo-form-hint" style="margin-top:2px;">Tu ID numérico dentro del juego</p>
       </div>
       <div class="torneo-form-group">
         <label class="torneo-form-label">Nombre en el juego (IGN)</label>
         <input class="torneo-form-input" id="insc-game-name" type="text" required placeholder="Ej: ProPlayer99">
-        <p class="torneo-form-hint">Tu nombre de usuario visible dentro del juego</p>
       </div>
+      
+      ${extraMembersHtml}
       
       <div style="display:flex; gap:10px; margin-top:24px;">
         <button type="button" class="torneo-btn btn-login" onclick="closeTorneoModal()" style="flex:1;">Cancelar</button>
@@ -435,8 +464,21 @@ window.openInscriptionModal = function(tournamentId) {
       const name = document.getElementById('insc-name').value.trim();
       
       if (!gameName || !gameId || !name) {
-        alert('Por favor completa todos los campos.');
+        alert('Por favor completa todos los campos del líder.');
         return;
+      }
+      
+      const teamMembers = [];
+      const idInputs = document.querySelectorAll('.tm-id');
+      const ignInputs = document.querySelectorAll('.tm-ign');
+      for (let i = 0; i < idInputs.length; i++) {
+        const tId = idInputs[i].value.trim();
+        const tIgn = ignInputs[i].value.trim();
+        if (!tId || !tIgn) {
+          alert('Por favor completa los datos de todos los miembros del equipo.');
+          return;
+        }
+        teamMembers.push({ gameId: tId, gameName: tIgn });
       }
       
       const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -449,6 +491,7 @@ window.openInscriptionModal = function(tournamentId) {
         email: user.email,
         gameId: gameId,
         gameName: gameName,
+        teamMembers: teamMembers.length > 0 ? teamMembers : null,
         joinedAt: new Date().toISOString()
       }).then(() => {
         closeTorneoModal();
@@ -469,6 +512,17 @@ window.closeTorneoModal = function() {
 };
 
 // ── Detail Modal ──
+window.switchTab = function(btn, tabId) {
+  const tabs = btn.parentElement.querySelectorAll('.torneo-tab-btn');
+  tabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  
+  const contents = btn.parentElement.parentElement.querySelectorAll('.torneo-tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  
+  document.getElementById(tabId).classList.add('active');
+};
+
 window.openDetailModal = function(tournamentId) {
   const torneo = torneosData.find(t => t.id === tournamentId);
   if (!torneo) return;
@@ -476,6 +530,7 @@ window.openDetailModal = function(tournamentId) {
   const participants = torneo.participants || {};
   const count = Object.keys(participants).length;
   const max = torneo.maxParticipants || 100;
+  const avatars = ['👾', '🤠', '🥷', '🤖', '🦸‍♂️', '🧟', '🧙‍♂️', '🧛', '🦹', '👽'];
   
   // Prizes
   let prizesHTML = '';
@@ -483,40 +538,89 @@ window.openDetailModal = function(tournamentId) {
   if (prizes.length > 0) {
     const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️'];
     prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text">${p.place ? p.place + ': ' : ''}${p.reward}</span></div>`).join('');
-    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes">${prizesHTML}</div></div>`;
+    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;">${prizesHTML}</div></div>`;
   } else if (torneo.prize) {
-    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
+    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
   }
   
   // Rules
   const rulesHTML = torneo.description
-    ? `<div class="torneo-detail-section"><h4>📋 Descripción y Reglas</h4><div class="torneo-detail-rules">${torneo.description}</div></div>`
+    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción y Reglas</h4><div class="torneo-detail-rules" style="margin-top:10px;">${torneo.description}</div></div>`
     : '';
   
   // Participants
   const participantsList = Object.values(participants);
   let participantsHTML = '';
   if (participantsList.length > 0) {
-    participantsHTML = '<div class="torneo-detail-section"><h4>👥 Participantes (' + count + '/' + max + ')</h4><div class="torneo-detail-participants">';
-    participantsList.slice(0, 50).forEach(p => {
-      participantsHTML += `<span class="torneo-detail-participant">🎮 ${p.gameName || p.name || 'Jugador'}</span>`;
+    participantsHTML = '<div class="torneo-detail-participants" style="margin-top: 15px;">';
+    participantsList.slice(0, 50).forEach((p, i) => {
+      const avatar = avatars[i % avatars.length];
+      let teamStr = '';
+      if (p.teamMembers && p.teamMembers.length > 0) {
+        teamStr = ` <span style="font-size:0.75rem; opacity:0.7;">(+${p.teamMembers.length})</span>`;
+      }
+      participantsHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatar}</span> <span>${p.gameName || p.name || 'Jugador'}${teamStr}</span></span>`;
     });
     if (participantsList.length > 50) {
       participantsHTML += `<span class="torneo-detail-participant">+${participantsList.length - 50} más</span>`;
     }
-    participantsHTML += '</div></div>';
+    participantsHTML += '</div>';
+  } else {
+    participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Aún no hay inscritos en este torneo.</p>';
   }
   
-  // Leaderboard
+  // Leaderboard with Podium
   let leaderboardHTML = '';
   if (torneo.leaderboard && torneo.leaderboard.length > 0) {
-    leaderboardHTML = '<div class="torneo-detail-section"><h4>📊 Tabla de Resultados</h4><div class="torneo-leaderboard"><table>';
-    leaderboardHTML += '<tr><th>#</th><th>Jugador</th><th>Kills</th></tr>';
-    torneo.leaderboard.forEach((entry, i) => {
-      const rankClass = i < 3 ? `rank-${i + 1}` : '';
-      leaderboardHTML += `<tr class="${rankClass}"><td>${i + 1}</td><td>${entry.playerName || 'Jugador'}</td><td>${entry.kills || 0}</td></tr>`;
+    const lbSorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+    
+    // Podium (Top 3)
+    let podiumHTML = '<div class="podium-container">';
+    const top3 = lbSorted.slice(0, 3);
+    const podOrder = [1, 0, 2];
+    podOrder.forEach(idx => {
+      const p = top3[idx];
+      if (p) {
+        const rank = idx + 1;
+        podiumHTML += `
+          <div class="podium-spot rank-${rank}">
+            <div class="podium-avatar">${avatars[(idx * 2 + 1) % avatars.length]}</div>
+            <div class="podium-bar">
+              <div class="podium-name">${p.playerName || 'Jugador'}</div>
+              <div class="podium-kills">${p.kills || 0} K</div>
+            </div>
+          </div>
+        `;
+      }
     });
-    leaderboardHTML += '</table></div></div>';
+    podiumHTML += '</div>';
+
+    // List (4th onwards)
+    let listHTML = '';
+    if (lbSorted.length > 3) {
+      listHTML = '<div class="leaderboard-list">';
+      lbSorted.slice(3).forEach((entry, i) => {
+        const realRank = i + 4;
+        listHTML += `
+          <div class="lb-item">
+            <div class="lb-rank">#${realRank}</div>
+            <div class="lb-avatar">${avatars[(realRank * 3) % avatars.length]}</div>
+            <div class="lb-name">${entry.playerName || 'Jugador'}</div>
+            <div class="lb-kills">${entry.kills || 0} K</div>
+          </div>
+        `;
+      });
+      listHTML += '</div>';
+    }
+    
+    leaderboardHTML = `
+      <div style="margin-top: 15px;">
+        ${podiumHTML}
+        ${listHTML}
+      </div>
+    `;
+  } else {
+    leaderboardHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Resultados no disponibles o el torneo está en curso.</p>';
   }
   
   // Winners
@@ -524,32 +628,46 @@ window.openDetailModal = function(tournamentId) {
   const winners = torneo.winners || [];
   if (winners.length > 0) {
     const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
-    winnersHTML = '<div class="torneo-detail-section"><h4>🏆 Ganadores</h4>';
+    winnersHTML = '<div class="torneo-detail-section"><h4>🏆 Ganadores Oficiales</h4><div style="margin-top:10px;">';
     winners.forEach((w, i) => {
-      winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px; margin-bottom:6px; background:rgba(255,215,0,0.05); border-radius:var(--radius-sm); border:1px solid rgba(255,215,0,0.12);">
-        <span style="font-size:1.4rem;">${medals[i] || '🏅'}</span>
+      winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
+        <span style="font-size:1.6rem;">${medals[i] || '🏅'}</span>
         <div>
-          <div style="font-weight:600; color:#fbbf24;">${w.name}</div>
-          <div style="font-size:0.8rem; color:var(--text-muted);">${w.place || ''} — ${w.reward || ''}</div>
+          <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${w.name}</div>
+          <div style="font-size:0.85rem; color:var(--text-secondary);">${w.place || ''} — ${w.reward || ''}</div>
         </div>
       </div>`;
     });
-    winnersHTML += '</div>';
+    winnersHTML += '</div></div>';
   }
   
   const content = document.getElementById('torneo-detail-content');
   content.innerHTML = `
-    <h3>${torneo.title}</h3>
+    <h3 style="font-family: var(--font-display); text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 5px; font-size: 1.8rem; line-height: 1.1;">${torneo.title}</h3>
     <p class="torneo-modal-subtitle">${torneo.productName || ''} ${torneo.gameMode ? '· ' + getGameModeLabel(torneo.gameMode) : ''}</p>
     
-    ${rulesHTML}
-    ${prizesHTML}
-    ${winnersHTML}
-    ${leaderboardHTML}
-    ${participantsHTML}
+    <div class="torneo-tabs">
+      <button class="torneo-tab-btn active" onclick="switchTab(this, 'tab-resumen')">Resumen</button>
+      <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-participantes')">Participantes (${count}/${max})</button>
+      <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-leaderboard')">Clasificación</button>
+    </div>
     
-    <div style="margin-top:20px; text-align:right;">
-      <button class="torneo-btn btn-login" onclick="closeDetailModal()" style="width:auto; padding:10px 24px;">Cerrar</button>
+    <div id="tab-resumen" class="torneo-tab-content active">
+      ${winnersHTML}
+      ${prizesHTML}
+      ${rulesHTML}
+    </div>
+    
+    <div id="tab-participantes" class="torneo-tab-content">
+      ${participantsHTML}
+    </div>
+    
+    <div id="tab-leaderboard" class="torneo-tab-content">
+      ${leaderboardHTML}
+    </div>
+    
+    <div style="margin-top:30px; text-align:right;">
+      <button class="torneo-btn btn-login" onclick="closeDetailModal()" style="width:auto; padding:10px 30px;">Volver</button>
     </div>
   `;
   

@@ -1837,19 +1837,22 @@ function renderTournaments(container) {
                 ${winnersDisplay}
               </div>
               
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items:center;">
-                <select class="admin-form-input" style="width: auto; padding: 6px 10px; font-size:0.82rem;" onchange="updateTournamentStatus('${torneo.id}', this.value)">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items:center; margin-top: 5px;">
+                <select class="admin-form-input" style="width: auto; padding: 6px 10px; font-size:0.82rem; background: var(--bg-deep);" onchange="updateTournamentStatus('${torneo.id}', this.value)">
                   <option value="upcoming" ${status === 'upcoming' ? 'selected' : ''}>📅 Próximo</option>
                   <option value="registration_open" ${status === 'registration_open' ? 'selected' : ''}>📝 Inscripción</option>
                   <option value="ongoing" ${status === 'ongoing' ? 'selected' : ''}>⚔️ En Curso</option>
                   <option value="completed" ${status === 'completed' ? 'selected' : ''}>✅ Finalizado</option>
                 </select>
-                <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">👥 Inscritos</button>
-                <button class="btn btn-secondary" onclick="manageTournamentResults('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">📊 Resultados</button>
-                ${status === 'completed' ? `<button class="btn btn-primary" onclick="sorteoTournament('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">🎲 Sorteo</button>` : ''}
-                <button class="btn btn-primary" onclick="editTournament('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;" title="Editar">✏️ Editar</button>
-                <button class="btn btn-secondary" onclick="duplicateTournament('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;" title="Duplicar">📋</button>
-                <button class="btn btn-danger" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">🗑️</button>
+                <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem;">👥 Inscritos</button>
+                <button class="btn btn-primary" onclick="manageTournamentResults('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem;">📊 Resultados</button>
+                
+                <div style="width: 1px; height: 24px; background: var(--border); margin: 0 4px;"></div>
+                
+                ${status === 'completed' ? `<button class="btn btn-secondary" onclick="sorteoTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Sorteo">🎲</button>` : ''}
+                <button class="btn btn-secondary" onclick="editTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Editar">✏️</button>
+                <button class="btn btn-secondary" onclick="duplicateTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Duplicar">📋</button>
+                <button class="btn btn-secondary" onclick="deleteTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none; color:#ef4444;" title="Eliminar">🗑️</button>
               </div>
             </div>
           </div>
@@ -1936,6 +1939,14 @@ window.editTournament = function(id) {
             <textarea id="et-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical;">${torneo.description || ''}</textarea>
           </div>
           
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Imagen del Banner</label>
+            <div style="display:flex; gap:10px;">
+              <input type="text" id="et-banner" class="admin-form-input" style="flex:1; padding: 10px;" value="${torneo.bannerUrl || ''}" placeholder="URL o subir desde dispositivo...">
+              <button type="button" id="et-banner-btn" class="btn btn-secondary" onclick="uploadTournamentBanner('et-banner', 'et-banner-btn')" style="padding: 0 15px; flex-shrink: 0;">🖼️ Subir</button>
+            </div>
+          </div>
+          
           <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
             <div>
               <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Participantes Máximos</label>
@@ -1973,6 +1984,7 @@ window.editTournament = function(id) {
         const gameMode = document.getElementById('et-gamemode').value;
         const maxP = parseInt(document.getElementById('et-max').value) || 100;
         const deadline = document.getElementById('et-deadline').value;
+        const bannerUrl = document.getElementById('et-banner').value.trim();
         
         const prizeInputs = document.querySelectorAll('#et-prizes-list .ct-prize-input');
         const places = ['1er Lugar', '2do Lugar', '3er Lugar', '4to Lugar', '5to Lugar', '6to Lugar'];
@@ -1987,6 +1999,7 @@ window.editTournament = function(id) {
           description: description || null,
           gameMode: gameMode || null,
           maxParticipants: maxP,
+          bannerUrl: bannerUrl || null,
           prizes: newPrizes.length > 0 ? newPrizes : null,
           prize: newPrizes.length > 0 ? newPrizes[0].reward : null
         };
@@ -2064,11 +2077,15 @@ window.viewTournamentParticipants = function(id) {
       tableRows = '<tr><td colspan="5" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
     } else {
       pList.forEach((p, i) => {
+        let teamInfo = '';
+        if (p.teamMembers && p.teamMembers.length > 0) {
+          teamInfo = `<br><span style="font-size:0.75rem; color:var(--accent);">👥 Equipo: ` + p.teamMembers.map(tm => `${tm.gameName} (${tm.gameId})`).join(', ') + `</span>`;
+        }
         tableRows += `
           <tr style="border-bottom: 1px solid var(--border);">
             <td style="padding: 8px;">${i + 1}</td>
             <td style="padding: 8px;">${p.name || 'Sin nombre'}</td>
-            <td style="padding: 8px;">${p.gameName || '-'}</td>
+            <td style="padding: 8px;">${p.gameName || '-'}${teamInfo}</td>
             <td style="padding: 8px;">${p.gameId || '-'}</td>
             <td style="padding: 8px;">${new Date(p.joinedAt).toLocaleString()}</td>
           </tr>
@@ -2114,9 +2131,13 @@ window.exportParticipantsCSV = function(id) {
     const participants = Object.values(torneo.participants || {});
     if (participants.length === 0) return alert('No hay participantes para exportar.');
     
-    let csv = 'Nombre,IGN,Game ID,Email,Fecha Inscripcion\n';
+    let csv = 'Nombre,IGN,Game ID,Email,Fecha Inscripcion,Miembros Equipo\n';
     participants.forEach(p => {
-      csv += `"${p.name || ''}","${p.gameName || ''}","${p.gameId || ''}","${p.email || ''}","${p.joinedAt || ''}"\n`;
+      let teamStr = '';
+      if (p.teamMembers && p.teamMembers.length > 0) {
+        teamStr = p.teamMembers.map(tm => `${tm.gameName} (${tm.gameId})`).join(' | ');
+      }
+      csv += `"${p.name || ''}","${p.gameName || ''}","${p.gameId || ''}","${p.email || ''}","${p.joinedAt || ''}","${teamStr}"\n`;
     });
     
     const blob = new Blob([csv], { type: 'text/csv' });
@@ -2280,6 +2301,16 @@ window.manageTournamentResults = function(id) {
           </table>
         </div>
         
+        <div style="margin-top: 20px; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2); padding: 15px; border-radius: var(--radius-sm);">
+          <h4 style="margin-bottom: 8px; color: var(--accent-light);">🤖 Carga Automática con IA (OCR)</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Sube una captura de pantalla del resultado final para extraer los nombres y kills automáticamente.</p>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="file" id="ocr-image-input" accept="image/*" class="admin-form-input" style="flex: 1; padding: 6px; min-width: 200px;">
+            <button class="btn btn-primary" onclick="processOCR('${id}')" id="ocr-process-btn" style="padding: 8px 15px; font-size: 0.85rem;">🔍 Escanear Imagen</button>
+          </div>
+          <div id="ocr-status" style="margin-top: 10px; font-size: 0.85rem; color: #fbbf24; font-weight: bold; display: none;"></div>
+        </div>
+        
         <div style="margin-top:20px;">
           <h4 style="margin-bottom:10px;">🏆 Agregar Ganador Manual</h4>
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -2323,6 +2354,153 @@ window.removeLeaderboardEntry = function(id, index) {
     });
   });
 };
+
+window.addWinner = function(id) {
+  const name = document.getElementById('winner-name').value.trim();
+  const place = document.getElementById('winner-place').value.trim() || '1° Lugar';
+  const reward = document.getElementById('winner-reward').value.trim();
+  
+  if (!name || !reward) return alert('Debes incluir el nombre y el premio.');
+  
+  firebase.database().ref('tournaments/' + id + '/winners').once('value').then(snap => {
+    const winners = snap.val() || [];
+    winners.push({ name, place, reward });
+    firebase.database().ref('tournaments/' + id).update({
+      winners: winners,
+      status: 'completed',
+      winnerName: winners.map(w => w.name).join(', ')
+    }).then(() => {
+      manageTournamentResults(id);
+    });
+  });
+};
+
+window.clearWinners = function(id) {
+  if (confirm('¿Estás seguro de borrar todos los ganadores actuales?')) {
+    firebase.database().ref('tournaments/' + id).update({
+      winners: null,
+      winnerName: null
+    }).then(() => {
+      manageTournamentResults(id);
+    });
+  }
+};
+
+window.processOCR = function(tournamentId) {
+  const fileInput = document.getElementById('ocr-image-input');
+  const statusDiv = document.getElementById('ocr-status');
+  const btn = document.getElementById('ocr-process-btn');
+  
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert('Por favor selecciona una imagen primero.');
+    return;
+  }
+  
+  const file = fileInput.files[0];
+  
+  statusDiv.style.display = 'block';
+  statusDiv.innerHTML = '⚙️ Cargando motor de Inteligencia Artificial (Tesseract)...';
+  btn.disabled = true;
+  
+  if (typeof Tesseract === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    script.onload = () => runTesseract(file, tournamentId, statusDiv, btn);
+    script.onerror = () => {
+      statusDiv.innerHTML = '❌ Error al cargar Tesseract.js. Verifica tu conexión.';
+      btn.disabled = false;
+    };
+    document.head.appendChild(script);
+  } else {
+    runTesseract(file, tournamentId, statusDiv, btn);
+  }
+};
+
+function runTesseract(file, tournamentId, statusDiv, btn) {
+  statusDiv.innerHTML = '🔍 Analizando imagen... (Esto puede tomar unos segundos)';
+  
+  Tesseract.recognize(
+    file,
+    'spa+eng',
+    { logger: m => {
+        if (m.status === 'recognizing text') {
+          statusDiv.innerHTML = `🔍 Analizando imagen... ${Math.round(m.progress * 100)}%`;
+        }
+      } 
+    }
+  ).then(({ data: { text } }) => {
+    console.log("Texto detectado por OCR:", text);
+    statusDiv.innerHTML = '✅ Análisis completo. Procesando datos...';
+    
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
+    let extractedCount = 0;
+    let newEntries = [];
+    
+    lines.forEach(line => {
+      // Free Fire specific pattern: [Rank]? [Name with any chars] [Kills] Eliminaciones
+      const match = line.match(/(.*?)\s+(\d+)\s*(?:Eliminaciones|Eliminacion|Eliminaci|Kills|Bajas)/i);
+      
+      if (match) {
+        let playerName = match[1].trim();
+        let kills = parseInt(match[2]);
+        
+        // Remove the leading rank number if it exists (e.g., "1 Luciana 777" -> "Luciana 777")
+        // Sometimes Tesseract sees weird characters instead of a number, so we strip common rank prefixes
+        playerName = playerName.replace(/^[\dOIl]+\s+/, '').trim();
+        
+        if (playerName.length > 0 && kills >= 0 && kills < 100) {
+          if (!newEntries.find(e => e.playerName === playerName)) {
+            newEntries.push({ playerName, kills });
+            extractedCount++;
+          }
+        }
+      } else {
+        // Fallback to generic parsing for other games
+        const cleanLine = line.replace(/[^\w\s\d-]/gi, '').trim();
+        if (!cleanLine) return;
+        
+        const parts = cleanLine.split(/\s+/);
+        let playerName = '';
+        let kills = 0;
+        
+        if (parts.length >= 2 && !isNaN(parts[parts.length - 1])) {
+          kills = parseInt(parts.pop());
+          playerName = parts.join(' ');
+        } else if (parts.length >= 2 && !isNaN(parts[0])) {
+          kills = parseInt(parts.shift());
+          playerName = parts.join(' ');
+        }
+        
+        if (playerName.length > 2 && kills >= 0 && kills < 100) {
+          if (!newEntries.find(e => e.playerName === playerName)) {
+            newEntries.push({ playerName, kills });
+            extractedCount++;
+          }
+        }
+      }
+    });
+    
+    if (newEntries.length > 0) {
+      statusDiv.innerHTML = `✨ Se detectaron ${extractedCount} resultados probables. Guardando...`;
+      firebase.database().ref('tournaments/' + tournamentId + '/leaderboard').once('value').then(snap => {
+        const leaderboard = snap.val() || [];
+        const combined = [...leaderboard, ...newEntries];
+        combined.sort((a, b) => (b.kills || 0) - (a.kills || 0));
+        
+        firebase.database().ref('tournaments/' + tournamentId + '/leaderboard').set(combined).then(() => {
+          manageTournamentResults(tournamentId);
+        });
+      });
+    } else {
+      statusDiv.innerHTML = '⚠️ No se detectaron nombres/kills claros. Sube una imagen con mejor contraste.';
+      btn.disabled = false;
+    }
+  }).catch(err => {
+    console.error(err);
+    statusDiv.innerHTML = '❌ Error al procesar la imagen.';
+    btn.disabled = false;
+  });
+}
 
 window.addWinner = function(id) {
   const name = document.getElementById('winner-name').value.trim();
@@ -2411,6 +2589,14 @@ window.showCreateTournamentModal = function() {
           <textarea id="ct-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical; font-family:var(--font-body);" placeholder="Reglas del torneo, cómo participar, restricciones, etc."></textarea>
         </div>
         
+        <div>
+          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Imagen del Banner</label>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="ct-banner" class="admin-form-input" style="flex:1; padding: 10px;" placeholder="URL o subir desde dispositivo...">
+            <button type="button" id="ct-banner-btn" class="btn btn-secondary" onclick="uploadTournamentBanner('ct-banner', 'ct-banner-btn')" style="padding: 0 15px; flex-shrink: 0;">🖼️ Subir</button>
+          </div>
+        </div>
+        
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
           <div>
             <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Participantes Máximos</label>
@@ -2461,6 +2647,7 @@ window.showCreateTournamentModal = function() {
       const gameMode = document.getElementById('ct-gamemode').value;
       const customTitle = document.getElementById('ct-title').value.trim();
       const description = document.getElementById('ct-description').value.trim();
+      const bannerUrl = document.getElementById('ct-banner').value.trim();
       const maxP = parseInt(document.getElementById('ct-max').value) || 100;
       const deadline = document.getElementById('ct-deadline').value;
       
@@ -2491,6 +2678,7 @@ window.showCreateTournamentModal = function() {
         title: title,
         description: description || null,
         gameMode: gameMode || null,
+        bannerUrl: bannerUrl || null,
         status: 'registration_open',
         createdAt: new Date().toISOString(),
         maxParticipants: maxP,
@@ -2529,5 +2717,49 @@ window.setTournamentWinner = function(id) {
   if (winnerName && winnerName.trim() !== '') {
     firebase.database().ref('tournaments/' + id).update({ winnerName: winnerName.trim() });
   }
+};
+
+window.uploadTournamentBanner = function(inputId, btnId) {
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Check size limit (e.g., 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen es muy grande (Máximo 5MB).');
+      return;
+    }
+
+    const storageRef = firebase.storage().ref('tournaments/' + Date.now() + '_' + file.name);
+    
+    const btn = document.getElementById(btnId);
+    const originalText = btn ? btn.innerText : '';
+    if(btn) {
+      btn.disabled = true;
+      btn.innerText = '⏳...';
+    }
+
+    storageRef.put(file).then(snapshot => {
+      return snapshot.ref.getDownloadURL();
+    }).then(url => {
+      document.getElementById(inputId).value = url;
+      if(btn) {
+        btn.disabled = false;
+        btn.innerText = '✅ Listo';
+        setTimeout(() => btn.innerText = originalText, 2000);
+      }
+    }).catch(err => {
+      console.error(err);
+      alert('Error subiendo imagen. Verifica tu conexión.');
+      if(btn) {
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    });
+  };
+  fileInput.click();
 };
 

@@ -858,3 +858,252 @@
     font-size: 0.85rem;
   }
 }
+
+/* ==========================================
+   FASE 4: ESPORTS STYLING (TABS, PODIUM, AVATARS)
+   ========================================== */
+
+/* ── Tabs Navigation ── */
+.torneo-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  overflow-x: auto;
+}
+
+.torneo-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  cursor: pointer;
+  position: relative;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.torneo-tab-btn:hover {
+  color: var(--text-primary);
+}
+
+.torneo-tab-btn.active {
+  color: var(--accent-light);
+}
+
+.torneo-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -11px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+  border-radius: 3px 3px 0 0;
+}
+
+.torneo-tab-content {
+  display: none;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.torneo-tab-content.active {
+  display: block;
+}
+
+/* ── Podium (Top 3 Leaderboard) ── */
+.podium-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 15px;
+  margin: 30px 0 40px;
+  min-height: 200px;
+}
+
+.podium-spot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100px;
+  position: relative;
+}
+
+.podium-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  border: 2px solid var(--border);
+  margin-bottom: -15px;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.podium-spot.rank-1 .podium-avatar { border-color: #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.4); width: 70px; height: 70px; font-size: 2.5rem; margin-bottom: -20px; }
+.podium-spot.rank-2 .podium-avatar { border-color: #c0c0c0; }
+.podium-spot.rank-3 .podium-avatar { border-color: #cd7f32; }
+
+.podium-bar {
+  width: 100%;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 30px;
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-align: center;
+}
+
+.podium-spot.rank-1 { order: 2; z-index: 3; }
+.podium-spot.rank-2 { order: 1; z-index: 1; }
+.podium-spot.rank-3 { order: 3; z-index: 1; }
+
+.podium-spot.rank-1 .podium-bar { height: 160px; background: linear-gradient(to top, rgba(255,215,0,0.1), rgba(255,215,0,0.4)); border-top: 3px solid #ffd700; }
+.podium-spot.rank-2 .podium-bar { height: 120px; background: linear-gradient(to top, rgba(192,192,192,0.1), rgba(192,192,192,0.3)); border-top: 3px solid #c0c0c0; }
+.podium-spot.rank-3 .podium-bar { height: 90px; background: linear-gradient(to top, rgba(205,127,50,0.1), rgba(205,127,50,0.3)); border-top: 3px solid #cd7f32; }
+
+.podium-name { font-size: 0.85rem; text-shadow: 0 2px 4px rgba(0,0,0,0.8); margin-bottom: 5px; word-break: break-all; padding: 0 5px; }
+.podium-kills { font-size: 1.2rem; color: var(--accent-light); }
+.podium-spot.rank-1 .podium-kills { color: #ffd700; font-size: 1.4rem; }
+
+/* ── Standard Leaderboard Items ── */
+.leaderboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lb-item {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 15px;
+  transition: transform 0.2s;
+}
+
+.lb-item:hover {
+  transform: translateX(5px);
+  background: rgba(255,255,255,0.06);
+}
+
+.lb-rank {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  width: 40px;
+}
+
+.lb-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 15px;
+  font-size: 1.2rem;
+}
+
+.lb-name {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.lb-kills {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--accent);
+}
+
+/* ── Hall of Fame Epic Cards ── */
+.hof-epic-card {
+  position: relative;
+  background: linear-gradient(145deg, var(--bg-card), var(--bg-deep));
+  border: 1px solid rgba(255,215,0,0.3);
+  border-radius: 12px;
+  padding: 2px;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.hof-epic-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(transparent, rgba(255,215,0,0.3), transparent 30%);
+  animation: rotateLight 4s linear infinite;
+}
+
+.hof-epic-card-inner {
+  position: relative;
+  background: var(--bg-card);
+  border-radius: 10px;
+  padding: 20px;
+  height: 100%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hof-epic-icon {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+}
+
+.hof-epic-title {
+  color: #ffd700;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  margin-bottom: 5px;
+}
+
+.hof-epic-winners {
+  font-weight: 800;
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.hof-epic-date {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+@keyframes rotateLight {
+  100% { transform: rotate(360deg); }
+}
+
+/* Participant list with avatars */
+.torneo-detail-participant {
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.05));
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.torneo-detail-participant span.avatar {
+  font-size: 1.1rem;
+}
