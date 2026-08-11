@@ -165,7 +165,7 @@
 /* ── Card Banner ── */
 .torneo-card-banner {
   position: relative;
-  height: 140px;
+  height: 100px;
   overflow: hidden;
   display: flex;
   align-items: flex-end;
@@ -308,7 +308,7 @@
 
 /* ── Card Body ── */
 .torneo-card-body {
-  padding: 20px 24px 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -326,10 +326,10 @@
 .torneo-description {
   font-size: 0.85rem;
   color: var(--text-muted);
-  margin-bottom: 16px;
-  line-height: 1.5;
+  margin-bottom: 8px;
+  line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -338,7 +338,7 @@
 .torneo-tags {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
@@ -358,10 +358,11 @@
 /* ── Prizes ── */
 .torneo-prizes {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 12px;
   margin-bottom: 16px;
-  padding: 12px;
+  padding: 10px;
   background: rgba(255, 215, 0, 0.03);
   border: 1px solid rgba(255, 215, 0, 0.1);
   border-radius: var(--radius-sm);
@@ -389,7 +390,7 @@
 
 /* ── Progress ── */
 .torneo-progress-section {
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .torneo-progress-header {
