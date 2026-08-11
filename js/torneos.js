@@ -238,7 +238,9 @@ function renderTorneos(torneos) {
       tagsHTML += `<span class="torneo-tag">${getGameModeIcon(torneo.gameMode)} ${getGameModeLabel(torneo.gameMode)}</span>`;
     }
     if (torneo.entryFee && torneo.entryFee > 0) {
-      tagsHTML += `<span class="torneo-tag" style="color:#fbbf24; border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.1);">💎 $${torneo.entryFee.toFixed(2)}</span>`;
+      const exchangeRate = window.EXCHANGE_RATE?.tournamentsUsdToBs || window.EXCHANGE_RATE?.usdToBs || 1;
+      const feeBs = (torneo.entryFee * exchangeRate).toFixed(2);
+      tagsHTML += `<span class="torneo-tag" style="color:#fbbf24; border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.1);">💎 Bs. ${feeBs}</span>`;
     } else {
       tagsHTML += `<span class="torneo-tag" style="color:#4ade80; border-color:rgba(74,222,128,0.3); background:rgba(74,222,128,0.1);">🆓 GRATIS</span>`;
     }
@@ -470,7 +472,7 @@ window.openInscriptionModal = function(tournamentId) {
 
     paymentHtml = `
       <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">💳 Pago de Inscripción</h4>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Costo del torneo: <strong style="color:var(--text-primary);">$${torneo.entryFee.toFixed(2)} USD</strong> (Aprox. Bs. ${feeBs})</p>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Costo del torneo: <strong style="color:var(--text-primary);">Bs. ${feeBs}</strong> (Aprox. $${torneo.entryFee.toFixed(2)} USD)</p>
       
       <div class="torneo-form-group">
         <label class="torneo-form-label">Método de Pago</label>
