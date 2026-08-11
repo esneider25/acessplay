@@ -2269,8 +2269,6 @@ window.manageTournamentResults = function(id) {
         <h3>📊 Resultados: ${torneo.title}</h3>
         <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">${torneo.productName || ''}</p>
         
-        ${winnersSection}
-        
         <h4 style="margin-bottom:10px;">📋 Tabla de Posiciones (Puntaje / Kills)</h4>
         <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
           <input type="text" id="lb-player" class="admin-form-input" placeholder="Nombre del jugador" style="flex:2; padding:8px 10px; min-width:150px;">
