@@ -2685,9 +2685,12 @@ window.showCreateTournamentModal = function() {
           </div>
         </div>
         
+        <div>
           <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Precio de Inscripción ($)</label>
           <input type="number" id="ct-entry-fee" class="admin-form-input" style="width: 100%; padding: 10px; margin-bottom: 14px;" value="0" min="0" step="0.01">
-          
+        </div>
+        
+        <div>
           <label class="admin-form-label" style="margin-bottom: 5px; display: block;">🏅 Premios</label>
           <div id="ct-prizes-list" style="display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; gap:8px; align-items:center;">
