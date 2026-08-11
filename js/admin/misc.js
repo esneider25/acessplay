@@ -1755,7 +1755,7 @@ function renderTournaments(container) {
         const active = torneos.filter(t => t.status === 'registration_open' || t.status === 'ongoing').length;
         const completed = torneos.filter(t => t.status === 'completed').length;
         let totalP = 0;
-        torneos.forEach(t => { totalP += Object.keys(t.participants || {}).length; });
+        torneos.forEach(t => { totalP += Object.values(t.participants || {}).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0); });
         statsBar.innerHTML = `
           <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
             <div style="font-size:1.6rem; font-weight:800; color:var(--accent-light); font-family:var(--font-display);">${torneos.length}</div>
@@ -1784,7 +1784,7 @@ function renderTournaments(container) {
       let listHtml = '';
       torneos.forEach(torneo => {
         const participants = torneo.participants || {};
-        const count = Object.keys(participants).length;
+        const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
         const max = torneo.maxParticipants || 100;
         const status = torneo.status || 'upcoming';
         const title = torneo.title || 'Torneo Sin Nombre';

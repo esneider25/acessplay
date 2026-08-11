@@ -94,7 +94,7 @@ function updateStats(torneos) {
   const completed = torneos.filter(t => t.status === 'completed').length;
   let totalParticipants = 0;
   torneos.forEach(t => {
-    totalParticipants += Object.keys(t.participants || {}).length;
+    totalParticipants += Object.values(t.participants || {}).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
   });
   
   animateCounter('stat-active', active);
@@ -194,7 +194,7 @@ function renderTorneos(torneos) {
   
   filtered.forEach(torneo => {
     const participants = torneo.participants || {};
-    const count = Object.keys(participants).length;
+    const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
     const max = torneo.maxParticipants || 100;
     const progress = Math.min((count / max) * 100, 100);
     const isJoined = user && participants[user.uid];
@@ -520,7 +520,7 @@ window.openDetailModal = function(tournamentId) {
   if (!torneo) return;
   
   const participants = torneo.participants || {};
-  const count = Object.keys(participants).length;
+  const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
   const max = torneo.maxParticipants || 100;
   const avatars = ['👾', '🤠', '🥷', '🤖', '🦸‍♂️', '🧟', '🧙‍♂️', '🧛', '🦹', '👽'];
   
