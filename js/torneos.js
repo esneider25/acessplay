@@ -332,7 +332,12 @@ function renderHallOfFame(torneos) {
   const container = document.getElementById('hall-of-fame-list');
   if (!container) return;
   
-  const completed = torneos.filter(t => t.status === 'completed' && t.winners && t.winners.length > 0);
+  const completed = torneos.filter(t => {
+    if (t.status !== 'completed') return false;
+    const hasWinners = t.winners && t.winners.length > 0;
+    const hasLeaderboard = t.leaderboard && t.leaderboard.length > 0;
+    return hasWinners || hasLeaderboard;
+  });
   
   if (completed.length === 0) {
     container.innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column:1/-1; padding:20px;">Aún no hay campeones registrados. ¡Sé el primero!</p>';
@@ -341,8 +346,15 @@ function renderHallOfFame(torneos) {
   
   let html = '';
   completed.slice(0, 10).forEach(torneo => {
-    const champion = torneo.winners[0];
-    const winnerDisplay = champion ? (champion.name || champion.playerName || 'Sin nombre') : 'Sin nombre';
+    let winnerDisplay = 'Sin nombre';
+    
+    if (torneo.winners && torneo.winners.length > 0) {
+      const champion = torneo.winners[0];
+      winnerDisplay = champion ? (champion.name || champion.playerName || 'Sin nombre') : 'Sin nombre';
+    } else if (torneo.leaderboard && torneo.leaderboard.length > 0) {
+      const sorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+      winnerDisplay = sorted[0].playerName || 'Sin nombre';
+    }
     
     let dateStr = '';
     try { dateStr = new Date(torneo.createdAt).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }); } catch(e) {}
