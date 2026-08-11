@@ -276,17 +276,8 @@ function renderTorneos(torneos) {
       ? `<p class="torneo-description">${torneo.description}</p>`
       : '';
     
-    // Leaderboard preview (for completed tournaments)
+    // Leaderboard preview (removed to save space, user can open modal to see it)
     let leaderboardPreview = '';
-    if (torneo.status === 'completed' && torneo.leaderboard && torneo.leaderboard.length > 0) {
-      leaderboardPreview = '<div class="torneo-leaderboard" style="margin-top:12px;"><table>';
-      leaderboardPreview += '<tr><th>#</th><th>Jugador</th><th>Kills</th></tr>';
-      torneo.leaderboard.slice(0, 3).forEach((entry, i) => {
-        const rankClass = i < 3 ? `rank-${i + 1}` : '';
-        leaderboardPreview += `<tr class="${rankClass}"><td>${i + 1}</td><td>${entry.playerName || 'Jugador'}</td><td>${entry.kills || 0}</td></tr>`;
-      });
-      leaderboardPreview += '</table></div>';
-    }
     
     html += `
       <div class="torneo-card" onclick="openDetailModal('${torneo.id}')" style="cursor:pointer;">
