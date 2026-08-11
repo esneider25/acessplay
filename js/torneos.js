@@ -373,6 +373,8 @@ window.openInscriptionModal = function(tournamentId) {
   const user = firebase.auth().currentUser;
   if (!user) {
     if (typeof showAuthModal === 'function') showAuthModal();
+    else if (typeof openAuthModal === 'function') openAuthModal();
+    else alert('Debes iniciar sesión para inscribirte.');
     return;
   }
   
@@ -383,13 +385,7 @@ window.openInscriptionModal = function(tournamentId) {
   if (torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date()) {
     alert('⏰ Las inscripciones para este torneo ya cerraron.');
     return;
-    if (typeof openAuthModal === 'function') openAuthModal();
-    else alert('Debes iniciar sesión para inscribirte.');
-    return;
   }
-  
-  const torneo = torneosData.find(t => t.id === tournamentId);
-  if (!torneo) return;
   
   const userName = user.displayName || user.email.split('@')[0];
   const content = document.getElementById('torneo-modal-content');
