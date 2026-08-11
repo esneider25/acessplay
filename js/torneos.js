@@ -572,9 +572,52 @@ window.openDetailModal = function(tournamentId) {
     participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Aún no hay inscritos en este torneo.</p>';
   }
   
-  // Resultados en Imágenes (ResultImages)
+  // Clasificación (Tabla de líderes y Capturas)
   let leaderboardHTML = '';
+  let hasContent = false;
+  
+  // 1. Mostrar tabla de posiciones manual (leaderboard) si existe
+  if (torneo.leaderboard && torneo.leaderboard.length > 0) {
+    hasContent = true;
+    const sorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+    
+    let tableRows = '';
+    sorted.forEach((entry, i) => {
+      let rankStyle = '';
+      if (i === 0) rankStyle = 'color:#fbbf24; font-weight:bold;';
+      else if (i === 1) rankStyle = 'color:#9ca3af; font-weight:bold;';
+      else if (i === 2) rankStyle = 'color:#b45309; font-weight:bold;';
+      
+      tableRows += `
+        <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background: ${i%2===0?'rgba(255,255,255,0.02)':'transparent'}">
+          <div style="display:flex; gap:15px; align-items:center;">
+            <span style="width:25px; text-align:center; ${rankStyle}">${i+1}</span>
+            <span style="font-weight:600; color:var(--text-primary);">${entry.playerName || 'Jugador'}</span>
+          </div>
+          <div style="color:var(--accent); font-weight:bold;">
+            ${entry.kills || 0} pts
+          </div>
+        </div>
+      `;
+    });
+    
+    leaderboardHTML += `
+      <div style="margin-top: 15px;">
+        <h4 style="margin-bottom:10px; color:var(--accent-light);">📋 Tabla de Posiciones</h4>
+        <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow:hidden;">
+          <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(0,0,0,0.3); font-size:0.85rem; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">
+            <div style="display:flex; gap:15px;"><span style="width:25px; text-align:center;">#</span> <span>Jugador</span></div>
+            <div>Puntaje</div>
+          </div>
+          ${tableRows}
+        </div>
+      </div>
+    `;
+  }
+  
+  // 2. Mostrar capturas de resultados si existen
   if (torneo.resultImages && torneo.resultImages.length > 0) {
+    hasContent = true;
     let imagesHTML = '<div class="results-images-container" style="display:flex; flex-direction:column; gap:15px; margin-top:15px;">';
     torneo.resultImages.forEach((imgUrl, i) => {
       imagesHTML += `
@@ -585,13 +628,15 @@ window.openDetailModal = function(tournamentId) {
     });
     imagesHTML += '</div>';
     
-    leaderboardHTML = `
-      <div style="margin-top: 15px;">
+    leaderboardHTML += `
+      <div style="margin-top: ${torneo.leaderboard && torneo.leaderboard.length > 0 ? '25px' : '15px'};">
         <h4 style="margin-bottom:10px; color:var(--accent-light);">📸 Capturas de Resultados</h4>
         ${imagesHTML}
       </div>
     `;
-  } else {
+  }
+  
+  if (!hasContent) {
     leaderboardHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Resultados no disponibles o el torneo está en curso.</p>';
   }
   
