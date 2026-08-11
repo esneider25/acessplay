@@ -1727,8 +1727,10 @@ function renderTournaments(container) {
   let html = `
     <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
       <h2>🏆 Gestión de Torneos</h2>
-      <button class="btn btn-primary" onclick="showCreateTournamentModal()" style="padding: 10px 15px; font-size: 0.9rem;">+ Crear Torneo Manual</button>
+      <button class="btn btn-primary" onclick="showCreateTournamentModal()" style="padding: 10px 15px; font-size: 0.9rem;">+ Crear Torneo</button>
     </div>
+    
+    <div id="tournament-stats-bar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
     
     <div class="admin-card">
       <div id="tournaments-list" style="display: flex; flex-direction: column; gap: 15px;">
@@ -1740,16 +1742,39 @@ function renderTournaments(container) {
 
   firebase.database().ref('tournaments').on('value', snapshot => {
     const listContainer = document.getElementById('tournaments-list');
-    if (!listContainer) return; // Tab changed
+    const statsBar = document.getElementById('tournament-stats-bar');
+    if (!listContainer) return;
 
     try {
       let torneos = [];
-      snapshot.forEach(child => {
-        torneos.push(child.val());
-      });
-      
-      // Sort descending by creation date
+      snapshot.forEach(child => { torneos.push(child.val()); });
       torneos.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+      // Stats
+      if (statsBar) {
+        const active = torneos.filter(t => t.status === 'registration_open' || t.status === 'ongoing').length;
+        const completed = torneos.filter(t => t.status === 'completed').length;
+        let totalP = 0;
+        torneos.forEach(t => { totalP += Object.keys(t.participants || {}).length; });
+        statsBar.innerHTML = `
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:var(--accent-light); font-family:var(--font-display);">${torneos.length}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Total</div>
+          </div>
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:#38bdf8; font-family:var(--font-display);">${active}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Activos</div>
+          </div>
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:#4ade80; font-family:var(--font-display);">${completed}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Completados</div>
+          </div>
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:#fbbf24; font-family:var(--font-display);">${totalP}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Participantes</div>
+          </div>
+        `;
+      }
 
       if (torneos.length === 0) {
         listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No hay torneos creados aún.</p>';
@@ -1761,56 +1786,83 @@ function renderTournaments(container) {
         const participants = torneo.participants || {};
         const count = Object.keys(participants).length;
         const max = torneo.maxParticipants || 100;
-        
-        let badgeColor = '#ffb74d'; // pending / upcoming
         const status = torneo.status || 'upcoming';
+        const title = torneo.title || 'Torneo Sin Nombre';
+        const productName = torneo.productName || 'Producto Desconocido';
+        
+        let badgeColor = '#ffb74d';
         if (status === 'registration_open') badgeColor = '#42a5f5';
         if (status === 'ongoing') badgeColor = '#8b5cf6';
         if (status === 'completed') badgeColor = '#66bb6a';
 
-        const title = torneo.title || 'Torneo Sin Nombre';
-        const productName = torneo.productName || 'Producto Desconocido';
         let dateStr = 'Fecha desconocida';
-        try {
-          if (torneo.createdAt) dateStr = new Date(torneo.createdAt).toLocaleDateString();
-        } catch (e) {}
+        try { if (torneo.createdAt) dateStr = new Date(torneo.createdAt).toLocaleDateString(); } catch(e) {}
+        
+        let deadlineStr = '';
+        if (torneo.registrationDeadline) {
+          try { deadlineStr = ' | Cierre: ' + new Date(torneo.registrationDeadline).toLocaleString(); } catch(e) {}
+        }
+
+        // Winners display
+        const winners = torneo.winners || [];
+        let winnersDisplay = '';
+        if (torneo.winnerName) winnersDisplay = `<p style="margin: 5px 0 0 0; color: gold; font-weight: bold;">👑 Ganador: ${torneo.winnerName}</p>`;
+        if (winners.length > 0) {
+          const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
+          winnersDisplay = '<div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">';
+          winners.forEach((w, i) => {
+            winnersDisplay += `<span style="background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.2); padding:3px 10px; border-radius:20px; font-size:0.8rem; color:#fbbf24;">${medals[i] || '🏅'} ${w.name} ${w.reward ? '(' + w.reward + ')' : ''}</span>`;
+          });
+          winnersDisplay += '</div>';
+        }
+
+        // Game mode
+        const modeLabels = { solo: '👤 Solo', duo: '👥 Dúo', squad: '🎯 Escuadras' };
+        const modeStr = torneo.gameMode ? ` | ${modeLabels[torneo.gameMode] || torneo.gameMode}` : '';
 
         listHtml += `
-          <div style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: center;">
-            <div style="flex: 1; min-width: 250px;">
-              <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px;">
-                <h3 style="margin:0; font-family: var(--font-display);">${title}</h3>
-                <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${status.toUpperCase()}</span>
+          <div style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px;">
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: flex-start;">
+              <div style="flex: 1; min-width: 250px;">
+                <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px; flex-wrap:wrap;">
+                  <h3 style="margin:0; font-family: var(--font-display);">${title}</h3>
+                  <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${status.replace('_', ' ').toUpperCase()}</span>
+                </div>
+                <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: var(--text-secondary);">
+                  🎮 ${productName}${modeStr} | 📅 ${dateStr}${deadlineStr}
+                </p>
+                <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">
+                  👥 ${count} / ${max} participantes
+                </p>
+                ${winnersDisplay}
               </div>
-              <p style="margin: 0 0 5px 0; font-size: 0.9rem; color: var(--text-secondary);">Producto: ${productName} | Creado: ${dateStr}</p>
-              <p style="margin: 0; font-size: 0.9rem; color: var(--text-secondary);">Participantes: ${count} / ${max}</p>
-              ${torneo.winnerName ? `<p style="margin: 5px 0 0 0; color: gold; font-weight: bold;">👑 Ganador: ${torneo.winnerName}</p>` : ''}
-            </div>
-            
-            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <select class="admin-form-input" style="width: auto; padding: 6px 12px;" onchange="updateTournamentStatus('${torneo.id}', this.value)">
-                <option value="upcoming" ${status === 'upcoming' ? 'selected' : ''}>Próximo</option>
-                <option value="registration_open" ${status === 'registration_open' ? 'selected' : ''}>Inscripción Abierta</option>
-                <option value="ongoing" ${status === 'ongoing' ? 'selected' : ''}>En Curso</option>
-                <option value="completed" ${status === 'completed' ? 'selected' : ''}>Finalizado</option>
-              </select>
               
-              <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Ver Inscritos</button>
-              <button class="btn btn-danger" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Eliminar</button>
-              ${status === 'completed' && !torneo.winnerName ? `<button class="btn btn-primary" onclick="setTournamentWinner('${torneo.id}')" style="padding: 6px 12px; font-size: 0.85rem;">Declarar Ganador</button>` : ''}
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items:center;">
+                <select class="admin-form-input" style="width: auto; padding: 6px 10px; font-size:0.82rem;" onchange="updateTournamentStatus('${torneo.id}', this.value)">
+                  <option value="upcoming" ${status === 'upcoming' ? 'selected' : ''}>📅 Próximo</option>
+                  <option value="registration_open" ${status === 'registration_open' ? 'selected' : ''}>📝 Inscripción</option>
+                  <option value="ongoing" ${status === 'ongoing' ? 'selected' : ''}>⚔️ En Curso</option>
+                  <option value="completed" ${status === 'completed' ? 'selected' : ''}>✅ Finalizado</option>
+                </select>
+                <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">👥 Inscritos</button>
+                <button class="btn btn-secondary" onclick="manageTournamentResults('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">📊 Resultados</button>
+                ${status === 'completed' ? `<button class="btn btn-primary" onclick="sorteoTournament('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">🎲 Sorteo</button>` : ''}
+                <button class="btn btn-secondary" onclick="duplicateTournament('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;" title="Duplicar">📋</button>
+                <button class="btn btn-danger" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 10px; font-size: 0.82rem;">🗑️</button>
+              </div>
             </div>
           </div>
         `;
       });
       listContainer.innerHTML = listHtml;
     } catch(err) {
-      listContainer.innerHTML = '<div style="color:red; padding: 20px;">Error rendering tournaments: ' + err.message + '<br><pre>' + err.stack + '</pre></div>';
+      listContainer.innerHTML = '<div style="color:red; padding: 20px;">Error: ' + err.message + '</div>';
     }
   });
 }
 
 window.updateTournamentStatus = function(id, newStatus) {
-  if (confirm('¿Cambiar el estado de este torneo a ' + newStatus + '?')) {
+  if (confirm('¿Cambiar el estado de este torneo a ' + newStatus.replace('_',' ') + '?')) {
     firebase.database().ref('tournaments/' + id).update({ status: newStatus });
   }
 };
@@ -1821,42 +1873,76 @@ window.deleteTournament = function(id) {
   }
 };
 
+window.duplicateTournament = function(id) {
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    if (!torneo) return alert('Torneo no encontrado.');
+    const newId = 'torneo-manual-' + (torneo.productId || 'custom') + '-' + Date.now();
+    const newTorneo = { ...torneo };
+    newTorneo.id = newId;
+    newTorneo.createdAt = new Date().toISOString();
+    newTorneo.status = 'registration_open';
+    newTorneo.title = torneo.title + ' (Copia)';
+    delete newTorneo.participants;
+    delete newTorneo.winners;
+    delete newTorneo.winnerName;
+    delete newTorneo.leaderboard;
+    if (torneo.registrationDeadline) {
+      const oldDate = new Date(torneo.registrationDeadline);
+      const newDate = new Date();
+      newDate.setDate(newDate.getDate() + 7);
+      newTorneo.registrationDeadline = newDate.toISOString();
+    }
+    firebase.database().ref('tournaments/' + newId).set(newTorneo).then(() => {
+      alert('✅ Torneo duplicado exitosamente.');
+    });
+  });
+};
+
 window.viewTournamentParticipants = function(id) {
   firebase.database().ref('tournaments/' + id).once('value').then(snap => {
     const torneo = snap.val();
     const participants = torneo.participants || {};
-    let html = `
-      <div style="padding: 20px;">
-        <h3>Inscritos en: ${torneo.title}</h3>
-        <p>Total: ${Object.keys(participants).length} participantes</p>
-        <div style="max-height: 400px; overflow-y: auto; margin-top: 15px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
-          <table class="admin-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="border-bottom: 1px solid var(--border);">
-                <th style="padding: 10px; text-align: left;">Nombre</th>
-                <th style="padding: 10px; text-align: left;">Email</th>
-                <th style="padding: 10px; text-align: left;">Fecha Inscripción</th>
-              </tr>
-            </thead>
-            <tbody>
-    `;
+    const pList = Object.values(participants);
     
-    if (Object.keys(participants).length === 0) {
-      html += '<tr><td colspan="3" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
+    let tableRows = '';
+    if (pList.length === 0) {
+      tableRows = '<tr><td colspan="5" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
     } else {
-      Object.values(participants).forEach(p => {
-        html += `
+      pList.forEach((p, i) => {
+        tableRows += `
           <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 10px;">${p.name || 'Sin nombre'}</td>
-            <td style="padding: 10px;">${p.email}</td>
-            <td style="padding: 10px;">${new Date(p.joinedAt).toLocaleString()}</td>
+            <td style="padding: 8px;">${i + 1}</td>
+            <td style="padding: 8px;">${p.name || 'Sin nombre'}</td>
+            <td style="padding: 8px;">${p.gameName || '-'}</td>
+            <td style="padding: 8px;">${p.gameId || '-'}</td>
+            <td style="padding: 8px;">${new Date(p.joinedAt).toLocaleString()}</td>
           </tr>
         `;
       });
     }
     
-    html += `
-            </tbody>
+    let html = `
+      <div style="padding: 20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+          <div>
+            <h3>👥 Inscritos: ${torneo.title}</h3>
+            <p style="color:var(--text-muted); font-size:0.9rem;">Total: ${pList.length} participantes</p>
+          </div>
+          <button class="btn btn-secondary" onclick="exportParticipantsCSV('${id}')" style="padding:8px 14px; font-size:0.85rem;">📥 Exportar CSV</button>
+        </div>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="border-bottom: 1px solid var(--border); background:rgba(255,255,255,0.02);">
+                <th style="padding: 10px; text-align: left;">#</th>
+                <th style="padding: 10px; text-align: left;">Nombre</th>
+                <th style="padding: 10px; text-align: left;">IGN</th>
+                <th style="padding: 10px; text-align: left;">Game ID</th>
+                <th style="padding: 10px; text-align: left;">Fecha</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
           </table>
         </div>
         <div style="margin-top: 20px; text-align: right;">
@@ -1868,10 +1954,243 @@ window.viewTournamentParticipants = function(id) {
   });
 };
 
-window.setTournamentWinner = function(id) {
-  const winnerName = prompt('Introduce el nombre o UID del ganador del torneo:');
-  if (winnerName && winnerName.trim() !== '') {
-    firebase.database().ref('tournaments/' + id).update({ winnerName: winnerName.trim() });
+window.exportParticipantsCSV = function(id) {
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    const participants = Object.values(torneo.participants || {});
+    if (participants.length === 0) return alert('No hay participantes para exportar.');
+    
+    let csv = 'Nombre,IGN,Game ID,Email,Fecha Inscripcion\n';
+    participants.forEach(p => {
+      csv += `"${p.name || ''}","${p.gameName || ''}","${p.gameId || ''}","${p.email || ''}","${p.joinedAt || ''}"\n`;
+    });
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `participantes_${torneo.title.replace(/\s/g, '_')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+};
+
+// ── Sorteo Animado ──
+window.sorteoTournament = function(id) {
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    const participants = Object.values(torneo.participants || {});
+    if (participants.length < 2) return alert('Se necesitan al menos 2 participantes para sortear.');
+
+    const numWinners = parseInt(prompt('¿Cuántos ganadores quieres sortear? (1-' + Math.min(participants.length, 5) + ')')) || 1;
+    if (numWinners < 1 || numWinners > participants.length) return alert('Número inválido.');
+    
+    // Shuffle and pick winners
+    const shuffled = [...participants].sort(() => Math.random() - 0.5);
+    const winners = shuffled.slice(0, numWinners);
+    
+    // Animated sorteo modal
+    let html = '<div style="padding:30px; text-align:center;">';
+    html += '<h2 style="margin-bottom:20px; font-family:var(--font-display);">🎲 Sorteo en Curso...</h2>';
+    html += '<div id="sorteo-display" style="font-size:1.5rem; padding:30px; background:var(--bg-deep); border-radius:var(--radius-md); border:2px solid var(--accent); margin-bottom:20px; min-height:80px; display:flex; align-items:center; justify-content:center; font-family:var(--font-display);"></div>';
+    html += '<div id="sorteo-results" style="display:none;"></div>';
+    html += '<div id="sorteo-actions" style="display:none; margin-top:20px; display:flex; gap:10px; justify-content:center;">';
+    html += `<button class="btn btn-primary" id="sorteo-save-btn" onclick="saveSorteoResults('${id}')" style="display:none;">✅ Guardar Ganadores</button>`;
+    html += '<button class="btn btn-secondary" onclick="closeAdminModal()">Cerrar</button>';
+    html += '</div></div>';
+    
+    openAdminModal(html);
+    
+    const display = document.getElementById('sorteo-display');
+    const allNames = participants.map(p => p.gameName || p.name || 'Jugador');
+    let tick = 0;
+    const totalTicks = 40;
+    
+    const interval = setInterval(() => {
+      tick++;
+      const randomName = allNames[Math.floor(Math.random() * allNames.length)];
+      display.textContent = randomName;
+      display.style.color = tick > totalTicks - 10 ? '#fbbf24' : 'var(--text-primary)';
+      
+      if (tick >= totalTicks) {
+        clearInterval(interval);
+        
+        // Show final winners
+        const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
+        display.innerHTML = '<span style="color:#fbbf24; font-size:2rem;">🎉 ¡Tenemos ganadores!</span>';
+        
+        const resultsDiv = document.getElementById('sorteo-results');
+        resultsDiv.style.display = 'block';
+        
+        let resultsHtml = '';
+        winners.forEach((w, i) => {
+          const reward = prompt(`Premio para ${medals[i]} ${w.gameName || w.name} (${i + 1}° lugar):`) || 'Premio especial';
+          w._reward = reward;
+          w._place = (i + 1) + '° Lugar';
+          resultsHtml += `<div style="display:flex; align-items:center; gap:12px; padding:12px; margin:8px 0; background:rgba(255,215,0,0.05); border-radius:var(--radius-sm); border:1px solid rgba(255,215,0,0.15);">
+            <span style="font-size:1.8rem;">${medals[i] || '🏅'}</span>
+            <div style="text-align:left;">
+              <div style="font-weight:700; color:#fbbf24; font-size:1.1rem;">${w.gameName || w.name}</div>
+              <div style="font-size:0.85rem; color:var(--text-secondary);">${w._place} — ${reward}</div>
+            </div>
+          </div>`;
+        });
+        resultsDiv.innerHTML = resultsHtml;
+        
+        // Store winners data for saving
+        window._sorteoWinners = winners;
+        document.getElementById('sorteo-save-btn').style.display = 'inline-block';
+      }
+    }, 80 + tick * 3);
+  });
+};
+
+window.saveSorteoResults = function(id) {
+  if (!window._sorteoWinners) return;
+  const winnersData = window._sorteoWinners.map(w => ({
+    name: w.gameName || w.name,
+    place: w._place,
+    reward: w._reward,
+    uid: w.uid || null
+  }));
+  
+  firebase.database().ref('tournaments/' + id).update({
+    winners: winnersData,
+    winnerName: winnersData.map(w => w.name).join(', '),
+    status: 'completed'
+  }).then(() => {
+    alert('✅ Ganadores guardados exitosamente.');
+    closeAdminModal();
+    delete window._sorteoWinners;
+  });
+};
+
+// ── Manage Results / Leaderboard ──
+window.manageTournamentResults = function(id) {
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    const leaderboard = torneo.leaderboard || [];
+    const winners = torneo.winners || [];
+    
+    let leaderboardRows = '';
+    if (leaderboard.length > 0) {
+      leaderboard.forEach((entry, i) => {
+        leaderboardRows += `
+          <tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px;">${i + 1}</td>
+            <td style="padding:8px;">${entry.playerName || ''}</td>
+            <td style="padding:8px;">${entry.kills || 0}</td>
+            <td style="padding:8px;"><button class="btn btn-danger" onclick="removeLeaderboardEntry('${id}', ${i})" style="padding:3px 8px; font-size:0.75rem;">✕</button></td>
+          </tr>`;
+      });
+    } else {
+      leaderboardRows = '<tr><td colspan="4" style="text-align:center; padding:15px; color:var(--text-muted);">Sin resultados aún</td></tr>';
+    }
+    
+    // Winners section
+    let winnersSection = '';
+    if (winners.length > 0) {
+      const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
+      winnersSection = '<div style="margin-bottom:20px;"><h4 style="margin-bottom:10px;">🏆 Ganadores actuales</h4>';
+      winners.forEach((w, i) => {
+        winnersSection += `<div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; margin:3px; background:rgba(255,215,0,0.06); border:1px solid rgba(255,215,0,0.15); border-radius:20px; font-size:0.85rem; color:#fbbf24;">${medals[i] || '🏅'} ${w.name} (${w.reward || ''})</div>`;
+      });
+      winnersSection += `<div style="margin-top:8px;"><button class="btn btn-danger" onclick="clearWinners('${id}')" style="padding:5px 12px; font-size:0.8rem;">Borrar ganadores</button></div></div>`;
+    }
+
+    let html = `
+      <div style="padding:20px;">
+        <h3>📊 Resultados: ${torneo.title}</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">${torneo.productName || ''}</p>
+        
+        ${winnersSection}
+        
+        <h4 style="margin-bottom:10px;">📋 Tabla de Posiciones (Kills)</h4>
+        <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+          <input type="text" id="lb-player" class="admin-form-input" placeholder="Nombre del jugador" style="flex:2; padding:8px 10px; min-width:150px;">
+          <input type="number" id="lb-kills" class="admin-form-input" placeholder="Kills" style="flex:1; padding:8px 10px; min-width:80px;">
+          <button class="btn btn-primary" onclick="addLeaderboardEntry('${id}')" style="padding:8px 14px; font-size:0.85rem;">+ Agregar</button>
+        </div>
+        
+        <div style="max-height:300px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02);">
+                <th style="padding:8px; text-align:left;">#</th>
+                <th style="padding:8px; text-align:left;">Jugador</th>
+                <th style="padding:8px; text-align:left;">Kills</th>
+                <th style="padding:8px; text-align:left;"></th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody">${leaderboardRows}</tbody>
+          </table>
+        </div>
+        
+        <div style="margin-top:20px;">
+          <h4 style="margin-bottom:10px;">🏆 Agregar Ganador Manual</h4>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <input type="text" id="winner-name" class="admin-form-input" placeholder="Nombre del ganador" style="flex:2; padding:8px 10px; min-width:120px;">
+            <input type="text" id="winner-place" class="admin-form-input" placeholder="Ej: 1° Lugar" style="flex:1; padding:8px 10px; min-width:80px;">
+            <input type="text" id="winner-reward" class="admin-form-input" placeholder="Premio" style="flex:1; padding:8px 10px; min-width:80px;">
+            <button class="btn btn-primary" onclick="addWinner('${id}')" style="padding:8px 14px; font-size:0.85rem;">+ Ganador</button>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: right;">
+          <button class="btn btn-secondary" onclick="closeAdminModal()">Cerrar</button>
+        </div>
+      </div>
+    `;
+    openAdminModal(html);
+  });
+};
+
+window.addLeaderboardEntry = function(id) {
+  const playerName = document.getElementById('lb-player').value.trim();
+  const kills = parseInt(document.getElementById('lb-kills').value) || 0;
+  if (!playerName) return alert('Escribe el nombre del jugador.');
+  
+  firebase.database().ref('tournaments/' + id + '/leaderboard').once('value').then(snap => {
+    const leaderboard = snap.val() || [];
+    leaderboard.push({ playerName, kills });
+    leaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
+    firebase.database().ref('tournaments/' + id + '/leaderboard').set(leaderboard).then(() => {
+      manageTournamentResults(id);
+    });
+  });
+};
+
+window.removeLeaderboardEntry = function(id, index) {
+  firebase.database().ref('tournaments/' + id + '/leaderboard').once('value').then(snap => {
+    const leaderboard = snap.val() || [];
+    leaderboard.splice(index, 1);
+    firebase.database().ref('tournaments/' + id + '/leaderboard').set(leaderboard).then(() => {
+      manageTournamentResults(id);
+    });
+  });
+};
+
+window.addWinner = function(id) {
+  const name = document.getElementById('winner-name').value.trim();
+  const place = document.getElementById('winner-place').value.trim() || '1° Lugar';
+  const reward = document.getElementById('winner-reward').value.trim() || 'Premio especial';
+  if (!name) return alert('Escribe el nombre del ganador.');
+  
+  firebase.database().ref('tournaments/' + id + '/winners').once('value').then(snap => {
+    const winners = snap.val() || [];
+    winners.push({ name, place, reward });
+    const winnerNames = winners.map(w => w.name).join(', ');
+    firebase.database().ref('tournaments/' + id).update({ winners, winnerName: winnerNames }).then(() => {
+      manageTournamentResults(id);
+    });
+  });
+};
+
+window.clearWinners = function(id) {
+  if (confirm('¿Borrar todos los ganadores de este torneo?')) {
+    firebase.database().ref('tournaments/' + id).update({ winners: null, winnerName: null }).then(() => {
+      manageTournamentResults(id);
+    });
   }
 };
 
@@ -1896,34 +2215,81 @@ window.closeAdminModal = window.closeAdminModal || function() {
 };
 
 window.showCreateTournamentModal = function() {
-  let options = '<option value="">Seleccione un producto</option>';
+  let productOptions = '<option value="">Seleccione un producto</option>';
   if (typeof PRODUCTS !== 'undefined') {
     PRODUCTS.forEach(p => {
-      options += `<option value="${p.id}">${p.name}</option>`;
+      productOptions += `<option value="${p.id}">${p.name}</option>`;
     });
   }
 
   let html = `
-    <div style="padding: 20px;">
-      <h3>🏆 Crear Torneo Manual</h3>
-      <form id="create-tournament-form" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">
-        <div>
-          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Producto Asociado</label>
-          <select id="ct-product" class="admin-form-input" style="width: 100%; padding: 10px;" required>
-            ${options}
-          </select>
+    <div style="padding: 20px; max-height:80vh; overflow-y:auto;">
+      <h3>🏆 Crear Torneo</h3>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">Configura los detalles del nuevo torneo</p>
+      
+      <form id="create-tournament-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Producto / Juego</label>
+            <select id="ct-product" class="admin-form-input" style="width: 100%; padding: 10px;" required>
+              ${productOptions}
+            </select>
+          </div>
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Modo de Juego</label>
+            <select id="ct-gamemode" class="admin-form-input" style="width: 100%; padding: 10px;">
+              <option value="">Libre</option>
+              <option value="solo">👤 Solo</option>
+              <option value="duo">👥 Dúo</option>
+              <option value="squad">🎯 Escuadras</option>
+            </select>
+          </div>
         </div>
+        
         <div>
-          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Participantes Máximos</label>
-          <input type="number" id="ct-max" class="admin-form-input" style="width: 100%; padding: 10px;" value="100" min="2" required>
+          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Título del Torneo</label>
+          <input type="text" id="ct-title" class="admin-form-input" style="width: 100%; padding: 10px;" placeholder="Ej: Copa FreeFire Escuadras #1">
+          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Déjalo vacío para generar automáticamente</p>
         </div>
+        
         <div>
-          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Premios (Opcional)</label>
-          <input type="text" id="ct-prize" class="admin-form-input" style="width: 100%; padding: 10px;" placeholder="Ej: Diamantes / Saldo">
+          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Descripción / Reglas</label>
+          <textarea id="ct-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical; font-family:var(--font-body);" placeholder="Reglas del torneo, cómo participar, restricciones, etc."></textarea>
         </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Participantes Máximos</label>
+            <input type="number" id="ct-max" class="admin-form-input" style="width: 100%; padding: 10px;" value="100" min="2" required>
+          </div>
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Cierre de Inscripciones</label>
+            <input type="datetime-local" id="ct-deadline" class="admin-form-input" style="width: 100%; padding: 10px;">
+          </div>
+        </div>
+        
+        <div>
+          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">🏅 Premios</label>
+          <div id="ct-prizes-list" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span style="font-size:1.2rem; min-width:28px;">🥇</span>
+              <input type="text" class="admin-form-input ct-prize-input" placeholder="1er lugar: Ej. 500 diamantes" style="flex:1; padding:8px 10px;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span style="font-size:1.2rem; min-width:28px;">🥈</span>
+              <input type="text" class="admin-form-input ct-prize-input" placeholder="2do lugar (opcional)" style="flex:1; padding:8px 10px;">
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <span style="font-size:1.2rem; min-width:28px;">🥉</span>
+              <input type="text" class="admin-form-input ct-prize-input" placeholder="3er lugar (opcional)" style="flex:1; padding:8px 10px;">
+            </div>
+          </div>
+          <button type="button" onclick="addPrizeRow()" style="margin-top:6px; background:none; border:1px dashed var(--border); color:var(--text-muted); padding:6px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:0.8rem;">+ Agregar premio</button>
+        </div>
+        
         <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: flex-end;">
           <button type="button" class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Crear Torneo</button>
+          <button type="submit" class="btn btn-primary">🏆 Crear Torneo</button>
         </div>
       </form>
     </div>
@@ -1934,35 +2300,80 @@ window.showCreateTournamentModal = function() {
     document.getElementById('create-tournament-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const pId = document.getElementById('ct-product').value;
-      if (!pId) return;
+      if (!pId) return alert('Selecciona un producto.');
       
-      const productObj = PRODUCTS.find(p => p.id === pId);
+      const productObj = (typeof PRODUCTS !== 'undefined') ? PRODUCTS.find(p => p.id === pId) : null;
       const pName = productObj ? productObj.name : pId;
+      const gameMode = document.getElementById('ct-gamemode').value;
+      const customTitle = document.getElementById('ct-title').value.trim();
+      const description = document.getElementById('ct-description').value.trim();
       const maxP = parseInt(document.getElementById('ct-max').value) || 100;
-      const prize = document.getElementById('ct-prize').value || 'Premios Especiales';
+      const deadline = document.getElementById('ct-deadline').value;
       
+      // Collect prizes
+      const prizeInputs = document.querySelectorAll('.ct-prize-input');
+      const places = ['1er Lugar', '2do Lugar', '3er Lugar', '4to Lugar', '5to Lugar'];
+      const prizes = [];
+      prizeInputs.forEach((input, i) => {
+        const val = input.value.trim();
+        if (val) prizes.push({ place: places[i] || (i + 1) + '° Lugar', reward: val });
+      });
+      
+      // Game mode labels
+      const modeLabels = { solo: 'Solo', duo: 'Dúo', squad: 'Escuadras' };
+      const modeStr = gameMode ? ' ' + (modeLabels[gameMode] || gameMode) : '';
+      
+      const title = customTitle || 'Copa ' + pName + modeStr + ' (Especial)';
       const tournamentId = 'torneo-manual-' + pId + '-' + Date.now();
       
       const submitBtn = e.target.querySelector('button[type="submit"]');
       submitBtn.disabled = true;
       submitBtn.innerText = 'Creando...';
       
-      firebase.database().ref('tournaments/' + tournamentId).set({
+      const torneoData = {
         id: tournamentId,
         productId: pId,
         productName: pName,
-        title: 'Copa ' + pName + ' (Especial)',
+        title: title,
+        description: description || null,
+        gameMode: gameMode || null,
         status: 'registration_open',
         createdAt: new Date().toISOString(),
         maxParticipants: maxP,
-        prize: prize
-      }).then(() => {
+        prize: prizes.length > 0 ? prizes[0].reward : 'Premios Especiales'
+      };
+      
+      if (prizes.length > 0) torneoData.prizes = prizes;
+      if (deadline) torneoData.registrationDeadline = new Date(deadline).toISOString();
+      
+      firebase.database().ref('tournaments/' + tournamentId).set(torneoData).then(() => {
         closeAdminModal();
       }).catch(err => {
         alert('Error: ' + err.message);
         submitBtn.disabled = false;
-        submitBtn.innerText = 'Crear Torneo';
+        submitBtn.innerText = '🏆 Crear Torneo';
       });
     });
   }, 100);
 };
+
+window.addPrizeRow = function() {
+  const list = document.getElementById('ct-prizes-list');
+  const count = list.children.length + 1;
+  const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '⭐'];
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex; gap:8px; align-items:center;';
+  div.innerHTML = `
+    <span style="font-size:1.2rem; min-width:28px;">${medals[count - 1] || '🎖️'}</span>
+    <input type="text" class="admin-form-input ct-prize-input" placeholder="${count}° lugar (opcional)" style="flex:1; padding:8px 10px;">
+  `;
+  list.appendChild(div);
+};
+
+window.setTournamentWinner = function(id) {
+  const winnerName = prompt('Introduce el nombre o UID del ganador del torneo:');
+  if (winnerName && winnerName.trim() !== '') {
+    firebase.database().ref('tournaments/' + id).update({ winnerName: winnerName.trim() });
+  }
+};
+

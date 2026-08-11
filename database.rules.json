@@ -1,42 +1,42 @@
 {
   "rules": {
-    "products": { 
+    "products": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "categories": { 
+    "categories": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "exchange_rate": { 
+    "exchange_rate": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "payment_methods": { 
+    "payment_methods": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "settings": { 
+    "settings": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "landing_config": { 
+    "landing_config": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "banners": { 
+    "banners": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "tournaments": {
       ".read": "true",
-      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
       "$tournamentId": {
-        ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
+        ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         "participants": {
-           "$uid": {
-             ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com')"
-           }
+          "$uid": {
+            ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+          }
         }
       }
     },
@@ -44,18 +44,22 @@
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "messages": { 
+    "messages": {
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
       "$sessionId": {
-         ".read": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || $sessionId.matches(/^fp-/)",
-         ".write": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || ($sessionId.matches(/^fp-/) && newData.exists())"
+        ".read": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || $sessionId.matches(/^fp-/)",
+        ".write": "(auth != null && (auth.token.email === 'admin@accesplay.com' || auth.uid === $sessionId)) || ($sessionId.matches(/^fp-/) && newData.exists())"
       }
     },
-    "orders": { 
+    "orders": {
       ".read": "auth != null && (auth.token.email === 'admin@accesplay.com' || (query.orderByChild == 'userId' && query.equalTo == auth.uid))",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
-      ".indexOn": ["userId", "id", "createdAt"],
+      ".indexOn": [
+        "userId",
+        "id",
+        "createdAt"
+      ],
       "$orderId": {
         ".read": "!$orderId.beginsWith('AP-OLD-') || (auth != null && data.child('userId').val() === auth.uid) || (auth != null && auth.token.email === 'admin@accesplay.com')",
         ".write": "auth != null && auth.token.email === 'admin@accesplay.com' || (!data.exists() && newData.child('status').val() === 'pending' && (auth == null || newData.child('userId').val() === auth.uid)) || (data.exists() && (newData.child('status').val() === data.child('status').val() || (data.child('status').val() === 'invalid-id' && newData.child('status').val() === 'pending')) && newData.child('priceUsd').val() === data.child('priceUsd').val() && newData.child('priceBs').val() === data.child('priceBs').val() && (auth == null || data.child('userId').val() === auth.uid))",
@@ -68,17 +72,19 @@
     "withdrawals": {
       ".read": "auth != null && (auth.token.email === 'admin@accesplay.com' || (query.orderByChild == 'userId' && query.equalTo == auth.uid))",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'",
-      ".indexOn": ["userId"],
+      ".indexOn": [
+        "userId"
+      ],
       "$wdId": {
-         ".read": "auth != null && (data.child('userId').val() === auth.uid || auth.token.email === 'admin@accesplay.com')",
-         ".write": "auth != null && ((!data.exists() && newData.child('userId').val() === auth.uid && newData.child('status').val() === 'pending') || auth.token.email === 'admin@accesplay.com')"
+        ".read": "auth != null && (data.child('userId').val() === auth.uid || auth.token.email === 'admin@accesplay.com')",
+        ".write": "auth != null && ((!data.exists() && newData.child('userId').val() === auth.uid && newData.child('status').val() === 'pending') || auth.token.email === 'admin@accesplay.com')"
       }
     },
-    "telegram_config": { 
+    "telegram_config": {
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "discounts": { 
+    "discounts": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
@@ -90,15 +96,15 @@
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "spam_tracker": { 
-      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'", 
-      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'" 
+    "spam_tracker": {
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "order_counter": { 
-      ".read": "auth != null", 
-      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'" 
+    "order_counter": {
+      ".read": "auth != null",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
-    "api_configs": { 
+    "api_configs": {
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },

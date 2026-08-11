@@ -927,15 +927,26 @@ function updateOrderStatus(orderId, newStatus, note) {
               const newCount = snapshot.val();
               if (newCount % 200 === 0) {
                 const tournamentId = 'torneo-' + order.productId + '-' + Date.now();
+                
+                const deadlineDate = new Date();
+                deadlineDate.setDate(deadlineDate.getDate() + 7);
+
                 db.ref('tournaments/' + tournamentId).set({
                   id: tournamentId,
                   productId: order.productId,
                   productName: order.productName || order.productId,
                   title: 'Copa ' + (order.productName || order.productId) + ' #' + (newCount / 200),
+                  description: 'Torneo automático especial de la comunidad. ¡Demuestra que eres el mejor!',
+                  gameMode: 'solo',
                   status: 'registration_open',
                   createdAt: new Date().toISOString(),
+                  registrationDeadline: deadlineDate.toISOString(),
                   maxParticipants: 100,
-                  prize: 'Diamantes / Saldo'
+                  prizes: [
+                    { place: '1er Lugar', reward: 'Premio Mayor' },
+                    { place: '2do Lugar', reward: 'Premio Especial' },
+                    { place: '3er Lugar', reward: 'Recompensa Sorpresa' }
+                  ]
                 });
               }
             }

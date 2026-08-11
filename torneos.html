@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AccessPlay Torneos — Participa en nuestras Copas y gana fabulosos premios.">
+  <meta name="description" content="AccessPlay Torneos — Participa en nuestras Copas y gana fabulosos premios en Free Fire, BloodStrike, Mobile Legends y más.">
   <meta name="theme-color" content="#060d1a">
   <title>🏆 Torneos | AccessPlay</title>
   
@@ -14,7 +14,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="css/styles.css?v=7.4">
-  <link rel="stylesheet" href="css/torneos.css?v=1">
+  <link rel="stylesheet" href="css/torneos.css?v=2">
 
   <script src="js/security.js?v=1"></script>
 </head>
@@ -26,28 +26,86 @@
   <!-- Auth Modal Container -->
   <div id="auth-modal-root"></div>
 
-  <!-- Torneos Root -->
+  <!-- Torneos App -->
   <div id="torneos-app">
-    <section class="torneos-header">
-      <div class="container" style="text-align: center; padding: 60px 20px;">
-        <h1 style="font-size: 3rem; margin-bottom: 20px; font-family: var(--font-display);">
+    
+    <!-- Hero -->
+    <section class="torneos-hero">
+      <div class="container">
+        <h1 class="torneos-hero-title">
           Copas <span class="gradient-text">AccessPlay</span> 🏆
         </h1>
-        <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto; font-size: 1.1rem;">
-          inicia sesion para inscribirse en nuestros torneos exclusivos para los usuarios de AccessPlay
+        <p class="torneos-hero-subtitle">
+          Compite en torneos exclusivos de tus juegos favoritos, demuestra tu nivel y gana premios increíbles.
         </p>
+        <div class="torneos-stats-bar" id="torneos-stats">
+          <div class="torneos-stat">
+            <div class="torneos-stat-value" id="stat-active">0</div>
+            <div class="torneos-stat-label">Torneos Activos</div>
+          </div>
+          <div class="torneos-stat">
+            <div class="torneos-stat-value" id="stat-participants">0</div>
+            <div class="torneos-stat-label">Participantes</div>
+          </div>
+          <div class="torneos-stat">
+            <div class="torneos-stat-value" id="stat-completed">0</div>
+            <div class="torneos-stat-label">Copas Realizadas</div>
+          </div>
+        </div>
       </div>
     </section>
+
+    <!-- Filters -->
+    <div class="container">
+      <div class="torneos-filters" id="torneos-filters">
+        <button class="torneos-filter-btn active" data-filter="all">🏆 Todos</button>
+        <button class="torneos-filter-btn" data-filter="registration_open">📝 Inscripción Abierta</button>
+        <button class="torneos-filter-btn" data-filter="ongoing">⚔️ En Curso</button>
+        <button class="torneos-filter-btn" data-filter="completed">✅ Finalizados</button>
+      </div>
+    </div>
     
-    <section class="torneos-list-section" style="padding: 40px 0; min-height: 50vh;">
+    <!-- Tournaments Grid -->
+    <section style="padding: 20px 0 60px; min-height: 40vh;">
       <div class="container">
         <div id="torneos-list" class="torneos-grid">
-          <div style="text-align: center; color: var(--text-muted); width: 100%; padding: 40px;">
+          <div class="torneos-empty">
             <div class="spinner"></div> Cargando torneos...
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Hall of Fame -->
+    <section class="torneos-hall-of-fame">
+      <div class="container">
+        <h2 class="torneos-section-title">🏅 Salón de la Fama</h2>
+        <p class="torneos-section-subtitle">Los campeones de nuestras copas anteriores</p>
+        <div id="hall-of-fame-list" class="hall-of-fame-grid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Inscription Modal -->
+  <div id="torneo-inscription-modal" class="torneo-modal-overlay">
+    <div class="torneo-modal">
+      <button class="torneo-modal-close" onclick="closeTorneoModal()">&times;</button>
+      <div id="torneo-modal-content">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div id="torneo-detail-modal" class="torneo-modal-overlay">
+    <div class="torneo-modal" style="max-width: 560px;">
+      <button class="torneo-modal-close" onclick="closeDetailModal()">&times;</button>
+      <div id="torneo-detail-content">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
   </div>
 
   <!-- Scripts -->
@@ -63,6 +121,6 @@
   <script src="js/app.js?v=61"></script>
   
   <!-- Lógica específica de Torneos -->
-  <script src="js/torneos.js?v=1"></script>
+  <script src="js/torneos.js?v=2"></script>
 </body>
 </html>
