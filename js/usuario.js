@@ -1648,16 +1648,47 @@ window.renderDashboardTournaments = async function() {
       let dateStr = '';
       try { if (t.createdAt) dateStr = new Date(t.createdAt).toLocaleDateString(); } catch(e) {}
       
+      const modeLabels = { solo: '👤 Solo', duo: '👥 Dúo', squad: '🎯 Escuadras' };
+      const modeStr = t.gameMode ? modeLabels[t.gameMode] || t.gameMode : '';
+      
+      const myEntry = t.participants[currentUser.uid];
+      let myInfoHtml = '';
+      if (myEntry) {
+         myInfoHtml = `
+         <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tu Registro:</div>
+            <div style="font-size: 0.85rem; display:flex; flex-wrap:wrap; gap:12px; color: var(--text-primary);">
+              ${myEntry.ign ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>IGN:</strong> ${myEntry.ign}</div>` : ''}
+              ${myEntry.id ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>ID:</strong> ${myEntry.id}</div>` : ''}
+              ${myEntry.teamName ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Equipo:</strong> ${myEntry.teamName}</div>` : ''}
+            </div>
+         </div>`;
+      }
+      
       html += `
-        <div class="glass-card" style="padding: 20px; border-top: 2px solid ${st.color};">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
-            <h3 style="margin:0; font-family:var(--font-display); font-size:1.2rem;">${t.title}</h3>
-            <span style="background:${st.color}20; color:${st.color}; padding:3px 8px; border-radius:12px; font-size:0.75rem; border:1px solid ${st.color}40; white-space:nowrap;">${st.text}</span>
+        <div class="glass-card" style="padding: 0; border: none; border-radius: var(--radius-md); overflow: hidden; position: relative; display: flex; flex-direction: column; background: var(--bg-deep); border: 1px solid var(--border);">
+          <div style="height: 4px; background: ${st.color}; width: 100%;"></div>
+          <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+              <h3 style="margin:0; font-family:var(--font-display); font-size:1.3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${t.title}</h3>
+              <span style="background:${st.color}15; color:${st.color}; padding:4px 10px; border-radius:12px; font-size:0.75rem; border:1px solid ${st.color}40; white-space:nowrap; font-weight:600; box-shadow: 0 2px 8px ${st.color}20;">${st.text}</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+              <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">🎮 ${t.productName || 'Juego'}</span>
+              ${modeStr ? `<span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">${modeStr}</span>` : ''}
+            </div>
+            
+            <p style="margin:0 0 10px 0; color:var(--text-muted); font-size:0.8rem; display: flex; align-items: center; gap: 4px;">
+              <i class="ph ph-calendar"></i> Fecha de Inscripción: ${dateStr}
+            </p>
+            
+            ${myInfoHtml}
+            
+            <div style="margin-top: auto;">
+              ${credsHtml}
+            </div>
           </div>
-          <p style="margin:0 0 5px 0; color:var(--text-secondary); font-size:0.85rem;">🎮 ${t.productName || ''}</p>
-          <p style="margin:0; color:var(--text-muted); font-size:0.8rem;">📅 Creado: ${dateStr}</p>
-          
-          ${credsHtml}
         </div>
       `;
     });
