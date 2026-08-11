@@ -1516,14 +1516,6 @@ function initNotifications() {
   });
 }
 
-function triggerNotification(title, body) {
-  if (Notification.permission === 'granted') {
-    new Notification(title, {
-      body: body,
-      icon: '/img/favicon-192.png'
-    });
-  }
-}
 window.renderDashboardTournaments = async function() {
   const container = document.getElementById('dashboard-tournaments-container');
   if (!container || !currentUser) return;
@@ -1549,8 +1541,8 @@ window.renderDashboardTournaments = async function() {
         <div style="text-align:center; padding:50px 20px; background:rgba(255,255,255,0.02); border-radius:var(--radius-lg); border:1px dashed rgba(255,255,255,0.1);">
           <i class="ph ph-trophy" style="font-size:3rem; color:var(--text-muted); margin-bottom:15px;"></i>
           <h3 style="color:var(--text-secondary);">No estás inscrito en ningún torneo</h3>
-          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Explora nuestra tienda para encontrar torneos activos.</p>
-          <button class="btn btn-primary" onclick="navigateTo('home')">Ir a la Tienda</button>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:20px;">Explora la sección de torneos para encontrar partidas activas.</p>
+          <button class="btn btn-primary" onclick="window.location.href='/torneos.html'">Ir a Torneos</button>
         </div>
       `;
       return;
