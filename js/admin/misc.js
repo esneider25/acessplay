@@ -2075,7 +2075,7 @@ window.viewTournamentParticipants = function(id) {
     
     let tableRows = '';
     if (pList.length === 0) {
-      tableRows = '<tr><td colspan="5" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
+      tableRows = '<tr><td colspan="6" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
     } else {
       pList.forEach((p, i) => {
         let teamInfo = '';
@@ -2089,6 +2089,9 @@ window.viewTournamentParticipants = function(id) {
             <td style="padding: 8px;">${p.gameName || '-'}${teamInfo}</td>
             <td style="padding: 8px;">${p.gameId || '-'}</td>
             <td style="padding: 8px;">${new Date(p.joinedAt).toLocaleString()}</td>
+            <td style="padding: 8px; text-align: center;">
+              <button class="btn btn-secondary" onclick="removeParticipant('${id}', '${p.uid}')" style="padding: 4px; font-size: 1rem; color: #ef4444; border:none; background:transparent;" title="Expulsar">🗑️</button>
+            </td>
           </tr>
         `;
       });
@@ -2112,6 +2115,7 @@ window.viewTournamentParticipants = function(id) {
                 <th style="padding: 10px; text-align: left;">IGN</th>
                 <th style="padding: 10px; text-align: left;">Game ID</th>
                 <th style="padding: 10px; text-align: left;">Fecha</th>
+                <th style="padding: 10px; text-align: center;">Acción</th>
               </tr>
             </thead>
             <tbody>${tableRows}</tbody>
@@ -2124,6 +2128,17 @@ window.viewTournamentParticipants = function(id) {
     `;
     openAdminModal(html);
   });
+};
+
+window.removeParticipant = function(tournamentId, userId) {
+  if (confirm('¿Estás seguro de expulsar a este participante del torneo?')) {
+    firebase.database().ref('tournaments/' + tournamentId + '/participants/' + userId).remove().then(() => {
+      alert('Participante eliminado.');
+      viewTournamentParticipants(tournamentId);
+    }).catch(err => {
+      alert('Error: ' + err.message);
+    });
+  }
 };
 
 window.exportParticipantsCSV = function(id) {
@@ -2292,13 +2307,23 @@ window.manageTournamentResults = function(id) {
         </div>
         
         <div style="margin-top: 20px; background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2); padding: 15px; border-radius: var(--radius-sm);">
-          <h4 style="margin-bottom: 8px; color: var(--accent-light);">🤖 Carga Automática con IA (OCR)</h4>
-          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Sube una captura de pantalla del resultado final para extraer los nombres y kills automáticamente.</p>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <input type="file" id="ocr-image-input" accept="image/*" class="admin-form-input" style="flex: 1; padding: 6px; min-width: 200px;">
-            <button class="btn btn-primary" onclick="processOCR('${id}')" id="ocr-process-btn" style="padding: 8px 15px; font-size: 0.85rem;">🔍 Escanear Imagen</button>
+          <h4 style="margin-bottom: 8px; color: var(--accent-light);">📸 Capturas de Resultados</h4>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">Sube los captures de pantalla de las posiciones finales para que los usuarios puedan verlas en los detalles del torneo.</p>
+          
+          <div id="results-images-preview" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            ${(torneo.resultImages || []).map((imgUrl, idx) => `
+              <div style="position:relative; width:80px; height:80px; border-radius:8px; overflow:hidden; border:1px solid rgba(255,255,255,0.1);">
+                <img src="${imgUrl}" style="width:100%; height:100%; object-fit:cover;">
+                <button onclick="removeResultImage('${id}', ${idx})" style="position:absolute; top:2px; right:2px; background:rgba(239, 68, 68, 0.9); color:white; border:none; border-radius:50%; width:20px; height:20px; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;">✕</button>
+              </div>
+            `).join('')}
           </div>
-          <div id="ocr-status" style="margin-top: 10px; font-size: 0.85rem; color: #fbbf24; font-weight: bold; display: none;"></div>
+          
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="result-image-url" class="admin-form-input" style="flex: 1; padding: 6px; min-width: 200px;" placeholder="Pega URL o usa 'Subir Archivo'...">
+            <button class="btn btn-primary" onclick="addResultImage('${id}', 'result-image-url')" style="padding: 8px 15px; font-size: 0.85rem;">+ Link</button>
+            <button class="btn btn-secondary" id="btn-upload-result-img" onclick="uploadTournamentResultImage('${id}', 'btn-upload-result-img')" style="padding: 8px 15px; font-size: 0.85rem;">⬆️ Subir Archivo</button>
+          </div>
         </div>
         
         <div style="margin-top: 20px; text-align: right;">
@@ -2366,128 +2391,76 @@ window.clearWinners = function(id) {
   }
 };
 
-window.processOCR = function(tournamentId) {
-  const fileInput = document.getElementById('ocr-image-input');
-  const statusDiv = document.getElementById('ocr-status');
-  const btn = document.getElementById('ocr-process-btn');
+window.addResultImage = function(id, inputId) {
+  const url = document.getElementById(inputId).value.trim();
+  if (!url) return alert('Debes ingresar una URL.');
   
-  if (!fileInput.files || fileInput.files.length === 0) {
-    alert('Por favor selecciona una imagen primero.');
-    return;
-  }
-  
-  const file = fileInput.files[0];
-  
-  statusDiv.style.display = 'block';
-  statusDiv.innerHTML = '⚙️ Cargando motor de Inteligencia Artificial (Tesseract)...';
-  btn.disabled = true;
-  
-  if (typeof Tesseract === 'undefined') {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-    script.onload = () => runTesseract(file, tournamentId, statusDiv, btn);
-    script.onerror = () => {
-      statusDiv.innerHTML = '❌ Error al cargar Tesseract.js. Verifica tu conexión.';
-      btn.disabled = false;
-    };
-    document.head.appendChild(script);
-  } else {
-    runTesseract(file, tournamentId, statusDiv, btn);
-  }
+  firebase.database().ref('tournaments/' + id + '/resultImages').once('value').then(snap => {
+    const images = snap.val() || [];
+    images.push(url);
+    firebase.database().ref('tournaments/' + id + '/resultImages').set(images).then(() => {
+      manageTournamentResults(id);
+    });
+  });
 };
 
-function runTesseract(file, tournamentId, statusDiv, btn) {
-  statusDiv.innerHTML = '🔍 Analizando imagen... (Esto puede tomar unos segundos)';
-  
-  Tesseract.recognize(
-    file,
-    'spa+eng',
-    { logger: m => {
-        if (m.status === 'recognizing text') {
-          statusDiv.innerHTML = `🔍 Analizando imagen... ${Math.round(m.progress * 100)}%`;
-        }
-      } 
-    }
-  ).then(({ data: { text } }) => {
-    console.log("Texto detectado por OCR:", text);
-    statusDiv.innerHTML = '✅ Análisis completo. Procesando datos...';
-    
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 2);
-    let extractedCount = 0;
-    let newEntries = [];
-    
-    lines.forEach(line => {
-      // Free Fire specific pattern: [Rank]? [Name with any chars] [Kills] Eliminaciones
-      const match = line.match(/(.*?)\s+(\d+)\s*(?:Eliminaciones|Eliminacion|Eliminaci|Kills|Bajas)/i);
-      
-      if (match) {
-        let playerName = match[1].trim();
-        let kills = parseInt(match[2]);
-        playerName = playerName.replace(/^[\dOIl]+\s+/, '').trim();
-        
-        if (playerName.length > 0 && kills >= 0 && kills < 100) {
-          if (!newEntries.find(e => e.playerName === playerName)) {
-            newEntries.push({ playerName, kills });
-            extractedCount++;
-          }
-        }
-      } else {
-        // Fallback to generic parsing for OCR garbled texts
-        const cleanLine = line.replace(/[^\w\s\d-]/gi, '').trim();
-        if (!cleanLine) return;
-        
-        const parts = cleanLine.split(/\s+/);
-        let playerName = '';
-        let kills = 0;
-        
-        // If the last word is not a number, and the second to last IS a number
-        // (This handles random garbage text like "Elmincnes" or "TElmincnes" at the end)
-        if (parts.length >= 2 && isNaN(parts[parts.length - 1]) && !isNaN(parts[parts.length - 2])) {
-           kills = parseInt(parts[parts.length - 2]);
-           parts.pop(); // remove garbage word
-           parts.pop(); // remove number
-           playerName = parts.join(' ');
-        } else if (parts.length >= 2 && !isNaN(parts[parts.length - 1])) {
-           kills = parseInt(parts.pop());
-           playerName = parts.join(' ');
-        } else if (parts.length >= 2 && !isNaN(parts[0])) {
-           kills = parseInt(parts.shift());
-           playerName = parts.join(' ');
-        }
-        
-        if (playerName) {
-          playerName = playerName.replace(/^[\dOIl]+\s+/, '').trim();
-        }
-        
-        if (playerName.length > 2 && kills >= 0 && kills < 100) {
-          if (!newEntries.find(e => e.playerName === playerName)) {
-            newEntries.push({ playerName, kills });
-            extractedCount++;
-          }
-        }
-      }
+window.removeResultImage = function(id, index) {
+  if (!confirm('¿Eliminar esta captura?')) return;
+  firebase.database().ref('tournaments/' + id + '/resultImages').once('value').then(snap => {
+    const images = snap.val() || [];
+    images.splice(index, 1);
+    firebase.database().ref('tournaments/' + id + '/resultImages').set(images).then(() => {
+      manageTournamentResults(id);
     });
+  });
+};
+
+window.uploadTournamentResultImage = function(id, btnId) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
     
-    if (newEntries.length > 0) {
-      statusDiv.innerHTML = `✨ Se detectaron ${extractedCount} resultados probables. Guardando...`;
-      firebase.database().ref('tournaments/' + tournamentId + '/leaderboard').once('value').then(snap => {
-        const leaderboard = snap.val() || [];
-        const combined = [...leaderboard, ...newEntries];
-        combined.sort((a, b) => (b.kills || 0) - (a.kills || 0));
-        
-        firebase.database().ref('tournaments/' + tournamentId + '/leaderboard').set(combined).then(() => {
-          manageTournamentResults(tournamentId);
+    // Check size limit (e.g., 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("El archivo es demasiado grande. Máximo 5MB.");
+      return;
+    }
+    
+    btn.disabled = true;
+    btn.innerText = 'Subiendo...';
+    
+    const storageRef = firebase.storage().ref();
+    const fileRef = storageRef.child(`tournaments/results/${id}_${Date.now()}_${file.name}`);
+    
+    fileRef.put(file).then(snapshot => {
+      return snapshot.ref.getDownloadURL();
+    }).then(downloadURL => {
+      // Add to database
+      firebase.database().ref('tournaments/' + id + '/resultImages').once('value').then(snap => {
+        const images = snap.val() || [];
+        images.push(downloadURL);
+        firebase.database().ref('tournaments/' + id + '/resultImages').set(images).then(() => {
+          btn.disabled = false;
+          btn.innerText = '⬆️ Subir Archivo';
+          manageTournamentResults(id);
         });
       });
-    } else {
-      statusDiv.innerHTML = '⚠️ No se detectaron nombres/kills claros. Sube una imagen con mejor contraste.';
+    }).catch(error => {
+      console.error("Upload error:", error);
+      alert("Error al subir imagen: " + error.message);
       btn.disabled = false;
-    }
-  }).catch(err => {
-    console.error(err);
-    statusDiv.innerHTML = '❌ Error al procesar la imagen.';
-    btn.disabled = false;
-  });
+      btn.innerText = '⬆️ Subir Archivo';
+    });
+  };
+  
+  input.click();
 }
 
 

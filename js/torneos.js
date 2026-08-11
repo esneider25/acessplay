@@ -332,7 +332,7 @@ function renderHallOfFame(torneos) {
   const container = document.getElementById('hall-of-fame-list');
   if (!container) return;
   
-  const completed = torneos.filter(t => t.status === 'completed' && (t.leaderboard && t.leaderboard.length > 0));
+  const completed = torneos.filter(t => t.status === 'completed' && t.winners && t.winners.length > 0);
   
   if (completed.length === 0) {
     container.innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column:1/-1; padding:20px;">Aún no hay campeones registrados. ¡Sé el primero!</p>';
@@ -340,11 +340,9 @@ function renderHallOfFame(torneos) {
   }
   
   let html = '';
-  completed.slice(0, 8).forEach(torneo => {
-    const sorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
-    const champion = sorted[0];
-    const winnerDisplay = champion ? champion.playerName : 'Sin nombre';
-    const killsStr = champion ? (champion.kills || 0) + ' Pts/Kills' : '';
+  completed.slice(0, 10).forEach(torneo => {
+    const champion = torneo.winners[0];
+    const winnerDisplay = champion ? (champion.name || champion.playerName || 'Sin nombre') : 'Sin nombre';
     
     let dateStr = '';
     try { dateStr = new Date(torneo.createdAt).toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }); } catch(e) {}
@@ -355,7 +353,7 @@ function renderHallOfFame(torneos) {
           <div class="hof-epic-icon">👑</div>
           <h4 class="hof-epic-title">${torneo.title}</h4>
           <div class="hof-epic-winners" style="color: #fbbf24; text-transform: uppercase;">${winnerDisplay}</div>
-          <div class="hof-epic-date" style="margin-top: 4px;">⭐ ${killsStr} | 📅 ${dateStr}</div>
+          <div class="hof-epic-date" style="margin-top: 4px;">📅 ${dateStr}</div>
         </div>
       </div>
     `;
@@ -536,8 +534,9 @@ window.openDetailModal = function(tournamentId) {
   }
   
   // Rules
-  const rulesHTML = torneo.description
-    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción y Reglas</h4><div class="torneo-detail-rules" style="margin-top:10px;">${torneo.description}</div></div>`
+  const formattedRules = torneo.description ? torneo.description.replace(/\n/g, '<br>') : '';
+  const rulesHTML = formattedRules
+    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción y Reglas</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedRules}</div></div>`
     : '';
   
   // Participants
@@ -561,76 +560,42 @@ window.openDetailModal = function(tournamentId) {
     participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Aún no hay inscritos en este torneo.</p>';
   }
   
-  // Leaderboard with Podium
+  // Resultados en Imágenes (ResultImages)
   let leaderboardHTML = '';
-  if (torneo.leaderboard && torneo.leaderboard.length > 0) {
-    const lbSorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
-    
-    // Podium (Top 3)
-    let podiumHTML = '<div class="podium-container">';
-    const top3 = lbSorted.slice(0, 3);
-    const podOrder = [1, 0, 2];
-    podOrder.forEach(idx => {
-      const p = top3[idx];
-      if (p) {
-        const rank = idx + 1;
-        podiumHTML += `
-          <div class="podium-spot rank-${rank}">
-            <div class="podium-avatar">${avatars[(idx * 2 + 1) % avatars.length]}</div>
-            <div class="podium-bar">
-              <div class="podium-name">${p.playerName || 'Jugador'}</div>
-              <div class="podium-kills">${p.kills || 0} K</div>
-            </div>
-          </div>
-        `;
-      }
+  if (torneo.resultImages && torneo.resultImages.length > 0) {
+    let imagesHTML = '<div class="results-images-container" style="display:flex; flex-direction:column; gap:15px; margin-top:15px;">';
+    torneo.resultImages.forEach((imgUrl, i) => {
+      imagesHTML += `
+        <div style="border-radius:var(--radius-md); overflow:hidden; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.2);">
+          <img src="${imgUrl}" style="width:100%; height:auto; display:block;" alt="Resultado ${i+1}">
+        </div>
+      `;
     });
-    podiumHTML += '</div>';
-
-    // List (4th onwards)
-    let listHTML = '';
-    if (lbSorted.length > 3) {
-      listHTML = '<div class="leaderboard-list">';
-      lbSorted.slice(3).forEach((entry, i) => {
-        const realRank = i + 4;
-        listHTML += `
-          <div class="lb-item">
-            <div class="lb-rank">#${realRank}</div>
-            <div class="lb-avatar">${avatars[(realRank * 3) % avatars.length]}</div>
-            <div class="lb-name">${entry.playerName || 'Jugador'}</div>
-            <div class="lb-kills">${entry.kills || 0} K</div>
-          </div>
-        `;
-      });
-      listHTML += '</div>';
-    }
+    imagesHTML += '</div>';
     
     leaderboardHTML = `
       <div style="margin-top: 15px;">
-        ${podiumHTML}
-        ${listHTML}
+        <h4 style="margin-bottom:10px; color:var(--accent-light);">📸 Capturas de Resultados</h4>
+        ${imagesHTML}
       </div>
     `;
   } else {
     leaderboardHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Resultados no disponibles o el torneo está en curso.</p>';
   }
   
-  // Winners automated from Leaderboard
+  // Winners 
   let winnersHTML = '';
-  if (torneo.status === 'completed' && torneo.leaderboard && torneo.leaderboard.length > 0) {
-    const lbSorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+  if (torneo.status === 'completed' && torneo.winners && torneo.winners.length > 0) {
     const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
-    const limit = Math.max(3, prizes.length);
-    const topPlayers = lbSorted.slice(0, limit);
     
     winnersHTML = '<div class="torneo-detail-section"><h4>🏆 Campeones del Torneo</h4><div style="margin-top:10px;">';
-    topPlayers.forEach((p, i) => {
-      const rewardStr = prizes[i] ? ' — ' + prizes[i].reward : '';
+    torneo.winners.forEach((p, i) => {
+      const rewardStr = p.reward ? ' — ' + p.reward : '';
       winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
         <span style="font-size:1.6rem;">${medals[i] || '🏅'}</span>
         <div>
-          <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${p.playerName}</div>
-          <div style="font-size:0.85rem; color:var(--text-secondary);">${i + 1}° Lugar${rewardStr} (${p.kills || 0} Pts/Kills)</div>
+          <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${p.name || p.playerName || 'Jugador'}</div>
+          <div style="font-size:0.85rem; color:var(--text-secondary);">${p.place || (i + 1) + '° Lugar'}${rewardStr}</div>
         </div>
       </div>`;
     });

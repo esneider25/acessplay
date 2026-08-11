@@ -651,9 +651,24 @@
 }
 
 .hall-of-fame-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
+  overflow-x: auto;
   gap: 16px;
+  padding-bottom: 15px; /* scrollbar space */
+  scroll-snap-type: x mandatory;
+}
+
+/* Custom scrollbar for webkit */
+.hall-of-fame-grid::-webkit-scrollbar {
+  height: 8px;
+}
+.hall-of-fame-grid::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.hall-of-fame-grid::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 4px;
 }
 
 .hall-of-fame-card {
@@ -1044,6 +1059,9 @@
   padding: 2px;
   overflow: hidden;
   transition: var(--transition);
+  min-width: 280px;
+  scroll-snap-align: start;
+  flex: 0 0 auto;
 }
 
 .hof-epic-card::before {
