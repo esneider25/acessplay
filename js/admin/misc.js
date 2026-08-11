@@ -1821,42 +1821,49 @@ function renderTournaments(container) {
         const modeStr = torneo.gameMode ? ` | ${modeLabels[torneo.gameMode] || torneo.gameMode}` : '';
 
         listHtml += `
-          <div style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px;">
-            <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: flex-start;">
+          <details style="background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 15px; margin-bottom: 10px;">
+            <summary style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; list-style:none; outline:none;">
+              <div style="display:flex; align-items:center; gap: 10px; flex-wrap:wrap;">
+                <h3 style="margin:0; font-family: var(--font-display); font-size:1.1rem;">${title}</h3>
+                <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${status.replace('_', ' ').toUpperCase()}</span>
+              </div>
+              <div style="font-size: 0.85rem; color: var(--text-secondary); display:flex; align-items:center; gap:10px;">
+                <span>👥 ${count} / ${max}</span>
+                <span style="color:var(--text-primary);">▼</span>
+              </div>
+            </summary>
+            
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-wrap: wrap; gap: 20px; justify-content: space-between; align-items: flex-start;">
               <div style="flex: 1; min-width: 250px;">
-                <div style="display:flex; align-items:center; gap: 10px; margin-bottom: 5px; flex-wrap:wrap;">
-                  <h3 style="margin:0; font-family: var(--font-display);">${title}</h3>
-                  <span style="background: ${badgeColor}20; color: ${badgeColor}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; border: 1px solid ${badgeColor}40;">${status.replace('_', ' ').toUpperCase()}</span>
-                </div>
                 <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: var(--text-secondary);">
-                  🎮 ${productName}${modeStr} | 📅 ${dateStr}${deadlineStr}
+                  🎮 <strong>${productName}</strong>${modeStr}
                 </p>
-                <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">
-                  👥 ${count} / ${max} participantes
+                <p style="margin: 0 0 5px 0; font-size: 0.85rem; color: var(--text-secondary);">
+                  📅 ${dateStr}${deadlineStr}
                 </p>
                 ${winnersDisplay}
               </div>
               
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items:center; margin-top: 5px;">
-                <select class="admin-form-input" style="width: auto; padding: 6px 10px; font-size:0.82rem; background: var(--bg-deep);" onchange="updateTournamentStatus('${torneo.id}', this.value)">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items:center; justify-content:flex-end; max-width: 600px;">
+                <select class="admin-form-input" style="width: auto; padding: 6px 10px; font-size:0.82rem; background: var(--bg-deep); margin-bottom:5px;" onchange="updateTournamentStatus('${torneo.id}', this.value)">
                   <option value="upcoming" ${status === 'upcoming' ? 'selected' : ''}>📅 Próximo</option>
                   <option value="registration_open" ${status === 'registration_open' ? 'selected' : ''}>📝 Inscripción</option>
                   <option value="ongoing" ${status === 'ongoing' ? 'selected' : ''}>⚔️ En Curso</option>
                   <option value="completed" ${status === 'completed' ? 'selected' : ''}>✅ Finalizado</option>
                 </select>
-                <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem;">👥 Inscritos</button>
-                <button class="btn btn-primary" onclick="manageTournamentResults('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem;">📊 Resultados</button>
+                <button class="btn btn-secondary" onclick="viewTournamentParticipants('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; margin-bottom:5px;">👥 Inscritos</button>
+                <button class="btn btn-primary" onclick="manageTournamentResults('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; margin-bottom:5px;">📊 Resultados</button>
                 
-                <div style="width: 1px; height: 24px; background: var(--border); margin: 0 4px;"></div>
+                <div style="width: 100%; height: 0;"></div> <!-- Force break -->
                 
-                ${status === 'completed' ? `<button class="btn btn-secondary" onclick="sorteoTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Sorteo">🎲</button>` : ''}
-                <button class="btn btn-secondary" onclick="manageTournamentCredentials('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Credenciales Sala">🔑</button>
-                <button class="btn btn-secondary" onclick="editTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Editar">✏️</button>
-                <button class="btn btn-secondary" onclick="duplicateTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none;" title="Duplicar">📋</button>
-                <button class="btn btn-secondary" onclick="deleteTournament('${torneo.id}')" style="padding: 6px; font-size: 1rem; background:transparent; border:none; box-shadow:none; color:#ef4444;" title="Eliminar">🗑️</button>
+                ${status === 'completed' ? `<button class="btn btn-secondary" onclick="sorteoTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);" title="Sorteo">🎲 Sorteo</button>` : ''}
+                <button class="btn btn-secondary" onclick="manageTournamentCredentials('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);" title="Credenciales Sala">🔑 Credenciales</button>
+                <button class="btn btn-secondary" onclick="editTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:rgba(14, 165, 233, 0.1); border:1px solid rgba(14, 165, 233, 0.3); color:#38bdf8;" title="Editar">✏️ Editar</button>
+                <button class="btn btn-secondary" onclick="duplicateTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:transparent; border:1px solid rgba(255,255,255,0.1);" title="Duplicar">📋 Duplicar</button>
+                <button class="btn btn-secondary" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:transparent; border:1px solid rgba(239, 68, 68, 0.3); color:#ef4444;" title="Eliminar">🗑️ Eliminar</button>
               </div>
             </div>
-          </div>
+          </details>
         `;
       });
       listContainer.innerHTML = listHtml;

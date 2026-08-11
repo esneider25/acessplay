@@ -238,7 +238,7 @@ function renderTorneos(torneos) {
       tagsHTML += `<span class="torneo-tag">${getGameModeIcon(torneo.gameMode)} ${getGameModeLabel(torneo.gameMode)}</span>`;
     }
     if (torneo.entryFee && torneo.entryFee > 0) {
-      const exchangeRate = window.EXCHANGE_RATE?.tournamentsUsdToBs || window.EXCHANGE_RATE?.usdToBs || 1;
+      const exchangeRate = typeof EXCHANGE_RATE !== 'undefined' ? (EXCHANGE_RATE.tournamentsUsdToBs || EXCHANGE_RATE.usdToBs || 1) : 1;
       const feeBs = (torneo.entryFee * exchangeRate).toFixed(2);
       tagsHTML += `<span class="torneo-tag" style="color:#fbbf24; border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.1);">💎 Bs. ${feeBs}</span>`;
     } else {
@@ -458,7 +458,7 @@ window.openInscriptionModal = function(tournamentId) {
   
   let paymentHtml = '';
   if (torneo.entryFee && torneo.entryFee > 0) {
-    const exchangeRate = window.EXCHANGE_RATE?.tournamentsUsdToBs || window.EXCHANGE_RATE?.usdToBs || 1;
+    const exchangeRate = typeof EXCHANGE_RATE !== 'undefined' ? (EXCHANGE_RATE.tournamentsUsdToBs || EXCHANGE_RATE.usdToBs || 1) : 1;
     const feeBs = (torneo.entryFee * exchangeRate).toFixed(2);
     
     let pmOptions = '<option value="wallet">Mi Billetera Virtual</option>';
@@ -536,7 +536,18 @@ window.openInscriptionModal = function(tournamentId) {
         const pm = PAYMENT_METHODS.find(m => m.id === methodId);
         if (pm && pm.details) {
           for (const [key, val] of Object.entries(pm.details)) {
-            html += `<strong>${key.charAt(0).toUpperCase() + key.slice(1)}:</strong> ${val}<br>`;
+            const formattedKey = key.charAt(0).toUpperCase() + key.slice(1);
+            html += `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; margin-bottom: 6px; background: rgba(0,0,0,0.2);">
+                <div style="text-align: left;">
+                  <span style="color:var(--text-muted); font-size:0.75rem; display:block; margin-bottom:2px; text-transform: uppercase; letter-spacing: 0.5px;">${formattedKey}</span>
+                  <span style="font-weight:600; font-size:0.95rem; color:var(--text-primary); user-select: all;">${val}</span>
+                </div>
+                <button type="button" onclick="navigator.clipboard.writeText('${val}'); if(typeof showToast !== 'undefined') showToast('✅ Copiado al portapapeles'); this.innerText='✔️'; setTimeout(()=>this.innerText='📋', 1500);" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary); padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9rem; transition:0.2s; hover:background:rgba(255,255,255,0.2);" title="Copiar ${formattedKey}">
+                  📋
+                </button>
+              </div>
+            `;
           }
         }
       }
