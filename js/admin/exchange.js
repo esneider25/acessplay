@@ -49,56 +49,6 @@ function renderExchange(container) {
       
       <!-- Card 1: Tasa de Cambio -->
       <div class="admin-card" style="position: relative; overflow: hidden;">
-// 5. EXCHANGE RATE & PROFIT MARGIN
-// ════════════════════════════════════════
-function renderExchange(container) {
-  // Build preview table rows from all products/packages
-  let previewRows = '';
-  let totalPackages = 0;
-  const currentMargin = EXCHANGE_RATE.profitMargin || 0;
-
-  PRODUCTS.forEach(product => {
-    (product.packages || []).forEach(pkg => {
-      const hasCustom = pkg.customMargin !== undefined && pkg.customMargin !== null && pkg.customMargin !== '';
-      const effectiveMargin = hasCustom ? parseFloat(pkg.customMargin) : currentMargin;
-      const costUsd = (pkg.costUsd && pkg.costUsd > 0) 
-        ? pkg.costUsd 
-        : (pkg.priceUsd > 0 ? parseFloat((pkg.priceUsd / (1 + (effectiveMargin / 100))).toFixed(2)) : 0);
-
-      if (costUsd > 0) {
-        totalPackages++;
-        const newPrice = parseFloat((costUsd + (costUsd * effectiveMargin / 100)).toFixed(2));
-        const diff = newPrice - costUsd;
-        const diffColor = diff > 0 ? '#4ade80' : diff < 0 ? '#f87171' : '#94a3b8';
-        const diffSign = diff > 0 ? '+' : '';
-        previewRows += `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">${product.name}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-muted);">${pkg.label || pkg.amount}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: #f59e0b; font-weight: 600;">$${costUsd.toFixed(2)}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: var(--text-secondary);">$${pkg.priceUsd.toFixed(2)}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: #0ea5e9; font-weight: 600;">$${newPrice.toFixed(2)}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; color: ${diffColor}; font-weight: 600;">${diffSign}$${diff.toFixed(2)}</td>
-            <td style="padding: 8px 10px; font-size: 0.8rem; text-align: center;">${hasCustom ? `<span style="background: rgba(139,92,246,0.15); color: #a78bfa; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">🎯 ${pkg.customMargin}%</span>` : `<span style="background: rgba(14,165,233,0.1); color: #38bdf8; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600;">🌍 ${currentMargin}%</span>`}</td>
-          </tr>
-        `;
-      }
-    });
-  });
-
-  container.innerHTML = `
-    <div class="admin-header">
-      <div>
-        <h1 class="admin-title">Tasa de Cambio & Márgenes</h1>
-        <p class="admin-subtitle">Configura la tasa USD → Bs. y el porcentaje de ganancia para todos los productos.</p>
-      </div>
-    </div>
-
-    <!-- ── Two Cards Side by Side ── -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px;">
-      
-      <!-- Card 1: Tasa de Cambio -->
-      <div class="admin-card" style="position: relative; overflow: hidden;">
         <div style="position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #0ea5e9, #06b6d4);"></div>
         <div class="admin-card-header" style="padding-bottom: 8px;">
           <h2 class="admin-card-title" style="display: flex; align-items: center; gap: 8px;">
