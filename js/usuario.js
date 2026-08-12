@@ -881,8 +881,16 @@ function renderDashboardContent() {
 
     <!-- SECTION: MIS TORNEOS -->
     <section id="sec-tournaments" class="panel-section">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;">
         <h2 style="margin:0; display:flex; align-items:center; gap:10px;"><i class="ph-fill ph-trophy" style="color:#fbbf24;"></i> Mis Torneos</h2>
+        
+        <div style="display: flex; align-items: center; gap: 15px; background: rgba(16, 185, 129, 0.05); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+          <div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Tus Ganancias</div>
+            <div style="font-size: 1.2rem; font-weight: bold; color: #10b981;" id="tournaments-points-display">0 PTS</div>
+          </div>
+          <button onclick="requestCashout()" class="btn-primary" style="padding: 10px 15px; font-size: 0.85rem; background: linear-gradient(135deg, #10b981, #059669); border:none; border-radius: 10px; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);"><i class="ph-fill ph-wallet"></i> Retirar</button>
+        </div>
       </div>
       <div id="dashboard-tournaments-container">
         <div style="text-align:center; padding:40px; color:var(--text-muted);">Cargando torneos...</div>
@@ -1560,6 +1568,11 @@ function initNotifications() {
 window.renderDashboardTournaments = async function() {
   const container = document.getElementById('dashboard-tournaments-container');
   if (!container || !currentUser) return;
+  
+  const pointsDisplay = document.getElementById('tournaments-points-display');
+  if (pointsDisplay && typeof userProfile !== 'undefined' && userProfile) {
+    pointsDisplay.innerText = (userProfile.points || 0) + ' PTS';
+  }
   
   try {
     const snap = await firebase.database().ref('tournaments').once('value');
