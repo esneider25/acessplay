@@ -410,7 +410,7 @@ window.openInscriptionModal = function(tournamentId) {
   if (!user) {
     if (typeof showAuthModal === 'function') showAuthModal();
     else if (typeof openAuthModal === 'function') openAuthModal();
-    else alert('Debes iniciar sesión para inscribirte.');
+    else Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Debes iniciar sesión para inscribirte.', confirmButtonColor: '#fbbf24' });
     return;
   }
   
@@ -419,7 +419,7 @@ window.openInscriptionModal = function(tournamentId) {
   
   // Check deadline
   if (torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date()) {
-    alert('⏰ Las inscripciones para este torneo ya cerraron.');
+    Swal.fire({ icon: 'info', title: 'Cerrado', text: 'Las inscripciones para este torneo ya cerraron.', confirmButtonColor: '#fbbf24' });
     return;
   }
   
@@ -570,7 +570,7 @@ window.openInscriptionModal = function(tournamentId) {
       const name = document.getElementById('insc-name').value.trim();
       
       if (!gameName || !gameId || !name) {
-        alert('Por favor completa todos los campos del líder.');
+        Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa todos los campos del líder.', confirmButtonColor: '#fbbf24' });
         return;
       }
       
@@ -581,7 +581,7 @@ window.openInscriptionModal = function(tournamentId) {
         const tId = idInputs[i].value.trim();
         const tIgn = ignInputs[i].value.trim();
         if (!tId || !tIgn) {
-          alert('Por favor completa los datos de todos los miembros del equipo.');
+          Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa los datos de todos los miembros del equipo.', confirmButtonColor: '#fbbf24' });
           return;
         }
         teamMembers.push({ gameId: tId, gameName: tIgn });
@@ -610,16 +610,16 @@ window.openInscriptionModal = function(tournamentId) {
             closeTorneoModal();
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
               launchConfetti();
-              alert('✅ ¡Inscripción exitosa!');
+              Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80' });
             } else {
-              alert('⏳ Tu inscripción está pendiente. En breve un administrador validará tu pago y confirmará tu cupo.');
+              Swal.fire({ icon: 'info', title: 'Inscripción pendiente', text: 'En breve un administrador validará tu pago y confirmará tu cupo.', confirmButtonColor: '#fbbf24' });
             }
             renderTorneos(torneosData);
           }).catch(err => {
             console.error('Error al inscribirse:', err);
             submitBtn.disabled = false;
             submitBtn.innerText = '⚡ Confirmar Inscripción';
-            alert('Ocurrió un error al inscribirte. Verifica tu conexión.');
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al inscribirte. Verifica tu conexión.', confirmButtonColor: '#ef4444' });
           });
       };
       
@@ -648,18 +648,18 @@ window.openInscriptionModal = function(tournamentId) {
               }).catch(err => {
                 submitBtn.disabled = false;
                 submitBtn.innerText = '⚡ Confirmar Inscripción';
-                alert('Error al procesar pago: ' + err.message);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Error al procesar pago: ' + err.message, confirmButtonColor: '#ef4444' });
               });
             } else {
               submitBtn.disabled = false;
               submitBtn.innerText = '⚡ Confirmar Inscripción';
-              alert('❌ Saldo insuficiente en tu Billetera Virtual. Tienes $' + currentBalance.toFixed(2));
+              Swal.fire({ icon: 'error', title: 'Saldo insuficiente', text: 'Saldo insuficiente en tu Billetera Virtual. Tienes $' + currentBalance.toFixed(2), confirmButtonColor: '#ef4444' });
             }
           });
         } else if (paymentMethod !== 'wallet') {
           const paymentRef = document.getElementById('insc-payment-ref').value.trim();
           if (!paymentRef) {
-            alert('Por favor ingresa el número de referencia.');
+            Swal.fire({ icon: 'warning', title: 'Referencia requerida', text: 'Por favor ingresa el número de referencia del pago.', confirmButtonColor: '#fbbf24' });
             submitBtn.disabled = false;
             submitBtn.innerText = '⚡ Confirmar Inscripción';
             return;
