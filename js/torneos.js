@@ -494,6 +494,7 @@ window.openInscriptionModal = function(tournamentId) {
         <div id="insc-pm-dynamic-info" style="font-size:0.85rem; font-family:var(--font-mono); color:var(--text-primary); margin-bottom:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px;">
           <!-- Loaded dynamically -->
         </div>
+        <p style="font-size:0.75rem; color:var(--accent); margin-bottom:6px; font-weight:600;"><i class="ph-fill ph-info"></i> Coloca los últimos 6 dígitos de la referencia</p>
         <input class="torneo-form-input" id="insc-payment-ref" type="text" placeholder="Número de Referencia / ID">
       </div>
     `;
