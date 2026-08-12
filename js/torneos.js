@@ -667,17 +667,6 @@ window.openInscriptionModal = function(tournamentId) {
           
           processInscription('pending_payment', paymentMethod, paymentRef);
           
-          // Send Telegram Notification
-          if (typeof sendTelegramMessage === 'function') {
-            const tgMessage = `🏆 *NUEVA INSCRIPCIÓN PENDIENTE*\n\n` +
-                              `*Torneo:* ${torneo.title}\n` +
-                              `*Jugador:* ${gameName}\n` +
-                              `*Monto:* $${torneo.entryFee.toFixed(2)}\n` +
-                              `*Método:* ${paymentMethod}\n` +
-                              `*Ref:* ${paymentRef}\n\n` +
-                              `Revisa el Panel de Admin para aprobar el pago.`;
-            sendTelegramMessage(tgMessage);
-          }
         }
       } else {
         // Free tournament
