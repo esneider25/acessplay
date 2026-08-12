@@ -19,8 +19,27 @@ document.addEventListener('DOMContentLoaded', () => {
           firebase.database().ref('users/' + user.uid).update({ referralCode: newCode });
           userProfile.referralCode = newCode;
         }
-        renderApp();
-        initNotifications();
+        
+        if (!window.appRendered) {
+          renderApp();
+          initNotifications();
+          window.appRendered = true;
+        } else {
+          // Update only sec-dashboard and nav balances to avoid destroying the DOM
+          const oldSec = document.getElementById('sec-dashboard');
+          if (oldSec) {
+            const isActive = oldSec.classList.contains('active');
+            const temp = document.createElement('div');
+            temp.innerHTML = renderDashboardContent();
+            const newSec = temp.firstElementChild;
+            if (!isActive) newSec.classList.remove('active');
+            oldSec.replaceWith(newSec);
+          }
+          const navWallet = document.getElementById('nav-wallet-balance');
+          if (navWallet) navWallet.innerText = (userProfile.wallet || 0).toFixed(2);
+          const navPoints = document.getElementById('nav-points-balance');
+          if (navPoints) navPoints.innerText = userProfile.points || 0;
+        }
       });
     } else {
       currentUser = null;
@@ -928,6 +947,9 @@ function renderDashboardContent() {
     <section id="sec-notifications" class="panel-section">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <h2 style="font-family: var(--font-display); font-size: 1.8rem; margin: 0;">🔔 Centro de Notificaciones</h2>
+        <button onclick="markAllNotificationsAsRead()" class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 8px; display: flex; align-items: center; gap: 5px;">
+           <i class="ph ph-checks"></i> Marcar leídas
+        </button>
       </div>
       <div class="glass-card" style="padding: 0;">
         <div id="notifications-list" style="display: flex; flex-direction: column; max-height: 600px; overflow-y: auto;">
@@ -1662,8 +1684,21 @@ window.handleNotificationClick = function(id, type, isRead) {
     switchSection('orders');
   } else if (type === 'tournament') {
     switchSection('tournaments');
-  } else if (type === 'wallet' || type === 'referral' || type === 'withdrawal') {
+  } else if (type === 'wallet' || type === 'withdrawal' || type === 'referral') {
     switchSection('wallet');
+  }
+};
+
+window.markAllNotificationsAsRead = function() {
+  if (!currentUser || !inAppNotifications || inAppNotifications.length === 0) return;
+  const updates = {};
+  inAppNotifications.forEach(n => {
+    if (!n.read) {
+      updates[n.id + '/read'] = true;
+    }
+  });
+  if (Object.keys(updates).length > 0) {
+    firebase.database().ref('users/' + currentUser.uid + '/notifications').update(updates);
   }
 };
 
