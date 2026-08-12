@@ -1937,9 +1937,15 @@ window.editTournament = function(id) {
             </div>
           </div>
           
-          <div>
-            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Título del Torneo</label>
-            <input type="text" id="et-title" class="admin-form-input" style="width: 100%; padding: 10px;" value="${torneo.title || ''}" required>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Título del Torneo</label>
+              <input type="text" id="et-title" class="admin-form-input" style="width: 100%; padding: 10px;" value="${torneo.title || ''}" required>
+            </div>
+            <div>
+              <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Precio por Kill ($ USD)</label>
+              <input type="number" step="0.01" min="0" id="et-price-per-kill" class="admin-form-input" style="width: 100%; padding: 10px;" value="${torneo.pricePerKill || '0.00'}">
+            </div>
           </div>
           
           <div>
@@ -1993,6 +1999,7 @@ window.editTournament = function(id) {
         const maxP = parseInt(document.getElementById('et-max').value) || 100;
         const deadline = document.getElementById('et-deadline').value;
         const bannerUrl = document.getElementById('et-banner').value.trim();
+        const pricePerKill = parseFloat(document.getElementById('et-price-per-kill').value) || 0;
         
         const prizeInputs = document.querySelectorAll('#et-prizes-list .ct-prize-input');
         const places = ['1er Lugar', '2do Lugar', '3er Lugar', '4to Lugar', '5to Lugar', '6to Lugar'];
@@ -2007,6 +2014,7 @@ window.editTournament = function(id) {
           description: description || null,
           gameMode: gameMode || null,
           maxParticipants: maxP,
+          pricePerKill: pricePerKill,
           bannerUrl: bannerUrl || null,
           prizes: newPrizes.length > 0 ? newPrizes : null,
           prize: newPrizes.length > 0 ? newPrizes[0].reward : null
@@ -2662,10 +2670,17 @@ window.showCreateTournamentModal = function() {
           </div>
         </div>
         
-        <div>
-          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Título del Torneo</label>
-          <input type="text" id="ct-title" class="admin-form-input" style="width: 100%; padding: 10px;" placeholder="Ej: Copa FreeFire Escuadras #1">
-          <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Déjalo vacío para generar automáticamente</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Título del Torneo</label>
+            <input type="text" id="ct-title" class="admin-form-input" style="width: 100%; padding: 10px;" placeholder="Ej: Copa FreeFire Escuadras #1">
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Déjalo vacío para autogenerar</p>
+          </div>
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Precio por Kill ($ USD)</label>
+            <input type="number" step="0.01" min="0" id="ct-price-per-kill" class="admin-form-input" style="width: 100%; padding: 10px;" placeholder="0.50" value="0.00">
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Pago automático a jugadores</p>
+          </div>
         </div>
         
         <div>
@@ -2740,6 +2755,7 @@ window.showCreateTournamentModal = function() {
       const maxP = parseInt(document.getElementById('ct-max').value) || 100;
       const deadline = document.getElementById('ct-deadline').value;
       const entryFee = parseFloat(document.getElementById('ct-entry-fee').value) || 0;
+      const pricePerKill = parseFloat(document.getElementById('ct-price-per-kill').value) || 0;
       
       // Collect prizes
       const prizeInputs = document.querySelectorAll('.ct-prize-input');
@@ -2773,6 +2789,7 @@ window.showCreateTournamentModal = function() {
         createdAt: new Date().toISOString(),
         maxParticipants: maxP,
         entryFee: entryFee,
+        pricePerKill: pricePerKill,
         prize: prizes.length > 0 ? prizes[0].reward : 'Premios Especiales'
       };
       

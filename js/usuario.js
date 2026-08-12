@@ -887,9 +887,9 @@ function renderDashboardContent() {
         <div style="display: flex; align-items: center; gap: 15px; background: rgba(16, 185, 129, 0.05); padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
           <div>
             <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Tus Ganancias</div>
-            <div style="font-size: 1.2rem; font-weight: bold; color: #10b981;" id="tournaments-points-display">0 PTS</div>
+            <div style="font-size: 1.2rem; font-weight: bold; color: #10b981;" id="tournaments-points-display">$0.00 USD</div>
           </div>
-          <button onclick="requestCashout()" class="btn-primary" style="padding: 10px 15px; font-size: 0.85rem; background: linear-gradient(135deg, #10b981, #059669); border:none; border-radius: 10px; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);"><i class="ph-fill ph-wallet"></i> Retirar</button>
+          <button onclick="requestTournamentCashout()" class="btn-primary" style="padding: 10px 15px; font-size: 0.85rem; background: linear-gradient(135deg, #10b981, #059669); border:none; border-radius: 10px; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);"><i class="ph-fill ph-wallet"></i> Retirar Premio</button>
         </div>
       </div>
       <div id="dashboard-tournaments-container">
@@ -1569,23 +1569,45 @@ window.renderDashboardTournaments = async function() {
   const container = document.getElementById('dashboard-tournaments-container');
   if (!container || !currentUser) return;
   
-  const pointsDisplay = document.getElementById('tournaments-points-display');
-  if (pointsDisplay && typeof userProfile !== 'undefined' && userProfile) {
-    pointsDisplay.innerText = (userProfile.points || 0) + ' PTS';
-  }
-  
   try {
     const snap = await firebase.database().ref('tournaments').once('value');
     const allTournaments = snap.val() || {};
     
+    let totalTournamentEarnings = 0;
     const myTournaments = [];
+    
     Object.keys(allTournaments).forEach(key => {
       const t = allTournaments[key];
       t.id = key;
       if (t.participants && t.participants[currentUser.uid]) {
         myTournaments.push(t);
+        
+        // Calculate earnings from Kills
+        if (t.status === 'completed' && t.pricePerKill && t.leaderboard) {
+           const myEntry = t.participants[currentUser.uid];
+           let myKills = 0;
+           const lbLider = t.leaderboard.find(l => l.playerName === myEntry.gameName);
+           if (lbLider) myKills = lbLider.kills || 0;
+           
+           let totalTeamKills = myKills;
+           if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
+              myEntry.teamMembers.forEach(tm => {
+                 const lbTm = t.leaderboard.find(l => l.playerName === tm.gameName);
+                 if (lbTm) totalTeamKills += (lbTm.kills || 0);
+              });
+           }
+           totalTournamentEarnings += (totalTeamKills * t.pricePerKill);
+        }
       }
     });
+    
+    const withdrawnEarnings = (userProfile && userProfile.withdrawnTournamentEarnings) || 0;
+    window.availableTournamentEarnings = Math.max(0, totalTournamentEarnings - withdrawnEarnings);
+    
+    const pointsDisplay = document.getElementById('tournaments-points-display');
+    if (pointsDisplay) {
+      pointsDisplay.innerText = '$' + window.availableTournamentEarnings.toFixed(2) + ' USD';
+    }
     
     // Sort so most recent (ongoing/registration_open) are first
     myTournaments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));

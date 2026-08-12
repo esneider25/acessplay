@@ -41,6 +41,8 @@ function renderWithdrawals(container) {
         detailsStr = `Pago Móvil: <strong>${w.details?.bank}</strong> | ${w.details?.phone} | ${w.details?.cedula}`;
       }
 
+      let typeBadge = w.type === 'tournament' ? '<span style="color:#10b981; font-size:0.75rem;"><i class="ph-fill ph-trophy"></i> Torneo</span>' : '<span style="color:#f59e0b; font-size:0.75rem;"><i class="ph-fill ph-coin"></i> Tienda (PTS)</span>';
+
       let statusBadge = '';
       if (w.status === 'pending') statusBadge = '<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">⏳ Pendiente</span>';
       else if (w.status === 'completed') statusBadge = '<span style="background: rgba(16, 185, 129, 0.2); color: #0ea5e9; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">✅ Pagado</span>';
@@ -48,7 +50,7 @@ function renderWithdrawals(container) {
 
       return `
                   <tr style="border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 12px; font-size: 0.85rem;">${new Date(w.createdAt).toLocaleString()}</td>
+                    <td style="padding: 12px; font-size: 0.85rem;">${new Date(w.createdAt).toLocaleString()}<br>${typeBadge}</td>
                     <td style="padding: 12px; font-size: 0.9rem;">
                       <div>${w.userName || '-'}</div>
                       <div style="font-size: 0.75rem; color: var(--text-secondary);">${w.userEmail}</div>
@@ -59,8 +61,8 @@ function renderWithdrawals(container) {
                     <td style="padding: 12px; text-align: center;">${statusBadge}</td>
                     <td style="padding: 12px; text-align: right;">
                       ${w.status === 'pending' ? `
-                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-bottom: 5px; background: #0ea5e9; border-color: #0ea5e9;" onclick="updateWithdrawalStatus('${w.id}', 'completed', '${w.userId}', ${w.amountPoints})">Aprobar</button>
-                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" onclick="updateWithdrawalStatus('${w.id}', 'rejected', '${w.userId}', ${w.amountPoints})">Rechazar</button>
+                        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem; margin-bottom: 5px; background: #0ea5e9; border-color: #0ea5e9;" onclick="updateWithdrawalStatus('${w.id}', 'completed', '${w.userId}', ${w.amountPoints}, '${w.type || 'points'}', ${w.amountUsd || 0})">Aprobar</button>
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.8rem;" onclick="updateWithdrawalStatus('${w.id}', 'rejected', '${w.userId}', ${w.amountPoints}, '${w.type || 'points'}', ${w.amountUsd || 0})">Rechazar</button>
                       ` : ''}
                     </td>
                   </tr>
@@ -80,61 +82,48 @@ function renderWithdrawals(container) {
   });
 }
 
-window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, pointsToRefund) {
-  if (!confirm(newStatus === 'completed' ? '¿Confirmas que ya enviaste el dinero a este usuario?' : '¿Seguro que deseas RECHAZAR este retiro? (Se le devolverán los puntos al usuario)')) return;
+window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, pointsToRefund, wType, amountUsd) {
+  if (!confirm(newStatus === 'completed' ? '¿Confirmas que ya enviaste el dinero a este usuario?' : '¿Seguro que deseas RECHAZAR este retiro? (Se le devolverá el saldo al usuario)')) return;
 
   firebase.database().ref('withdrawals/' + withdrawalId).update({
     status: newStatus,
     processedAt: Date.now()
   }).then(() => {
     if (newStatus === 'rejected') {
-      // Refund points to user
-      firebase.database().ref('users/' + userId + '/points').once('value').then(snap => {
-        const currentPts = snap.val() || 0;
-        firebase.database().ref('users/' + userId).update({
-          points: currentPts + pointsToRefund
+      if (wType === 'tournament') {
+        // Refund tournament earnings (subtract from what they have withdrawn so their available goes up)
+        firebase.database().ref('users/' + userId + '/withdrawnTournamentEarnings').once('value').then(snap => {
+          const currentWithdrawn = snap.val() || 0;
+          firebase.database().ref('users/' + userId).update({
+            withdrawnTournamentEarnings: Math.max(0, currentWithdrawn - amountUsd)
+          });
         });
+      } else {
+        // Refund points to user
+        firebase.database().ref('users/' + userId + '/points').once('value').then(snap => {
+          const currentPts = snap.val() || 0;
+          firebase.database().ref('users/' + userId).update({
+            points: currentPts + pointsToRefund
+          });
 
-        firebase.database().ref('users/' + userId + '/transactions').push({
-          id: Date.now().toString(),
-          type: 'deposit',
-          amount: 0,
-          description: `Devolución por retiro rechazado (+${pointsToRefund} PTS)`,
-          date: Date.now()
+          firebase.database().ref('users/' + userId + '/transactions').push({
+            id: Date.now().toString(),
+            type: 'deposit',
+            amount: 0,
+            description: `Devolución por retiro rechazado (+${pointsToRefund} PTS)`,
+            date: Date.now()
+          });
         });
-      });
+      }
     }
     showAdminToast('Estado actualizado', 'success');
     renderWithdrawals(document.getElementById('admin-main-content'));
   }).catch(err => {
     alert("Error: " + err.message);
   });
-}; window.viewUserTransactions = function (userId) {
-  const user = window.CUSTOMERS_DATA?.find(u => u.id === userId);
-  if (!user) return;
+};
 
-  const modal = document.createElement('div');
-  modal.id = 'tx-modal';
-  modal.style.position = 'fixed';
-  modal.style.top = '0'; modal.style.left = '0'; modal.style.width = '100%'; modal.style.height = '100%';
-  modal.style.background = 'rgba(0,0,0,0.8)'; modal.style.zIndex = '1000';
-  modal.style.display = 'flex'; modal.style.alignItems = 'center'; modal.style.justifyContent = 'center';
-
-  let txHtml = '<div style="text-align:center; padding: 20px; color: var(--text-secondary);">No hay movimientos.</div>';
-
-  if (user.transactions && user.transactions.length > 0) {
-    const sortedTx = [...user.transactions].sort((a, b) => b.date - a.date);
-    txHtml = sortedTx.map(tx => {
-      let sign = tx.amount >= 0 ? '+' : '';
-      let color = tx.amount >= 0 ? '#0ea5e9' : '#ff5252';
-      let icon = tx.type === 'deposit' ? '💰' : (tx.type === 'purchase' ? '🛒' : '🔄');
-      return `
-      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 8px;">
-         <div style="display: flex; align-items: center; gap: 12px;">
-           <div style="font-size: 1.5rem; opacity: 0.8;">${icon}</div>
-           <div>
-             <div style="font-weight: bold; font-size: 0.9rem;">${tx.description || 'Movimiento'}</div>
-             <div style="font-size: 0.75rem; color: var(--text-secondary);">${new Date(tx.date).toLocaleString()}</div>
+window.viewUserTransactions = function (userId) {
            </div>
          </div>
          <div style="font-weight: bold; color: ${color};">${sign}$${parseFloat(tx.amount).toFixed(2)}</div>
@@ -160,7 +149,7 @@ window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, point
   document.body.appendChild(modal);
 };
 
-// ── Roles and Blocking ──
+// â”€â”€ Roles and Blocking â”€â”€
 window.openCustomerInfoModal = function (uid) {
   showUserDetailsModal(uid);
 };
@@ -181,7 +170,7 @@ async function showUserDetailsModal(uid) {
       <div class="modal" style="max-width: 500px; max-height: 90vh; overflow-y: auto;">
         <h3 style="margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
           <span>Detalles del Cliente</span>
-          <button onclick="document.getElementById('customer-info-modal-overlay').remove()" style="background:none; border:none; color: white; cursor: pointer; font-size: 1.2rem;">✕</button>
+          <button onclick="document.getElementById('customer-info-modal-overlay').remove()" style="background:none; border:none; color: white; cursor: pointer; font-size: 1.2rem;">âœ•</button>
         </h3>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
@@ -198,11 +187,11 @@ async function showUserDetailsModal(uid) {
             <div style="font-weight: bold;">${user.whatsapp || 'N/A'}</div>
           </div>
           <div>
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Cédula (C.I)</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">CÃ©dula (C.I)</div>
             <div style="font-weight: bold;">${user.cedula || 'N/A'}</div>
           </div>
           <div style="grid-column: span 2;">
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Dirección</div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">DirecciÃ³n</div>
             <div style="font-weight: bold;">${user.direccion || 'N/A'}</div>
           </div>
           <div>
@@ -224,19 +213,19 @@ async function showUserDetailsModal(uid) {
 
         <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; margin-bottom: 20px;">
           <h4 style="margin-bottom: 10px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px;">
-            <i class="ph ph-lock-key"></i> Forzar Cambio de Contraseña
+            <i class="ph ph-lock-key"></i> Forzar Cambio de ContraseÃ±a
           </h4>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             <div style="position: relative;">
-              <input type="password" id="admin-force-pass-${uid}" class="admin-form-input" placeholder="Nueva contraseña (mínimo 6)" style="width: 100%; padding-right: 40px; background: rgba(0,0,0,0.2);">
+              <input type="password" id="admin-force-pass-${uid}" class="admin-form-input" placeholder="Nueva contraseÃ±a (mÃ­nimo 6)" style="width: 100%; padding-right: 40px; background: rgba(0,0,0,0.2);">
               <i class="ph ph-eye" id="toggle-force-pwd-${uid}" onclick="togglePasswordVisibility('admin-force-pass-${uid}', 'toggle-force-pwd-${uid}')" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: var(--text-secondary);"></i>
             </div>
             <div style="position: relative;">
-              <input type="password" id="admin-force-confirm-${uid}" class="admin-form-input" placeholder="Confirmar contraseña" style="width: 100%; padding-right: 40px; background: rgba(0,0,0,0.2);">
+              <input type="password" id="admin-force-confirm-${uid}" class="admin-form-input" placeholder="Confirmar contraseÃ±a" style="width: 100%; padding-right: 40px; background: rgba(0,0,0,0.2);">
               <i class="ph ph-eye" id="toggle-force-confirm-${uid}" onclick="togglePasswordVisibility('admin-force-confirm-${uid}', 'toggle-force-confirm-${uid}')" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: var(--text-secondary);"></i>
             </div>
             <button class="btn btn-primary" onclick="forceCustomerPassword('${uid}', this)" style="width: 100%; justify-content: center; margin-top: 5px;">
-              💾 Actualizar Contraseña del Cliente
+              ðŸ’¾ Actualizar ContraseÃ±a del Cliente
             </button>
           </div>
         </div>
@@ -297,8 +286,8 @@ window.forceCustomerPassword = async function (uid, btnElement) {
   const pass = passInput ? passInput.value.trim() : '';
   const confirm = confirmInput ? confirmInput.value.trim() : '';
 
-  if (pass.length < 6) return alert("La contraseña debe tener al menos 6 caracteres.");
-  if (pass !== confirm) return alert("Las contraseñas no coinciden.");
+  if (pass.length < 6) return alert("La contraseÃ±a debe tener al menos 6 caracteres.");
+  if (pass !== confirm) return alert("Las contraseÃ±as no coinciden.");
 
   const btn = btnElement || (typeof event !== 'undefined' ? (event.target || event.srcElement) : null);
   const originalText = btn ? btn.innerHTML : '';
@@ -309,7 +298,7 @@ window.forceCustomerPassword = async function (uid, btnElement) {
 
   try {
     const currentUser = firebase.auth().currentUser;
-    if (!currentUser) throw new Error("No hay una sesión de administrador activa.");
+    if (!currentUser) throw new Error("No hay una sesiÃ³n de administrador activa.");
 
     const idToken = await currentUser.getIdToken();
     const response = await fetch('/api/admin-update-password', {
@@ -326,14 +315,14 @@ window.forceCustomerPassword = async function (uid, btnElement) {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(data.error || 'Error al actualizar contraseña.');
+      throw new Error(data.error || 'Error al actualizar contraseÃ±a.');
     }
 
-    alert("Contraseña actualizada con éxito.");
+    alert("ContraseÃ±a actualizada con Ã©xito.");
     if (passInput) passInput.value = '';
     if (confirmInput) confirmInput.value = '';
   } catch (error) {
-    alert("Error guardando la contraseña: " + error.message);
+    alert("Error guardando la contraseÃ±a: " + error.message);
   } finally {
     if (btn) {
       btn.innerHTML = originalText;
@@ -361,20 +350,20 @@ window.openRoleModal = function (uid, currentRole, currentDiscount, currentRefer
         <div class="form-group" id="discount-group" style="display: ${currentRole === 'revendedor' ? 'block' : 'none'};">
           <label>Margen de Ganancia sobre Costo (%)</label>
           <input type="number" id="discount-input" class="form-input" value="${currentDiscount || 0}" min="0" max="1000">
-          <div class="form-hint">El precio para este revendedor será: Costo del Producto + Este Porcentaje. (Si el producto no tiene costo configurado, se usará el precio normal).</div>
+          <div class="form-hint">El precio para este revendedor serÃ¡: Costo del Producto + Este Porcentaje. (Si el producto no tiene costo configurado, se usarÃ¡ el precio normal).</div>
           
           <div style="margin-top: 15px; background: rgba(14, 165, 233, 0.1); padding: 10px; border-radius: 8px; border: 1px solid rgba(14, 165, 233, 0.2);">
             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
               <input type="checkbox" id="auto-process-input" ${currentAutoProcess ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer;">
               <span style="font-size: 0.9rem; font-weight: 500;">Auto-procesar pagos externos</span>
             </label>
-            <div class="form-hint" style="margin-top: 5px;">Si está activo, los Pagos Móviles y Binance de este revendedor se completarán solos SIN tu aprobación. Actívalo solo para revendedores de total confianza.</div>
+            <div class="form-hint" style="margin-top: 5px;">Si estÃ¡ activo, los Pagos MÃ³viles y Binance de este revendedor se completarÃ¡n solos SIN tu aprobaciÃ³n. ActÃ­valo solo para revendedores de total confianza.</div>
           </div>
         </div>
         <div class="form-group" id="referral-limit-group" style="display: ${currentRole === 'influencer' ? 'block' : 'none'}; margin-top: 15px;">
-          <label>Límite de Referidos (Cupos)</label>
+          <label>LÃ­mite de Referidos (Cupos)</label>
           <input type="number" id="referral-limit-input" class="form-input" value="${currentReferralLimit || 30}" min="0" max="1000">
-          <div class="form-hint">Cantidad máxima de amigos que este influencer puede invitar para ganar recompensas.</div>
+          <div class="form-hint">Cantidad mÃ¡xima de amigos que este influencer puede invitar para ganar recompensas.</div>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <button class="btn btn-secondary" onclick="document.getElementById('role-modal-overlay').remove()">Cancelar</button>
@@ -398,36 +387,36 @@ window.saveUserRole = function (uid) {
     referralLimit: role === 'influencer' ? referralLimit : null,
     autoProcessExternal: role === 'revendedor' ? autoProcessExternal : false
   }).then(() => {
-    showAdminToast('✅ Rol actualizado', 'success');
+    showAdminToast('âœ… Rol actualizado', 'success');
     document.getElementById('role-modal-overlay').remove();
     renderActiveTab();
   });
 };
 
 window.toggleBlockUser = function (uid, isBlocked) {
-  if (confirm(isBlocked ? '¿Seguro que deseas DESBLOQUEAR a este usuario?' : '¿Seguro que deseas BLOQUEAR a este usuario? Se cerrará su sesión y no podrá comprar.')) {
+  if (confirm(isBlocked ? 'Â¿Seguro que deseas DESBLOQUEAR a este usuario?' : 'Â¿Seguro que deseas BLOQUEAR a este usuario? Se cerrarÃ¡ su sesiÃ³n y no podrÃ¡ comprar.')) {
     firebase.database().ref('users/' + uid).update({
       isBlocked: !isBlocked
     }).then(() => {
-      showAdminToast(isBlocked ? '✅ Usuario desbloqueado' : '🚫 Usuario bloqueado', 'success');
+      showAdminToast(isBlocked ? 'âœ… Usuario desbloqueado' : 'ðŸš« Usuario bloqueado', 'success');
       renderActiveTab();
     });
   }
 };
 
-// ── Banners Management ──
+// â”€â”€ Banners Management â”€â”€
 
 function renderBanners(container) {
   let html = `
     <div class="admin-header-flex">
-      <h2>🖼️ Gestión de Banners</h2>
+      <h2>ðŸ–¼ï¸ GestiÃ³n de Banners</h2>
       <div style="display: flex; gap: 10px;">
-        <button class="btn-secondary" onclick="saveToDb('banners', BANNERS); showAdminToast('✅ Banners guardados', 'success');">💾 Guardar Cambios</button>
+        <button class="btn-secondary" onclick="saveToDb('banners', BANNERS); showAdminToast('âœ… Banners guardados', 'success');">ðŸ’¾ Guardar Cambios</button>
         <button class="btn-primary" onclick="adminEditBanner(null)">+ Nuevo Banner</button>
       </div>
     </div>
     <p style="color: var(--text-secondary); margin-bottom: 20px;">
-      Configura los banners deslizantes de la página principal. Opcionalmente sube una imagen para el fondo.
+      Configura los banners deslizantes de la pÃ¡gina principal. Opcionalmente sube una imagen para el fondo.
     </p>
     <div class="admin-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
   `;
@@ -444,12 +433,12 @@ function renderBanners(container) {
         <div class="admin-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
           <div style="height: 140px; ${bg} position: relative; border-bottom: 1px solid var(--border-color);">
             <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 10px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
-              <h3 style="color: white; font-size: 1.1rem; margin: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">${banner.title || 'Sin Título'}</h3>
+              <h3 style="color: white; font-size: 1.1rem; margin: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">${banner.title || 'Sin TÃ­tulo'}</h3>
             </div>
             ${banner.badge ? `<div style="position: absolute; top: 10px; right: 10px; background: ${banner.badgeColor}; color: #000; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 4px;">${banner.badge}</div>` : ''}
           </div>
           <div style="padding: 15px; flex: 1;">
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px; line-height: 1.4;">${banner.desc ? (banner.desc.length > 60 ? banner.desc.substring(0, 60) + '...' : banner.desc) : 'Sin descripción'}</p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px; line-height: 1.4;">${banner.desc ? (banner.desc.length > 60 ? banner.desc.substring(0, 60) + '...' : banner.desc) : 'Sin descripciÃ³n'}</p>
             <div style="display: flex; gap: 10px;">
               <button class="btn-secondary" style="flex: 1; padding: 6px;" onclick="adminEditBanner('${banner.id}')">Editar</button>
               <button class="btn-danger" style="flex: 1; padding: 6px;" onclick="adminDeleteBanner('${banner.id}')">Eliminar</button>
@@ -465,7 +454,7 @@ function renderBanners(container) {
 }
 
 function adminEditBanner(id) {
-  let b = { id: 'banner-' + Date.now(), title: '', desc: '', badge: '', badgeColor: '#0ea5e9', imageUrl: '', bgGradient: 'linear-gradient(135deg, #111827, #1f2937)', btnText: 'Ver Más', btnLink: 'catalog', btnColor: 'var(--accent)', btnTextColor: 'var(--bg-deep)' };
+  let b = { id: 'banner-' + Date.now(), title: '', desc: '', badge: '', badgeColor: '#0ea5e9', imageUrl: '', bgGradient: 'linear-gradient(135deg, #111827, #1f2937)', btnText: 'Ver MÃ¡s', btnLink: 'catalog', btnColor: 'var(--accent)', btnTextColor: 'var(--bg-deep)' };
   let isEdit = false;
 
   if (id) {
@@ -481,7 +470,7 @@ function adminEditBanner(id) {
       <h3>${isEdit ? 'Editar Banner' : 'Nuevo Banner'}</h3>
       
       <div class="form-group" style="margin-top: 15px;">
-        <label>🖼️ Imagen de Fondo (Opcional)</label>
+        <label>ðŸ–¼ï¸ Imagen de Fondo (Opcional)</label>
         <input type="file" id="banner-file" accept="image/*" class="admin-input" style="padding: 10px;" onchange="handleBannerImageUpload(this)">
         <input type="hidden" id="banner-imageUrl" value="${b.imageUrl || ''}">
         <div id="banner-image-preview" style="margin-top: 10px; height: 120px; border-radius: 8px; border: 1px dashed var(--border-color); background: ${b.imageUrl ? `url('${b.imageUrl}') center/contain no-repeat, ${b.bgGradient || 'rgba(0,0,0,0.2)'}` : 'rgba(0,0,0,0.2)'}; display: flex; align-items: center; justify-content: center;">
@@ -491,17 +480,17 @@ function adminEditBanner(id) {
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
         <div class="form-group">
-          <label>Título</label>
+          <label>TÃ­tulo</label>
           <input type="text" id="banner-title" class="admin-input" value="${b.title}">
         </div>
         <div class="form-group">
-          <label>Texto del Botón</label>
+          <label>Texto del BotÃ³n</label>
           <input type="text" id="banner-btnText" class="admin-input" value="${b.btnText}">
         </div>
       </div>
 
       <div class="form-group">
-        <label>Descripción</label>
+        <label>DescripciÃ³n</label>
         <textarea id="banner-desc" class="admin-input" style="height: 60px;">${b.desc}</textarea>
       </div>
 
@@ -517,10 +506,10 @@ function adminEditBanner(id) {
       </div>
 
       <div class="form-group">
-        <label>Enlace del Botón</label>
+        <label>Enlace del BotÃ³n</label>
         <select id="banner-btnLink" class="admin-input">
-          <option value="catalog" ${b.btnLink === 'catalog' ? 'selected' : ''}>Catálogo</option>
-          <option value="how-it-works" ${b.btnLink === 'how-it-works' ? 'selected' : ''}>¿Cómo Funciona?</option>
+          <option value="catalog" ${b.btnLink === 'catalog' ? 'selected' : ''}>CatÃ¡logo</option>
+          <option value="how-it-works" ${b.btnLink === 'how-it-works' ? 'selected' : ''}>Â¿CÃ³mo Funciona?</option>
           <optgroup label="Productos">
             ${PRODUCTS.map(p => `<option value="product:${p.id}" ${b.btnLink === `product:${p.id}` ? 'selected' : ''}>${p.name}</option>`).join('')}
           </optgroup>
@@ -581,7 +570,7 @@ function handleBannerImageUpload(input) {
 
 function adminSaveBanner(id) {
   const title = document.getElementById('banner-title').value.trim();
-  if (!title) { showToast('⚠️ El título es obligatorio'); return; }
+  if (!title) { showToast('âš ï¸ El tÃ­tulo es obligatorio'); return; }
 
   const b = {
     id: id,
@@ -609,11 +598,11 @@ function adminSaveBanner(id) {
 function adminDeleteBanner(id) {
   const modalHtml = `
     <div class="admin-modal-content" style="max-width: 400px; text-align: center;">
-      <h3 style="color: #ef5350;">⚠️ Eliminar Banner</h3>
-      <p style="margin: 15px 0; color: var(--text-secondary);">¿Estás seguro que deseas eliminar este banner?</p>
+      <h3 style="color: #ef5350;">âš ï¸ Eliminar Banner</h3>
+      <p style="margin: 15px 0; color: var(--text-secondary);">Â¿EstÃ¡s seguro que deseas eliminar este banner?</p>
       <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
         <button class="btn-secondary" onclick="closeAdminModal()">Cancelar</button>
-        <button class="btn-danger" onclick="executeDeleteBanner('${id}')">Sí, Eliminar</button>
+        <button class="btn-danger" onclick="executeDeleteBanner('${id}')">SÃ­, Eliminar</button>
       </div>
     </div>
   `;
@@ -627,7 +616,7 @@ function executeDeleteBanner(id) {
     saveToDb('banners', BANNERS);
     closeAdminModal();
     renderActiveTab();
-    showToast('🗑️ Banner eliminado');
+    showToast('ðŸ—‘ï¸ Banner eliminado');
   }
 }
 
