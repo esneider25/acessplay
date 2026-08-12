@@ -41,7 +41,8 @@ function renderWithdrawals(container) {
         detailsStr = `Pago Móvil: <strong>${w.details?.bank}</strong> | ${w.details?.phone} | ${w.details?.cedula}`;
       }
 
-      let typeBadge = w.type === 'tournament' ? '<span style="color:#10b981; font-size:0.75rem;"><i class="ph-fill ph-trophy"></i> Torneo</span>' : '<span style="color:#f59e0b; font-size:0.75rem;"><i class="ph-fill ph-coin"></i> Tienda (PTS)</span>';
+      let typeBadge = (w.type === 'tournament' || w.type === 'tournament_prize') ? '<span style="color:#10b981; font-size:0.75rem;"><i class="ph-fill ph-trophy"></i> Torneo</span>' : '<span style="color:#f59e0b; font-size:0.75rem;"><i class="ph-fill ph-coin"></i> Tienda (PTS)</span>';
+      let ptsDisplay = (w.type === 'tournament' || w.type === 'tournament_prize') ? '<span style="color:var(--text-secondary); font-size: 0.8rem;">-</span>' : `${w.amountPoints} PTS`;
 
       let statusBadge = '';
       if (w.status === 'pending') statusBadge = '<span style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">⏳ Pendiente</span>';
@@ -55,7 +56,7 @@ function renderWithdrawals(container) {
                       <div>${w.userName || '-'}</div>
                       <div style="font-size: 0.75rem; color: var(--text-secondary);">${w.userEmail}</div>
                     </td>
-                    <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #3b82f6;">${w.amountPoints} PTS</td>
+                    <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #3b82f6;">${ptsDisplay}</td>
                     <td style="padding: 12px; font-size: 0.9rem; text-align: right; font-weight: bold; color: #0ea5e9;">$${w.amountUsd} USD</td>
                     <td style="padding: 12px; font-size: 0.85rem;">${detailsStr}</td>
                     <td style="padding: 12px; text-align: center;">${statusBadge}</td>
@@ -90,7 +91,7 @@ window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, point
     processedAt: Date.now()
   }).then(() => {
     if (newStatus === 'rejected') {
-      if (wType === 'tournament') {
+      if (wType === 'tournament' || wType === 'tournament_prize') {
         // Refund tournament earnings (subtract from what they have withdrawn so their available goes up)
         firebase.database().ref('users/' + userId + '/withdrawnTournamentEarnings').once('value').then(snap => {
           const currentWithdrawn = snap.val() || 0;
