@@ -2485,8 +2485,11 @@ window.saveBulkLeaderboard = function(id) {
   
   newLeaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
   
-  firebase.database().ref('tournaments/' + id + '/leaderboard').set(newLeaderboard).then(() => {
-    alert('✅ Puntuaciones guardadas exitosamente.');
+  firebase.database().ref('tournaments/' + id).update({
+    leaderboard: newLeaderboard,
+    status: 'completed'
+  }).then(() => {
+    alert('✅ Puntuaciones guardadas y torneo finalizado.');
     manageTournamentResults(id);
   });
 };

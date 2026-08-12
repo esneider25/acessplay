@@ -1778,20 +1778,22 @@ window.renderDashboardTournaments = async function() {
         myTournaments.push(t);
         
         // Calculate earnings from Kills
-        if (t.status === 'completed' && t.pricePerKill && t.leaderboard) {
+        if ((t.status === 'completed' || t.status === 'completado') && t.pricePerKill && t.leaderboard) {
            const myEntry = t.participants[currentUser.uid];
            let myKills = 0;
-           const lbLider = t.leaderboard.find(l => l.playerName === myEntry.gameName);
-           if (lbLider) myKills = lbLider.kills || 0;
+           const myGameName = (myEntry.gameName || '').trim().toLowerCase();
+           const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
+           if (lbLider) myKills = parseInt(lbLider.kills) || 0;
            
            let totalTeamKills = myKills;
            if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
               myEntry.teamMembers.forEach(tm => {
-                 const lbTm = t.leaderboard.find(l => l.playerName === tm.gameName);
-                 if (lbTm) totalTeamKills += (lbTm.kills || 0);
+                 const tmName = (tm.gameName || '').trim().toLowerCase();
+                 const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
+                 if (lbTm) totalTeamKills += (parseInt(lbTm.kills) || 0);
               });
            }
-           totalTournamentEarnings += (totalTeamKills * t.pricePerKill);
+           totalTournamentEarnings += (totalTeamKills * (parseFloat(t.pricePerKill) || 0));
         }
       }
     });
