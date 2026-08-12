@@ -1376,6 +1376,148 @@ window.submitCashout = function() {
   });
 };
 
+window.requestTournamentCashout = function() {
+  if (!userProfile) return;
+  const earnings = window.availableTournamentEarnings || 0;
+  
+  if (earnings < 1) {
+    usuarioToast('Necesitas al menos $1 USD en ganancias para retirar.', 'error');
+    return;
+  }
+  
+  const modalHTML = `
+    <div class="modal-overlay active" id="cashout-tournament-modal">
+      <div class="modal" style="background: var(--bg-surface); padding: 30px; border-radius: 16px; width: 90%; max-width: 450px;">
+        <h3 style="margin-top:0; color: #10b981;"><i class="ph-fill ph-trophy"></i> Retirar Premio de Torneo</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">Tienes <strong>$${earnings.toFixed(2)} USD</strong> disponibles en ganancias.</p>
+        
+        <div class="form-group" style="margin-top: 15px;">
+          <label>Cantidad a retirar (USD)</label>
+          <input type="number" id="cashout-tournament-amount" class="form-input" min="1" max="${earnings.toFixed(2)}" value="${earnings.toFixed(2)}" step="0.5">
+        </div>
+
+        <div class="form-group">
+          <label>Método de Pago</label>
+          <select id="cashout-tournament-method" class="form-input" onchange="
+            const method = this.value;
+            if(method === 'binance') {
+              document.getElementById('cashout-tournament-binance-fields').style.display = 'block';
+              document.getElementById('cashout-tournament-pagomovil-fields').style.display = 'none';
+            } else {
+              document.getElementById('cashout-tournament-binance-fields').style.display = 'none';
+              document.getElementById('cashout-tournament-pagomovil-fields').style.display = 'block';
+            }
+          ">
+            <option value="binance">Binance Pay</option>
+            <option value="pagomovil">Pago Móvil</option>
+          </select>
+        </div>
+        
+        <div id="cashout-tournament-binance-fields">
+          <div class="form-group">
+            <label>Correo / PayID / Binance ID</label>
+            <input type="text" id="cashout-tournament-binance-id" class="form-input" placeholder="ej. usuario@gmail.com o 12345678">
+          </div>
+        </div>
+        
+        <div id="cashout-tournament-pagomovil-fields" style="display:none;">
+          <div class="form-group">
+            <label>Banco</label>
+            <input type="text" id="cashout-tournament-pm-bank" class="form-input" placeholder="ej. Banesco, Mercantil...">
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" id="cashout-tournament-pm-phone" class="form-input" placeholder="0414-XXXXXXX">
+          </div>
+          <div class="form-group">
+            <label>Cédula</label>
+            <input type="text" id="cashout-tournament-pm-cedula" class="form-input" placeholder="V-12345678">
+          </div>
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-top: 25px;">
+          <button class="btn btn-secondary" onclick="document.getElementById('cashout-tournament-modal').remove()">Cancelar</button>
+          <button class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="submitTournamentCashout()">Confirmar Retiro</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+};
+
+window.submitTournamentCashout = function() {
+  const amount = parseFloat(document.getElementById('cashout-tournament-amount').value) || 0;
+  const currentEarnings = window.availableTournamentEarnings || 0;
+  
+  if (amount < 1) return usuarioToast('Mínimo de retiro: $1 USD', 'error');
+  if (amount > currentEarnings) return usuarioToast('No tienes suficientes ganancias', 'error');
+  
+  const method = document.getElementById('cashout-tournament-method').value;
+  let details = {};
+  
+  if (method === 'binance') {
+    const binanceId = document.getElementById('cashout-tournament-binance-id').value.trim();
+    if (!binanceId) return usuarioToast('Ingresa tu ID de Binance', 'error');
+    details = { type: 'binance', account: binanceId };
+  } else {
+    const bank = document.getElementById('cashout-tournament-pm-bank').value.trim();
+    const phone = document.getElementById('cashout-tournament-pm-phone').value.trim();
+    const cedula = document.getElementById('cashout-tournament-pm-cedula').value.trim();
+    if (!bank || !phone || !cedula) return usuarioToast('Completa todos los datos del Pago Móvil', 'error');
+    details = { type: 'pagomovil', bank, phone, cedula };
+  }
+  
+  // Submit
+  const withdrawRef = firebase.database().ref('withdrawals').push();
+  const withdrawalData = {
+    id: withdrawRef.key,
+    userId: currentUser.uid,
+    userEmail: currentUser.email,
+    userName: userProfile.name || '',
+    amountPoints: 0,
+    amountUsd: amount,
+    method: method,
+    details: details,
+    type: 'tournament_prize',
+    status: 'pending',
+    createdAt: Date.now()
+  };
+  
+  firebase.auth().currentUser.getIdToken().then(idToken => {
+    return fetch('/api/wallet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+      body: JSON.stringify({ action: 'tournament_cashout', amount: amount })
+    });
+  }).then(res => res.json()).then(data => {
+    if (data.error) throw new Error(data.error);
+    
+    // Save transaction record in user's history
+    firebase.database().ref('users/' + currentUser.uid + '/transactions').push({
+      id: Date.now().toString(),
+      type: 'withdrawal',
+      amount: 0,
+      description: `Retiro Premio Torneo a ${method === 'binance' ? 'Binance' : 'Pago Móvil'} (-$${amount} USD)`,
+      date: Date.now()
+    });
+    
+    // Update local profile immediately so UI reflects it without hard refresh
+    if (!userProfile.withdrawnTournamentEarnings) userProfile.withdrawnTournamentEarnings = 0;
+    userProfile.withdrawnTournamentEarnings += amount;
+    
+    // Save withdrawal request
+    withdrawRef.set(withdrawalData).then(() => {
+      document.getElementById('cashout-tournament-modal').remove();
+      usuarioToast('Retiro de premio solicitado con éxito', 'success');
+      renderDashboardTournaments(); // Refresh the earnings display
+    });
+  }).catch(err => {
+    console.error(err);
+    usuarioToast(err.message || 'Error procesando retiro', 'error');
+  });
+};
+
 // ==========================================
 // CHAT DE SOPORTE
 // ==========================================

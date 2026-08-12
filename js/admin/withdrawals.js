@@ -124,6 +124,34 @@ window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, point
 };
 
 window.viewUserTransactions = function (userId) {
+  const users = adminState.users || {};
+  const user = users[userId];
+  if (!user) return;
+
+  const existingModal = document.getElementById('tx-modal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'tx-modal';
+  modal.className = 'modal-overlay active';
+  modal.style.zIndex = '9999';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+
+  let txHtml = '<p style="color:var(--text-secondary);text-align:center;">No hay transacciones registradas.</p>';
+  if (user.transactions) {
+    const txs = Object.values(user.transactions).sort((a, b) => b.date - a.date);
+    txHtml = txs.map(tx => {
+      const isAdd = tx.type === 'deposit' || tx.type === 'add' || tx.type === 'ganancia' || tx.type === 'referral';
+      const color = isAdd ? '#10b981' : '#ef4444';
+      const sign = isAdd ? '+' : '-';
+      return `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+         <div>
+           <div style="font-weight: bold; font-size: 0.9rem;">${tx.description || tx.type}</div>
+           <div style="font-size: 0.75rem; color: var(--text-secondary);">
+             ${new Date(tx.date).toLocaleString()}
            </div>
          </div>
          <div style="font-weight: bold; color: ${color};">${sign}$${parseFloat(tx.amount).toFixed(2)}</div>
@@ -149,7 +177,7 @@ window.viewUserTransactions = function (userId) {
   document.body.appendChild(modal);
 };
 
-// â”€â”€ Roles and Blocking â”€â”€
+// ── Roles and Blocking ──
 window.openCustomerInfoModal = function (uid) {
   showUserDetailsModal(uid);
 };

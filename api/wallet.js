@@ -114,6 +114,9 @@ export default async function handler(req, res) {
         }
         user.points = points - amount;
       }
+      else if (action === 'tournament_cashout') {
+        user.withdrawnTournamentEarnings = (user.withdrawnTournamentEarnings || 0) + amount;
+      }
       else {
         throw new Error('Acción inválida');
       }
