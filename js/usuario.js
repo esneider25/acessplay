@@ -1579,7 +1579,7 @@ window.renderDashboardTournaments = async function() {
     Object.keys(allTournaments).forEach(key => {
       const t = allTournaments[key];
       t.id = key;
-      if (t.participants && t.participants[currentUser.uid]) {
+      if (t.participants && t.participants[currentUser.uid] && t.participants[currentUser.uid].paymentStatus !== 'rejected') {
         myTournaments.push(t);
         
         // Calculate earnings from Kills
@@ -1735,6 +1735,12 @@ window.renderDashboardTournaments = async function() {
             }
          }
 
+         let statusBadgeHtml = '';
+         if (myEntry.paymentStatus === 'pending_payment') {
+           statusBadgeHtml = `<div style="margin-top:10px; padding:10px; border-radius:6px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; font-size:0.85rem; font-weight:600; text-align:center;">⏳ Inscripción Pendiente de Aprobación</div>`;
+           credsHtml = '';
+         }
+
          myInfoHtml = `
          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tu Registro:</div>
@@ -1744,6 +1750,7 @@ window.renderDashboardTournaments = async function() {
               ${myEntry.name ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Titular:</strong> ${myEntry.name}</div>` : ''}
               ${teamHtml}
             </div>
+            ${statusBadgeHtml}
             ${resultsHtml}
          </div>`;
       }

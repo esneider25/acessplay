@@ -2319,9 +2319,12 @@ window.manageTournamentResults = function(id) {
     const leaderboard = torneo.leaderboard || [];
     const participants = torneo.participants || {};
     
+    // Only include valid participants in results
+    const validParticipants = Object.values(participants).filter(p => !p.paymentStatus || p.paymentStatus === 'approved' || p.paymentStatus === 'free');
+    
     // Flatten participants into individual players
     let allPlayers = [];
-    Object.values(participants).forEach(p => {
+    validParticipants.forEach(p => {
       const pName = p.gameName || p.name || 'Sin Nombre';
       if (!allPlayers.includes(pName)) allPlayers.push(pName);
       
@@ -2348,7 +2351,7 @@ window.manageTournamentResults = function(id) {
     
     // Build grouped rows
     let leaderboardRows = '';
-    const groupedParticipants = Object.values(participants);
+    const groupedParticipants = validParticipants;
     
     if (groupedParticipants.length > 0 || leaderboard.length > 0) {
       let index = 1;

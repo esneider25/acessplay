@@ -194,10 +194,13 @@ function renderTorneos(torneos) {
   
   filtered.forEach(torneo => {
     const participants = torneo.participants || {};
-    const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
+    const count = Object.values(participants).reduce((acc, p) => {
+      if (p.paymentStatus === 'rejected') return acc;
+      return acc + 1 + (p.teamMembers ? p.teamMembers.length : 0);
+    }, 0);
     const max = torneo.maxParticipants || 100;
     const progress = Math.min((count / max) * 100, 100);
-    const isJoined = user && participants[user.uid];
+    const isJoined = user && participants[user.uid] && participants[user.uid].paymentStatus !== 'rejected';
     const bannerClass = getGameBannerClass(torneo.productName);
     
     // Badge
@@ -254,7 +257,12 @@ function renderTorneos(torneos) {
       
       if (user) {
         if (isJoined) {
-          actionButton = `<button class="torneo-btn btn-joined" disabled>✅ Ya estás inscrito</button>`;
+          const myP = participants[user.uid];
+          if (myP.paymentStatus === 'pending_payment') {
+            actionButton = `<button class="torneo-btn" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);" disabled>⏳ Inscripción Pendiente</button>`;
+          } else {
+            actionButton = `<button class="torneo-btn btn-joined" disabled>✅ Ya estás inscrito</button>`;
+          }
         } else if (count >= max) {
           actionButton = `<button class="torneo-btn" disabled>🚫 Cupos Agotados</button>`;
         } else if (deadlineExpired) {
