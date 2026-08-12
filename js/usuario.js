@@ -1367,6 +1367,15 @@ window.submitCashout = function() {
     
     // Save withdrawal request
     withdrawRef.set(withdrawalData).then(() => {
+      
+      firebase.database().ref('users/' + currentUser.uid + '/notifications').push({
+        title: 'Retiro Solicitado 💸',
+        body: `Tu retiro de ${amount} PTS ha sido enviado y está en revisión.`,
+        type: 'withdrawal',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+
       document.getElementById('cashout-modal').remove();
       usuarioToast('¡Solicitud de retiro enviada! El equipo la procesará pronto.', 'success');
       if (typeof renderDashboard === 'function') renderDashboard();
@@ -1508,6 +1517,15 @@ window.submitTournamentCashout = function() {
     
     // Save withdrawal request
     withdrawRef.set(withdrawalData).then(() => {
+      
+      firebase.database().ref('users/' + currentUser.uid + '/notifications').push({
+        title: 'Retiro Solicitado 💸',
+        body: `Tu retiro de premio de torneo por $${amount} USD ha sido enviado y está en revisión.`,
+        type: 'withdrawal',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+
       document.getElementById('cashout-tournament-modal').remove();
       usuarioToast('Retiro de premio solicitado con éxito', 'success');
       renderDashboardTournaments(); // Refresh the earnings display
@@ -1640,11 +1658,11 @@ window.handleNotificationClick = function(id, type, isRead) {
     firebase.database().ref('users/' + currentUser.uid + '/notifications/' + id).update({ read: true });
   }
   
-  if (type === 'order') {
+  if (type === 'order' || type === 'roulette') {
     switchSection('orders');
   } else if (type === 'tournament') {
     switchSection('tournaments');
-  } else if (type === 'wallet' || type === 'referral') {
+  } else if (type === 'wallet' || type === 'referral' || type === 'withdrawal') {
     switchSection('wallet');
   }
 };

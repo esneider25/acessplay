@@ -152,6 +152,17 @@ export default async function handler(req, res) {
         };
 
         await db.ref(`orders/${prizeOrderId}`).set(freeOrder);
+        
+        // Push Notification for winning
+        if (order.userId) {
+          await db.ref(`users/${order.userId}/notifications`).push({
+            title: '¡Premio de Ruleta! 🎰',
+            body: `Has ganado un ${product.name} - ${cheapestPackage.name} en la ruleta. El pedido ya está en tu cuenta.`,
+            type: 'roulette',
+            timestamp: new Date().toISOString(),
+            read: false
+          });
+        }
       }
     }
 

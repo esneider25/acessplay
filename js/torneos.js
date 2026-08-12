@@ -616,6 +616,15 @@ window.openInscriptionModal = function(tournamentId) {
         firebase.database().ref('tournaments/' + tournamentId + '/participants/' + user.uid).set(participantData)
           .then(() => {
             closeTorneoModal();
+            
+            firebase.database().ref('users/' + user.uid + '/notifications').push({
+              title: 'Inscripción a Torneo 🏆',
+              body: `Tu solicitud de inscripción al torneo ha sido registrada. Estado: ${paymentStatus === 'approved' || paymentStatus === 'free' ? 'Confirmado ✅' : 'Pendiente de Pago ⏳'}`,
+              type: 'tournament',
+              timestamp: new Date().toISOString(),
+              read: false
+            });
+
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
               launchConfetti();
               Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80' });
