@@ -1915,7 +1915,7 @@ window.editTournament = function(id) {
       prizesHtml = `
         <div style="display:flex; gap:8px; align-items:center;">
           <span style="font-size:1.2rem; min-width:28px;">🥇</span>
-          <input type="text" class="admin-form-input ct-prize-input" value="${torneo.prize || ''}" placeholder="1er lugar" style="flex:1; padding:8px 10px;">
+          <input type="text" class="admin-form-input ct-prize-input" value="${torneo.prize || ''}" placeholder="1er lugar (opcional)" style="flex:1; padding:8px 10px;">
         </div>
       `;
     }
@@ -2017,7 +2017,7 @@ window.editTournament = function(id) {
           pricePerKill: pricePerKill,
           bannerUrl: bannerUrl || null,
           prizes: newPrizes.length > 0 ? newPrizes : null,
-          prize: newPrizes.length > 0 ? newPrizes[0].reward : null
+          prize: newPrizes.length > 0 ? newPrizes[0].reward : (pricePerKill > 0 ? `Pago por Kill: $${pricePerKill.toFixed(2)}` : 'Sin Premios Fijos')
         };
         
         if (deadline) {
@@ -2720,7 +2720,7 @@ window.showCreateTournamentModal = function() {
           <div id="ct-prizes-list" style="display:flex; flex-direction:column; gap:8px;">
             <div style="display:flex; gap:8px; align-items:center;">
               <span style="font-size:1.2rem; min-width:28px;">🥇</span>
-              <input type="text" class="admin-form-input ct-prize-input" placeholder="1er lugar: Ej. 500 diamantes" style="flex:1; padding:8px 10px;">
+              <input type="text" class="admin-form-input ct-prize-input" placeholder="1er lugar (opcional, Ej: 500 diamantes)" style="flex:1; padding:8px 10px;">
             </div>
             <div style="display:flex; gap:8px; align-items:center;">
               <span style="font-size:1.2rem; min-width:28px;">🥈</span>
@@ -2793,7 +2793,7 @@ window.showCreateTournamentModal = function() {
         maxParticipants: maxP,
         entryFee: entryFee,
         pricePerKill: pricePerKill,
-        prize: prizes.length > 0 ? prizes[0].reward : 'Premios Especiales'
+        prize: prizes.length > 0 ? prizes[0].reward : (pricePerKill > 0 ? `Pago por Kill: $${pricePerKill.toFixed(2)}` : 'Sin Premios Fijos')
       };
       
       if (prizes.length > 0) torneoData.prizes = prizes;
