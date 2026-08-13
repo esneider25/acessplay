@@ -278,9 +278,7 @@ function renderTorneos(torneos) {
     } else if (torneo.status === 'completed') {
       const leaderboard = torneo.leaderboard || [];
       if (leaderboard.length > 0) {
-        const sorted = [...leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
-        const champ = sorted[0].playerName;
-        actionButton = `<div style="text-align:center; padding:12px; background:rgba(255,215,0,0.06); border-radius:var(--radius-sm); color:#fbbf24; border:1px solid rgba(255,215,0,0.2);">👑 Campeón: ${champ}</div>`;
+        actionButton = `<button class="torneo-btn" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);" onclick="viewTournamentResults('${torneo.id}')">🏆 Ver Resultados</button>`;
       } else {
         actionButton = `<button class="torneo-btn" disabled>Torneo Finalizado</button>`;
       }
@@ -707,7 +705,41 @@ window.switchTab = function(btn, tabId) {
   const contents = btn.parentElement.parentElement.querySelectorAll('.torneo-tab-content');
   contents.forEach(c => c.classList.remove('active'));
   
-  document.getElementById(tabId).classList.add('active');
+  const target = btn.parentElement.parentElement.querySelector('#' + tabId);
+  if (target) target.classList.add('active');
+};
+
+window.viewTournamentResults = function(id) {
+  const torneo = currentTorneosData.find(t => t.id === id);
+  if (!torneo) return;
+  const leaderboard = torneo.leaderboard || [];
+  const sorted = [...leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+  
+  let rows = '';
+  sorted.forEach((l, i) => {
+    let medal = '';
+    if (i === 0) medal = '🥇';
+    else if (i === 1) medal = '🥈';
+    else if (i === 2) medal = '🥉';
+    else medal = `<span style="opacity:0.6;">${i+1}º</span>`;
+    
+    rows += `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(255,255,255,0.03); margin-bottom:8px; border-radius:8px;">
+        <div style="font-size:1.05rem;"><strong style="color:var(--accent); font-size:1.2rem; display:inline-block; width:30px; text-align:center;">${medal}</strong> <span style="margin-left:10px; font-weight:600;">${l.playerName}</span></div>
+        <div style="color:var(--text-secondary); font-size:0.95rem; font-family:var(--font-mono);"><strong style="color:white;">${l.kills}</strong> Kills</div>
+      </div>
+    `;
+  });
+  
+  Swal.fire({
+    title: `<h3 style="color:var(--text-primary); margin:0;">🏆 Clasificación Final</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
+    html: `<div style="max-height: 400px; overflow-y:auto; text-align:left; margin-top:15px; padding-right:5px;">${rows}</div>`,
+    background: 'var(--bg-surface)',
+    color: 'var(--text-primary)',
+    confirmButtonColor: 'var(--accent)',
+    confirmButtonText: 'Cerrar',
+    width: '450px'
+  });
 };
 
 window.openDetailModal = function(tournamentId) {

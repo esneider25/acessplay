@@ -1799,7 +1799,8 @@ window.renderDashboardTournaments = async function() {
     });
     
     const withdrawnEarnings = (userProfile && userProfile.withdrawnTournamentEarnings) || 0;
-    window.availableTournamentEarnings = Math.max(0, totalTournamentEarnings - withdrawnEarnings);
+    const refundedEarnings = (userProfile && userProfile.refundedTournamentEarnings) || 0;
+    window.availableTournamentEarnings = Math.max(0, (totalTournamentEarnings + refundedEarnings) - withdrawnEarnings);
     
     const pointsDisplay = document.getElementById('tournaments-points-display');
     if (pointsDisplay) {

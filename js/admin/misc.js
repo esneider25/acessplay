@@ -1880,8 +1880,35 @@ window.updateTournamentStatus = function(id, newStatus) {
 };
 
 window.deleteTournament = function(id) {
-  if (confirm('¿Estás seguro de eliminar este torneo por completo? Esta acción no se puede deshacer.')) {
-    firebase.database().ref('tournaments/' + id).remove();
+  if (confirm('¿Estás seguro de cancelar y eliminar este torneo? Se reembolsará la inscripción a los participantes aprobados a sus ganancias de torneo.')) {
+    firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+      const torneo = snap.val();
+      if (!torneo) return;
+      
+      const entryFee = parseFloat(torneo.entryFee) || 0;
+      
+      if (entryFee > 0 && torneo.participants) {
+        Object.keys(torneo.participants).forEach(uid => {
+          const p = torneo.participants[uid];
+          if (p.paymentStatus === 'approved') {
+            const userRef = firebase.database().ref('users/' + uid + '/refundedTournamentEarnings');
+            userRef.transaction(current => (current || 0) + entryFee);
+            
+            firebase.database().ref('users/' + uid + '/notifications').push({
+              title: 'Torneo Cancelado 🚨',
+              body: `El torneo "${torneo.title}" ha sido cancelado. Se te han reembolsado $${entryFee} USD a tus ganancias de torneos.`,
+              type: 'tournament',
+              timestamp: new Date().toISOString(),
+              read: false
+            });
+          }
+        });
+      }
+      
+      firebase.database().ref('tournaments/' + id).remove().then(() => {
+        alert('Torneo eliminado y reembolsos (si aplican) procesados.');
+      });
+    });
   }
 };
 
