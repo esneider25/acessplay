@@ -91,7 +91,7 @@ function initTorneos() {
 // ── Stats ──
 function updateStats(torneos) {
   const active = torneos.filter(t => t.status === 'registration_open' || t.status === 'ongoing').length;
-  const completed = torneos.filter(t => t.status === 'completed').length;
+  const completed = torneos.filter(t => t.status === 'completed' || t.status === 'completado').length;
   let totalParticipants = 0;
   torneos.forEach(t => {
     totalParticipants += Object.values(t.participants || {}).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
@@ -209,7 +209,8 @@ function renderTorneos(torneos) {
       case 'upcoming': badgeClass = 'badge-upcoming'; statusText = '📅 Próximo'; break;
       case 'registration_open': badgeClass = 'badge-open'; statusText = '📝 Inscripciones Abiertas'; break;
       case 'ongoing': badgeClass = 'badge-ongoing'; statusText = '⚔️ En Curso'; break;
-      case 'completed': badgeClass = 'badge-completed'; statusText = '✅ Finalizado'; break;
+      case 'completed': 
+      case 'completado': badgeClass = 'badge-completed'; statusText = '✅ Finalizado'; break;
       default: badgeClass = 'badge-upcoming'; statusText = torneo.status;
     }
     
@@ -275,7 +276,7 @@ function renderTorneos(torneos) {
       }
     } else if (torneo.status === 'ongoing') {
       actionButton = `<button class="torneo-btn" disabled>⚔️ Torneo en progreso</button>`;
-    } else if (torneo.status === 'completed') {
+    } else if (torneo.status === 'completed' || torneo.status === 'completado') {
       const leaderboard = torneo.leaderboard || [];
       if (leaderboard.length > 0) {
         actionButton = `<button class="torneo-btn" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);" onclick="viewTournamentResults('${torneo.id}')">🏆 Ver Resultados</button>`;
@@ -379,7 +380,7 @@ function renderHallOfFame(torneos) {
   
   // Aggregate stats across all completed tournaments
   torneos.forEach(t => {
-    if (t.status === 'completed' && t.leaderboard && t.leaderboard.length > 0) {
+    if ((t.status === 'completed' || t.status === 'completado') && t.leaderboard && t.leaderboard.length > 0) {
       const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
       const targetStats = isFree ? playerStatsFree : playerStatsPremium;
       

@@ -1896,7 +1896,7 @@ window.renderDashboardTournaments = async function() {
             <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">Las credenciales se publicarán cuando inicie el torneo.</p>
           </div>
         `;
-      } else if (t.status === 'completed') {
+      } else if (t.status === 'completed' || t.status === 'completado') {
          credsHtml = `
           <div style="margin-top: 15px; background: rgba(102, 187, 106, 0.05); border: 1px solid rgba(102, 187, 106, 0.2); border-radius: var(--radius-sm); padding: 12px; text-align: center;">
             <p style="margin: 0; font-size: 0.85rem; color: #66bb6a;">El torneo ha finalizado.</p>
@@ -1921,7 +1921,7 @@ window.renderDashboardTournaments = async function() {
          }
          
          let resultsHtml = '';
-         if (t.status === 'completed' && t.leaderboard) {
+         if ((t.status === 'completed' || t.status === 'completado') && t.leaderboard) {
             let myKills = 0;
             const myGameName = (myEntry.gameName || myEntry.name || 'Sin Nombre').trim().toLowerCase();
             const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
@@ -1946,6 +1946,7 @@ window.renderDashboardTournaments = async function() {
                     <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${myEntry.gameName} (Tú):</span> <strong>${myKills} Kills</strong></div>
                     ${myTeamKillsHtml}
                     <div style="border-top:1px dashed rgba(102, 187, 106, 0.3); margin-top:6px; padding-top:6px; display:flex; justify-content:space-between; color:#4ade80;"><span>Total Equipo:</span> <strong>${totalTeamKills} Kills</strong></div>
+                    <div style="display:flex; justify-content:space-between; margin-top:4px; color:#f59e0b;"><span>Ganancia por Kills:</span> <strong>$${(totalTeamKills * (parseFloat(t.pricePerKill) || 0)).toFixed(2)} USD</strong></div>
                   </div>
                 </div>
               `;
@@ -1955,6 +1956,9 @@ window.renderDashboardTournaments = async function() {
                   <div style="font-size:0.75rem; color:#66bb6a; text-transform:uppercase; margin-bottom:8px; font-weight:bold;"><i class="ph-fill ph-chart-bar"></i> Tus Resultados</div>
                   <div style="font-size:0.85rem; color:var(--text-primary); display:flex; justify-content:space-between;">
                     <span>Kills logradas:</span> <strong>${myKills}</strong>
+                  </div>
+                  <div style="border-top:1px dashed rgba(102, 187, 106, 0.3); margin-top:6px; padding-top:6px; font-size:0.85rem; display:flex; justify-content:space-between; color:#f59e0b;">
+                    <span>Ganancia por Kills:</span> <strong>$${(myKills * (parseFloat(t.pricePerKill) || 0)).toFixed(2)} USD</strong>
                   </div>
                 </div>
               `;
