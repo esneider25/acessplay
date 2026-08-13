@@ -222,48 +222,6 @@ function renderTorneos(torneos) {
   if (currentFilter !== 'all') {
     filtered = torneos.filter(t => t.status === currentFilter);
   }
-  
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div class="torneos-empty">
-        <div class="torneos-empty-icon">🏆</div>
-        <h3>${currentFilter === 'all' ? 'No hay torneos disponibles' : 'No hay torneos en esta categoría'}</h3>
-        <p>Mantente atento a nuestros próximos eventos y copas.</p>
-      </div>
-    `;
-    return;
-  }
-  
-  const user = firebase.auth().currentUser;
-  let html = '';
-  
-  filtered.forEach(torneo => {
-    const count = torneo.participantsCount || 0;
-    const max = torneo.maxParticipants || 100;
-    const progress = Math.min((count / max) * 100, 100);
-    // Since participants isn't loaded with the tournament anymore, we assume they are joined if it's rendered in a specific user view
-    // Or we rely on checking `tournament_participants` locally if we fetched it, but we didn't. For now we will rely on a local user session state if possible, but actually `isJoined` here might be wrong.
-    // Wait, the client doesn't know if they joined unless they fetch it.
-    const isJoined = false; // We can improve this later by tracking user joined tournaments.
-    const bannerClass = getGameBannerClass(torneo.productName);
-    
-    // Badge
-    let badgeClass = '', statusText = '';
-    switch (torneo.status) {
-      case 'upcoming': badgeClass = 'badge-upcoming'; statusText = '📅 Próximo'; break;
-      case 'registration_open': badgeClass = 'badge-open'; statusText = '📝 Inscripciones Abiertas'; break;
-      case 'ongoing': badgeClass = 'badge-ongoing'; statusText = '⚔️ En Curso'; break;
-      case 'completed': 
-      case 'completado': badgeClass = 'badge-completed'; statusText = '✅ Finalizado'; break;
-      default: badgeClass = 'badge-upcoming'; statusText = torneo.status;
-    }
-    
-    // Countdown
-    let countdownHTML = '';
-    if (torneo.registrationDeadline && (torneo.status === 'registration_open' || torneo.status === 'upcoming')) {
-      countdownHTML = `<div data-countdown-deadline="${torneo.registrationDeadline}">${getCountdownHTML(torneo.registrationDeadline)}</div>`;
-    }
-    
     // Prizes
     let prizesHTML = '';
     const prizes = torneo.prizes || [];
