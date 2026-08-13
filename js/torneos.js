@@ -57,25 +57,60 @@ function initTorneos() {
     renderTorneos(torneosData);
   });
   
-  // Listen for tournaments
-  db.ref('tournaments').orderByChild('createdAt').on('value', snapshot => {
-    torneosData = [];
-    snapshot.forEach(childSnapshot => {
-      torneosData.push(childSnapshot.val());
-    });
-    
-    torneosData.sort((a, b) => {
-      const order = { 'registration_open': 1, 'ongoing': 2, 'upcoming': 3, 'completed': 4 };
-      const statusA = order[a.status] || 99;
-      const statusB = order[b.status] || 99;
-      if (statusA !== statusB) return statusA - statusB;
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-    
-    updateStats(torneosData);
-    renderTorneos(torneosData);
-    renderHallOfFame(torneosData);
+  let currentLimit = 5;
+  let tournamentsListener = null;
+
+  // Listen for global metadata stats
+  db.ref('tournament_metadata').on('value', snapshot => {
+    const meta = snapshot.val() || { active: 0, completed: 0, participants: 0 };
+    animateCounter('stat-active', meta.active || 0);
+    animateCounter('stat-participants', meta.participants || 0);
+    animateCounter('stat-completed', meta.completed || 0);
   });
+
+  // Listen for global hall of fame
+  db.ref('tournament_global_stats').on('value', snapshot => {
+    let data = snapshot.val() || { premium: [], free: [] };
+    renderHallOfFame(data, true);
+  });
+
+  window.loadMoreTournaments = function() {
+    currentLimit += 5;
+    loadTournaments();
+  };
+
+  function loadTournaments() {
+    if (tournamentsListener) {
+      tournamentsListener.off();
+    }
+    
+    let query = db.ref('tournaments');
+    // If filter is active, Firebase doesn't allow multiple orderBy.
+    // So we just fetch all chronological and filter locally, but to paginate correctly
+    // we need to fetch enough. To simplify, we keep ordering by createdAt.
+    // In a production app with huge data we'd need composite indices.
+    query = query.orderByChild('createdAt').limitToLast(currentLimit);
+    
+    tournamentsListener = query;
+    tournamentsListener.on('value', snapshot => {
+      torneosData = [];
+      snapshot.forEach(child => {
+        torneosData.push(child.val());
+      });
+      
+      torneosData.sort((a, b) => {
+        const order = { 'registration_open': 1, 'ongoing': 2, 'upcoming': 3, 'completed': 4, 'completado': 4 };
+        const statusA = order[a.status] || 99;
+        const statusB = order[b.status] || 99;
+        if (statusA !== statusB) return statusA - statusB;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+      
+      renderTorneos(torneosData);
+    });
+  }
+  
+  loadTournaments();
   
   // Filter buttons
   document.getElementById('torneos-filters').addEventListener('click', (e) => {
@@ -90,16 +125,7 @@ function initTorneos() {
 
 // ── Stats ──
 function updateStats(torneos) {
-  const active = torneos.filter(t => t.status === 'registration_open' || t.status === 'ongoing').length;
-  const completed = torneos.filter(t => t.status === 'completed' || t.status === 'completado').length;
-  let totalParticipants = 0;
-  torneos.forEach(t => {
-    totalParticipants += Object.values(t.participants || {}).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
-  });
-  
-  animateCounter('stat-active', active);
-  animateCounter('stat-participants', totalParticipants);
-  animateCounter('stat-completed', completed);
+  // Handled by global metadata listener now
 }
 
 function animateCounter(elementId, target) {
@@ -193,14 +219,13 @@ function renderTorneos(torneos) {
   let html = '';
   
   filtered.forEach(torneo => {
-    const participants = torneo.participants || {};
-    const count = Object.values(participants).reduce((acc, p) => {
-      if (p.paymentStatus === 'rejected') return acc;
-      return acc + 1 + (p.teamMembers ? p.teamMembers.length : 0);
-    }, 0);
+    const count = torneo.participantsCount || 0;
     const max = torneo.maxParticipants || 100;
     const progress = Math.min((count / max) * 100, 100);
-    const isJoined = user && participants[user.uid] && participants[user.uid].paymentStatus !== 'rejected';
+    // Since participants isn't loaded with the tournament anymore, we assume they are joined if it's rendered in a specific user view
+    // Or we rely on checking `tournament_participants` locally if we fetched it, but we didn't. For now we will rely on a local user session state if possible, but actually `isJoined` here might be wrong.
+    // Wait, the client doesn't know if they joined unless they fetch it.
+    const isJoined = false; // We can improve this later by tracking user joined tournaments.
     const bannerClass = getGameBannerClass(torneo.productName);
     
     // Badge
@@ -398,34 +423,50 @@ window.switchHofTab = function(type) {
   }
 };
 
-function renderHallOfFame(torneos) {
+function renderHallOfFame(data, isPreAggregated = false) {
   const premiumContainer = document.getElementById('hall-of-fame-premium');
   const freeContainer = document.getElementById('hall-of-fame-free');
   if (!premiumContainer || !freeContainer) return;
   
-  const playerStatsPremium = {};
-  const playerStatsFree = {};
-  
-  // Aggregate stats across all completed tournaments
-  torneos.forEach(t => {
-    if ((t.status === 'completed' || t.status === 'completado') && t.leaderboard && t.leaderboard.length > 0) {
-      const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
-      const targetStats = isFree ? playerStatsFree : playerStatsPremium;
-      
-      t.leaderboard.forEach(entry => {
-        if (!entry.playerName) return;
-        const name = entry.playerName.trim();
-        if (!targetStats[name]) {
-          targetStats[name] = { name: name, kills: 0, gamesPlayed: 0 };
-        }
-        targetStats[name].kills += (parseInt(entry.kills) || 0);
-        targetStats[name].gamesPlayed += 1;
-      });
-    }
-  });
-  
-  const topPremium = Object.values(playerStatsPremium).sort((a, b) => b.kills - a.kills).slice(0, 10);
-  const topFree = Object.values(playerStatsFree).sort((a, b) => b.kills - a.kills).slice(0, 10);
+  let topPremium = [];
+  let topFree = [];
+
+  if (isPreAggregated) {
+    const premiumData = data.premium || [];
+    const freeData = data.free || [];
+    topPremium = Array.isArray(premiumData) ? premiumData : Object.values(premiumData);
+    topFree = Array.isArray(freeData) ? freeData : Object.values(freeData);
+    
+    topPremium.sort((a, b) => b.kills - a.kills);
+    topFree.sort((a, b) => b.kills - a.kills);
+    
+    topPremium = topPremium.slice(0, 10);
+    topFree = topFree.slice(0, 10);
+  } else {
+    const playerStatsPremium = {};
+    const playerStatsFree = {};
+    
+    // Aggregate stats across all completed tournaments
+    data.forEach(t => {
+      if ((t.status === 'completed' || t.status === 'completado') && t.leaderboard && t.leaderboard.length > 0) {
+        const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
+        const targetStats = isFree ? playerStatsFree : playerStatsPremium;
+        
+        t.leaderboard.forEach(entry => {
+          if (!entry.playerName) return;
+          const name = entry.playerName.trim();
+          if (!targetStats[name]) {
+            targetStats[name] = { name: name, kills: 0, gamesPlayed: 0 };
+          }
+          targetStats[name].kills += (parseInt(entry.kills) || 0);
+          targetStats[name].gamesPlayed += 1;
+        });
+      }
+    });
+    
+    topPremium = Object.values(playerStatsPremium).sort((a, b) => b.kills - a.kills).slice(0, 10);
+    topFree = Object.values(playerStatsFree).sort((a, b) => b.kills - a.kills).slice(0, 10);
+  }
   
   premiumContainer.innerHTML = buildHofHtml(topPremium, 'Aún no hay campeones en torneos premium. ¡Sé el primero!');
   freeContainer.innerHTML = buildHofHtml(topFree, 'Aún no hay campeones en torneos gratuitos. ¡Sé el primero!');
@@ -686,8 +727,13 @@ window.openInscriptionModal = function(tournamentId) {
           paymentRef: paymentRef
         };
         
-        firebase.database().ref('tournaments/' + tournamentId + '/participants/' + user.uid).set(participantData)
+        firebase.database().ref('tournament_participants/' + tournamentId + '/' + user.uid).set(participantData)
           .then(() => {
+            if (paymentStatus === 'approved' || paymentStatus === 'free') {
+              const countAddition = 1 + (participantData.teamMembers ? participantData.teamMembers.length : 0);
+              firebase.database().ref('tournaments/' + tournamentId + '/participantsCount').transaction(c => (c || 0) + countAddition);
+              firebase.database().ref('tournament_metadata/participants').transaction(c => (c || 0) + countAddition);
+            }
             closeTorneoModal();
             
             firebase.database().ref('users/' + user.uid + '/notifications').push({

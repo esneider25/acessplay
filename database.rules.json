@@ -31,14 +31,30 @@
     "tournaments": {
       ".read": "true",
       ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+      ".indexOn": ["createdAt", "status"],
       "$tournamentId": {
         ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         "participants": {
           "$uid": {
             ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
           }
+        },
+        "participantsCount": {
+          ".write": "auth != null"
         }
       }
+    },
+    "tournament_participants": {
+      ".read": "true",
+      "$tournamentId": {
+        "$uid": {
+          ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+        }
+      }
+    },
+    "tournament_global_stats": {
+      ".read": "true",
+      ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
     },
     "product_stats": {
       ".read": "true",

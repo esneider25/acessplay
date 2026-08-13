@@ -1723,9 +1723,6 @@ window.fixWalletSpendingBug = async function() {
 };
 
 // ════════════════════════════════════════
-
-window.adminTournamentLimit = window.adminTournamentLimit || 5;
-
 function renderTournaments(container) {
   let html = `
     <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
@@ -1742,39 +1739,13 @@ function renderTournaments(container) {
       <div id="tournaments-list" style="display: flex; flex-direction: column; gap: 15px;">
         <div style="text-align: center; padding: 20px;"><div class="spinner"></div> Cargando torneos...</div>
       </div>
-      <div style="text-align: center; margin-top: 20px;">
-        <button id="btn-load-more-admin-tournaments" class="btn btn-secondary" onclick="window.adminTournamentLimit += 5; renderTournaments(document.getElementById('content-area'))" style="display: none; padding: 10px 20px;">Cargar más torneos</button>
-      </div>
     </div>
   `;
   container.innerHTML = html;
 
-  // Cargar metadatos para las estadísticas globales
-  firebase.database().ref('tournament_metadata').on('value', metaSnap => {
-    const statsBar = document.getElementById('tournament-stats-bar');
-    if (!statsBar) return;
-    const meta = metaSnap.val() || { active: 0, completed: 0, participants: 0 };
-    // Para el total, asumiendo active + completed + upcoming. Vamos a cargar también el total de nodos si es necesario, o lo leemos del meta.
-    // Como el meta no guardó "total", podemos mostrar solo los que sí tenemos.
-    statsBar.innerHTML = `
-      <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
-        <div style="font-size:1.6rem; font-weight:800; color:#38bdf8; font-family:var(--font-display);">${meta.active || 0}</div>
-        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Activos</div>
-      </div>
-      <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
-        <div style="font-size:1.6rem; font-weight:800; color:#4ade80; font-family:var(--font-display);">${meta.completed || 0}</div>
-        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Completados</div>
-      </div>
-      <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
-        <div style="font-size:1.6rem; font-weight:800; color:#fbbf24; font-family:var(--font-display);">${meta.participants || 0}</div>
-        <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Participantes Históricos</div>
-      </div>
-    `;
-  });
-
-  firebase.database().ref('tournaments').orderByChild('createdAt').limitToLast(window.adminTournamentLimit).on('value', snapshot => {
+  firebase.database().ref('tournaments').on('value', snapshot => {
     const listContainer = document.getElementById('tournaments-list');
-    const loadMoreBtn = document.getElementById('btn-load-more-admin-tournaments');
+    const statsBar = document.getElementById('tournament-stats-bar');
     if (!listContainer) return;
 
     try {
@@ -1782,22 +1753,41 @@ function renderTournaments(container) {
       snapshot.forEach(child => { torneos.push(child.val()); });
       torneos.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
+      // Stats
+      if (statsBar) {
+        const active = torneos.filter(t => t.status === 'registration_open' || t.status === 'ongoing').length;
+        const completed = torneos.filter(t => t.status === 'completed').length;
+        let totalP = 0;
+        torneos.forEach(t => { totalP += Object.values(t.participants || {}).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0); });
+        statsBar.innerHTML = `
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:var(--accent-light); font-family:var(--font-display);">${torneos.length}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Total</div>
+          </div>
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:#38bdf8; font-family:var(--font-display);">${active}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Activos</div>
+          </div>
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:#4ade80; font-family:var(--font-display);">${completed}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Completados</div>
+          </div>
+          <div style="background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; text-align:center;">
+            <div style="font-size:1.6rem; font-weight:800; color:#fbbf24; font-family:var(--font-display);">${totalP}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Participantes</div>
+          </div>
+        `;
+      }
+
       if (torneos.length === 0) {
         listContainer.innerHTML = '<p style="text-align:center; color: var(--text-muted); padding: 20px;">No hay torneos creados aún.</p>';
         return;
       }
-      
-      if (loadMoreBtn) {
-        if (torneos.length >= window.adminTournamentLimit) {
-            loadMoreBtn.style.display = 'inline-block';
-        } else {
-            loadMoreBtn.style.display = 'none';
-        }
-      }
 
       let listHtml = '';
       torneos.forEach(torneo => {
-        const count = torneo.participantsCount || 0;
+        const participants = torneo.participants || {};
+        const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
         const max = torneo.maxParticipants || 100;
         const status = torneo.status || 'upcoming';
         const title = torneo.title || 'Torneo Sin Nombre';
@@ -1887,7 +1877,6 @@ function renderTournaments(container) {
     }
   });
 }
-
 
 window.updateTournamentStatus = function(id, newStatus) {
   if (confirm('¿Cambiar el estado de este torneo a ' + newStatus.replace('_',' ') + '?')) {
@@ -2205,14 +2194,10 @@ window.duplicateTournament = function(id) {
   });
 };
 
-
 window.viewTournamentParticipants = function(id) {
-  Promise.all([
-    firebase.database().ref('tournaments/' + id).once('value'),
-    firebase.database().ref('tournament_participants/' + id).once('value')
-  ]).then(snaps => {
-    const torneo = snaps[0].val();
-    const participants = snaps[1].val() || {};
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    const participants = torneo.participants || {};
     const pList = Object.values(participants);
     
     let tableRows = '';
@@ -2293,45 +2278,29 @@ window.viewTournamentParticipants = function(id) {
 
 window.removeParticipant = function(tournamentId, userId) {
   if (confirm('¿Estás seguro de expulsar a este participante del torneo?')) {
-    firebase.database().ref('tournament_participants/' + tournamentId + '/' + userId).once('value').then(snap => {
-      const p = snap.val();
-      if (p) {
-        let countSub = 1 + (p.teamMembers ? p.teamMembers.length : 0);
-        firebase.database().ref('tournament_participants/' + tournamentId + '/' + userId).remove().then(() => {
-          if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
-             firebase.database().ref('tournaments/' + tournamentId + '/participantsCount').transaction(c => (c || 0) - countSub);
-             firebase.database().ref('tournament_metadata/participants').transaction(c => (c || 0) - countSub);
-          }
-          alert('Participante eliminado.');
-          viewTournamentParticipants(tournamentId);
-        });
-      }
-    }).catch(err => alert('Error: ' + err.message));
+    firebase.database().ref('tournaments/' + tournamentId + '/participants/' + userId).remove().then(() => {
+      alert('Participante eliminado.');
+      viewTournamentParticipants(tournamentId);
+    }).catch(err => {
+      alert('Error: ' + err.message);
+    });
   }
 };
 
 window.approveTournamentPayment = function(tournamentId, userId) {
   if (confirm('¿Aprobar el pago de esta inscripción?')) {
-    firebase.database().ref(`tournament_participants/${tournamentId}/${userId}`).update({
+    firebase.database().ref(`tournaments/${tournamentId}/participants/${userId}`).update({
       paymentStatus: 'approved'
     }).then(() => {
-      firebase.database().ref(`tournament_participants/${tournamentId}/${userId}`).once('value').then(snap => {
-         let p = snap.val();
-         if(p) {
-             let countAdd = 1 + (p.teamMembers ? p.teamMembers.length : 0);
-             firebase.database().ref('tournaments/' + tournamentId + '/participantsCount').transaction(c => (c || 0) + countAdd);
-             firebase.database().ref('tournament_metadata/participants').transaction(c => (c || 0) + countAdd);
-         }
-         alert('Pago aprobado.');
-         viewTournamentParticipants(tournamentId);
-      });
+      alert('Pago aprobado.');
+      viewTournamentParticipants(tournamentId);
     }).catch(err => alert('Error: ' + err.message));
   }
 };
 
 window.rejectTournamentPayment = function(tournamentId, userId) {
   if (confirm('¿Rechazar el pago de esta inscripción? El estado cambiará a rechazado.')) {
-    firebase.database().ref(`tournament_participants/${tournamentId}/${userId}`).update({
+    firebase.database().ref(`tournaments/${tournamentId}/participants/${userId}`).update({
       paymentStatus: 'rejected'
     }).then(() => {
       alert('Pago rechazado.');
@@ -2341,13 +2310,9 @@ window.rejectTournamentPayment = function(tournamentId, userId) {
 };
 
 window.exportParticipantsCSV = function(id) {
-  Promise.all([
-    firebase.database().ref('tournaments/' + id).once('value'),
-    firebase.database().ref('tournament_participants/' + id).once('value')
-  ]).then(snaps => {
-    const torneo = snaps[0].val();
-    const partsSnap = snaps[1];
-    const participants = Object.values(partsSnap.val() || {});
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    const participants = Object.values(torneo.participants || {});
     if (participants.length === 0) return alert('No hay participantes para exportar.');
     
     let csv = 'Nombre,IGN,Game ID,Email,Fecha Inscripcion,Miembros Equipo\n';
@@ -3338,111 +3303,3 @@ window.saveWithdrawalAdjustment = function(uid) {
   }
 };
 
-
-
-// ── Migración de Torneos a Nueva Estructura ──
-window.migrateTournamentsData = async function() {
-  const confirmacion = await Swal.fire({
-    title: '¿Iniciar Migración de Torneos?',
-    text: 'Este proceso moverá los participantes a la nueva estructura "tournament_participants" y creará los metadatos globales. ¡Haz esto solo si no hay usuarios escribiendo actualmente!',
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, migrar y optimizar',
-    cancelButtonText: 'Cancelar'
-  });
-
-  if (!confirmacion.isConfirmed) return;
-
-  const btn = document.getElementById('btn-migrate-tournaments');
-  if(btn) { btn.innerHTML = '<div class="spinner" style="width:15px; height:15px; border-width:2px; margin-right:10px;"></div> Migrando...'; btn.disabled = true; }
-
-  try {
-    const snap = await firebase.database().ref('tournaments').once('value');
-    if (!snap.exists()) {
-      Swal.fire('Atención', 'No hay torneos para migrar.', 'info');
-      if(btn) { btn.innerHTML = '⚡ Optimizar y Migrar Torneos'; btn.disabled = false; }
-      return;
-    }
-
-    const tournaments = snap.val();
-    const updates = {};
-    let playerStats = {};
-
-    let totalActive = 0;
-    let totalCompleted = 0;
-    let totalParticipants = 0;
-
-    for (const tId in tournaments) {
-      const t = tournaments[tId];
-      const participants = t.participants || {};
-      const status = t.status || 'upcoming';
-      
-      if (status === 'registration_open' || status === 'ongoing') totalActive++;
-      if (status === 'completed' || status === 'completado') totalCompleted++;
-
-      let count = 0;
-      for (const uid in participants) {
-        const p = participants[uid];
-        updates['tournament_participants/' + tId + '/' + uid] = p;
-        
-        let adds = 1 + (p.teamMembers ? p.teamMembers.length : 0);
-        if (p.paymentStatus !== 'rejected') {
-            count += adds;
-            totalParticipants += adds;
-        }
-
-        // Global stats aggregation
-        if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
-            if (!playerStats[uid]) playerStats[uid] = { uid, name: p.name || 'Desconocido', gameName: p.gameName || 'Sin IGN', tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, type: p.paymentStatus === 'approved' ? 'premium' : 'free' };
-            playerStats[uid].tournamentsPlayed += 1;
-            // Upgrade type if they ever pay
-            if (p.paymentStatus === 'approved') playerStats[uid].type = 'premium';
-        }
-      }
-
-      if (t.participants) {
-        updates['tournaments/' + tId + '/participants'] = null; 
-      }
-      if (t.participantsCount !== count) {
-      updates['tournaments/' + tId + '/participantsCount'] = count;
-      }
-      
-      // Calculate earnings and wins for historical
-      const winners = t.winners || [];
-      winners.forEach(w => {
-         if (w.uid && playerStats[w.uid]) {
-             playerStats[w.uid].totalWins += 1;
-             const wStr = (w.reward || '').replace(/[^0-9.]/g, '');
-             const val = parseFloat(wStr);
-             if (!isNaN(val)) playerStats[w.uid].totalEarnings += val;
-         }
-      });
-    }
-
-    const premiumPlayers = Object.values(playerStats).filter(p => p.type === 'premium');
-    const freePlayers = Object.values(playerStats).filter(p => p.type === 'free');
-
-    updates['tournament_global_stats'] = {
-        premium: premiumPlayers,
-        free: freePlayers
-    };
-    updates['tournament_metadata'] = {
-        active: totalActive,
-        completed: totalCompleted,
-        participants: totalParticipants,
-        lastUpdated: new Date().toISOString()
-    };
-
-    await firebase.database().ref().update(updates);
-    
-    Swal.fire('¡Éxito!', 'La migración y optimización se completó correctamente.', 'success');
-  } catch(err) {
-    console.error(err);
-    Swal.fire('Error', 'Hubo un problema al migrar: ' + err.message, 'error');
-  } finally {
-    if(btn) {
-      btn.innerHTML = '⚡ Optimizar y Migrar Torneos';
-      btn.disabled = false;
-    }
-  }
-};
