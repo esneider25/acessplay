@@ -1727,7 +1727,10 @@ function renderTournaments(container) {
   let html = `
     <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
       <h2>🏆 Gestión de Torneos</h2>
-      <button class="btn btn-primary" onclick="showCreateTournamentModal()" style="padding: 10px 15px; font-size: 0.9rem;">+ Crear Torneo</button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-secondary" onclick="showAdjustWithdrawalsModal()" style="padding: 10px 15px; font-size: 0.9rem;" title="Ajusta el historial de retiros de torneos de un cliente">🔧 Ajustar Retiros</button>
+        <button class="btn btn-primary" onclick="showCreateTournamentModal()" style="padding: 10px 15px; font-size: 0.9rem;">+ Crear Torneo</button>
+      </div>
     </div>
     
     <div id="tournament-stats-bar" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;"></div>
@@ -3046,3 +3049,85 @@ window.saveTournamentCredentials = function(id) {
     }
   });
 };
+
+window.showAdjustWithdrawalsModal = function() {
+  const html = `
+    <div style="background: var(--bg-surface); padding: 30px; border-radius: var(--radius-lg); width: 90%; max-width: 450px; border: 1px solid var(--border);">
+      <h3 style="margin-top: 0; color: var(--accent);"><i class="ph-fill ph-wrench"></i> Ajustar Retiros de Torneos</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Busca a un cliente por su correo para ver o modificar su historial de ganancias retiradas. Esto sirve para evitar saldos en negativo cuando borras torneos antiguos.</p>
+      
+      <div style="margin-bottom: 15px;">
+        <label class="admin-form-label">Correo del Cliente</label>
+        <div style="display:flex; gap:10px;">
+          <input type="email" id="adj-email" class="admin-form-input" placeholder="correo@ejemplo.com" style="flex:1;">
+          <button class="btn btn-primary" onclick="searchUserForAdjustment()" style="padding: 8px 15px;">Buscar</button>
+        </div>
+      </div>
+      
+      <div id="adj-result-area" style="display:none; background: rgba(0,0,0,0.2); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--border); margin-bottom: 20px;">
+        <!-- Results injected here -->
+      </div>
+      
+      <div style="text-align: right;">
+        <button class="btn btn-secondary" onclick="closeAdminModal()">Cerrar</button>
+      </div>
+    </div>
+  `;
+  openAdminModal(html);
+};
+
+window.searchUserForAdjustment = function() {
+  const email = document.getElementById('adj-email').value.trim().toLowerCase();
+  if (!email) return alert('Ingresa un correo electrónico');
+  
+  const resultArea = document.getElementById('adj-result-area');
+  resultArea.style.display = 'block';
+  resultArea.innerHTML = '<div class="spinner" style="margin: 0 auto;"></div>';
+  
+  firebase.database().ref('users').orderByChild('email').equalTo(email).once('value').then(snap => {
+    if (!snap.exists()) {
+      resultArea.innerHTML = '<p style="color:#ef4444; margin:0;">Usuario no encontrado.</p>';
+      return;
+    }
+    
+    let uid = '';
+    let userData = null;
+    snap.forEach(child => {
+      uid = child.key;
+      userData = child.val();
+    });
+    
+    const withdrawn = parseFloat(userData.withdrawnTournamentEarnings) || 0;
+    
+    resultArea.innerHTML = `
+      <div style="margin-bottom: 10px;">
+        <div style="font-weight: bold; color: var(--text-primary);">${userData.name || 'Sin nombre'}</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">${uid}</div>
+      </div>
+      
+      <div style="margin-bottom: 15px;">
+        <label class="admin-form-label">Historial de Retiros ($ USD)</label>
+        <input type="number" id="adj-withdrawn-val" class="admin-form-input" step="0.01" min="0" value="${withdrawn.toFixed(2)}">
+      </div>
+      
+      <button class="btn btn-primary" onclick="saveWithdrawalAdjustment('${uid}')" style="width: 100%;">💾 Guardar Nuevo Valor</button>
+    `;
+  }).catch(err => {
+    resultArea.innerHTML = '<p style="color:#ef4444; margin:0;">Error en la búsqueda.</p>';
+  });
+};
+
+window.saveWithdrawalAdjustment = function(uid) {
+  const newVal = parseFloat(document.getElementById('adj-withdrawn-val').value);
+  if (isNaN(newVal) || newVal < 0) return alert('Monto inválido');
+  
+  firebase.database().ref('users/' + uid).update({
+    withdrawnTournamentEarnings: newVal
+  }).then(() => {
+    alert('✅ Historial de retiros actualizado correctamente.');
+    closeAdminModal();
+  }).catch(err => {
+    alert('Error al actualizar: ' + err.message);
+  });
+};
+
