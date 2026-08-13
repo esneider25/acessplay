@@ -222,6 +222,46 @@ function renderTorneos(torneos) {
   if (currentFilter !== 'all') {
     filtered = torneos.filter(t => t.status === currentFilter);
   }
+
+  let html = '';
+  if (filtered.length === 0) {
+    html = `<div style="text-align:center; padding:3rem; grid-column:1/-1;">
+      <div style="font-size:3rem; margin-bottom:1rem;">🏆</div>
+      <h3 style="color:var(--text-primary); font-size:1.5rem; margin-bottom:0.5rem;">No hay torneos disponibles</h3>
+      <p style="color:var(--text-secondary);">Vuelve más tarde para ver nuevos torneos.</p>
+    </div>`;
+  }
+
+  filtered.forEach(torneo => {
+    const user = typeof window.currentUser !== 'undefined' ? window.currentUser : (window.user || null);
+    const participants = torneo.participants || {};
+    const count = Object.keys(participants).length;
+    const max = torneo.maxParticipants || 100;
+    const progress = max > 0 ? Math.min((count / max) * 100, 100) : 0;
+    const isJoined = user && participants[user.uid];
+
+    let badgeClass = '';
+    let statusText = '';
+    let bannerClass = typeof getGameBannerClass === 'function' ? getGameBannerClass(torneo.productName) : '';
+    let countdownHTML = '';
+
+    if (torneo.status === 'registration_open') {
+      badgeClass = 'bg-green-500';
+      statusText = 'Inscripción Abierta';
+      if (torneo.registrationDeadline) {
+         countdownHTML = `<div class="torneo-countdown-badge" data-countdown-deadline="${torneo.registrationDeadline}"></div>`;
+      }
+    } else if (torneo.status === 'ongoing') {
+      badgeClass = 'bg-yellow-500';
+      statusText = 'En Curso';
+    } else if (torneo.status === 'completed' || torneo.status === 'completado') {
+      badgeClass = 'bg-gray-500';
+      statusText = 'Finalizado';
+    } else {
+      badgeClass = 'bg-blue-500';
+      statusText = torneo.status;
+    }
+
     // Prizes
     let prizesHTML = '';
     const prizes = torneo.prizes || [];
