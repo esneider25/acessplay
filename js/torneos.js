@@ -755,7 +755,7 @@ window.switchTab = function(btn, tabId) {
 };
 
 window.viewTournamentResults = function(id) {
-  const torneo = currentTorneosData.find(t => t.id === id);
+  const torneo = torneosData.find(t => t.id === id);
   if (!torneo) return;
   const leaderboard = torneo.leaderboard || [];
   const sorted = [...leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
@@ -788,18 +788,18 @@ window.viewTournamentResults = function(id) {
 };
 
 window.viewTournamentRules = function(id) {
-  const torneo = currentTorneosData.find(t => t.id === id);
+  const torneo = torneosData.find(t => t.id === id);
   if (!torneo || !torneo.rules) return;
   
   const formattedRules = torneo.rules.replace(/\n/g, '<br>');
   
   Swal.fire({
-    title: `<h3 style="color:var(--text-primary); margin:0;">📜 Reglamento</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
-    html: `<div style="max-height: 400px; overflow-y:auto; text-align:left; margin-top:15px; padding-right:5px; font-family:var(--font-body); font-size: 0.95rem; line-height: 1.5; color: var(--text-secondary);">${formattedRules}</div>`,
+    title: `<h3 style="color:var(--text-primary); margin:0; display: flex; align-items: center; justify-content: center; gap: 10px;"><i class="ph-fill ph-warning-circle" style="color:#ef4444;"></i> Reglamento</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
+    html: `<div style="max-height: 400px; overflow-y:auto; text-align:left; margin-top:15px; font-family:var(--font-body); font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); background: rgba(220, 38, 38, 0.05); border-left: 4px solid #dc2626; padding: 15px; border-radius: 0 8px 8px 0;">${formattedRules}</div>`,
     background: 'var(--bg-surface)',
     color: 'var(--text-primary)',
     confirmButtonColor: 'var(--accent)',
-    confirmButtonText: 'Entendido',
+    confirmButtonText: 'Cerrar',
     width: '500px'
   });
 };
@@ -824,11 +824,25 @@ window.openDetailModal = function(tournamentId) {
     prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
   }
   
-  // Rules
-  const formattedRules = torneo.description ? torneo.description.replace(/\n/g, '<br>') : '';
-  const rulesHTML = formattedRules
-    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción y Reglas</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedRules}</div></div>`
+  // Rules and Description
+  const formattedDesc = torneo.description ? torneo.description.replace(/\n/g, '<br>') : '';
+  let rulesHTML = formattedDesc
+    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedDesc}</div></div>`
     : '';
+    
+  const formattedRulesText = torneo.rules ? torneo.rules.replace(/\n/g, '<br>') : '';
+  if (formattedRulesText) {
+    rulesHTML += `<div class="torneo-detail-section" style="margin-top:20px;">
+        <div style="background: rgba(220, 38, 38, 0.05); border-left: 4px solid #dc2626; padding: 15px; border-radius: 0 8px 8px 0;">
+          <h4 style="color: #ef4444; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size:0.95rem; font-family: var(--font-display); text-transform: uppercase; letter-spacing: 0.8px;">
+            <i class="ph-fill ph-warning-circle"></i> Reglas del Torneo
+          </h4>
+          <div style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+            ${formattedRulesText}
+          </div>
+        </div>
+       </div>`;
+  }
   
   // Participants
   const participantsList = Object.values(participants);
