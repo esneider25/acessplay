@@ -1354,6 +1354,13 @@ window.submitCashout = function() {
     details = { type: 'pagomovil', bank, phone, cedula };
   }
   
+  const submitBtn = document.querySelector('#cashout-modal .btn-primary');
+  if (submitBtn) {
+    if (submitBtn.disabled) return;
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Procesando...';
+  }
+  
   // Submit
   const withdrawRef = firebase.database().ref('withdrawals').push();
   const withdrawalData = {
@@ -1404,6 +1411,10 @@ window.submitCashout = function() {
     });
   }).catch(err => {
     usuarioToast('Error: ' + err.message, 'error');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Confirmar Retiro';
+    }
   });
 };
 
@@ -1499,6 +1510,13 @@ window.submitTournamentCashout = function() {
     details = { type: 'pagomovil', bank, phone, cedula };
   }
   
+  const submitBtn = document.querySelector('#cashout-tournament-modal .btn-primary');
+  if (submitBtn) {
+    if (submitBtn.disabled) return;
+    submitBtn.disabled = true;
+    submitBtn.innerText = 'Procesando...';
+  }
+  
   // Submit
   const exchangeRate = typeof EXCHANGE_RATE !== 'undefined' ? (EXCHANGE_RATE.tournamentsUsdToBs || EXCHANGE_RATE.usdToBs || 1) : 1;
   const amountBs = parseFloat((amount * exchangeRate).toFixed(2));
@@ -1559,6 +1577,10 @@ window.submitTournamentCashout = function() {
   }).catch(err => {
     console.error(err);
     usuarioToast(err.message || 'Error procesando retiro', 'error');
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerText = 'Confirmar Retiro';
+    }
   });
 };
 
