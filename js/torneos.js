@@ -774,15 +774,6 @@ window.closeTorneoModal = function() {
 window.switchTab = function(btn, tabId) {
   const tabs = btn.parentElement.querySelectorAll('.torneo-tab-btn');
   tabs.forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  
-  const contents = btn.parentElement.parentElement.querySelectorAll('.torneo-tab-content');
-  contents.forEach(c => c.classList.remove('active'));
-  
-  const target = btn.parentElement.parentElement.querySelector('#' + tabId);
-  if (target) target.classList.add('active');
-};
-
 window.viewTournamentResults = function(id) {
   const torneo = torneosData.find(t => t.id === id);
   if (!torneo) return;
@@ -790,19 +781,50 @@ window.viewTournamentResults = function(id) {
   
   const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
   
-  const sorted = [...leaderboard].sort((a, b) => {
+  // Group leaderboard by leaderName
+  const groupedLeaderboard = [];
+  const processedPlayers = new Set();
+  
+  leaderboard.forEach(entry => {
+     if (processedPlayers.has(entry.playerName)) return;
+     
+     if (entry.leaderName) {
+         const teamMembers = leaderboard.filter(l => l.leaderName === entry.leaderName);
+         const totalKills = teamMembers.reduce((sum, p) => sum + (p.kills || 0), 0);
+         teamMembers.forEach(p => processedPlayers.add(p.playerName));
+         
+         groupedLeaderboard.push({
+             isTeam: true,
+             leaderName: entry.leaderName,
+             position: entry.position,
+             totalKills: totalKills,
+             members: teamMembers
+         });
+     } else {
+         processedPlayers.add(entry.playerName);
+         groupedLeaderboard.push({
+             isTeam: false,
+             playerName: entry.playerName,
+             position: entry.position,
+             totalKills: entry.kills || 0,
+             members: [entry]
+         });
+     }
+  });
+  
+  const sorted = [...groupedLeaderboard].sort((a, b) => {
     if (isPrizeFormat) {
-      if (a.position === 0 && b.position === 0) return (b.kills || 0) - (a.kills || 0);
+      if (a.position === 0 && b.position === 0) return (b.totalKills || 0) - (a.totalKills || 0);
       if (a.position === 0) return 1;
       if (b.position === 0) return -1;
       return a.position - b.position;
     } else {
-      return (b.kills || 0) - (a.kills || 0);
+      return (b.totalKills || 0) - (a.totalKills || 0);
     }
   });
   
   let rows = '';
-  sorted.forEach((l, i) => {
+  sorted.forEach((group, i) => {
     let medal = '';
     if (i === 0) medal = '🥇';
     else if (i === 1) medal = '🥈';
@@ -811,31 +833,60 @@ window.viewTournamentResults = function(id) {
     
     let statsHtml = '';
     if (isPrizeFormat) {
-      if (l.position === 0) {
+      if (group.position === 0) {
         medal = '<span style="opacity:0.6;">-</span>';
       }
-      let displayPos = l.position === 0 ? 'N/C' : `${l.position}º Lugar`;
+      let displayPos = group.position === 0 ? 'N/C' : `${group.position}º Lugar`;
       let prizeText = '';
-      if (l.position > 0 && torneo.prizes && torneo.prizes[l.position - 1]) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🎁 ${torneo.prizes[l.position - 1].reward}</div>`;
-      } else if (l.position === 1 && torneo.prize) {
+      if (group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
+        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🎁 ${torneo.prizes[group.position - 1].reward}</div>`;
+      } else if (group.position === 1 && torneo.prize) {
         prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🎁 ${torneo.prize}</div>`;
+      }
+      
+      let membersHtml = '';
+      if (group.isTeam) {
+         membersHtml = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-align:right;">`;
+         group.members.forEach(m => {
+            membersHtml += `<div>${m.playerName}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
+         });
+         membersHtml += `</div>`;
       }
       
       statsHtml = `
         <div style="display:flex; flex-direction:column; align-items:flex-end;">
           <div style="color:var(--accent); font-size:0.95rem; font-weight:bold;">${displayPos}</div>
           ${prizeText}
-          <div style="color:var(--text-secondary); font-size:0.8rem;"><strong style="color:white;">${l.kills || 0}</strong> Kills</div>
+          <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:2px;"><strong style="color:white;">${group.totalKills}</strong> Kills ${group.isTeam?'(Total)':''}</div>
+          ${membersHtml}
         </div>
       `;
     } else {
-      statsHtml = `<div style="color:var(--text-secondary); font-size:0.95rem; font-family:var(--font-mono);"><strong style="color:white;">${l.kills || 0}</strong> Kills</div>`;
+      let membersHtml = '';
+      if (group.isTeam) {
+         membersHtml = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-align:right;">`;
+         group.members.forEach(m => {
+            membersHtml += `<div>${m.playerName}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
+         });
+         membersHtml += `</div>`;
+      }
+
+      statsHtml = `
+        <div style="display:flex; flex-direction:column; align-items:flex-end;">
+          <div style="color:var(--text-secondary); font-size:1rem;"><strong style="color:white;">${group.totalKills}</strong> Kills ${group.isTeam?'(Total)':''}</div>
+          ${membersHtml}
+        </div>
+      `;
     }
     
+    const displayName = group.isTeam ? `Equipo de ${group.leaderName}` : group.playerName;
+    
     rows += `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(255,255,255,0.03); margin-bottom:8px; border-radius:8px;">
-        <div style="font-size:1.05rem;"><strong style="color:var(--accent); font-size:1.2rem; display:inline-block; width:30px; text-align:center;">${medal}</strong> <span style="margin-left:10px; font-weight:600;">${l.playerName}</span></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background: ${i%2===0?'rgba(255,255,255,0.02)':'transparent'}">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:1.2rem; width:25px; text-align:center;">${medal}</div>
+          <div style="font-weight:600; color:var(--text-primary);">${displayName}</div>
+        </div>
         ${statsHtml}
       </div>
     `;
@@ -915,8 +966,6 @@ window.openDetailModal = function(tournamentId) {
   if (participantsList.length > 0) {
     participantsHTML = '<div class="torneo-detail-participants-grouped" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">';
     
-    // Solo players can be grouped together, or we can list every entry as its own block.
-    // It's better to list every registration entry as a block to show the team context.
     participantsList.forEach((p, i) => {
       const avatarCap = avatars[i % avatars.length];
       const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
@@ -965,45 +1014,88 @@ window.openDetailModal = function(tournamentId) {
     hasContent = true;
     const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
     
-    const sorted = [...torneo.leaderboard].sort((a, b) => {
+    // Group leaderboard by leaderName
+    const groupedLeaderboard = [];
+    const processedPlayers = new Set();
+    
+    torneo.leaderboard.forEach(entry => {
+       if (processedPlayers.has(entry.playerName)) return;
+       
+       if (entry.leaderName) {
+           const teamMembers = torneo.leaderboard.filter(l => l.leaderName === entry.leaderName);
+           const totalKills = teamMembers.reduce((sum, p) => sum + (p.kills || 0), 0);
+           teamMembers.forEach(p => processedPlayers.add(p.playerName));
+           
+           groupedLeaderboard.push({
+               isTeam: true,
+               leaderName: entry.leaderName,
+               position: entry.position,
+               totalKills: totalKills,
+               members: teamMembers
+           });
+       } else {
+           processedPlayers.add(entry.playerName);
+           groupedLeaderboard.push({
+               isTeam: false,
+               playerName: entry.playerName,
+               position: entry.position,
+               totalKills: entry.kills || 0,
+               members: [entry]
+           });
+       }
+    });
+    
+    const sorted = [...groupedLeaderboard].sort((a, b) => {
       if (isPrizeFormat) {
-        if (a.position === 0 && b.position === 0) return (b.kills || 0) - (a.kills || 0);
+        if (a.position === 0 && b.position === 0) return (b.totalKills || 0) - (a.totalKills || 0);
         if (a.position === 0) return 1;
         if (b.position === 0) return -1;
         return a.position - b.position;
       } else {
-        return (b.kills || 0) - (a.kills || 0);
+        return (b.totalKills || 0) - (a.totalKills || 0);
       }
     });
     
     let tableRows = '';
-    sorted.forEach((entry, i) => {
+    sorted.forEach((group, i) => {
       let rankStyle = '';
-      let displayPos = isPrizeFormat && entry.position > 0 ? entry.position : i + 1;
-      if (isPrizeFormat && entry.position === 0) displayPos = '-';
+      let displayPos = isPrizeFormat && group.position > 0 ? group.position : i + 1;
+      if (isPrizeFormat && group.position === 0) displayPos = '-';
       
-      if (displayPos === 1) rankStyle = 'color:#fbbf24; font-weight:bold;';
-      else if (displayPos === 2) rankStyle = 'color:#9ca3af; font-weight:bold;';
-      else if (displayPos === 3) rankStyle = 'color:#b45309; font-weight:bold;';
+      if (displayPos === 1) rankStyle = 'color:#fbbf24; font-weight:bold; font-size:1.1rem;';
+      else if (displayPos === 2) rankStyle = 'color:#9ca3af; font-weight:bold; font-size:1.1rem;';
+      else if (displayPos === 3) rankStyle = 'color:#b45309; font-weight:bold; font-size:1.1rem;';
       
       let prizeText = '';
-      if (isPrizeFormat && entry.position > 0 && torneo.prizes && torneo.prizes[entry.position - 1]) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🎁 ${torneo.prizes[entry.position - 1].reward}</div>`;
-      } else if (isPrizeFormat && entry.position === 1 && torneo.prize) {
+      if (isPrizeFormat && group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
+        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🎁 ${torneo.prizes[group.position - 1].reward}</div>`;
+      } else if (isPrizeFormat && group.position === 1 && torneo.prize) {
         prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🎁 ${torneo.prize}</div>`;
       }
       
+      let membersHtml = '';
+      if (group.isTeam) {
+         membersHtml = `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">`;
+         group.members.forEach(m => {
+            membersHtml += `<div>• ${m.playerName}: <strong style="color:white;">${m.kills || 0}</strong> kills</div>`;
+         });
+         membersHtml += `</div>`;
+      }
+      
+      const displayName = group.isTeam ? `Equipo de ${group.leaderName}` : group.playerName;
+
       tableRows += `
         <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background: ${i%2===0?'rgba(255,255,255,0.02)':'transparent'}">
-          <div style="display:flex; gap:15px; align-items:center;">
-            <span style="width:25px; text-align:center; ${rankStyle}">${displayPos}</span>
+          <div style="display:flex; gap:15px; align-items:flex-start;">
+            <span style="width:25px; text-align:center; ${rankStyle}; padding-top:2px;">${displayPos}</span>
             <div style="display:flex; flex-direction:column;">
-              <span style="font-weight:600; color:var(--text-primary);">${entry.playerName || 'Jugador'}</span>
+              <span style="font-weight:600; color:var(--text-primary);">${displayName}</span>
               ${prizeText}
+              ${membersHtml}
             </div>
           </div>
-          <div style="color:var(--accent); font-weight:bold;">
-            ${entry.kills || 0} kills
+          <div style="color:var(--accent); font-weight:bold; padding-top:2px;">
+            ${group.totalKills} kills ${group.isTeam ? '(Total)' : ''}
           </div>
         </div>
       `;

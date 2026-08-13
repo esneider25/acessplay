@@ -1915,6 +1915,60 @@ window.renderDashboardTournaments = async function() {
             let myTeamKillsHtml = '';
             let totalTeamKills = myKills;
             
+            let myPosition = 0;
+            if (lbLider && lbLider.position) myPosition = lbLider.position;
+            
+            if (myPosition === 0 && myEntry.teamMembers && myEntry.teamMembers.length > 0) {
+               for(let tm of myEntry.teamMembers) {
+                 const tmName = (tm.gameName || 'Compañero').trim().toLowerCase();
+                 const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
+                 if (lbTm && lbTm.position) {
+                    myPosition = lbTm.position;
+                    break;
+                 }
+               }
+            }
+
+            let myPrizeText = '';
+            if (myPosition > 0) {
+              if (t.prizes && t.prizes[myPosition - 1]) {
+                myPrizeText = t.prizes[myPosition - 1].reward;
+              } else if (myPosition === 1 && t.prize) {
+                myPrizeText = t.prize;
+              }
+            }
+
+            let extraHtml = '';
+            if (myPosition > 0) {
+              extraHtml += `
+                <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed rgba(102, 187, 106, 0.3); color:#fbbf24;">
+                  <span>Posición Final:</span> <strong>${myPosition}º Lugar</strong>
+                </div>
+              `;
+              if (myPrizeText) {
+                extraHtml += `
+                  <div style="display:flex; justify-content:space-between; margin-top:4px; color:#4ade80;">
+                    <span>Premio:</span> <strong>${myPrizeText}</strong>
+                  </div>
+                `;
+              }
+            } else if (!t.pricePerKill || parseFloat(t.pricePerKill) === 0) {
+              extraHtml += `
+                <div style="display:flex; justify-content:space-between; margin-top:6px; padding-top:6px; border-top:1px dashed rgba(102, 187, 106, 0.3); color:var(--text-muted);">
+                  <span>Posición:</span> <strong>No clasificó</strong>
+                </div>
+              `;
+            }
+
+            if (t.pricePerKill && parseFloat(t.pricePerKill) > 0) {
+              const borderStyle = myPosition > 0 || (!t.pricePerKill || parseFloat(t.pricePerKill) === 0) ? '' : 'border-top:1px dashed rgba(102, 187, 106, 0.3); margin-top:6px; padding-top:6px;';
+              extraHtml += `
+                <div style="display:flex; justify-content:space-between; margin-top:4px; color:#f59e0b; ${borderStyle}">
+                  <span>Ganancia por Kills:</span> <strong>$${((totalTeamKills || myKills) * parseFloat(t.pricePerKill)).toFixed(2)} USD</strong>
+                </div>
+              `;
+            }
+
             if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
               myEntry.teamMembers.forEach(tm => {
                 const tmName = (tm.gameName || 'Compañero').trim().toLowerCase();
@@ -1930,8 +1984,8 @@ window.renderDashboardTournaments = async function() {
                   <div style="font-size:0.85rem; color:var(--text-primary);">
                     <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${myEntry.gameName} (Tú):</span> <strong>${myKills} Kills</strong></div>
                     ${myTeamKillsHtml}
-                    <div style="border-top:1px dashed rgba(102, 187, 106, 0.3); margin-top:6px; padding-top:6px; display:flex; justify-content:space-between; color:#4ade80;"><span>Total Equipo:</span> <strong>${totalTeamKills} Kills</strong></div>
-                    <div style="display:flex; justify-content:space-between; margin-top:4px; color:#f59e0b;"><span>Ganancia por Kills:</span> <strong>$${(totalTeamKills * (parseFloat(t.pricePerKill) || 0)).toFixed(2)} USD</strong></div>
+                    <div style="border-top:1px solid rgba(255,255,255,0.05); margin-top:6px; padding-top:6px; display:flex; justify-content:space-between; color:var(--text-primary);"><span>Total Equipo:</span> <strong>${totalTeamKills} Kills</strong></div>
+                    ${extraHtml}
                   </div>
                 </div>
               `;
@@ -1939,11 +1993,11 @@ window.renderDashboardTournaments = async function() {
               resultsHtml = `
                 <div style="margin-top: 15px; padding: 12px; background: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.3); border-radius: 6px;">
                   <div style="font-size:0.75rem; color:#66bb6a; text-transform:uppercase; margin-bottom:8px; font-weight:bold;"><i class="ph-fill ph-chart-bar"></i> Tus Resultados</div>
-                  <div style="font-size:0.85rem; color:var(--text-primary); display:flex; justify-content:space-between;">
-                    <span>Kills logradas:</span> <strong>${myKills}</strong>
-                  </div>
-                  <div style="border-top:1px dashed rgba(102, 187, 106, 0.3); margin-top:6px; padding-top:6px; font-size:0.85rem; display:flex; justify-content:space-between; color:#f59e0b;">
-                    <span>Ganancia por Kills:</span> <strong>$${(myKills * (parseFloat(t.pricePerKill) || 0)).toFixed(2)} USD</strong>
+                  <div style="font-size:0.85rem; color:var(--text-primary); display:flex; flex-direction:column; gap:4px;">
+                    <div style="display:flex; justify-content:space-between;">
+                      <span>Kills logradas:</span> <strong>${myKills}</strong>
+                    </div>
+                    ${extraHtml}
                   </div>
                 </div>
               `;
