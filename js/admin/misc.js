@@ -1858,9 +1858,11 @@ function renderTournaments(container) {
                 
                 ${status === 'completed' ? `<button class="btn btn-secondary" onclick="sorteoTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);" title="Sorteo">🎲 Sorteo</button>` : ''}
                 <button class="btn btn-secondary" onclick="manageTournamentCredentials('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);" title="Credenciales Sala">🔑 Credenciales</button>
+                <button class="btn btn-secondary" onclick="notifyTournamentStart('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:transparent; border:1px solid rgba(16, 185, 129, 0.3); color:#10b981;" title="Notificar a todos los participantes">🔔 Alerta Inicio</button>
                 <button class="btn btn-secondary" onclick="editTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:rgba(14, 165, 233, 0.1); border:1px solid rgba(14, 165, 233, 0.3); color:#38bdf8;" title="Editar">✏️ Editar</button>
                 <button class="btn btn-secondary" onclick="duplicateTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:transparent; border:1px solid rgba(255,255,255,0.1);" title="Duplicar">📋 Duplicar</button>
-                <button class="btn btn-secondary" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:transparent; border:1px solid rgba(239, 68, 68, 0.3); color:#ef4444;" title="Eliminar">🗑️ Eliminar</button>
+                <button class="btn btn-secondary" onclick="deleteTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:transparent; border:1px solid rgba(239, 68, 68, 0.3); color:#ef4444;" title="Eliminar (Sin reembolso)">🗑️ Eliminar</button>
+                <button class="btn btn-secondary" onclick="cancelTournament('${torneo.id}')" style="padding: 6px 12px; font-size: 0.82rem; background:transparent; border:1px solid rgba(245, 158, 11, 0.3); color:#f59e0b;" title="Cancelar y Reembolsar">🚫 Cancelar</button>
               </div>
             </div>
           </details>
@@ -1880,7 +1882,13 @@ window.updateTournamentStatus = function(id, newStatus) {
 };
 
 window.deleteTournament = function(id) {
-  if (confirm('¿Estás seguro de cancelar y eliminar este torneo? Se reembolsará la inscripción a los participantes aprobados a sus ganancias de torneo.')) {
+  if (confirm('¿Estás seguro de ELIMINAR este torneo de prueba? Esta acción no reembolsará a nadie y no se puede deshacer.')) {
+    firebase.database().ref('tournaments/' + id).remove();
+  }
+};
+
+window.cancelTournament = function(id) {
+  if (confirm('¿Estás seguro de CANCELAR este torneo? Se reembolsará automáticamente el valor de la inscripción a las ganancias de torneos de todos los participantes aprobados y el torneo será eliminado.')) {
     firebase.database().ref('tournaments/' + id).once('value').then(snap => {
       const torneo = snap.val();
       if (!torneo) return;
@@ -1906,8 +1914,35 @@ window.deleteTournament = function(id) {
       }
       
       firebase.database().ref('tournaments/' + id).remove().then(() => {
-        alert('Torneo eliminado y reembolsos (si aplican) procesados.');
+        alert('Torneo cancelado exitosamente y reembolsos procesados.');
       });
+    });
+  }
+};
+
+window.notifyTournamentStart = function(id) {
+  if (confirm('¿Deseas enviar una notificación a todos los participantes inscritos de que el torneo está por comenzar?')) {
+    firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+      const torneo = snap.val();
+      if (!torneo || !torneo.participants) {
+        return alert('No hay participantes inscritos para notificar.');
+      }
+      
+      let count = 0;
+      Object.keys(torneo.participants).forEach(uid => {
+        const p = torneo.participants[uid];
+        if (p.paymentStatus === 'approved' || p.paymentStatus === 'wallet' || p.paymentStatus === 'free') {
+          firebase.database().ref('users/' + uid + '/notifications').push({
+            title: '¡El Torneo ya va a comenzar! 🎮',
+            body: `Prepárate, el torneo "${torneo.title}" está a punto de empezar. Revisa tus credenciales de sala en tu panel (mis torneos) si aplican.`,
+            type: 'tournament',
+            timestamp: new Date().toISOString(),
+            read: false
+          });
+          count++;
+        }
+      });
+      alert(`Se enviaron alertas a ${count} participantes confirmados.`);
     });
   }
 };
@@ -1976,8 +2011,13 @@ window.editTournament = function(id) {
           </div>
           
           <div>
-            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Descripción / Reglas</label>
-            <textarea id="et-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical;">${torneo.description || ''}</textarea>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Descripción Corta</label>
+            <textarea id="et-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:60px; resize:vertical;">${torneo.description || ''}</textarea>
+          </div>
+          
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">📜 Reglamento (Opcional)</label>
+            <textarea id="et-rules" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical;" placeholder="Reglas, restricciones, etc.">${torneo.rules || ''}</textarea>
           </div>
           
           <div>
@@ -2022,6 +2062,7 @@ window.editTournament = function(id) {
         
         const title = document.getElementById('et-title').value.trim();
         const description = document.getElementById('et-description').value.trim();
+        const rules = document.getElementById('et-rules').value.trim();
         const gameMode = document.getElementById('et-gamemode').value;
         const maxP = parseInt(document.getElementById('et-max').value) || 100;
         const deadline = document.getElementById('et-deadline').value;
@@ -2039,6 +2080,7 @@ window.editTournament = function(id) {
         const updateData = {
           title: title,
           description: description || null,
+          rules: rules || null,
           gameMode: gameMode || null,
           maxParticipants: maxP,
           pricePerKill: pricePerKill,
@@ -2717,8 +2759,13 @@ window.showCreateTournamentModal = function() {
         </div>
         
         <div>
-          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Descripción / Reglas</label>
-          <textarea id="ct-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical; font-family:var(--font-body);" placeholder="Reglas del torneo, cómo participar, restricciones, etc."></textarea>
+          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Descripción Corta</label>
+          <textarea id="ct-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:60px; resize:vertical; font-family:var(--font-body);" placeholder="Descripción breve del torneo"></textarea>
+        </div>
+        
+        <div>
+          <label class="admin-form-label" style="margin-bottom: 5px; display: block;">📜 Reglamento (Opcional)</label>
+          <textarea id="ct-rules" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical; font-family:var(--font-body);" placeholder="Reglas del torneo, cómo participar, restricciones, etc."></textarea>
         </div>
         
         <div>
@@ -2784,6 +2831,7 @@ window.showCreateTournamentModal = function() {
       const gameMode = document.getElementById('ct-gamemode').value;
       const customTitle = document.getElementById('ct-title').value.trim();
       const description = document.getElementById('ct-description').value.trim();
+      const rules = document.getElementById('ct-rules').value.trim();
       const bannerUrl = document.getElementById('ct-banner').value.trim();
       const maxP = parseInt(document.getElementById('ct-max').value) || 100;
       const deadline = document.getElementById('ct-deadline').value;
@@ -2816,6 +2864,7 @@ window.showCreateTournamentModal = function() {
         productName: pName,
         title: title,
         description: description || null,
+        rules: rules || null,
         gameMode: gameMode || null,
         bannerUrl: bannerUrl || null,
         status: 'registration_open',

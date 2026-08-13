@@ -288,6 +288,11 @@ function renderTorneos(torneos) {
     const descriptionHTML = torneo.description
       ? `<p class="torneo-description">${torneo.description}</p>`
       : '';
+      
+    // Rules
+    const rulesHTML = torneo.rules
+      ? `<button class="torneo-btn" style="background: rgba(14, 165, 233, 0.1); color: #38bdf8; border-color: rgba(14, 165, 233, 0.3); padding: 5px; font-size: 0.8rem; margin-bottom: 10px;" onclick="event.stopPropagation(); viewTournamentRules('${torneo.id}')">📜 Ver Reglas</button>`
+      : '';
     
     // Leaderboard preview (removed to save space, user can open modal to see it)
     let leaderboardPreview = '';
@@ -304,6 +309,7 @@ function renderTorneos(torneos) {
         <div class="torneo-card-body">
           <h3 class="torneo-title">${torneo.title}</h3>
           ${descriptionHTML}
+          ${rulesHTML}
           ${tagsHTML}
           ${prizesHTML}
           
@@ -332,34 +338,73 @@ function renderTorneos(torneos) {
 }
 
 // ── Hall of Fame (Global Top 10) ──
-function renderHallOfFame(torneos) {
-  const container = document.getElementById('hall-of-fame-list');
-  if (!container) return;
+window.switchHofTab = function(type) {
+  const premiumBtn = document.getElementById('tab-hof-premium');
+  const freeBtn = document.getElementById('tab-hof-free');
+  const premiumContainer = document.getElementById('hall-of-fame-premium');
+  const freeContainer = document.getElementById('hall-of-fame-free');
   
-  const playerStats = {};
+  if (type === 'premium') {
+    premiumBtn.style.background = 'var(--accent)';
+    premiumBtn.style.color = 'white';
+    premiumBtn.style.border = 'none';
+    
+    freeBtn.style.background = 'rgba(255,255,255,0.05)';
+    freeBtn.style.color = 'var(--text-muted)';
+    freeBtn.style.border = '1px solid rgba(255,255,255,0.1)';
+    
+    premiumContainer.style.display = 'block';
+    freeContainer.style.display = 'none';
+  } else {
+    freeBtn.style.background = 'var(--accent)';
+    freeBtn.style.color = 'white';
+    freeBtn.style.border = 'none';
+    
+    premiumBtn.style.background = 'rgba(255,255,255,0.05)';
+    premiumBtn.style.color = 'var(--text-muted)';
+    premiumBtn.style.border = '1px solid rgba(255,255,255,0.1)';
+    
+    freeContainer.style.display = 'block';
+    premiumContainer.style.display = 'none';
+  }
+};
+
+function renderHallOfFame(torneos) {
+  const premiumContainer = document.getElementById('hall-of-fame-premium');
+  const freeContainer = document.getElementById('hall-of-fame-free');
+  if (!premiumContainer || !freeContainer) return;
+  
+  const playerStatsPremium = {};
+  const playerStatsFree = {};
   
   // Aggregate stats across all completed tournaments
   torneos.forEach(t => {
     if (t.status === 'completed' && t.leaderboard && t.leaderboard.length > 0) {
+      const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
+      const targetStats = isFree ? playerStatsFree : playerStatsPremium;
+      
       t.leaderboard.forEach(entry => {
         if (!entry.playerName) return;
         const name = entry.playerName.trim();
-        if (!playerStats[name]) {
-          playerStats[name] = { name: name, kills: 0, gamesPlayed: 0 };
+        if (!targetStats[name]) {
+          targetStats[name] = { name: name, kills: 0, gamesPlayed: 0 };
         }
-        playerStats[name].kills += (parseInt(entry.kills) || 0);
-        playerStats[name].gamesPlayed += 1;
+        targetStats[name].kills += (parseInt(entry.kills) || 0);
+        targetStats[name].gamesPlayed += 1;
       });
     }
   });
   
-  const topPlayers = Object.values(playerStats)
-    .sort((a, b) => b.kills - a.kills)
-    .slice(0, 10);
+  const topPremium = Object.values(playerStatsPremium).sort((a, b) => b.kills - a.kills).slice(0, 10);
+  const topFree = Object.values(playerStatsFree).sort((a, b) => b.kills - a.kills).slice(0, 10);
   
+  premiumContainer.innerHTML = buildHofHtml(topPremium, 'Aún no hay campeones en torneos premium. ¡Sé el primero!');
+  freeContainer.innerHTML = buildHofHtml(topFree, 'Aún no hay campeones en torneos gratuitos. ¡Sé el primero!');
+}
+
+function buildHofHtml(topPlayers, emptyMessage) {
   if (topPlayers.length === 0) {
-    container.innerHTML = '<p style="text-align:center; color:var(--text-muted); grid-column:1/-1; padding:20px;">Aún no hay campeones registrados. ¡Sé el primero!</p>';
-    return;
+    return `<p style="text-align:center; color:var(--text-muted); grid-column:1/-1; padding:20px;">${emptyMessage}</p>`;
   }
   
   let html = '<div class="hof-global-leaderboard" style="grid-column:1/-1; display:flex; flex-direction:column; gap:10px;">';
@@ -407,7 +452,7 @@ function renderHallOfFame(torneos) {
   });
   
   html += '</div>';
-  container.innerHTML = html;
+  return html;
 }
 
 // ── Inscription Modal ──
@@ -739,6 +784,23 @@ window.viewTournamentResults = function(id) {
     confirmButtonColor: 'var(--accent)',
     confirmButtonText: 'Cerrar',
     width: '450px'
+  });
+};
+
+window.viewTournamentRules = function(id) {
+  const torneo = currentTorneosData.find(t => t.id === id);
+  if (!torneo || !torneo.rules) return;
+  
+  const formattedRules = torneo.rules.replace(/\n/g, '<br>');
+  
+  Swal.fire({
+    title: `<h3 style="color:var(--text-primary); margin:0;">📜 Reglamento</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
+    html: `<div style="max-height: 400px; overflow-y:auto; text-align:left; margin-top:15px; padding-right:5px; font-family:var(--font-body); font-size: 0.95rem; line-height: 1.5; color: var(--text-secondary);">${formattedRules}</div>`,
+    background: 'var(--bg-surface)',
+    color: 'var(--text-primary)',
+    confirmButtonColor: 'var(--accent)',
+    confirmButtonText: 'Entendido',
+    width: '500px'
   });
 };
 
