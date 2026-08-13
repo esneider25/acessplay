@@ -1,3 +1,16 @@
+
+// Configurar tema oscuro por defecto para todas las alertas SweetAlert2
+if (typeof Swal !== 'undefined') {
+  const originalSwal = Swal;
+  window.Swal = originalSwal.mixin({
+    background: 'var(--bg-surface, #1e293b)',
+    color: 'var(--text-primary, #f8fafc)',
+    customClass: {
+      popup: 'swal-dark-theme'
+    }
+  });
+}
+
 // ============================================================
 // AccessPlay — Main App Logic & SPA Routing (v2 + Orders)
 // ============================================================

@@ -514,7 +514,7 @@ function buildHofHtml(topPlayers, emptyMessage) {
         
         <div style="display:flex; align-items:center; gap:20px;">
           <div style="width:30px; text-align:center; font-size:1.5rem;">${rankBadge}</div>
-          <div style="${nameStyle}">${player.name}</div>
+          <div style="${nameStyle}">${player.gameName || player.name}</div>
         </div>
         
         <div style="display:flex; gap:30px; align-items:center;">
@@ -543,7 +543,7 @@ window.openInscriptionModal = function(tournamentId) {
   if (!user) {
     if (typeof showAuthModal === 'function') showAuthModal();
     else if (typeof openAuthModal === 'function') openAuthModal();
-    else Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Debes iniciar sesión para inscribirte.', confirmButtonColor: '#fbbf24' });
+    else Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Debes iniciar sesión para inscribirte.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
     return;
   }
   
@@ -552,7 +552,7 @@ window.openInscriptionModal = function(tournamentId) {
   
   // Check deadline
   if (torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date()) {
-    Swal.fire({ icon: 'info', title: 'Cerrado', text: 'Las inscripciones para este torneo ya cerraron.', confirmButtonColor: '#fbbf24' });
+    Swal.fire({ icon: 'info', title: 'Cerrado', text: 'Las inscripciones para este torneo ya cerraron.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
     return;
   }
   
@@ -704,7 +704,7 @@ window.openInscriptionModal = function(tournamentId) {
       const name = document.getElementById('insc-name').value.trim();
       
       if (!gameName || !gameId || !name) {
-        Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa todos los campos del líder.', confirmButtonColor: '#fbbf24' });
+        Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa todos los campos del líder.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
         return;
       }
       
@@ -715,7 +715,7 @@ window.openInscriptionModal = function(tournamentId) {
         const tId = idInputs[i].value.trim();
         const tIgn = ignInputs[i].value.trim();
         if (!tId || !tIgn) {
-          Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa los datos de todos los miembros del equipo.', confirmButtonColor: '#fbbf24' });
+          Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa los datos de todos los miembros del equipo.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
           return;
         }
         teamMembers.push({ gameId: tId, gameName: tIgn });
@@ -766,6 +766,8 @@ window.openInscriptionModal = function(tournamentId) {
                 confirmButtonText: '<i class="ph ph-whatsapp-logo"></i> Ir al canal',
                 cancelButtonText: 'Cerrar',
                 confirmButtonColor: '#25D366',
+                background: 'var(--bg-surface)',
+                color: 'var(--text-primary)',
                 cancelButtonColor: '#ef4444'
               }).then((result) => {
                 if (result.isConfirmed) {
@@ -776,16 +778,16 @@ window.openInscriptionModal = function(tournamentId) {
 
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
               launchConfetti();
-              Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80' }).then(() => showWhatsappPrompt());
+              Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
             } else {
-              Swal.fire({ icon: 'info', title: 'Inscripción pendiente', text: 'En breve un administrador validará tu pago y confirmará tu cupo.', confirmButtonColor: '#fbbf24' }).then(() => showWhatsappPrompt());
+              Swal.fire({ icon: 'info', title: 'Inscripción pendiente', text: 'En breve un administrador validará tu pago y confirmará tu cupo.', confirmButtonColor: '#fbbf24', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
             }
             renderTorneos(torneosData);
           }).catch(err => {
             console.error('Error al inscribirse:', err);
             submitBtn.disabled = false;
             submitBtn.innerText = '⚡ Confirmar Inscripción';
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al inscribirte. Verifica tu conexión.', confirmButtonColor: '#ef4444' });
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al inscribirte. Verifica tu conexión.', confirmButtonColor: '#ef4444', background: 'var(--bg-surface)', color: 'var(--text-primary)' });
           });
       };
       
@@ -825,7 +827,7 @@ window.openInscriptionModal = function(tournamentId) {
         } else if (paymentMethod !== 'wallet') {
           const paymentRef = document.getElementById('insc-payment-ref').value.trim();
           if (!paymentRef) {
-            Swal.fire({ icon: 'warning', title: 'Referencia requerida', text: 'Por favor ingresa el número de referencia del pago.', confirmButtonColor: '#fbbf24' });
+            Swal.fire({ icon: 'warning', title: 'Referencia requerida', text: 'Por favor ingresa el número de referencia del pago.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
             submitBtn.disabled = false;
             submitBtn.innerText = '⚡ Confirmar Inscripción';
             return;
