@@ -3138,6 +3138,7 @@ window.searchUserForAdjustment = function() {
     });
     
     const withdrawn = parseFloat(userData.withdrawnTournamentEarnings) || 0;
+    const archived = parseFloat(userData.withdrawnTournamentEarnings === undefined && userData.archivedTournamentEarnings ? userData.archivedTournamentEarnings : (userData.archivedTournamentEarnings || 0));
     
     resultArea.innerHTML = `
       <div style="margin-bottom: 10px;">
@@ -3146,11 +3147,18 @@ window.searchUserForAdjustment = function() {
       </div>
       
       <div style="margin-bottom: 15px;">
-        <label class="admin-form-label">Historial de Retiros ($ USD)</label>
+        <label class="admin-form-label">Retiros Acumulados ($ USD)</label>
         <input type="number" id="adj-withdrawn-val" class="admin-form-input" step="0.01" min="0" value="${withdrawn.toFixed(2)}">
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Todo lo que el usuario ha retirado.</div>
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <label class="admin-form-label">Ganancias de Torneos Borrados ($ USD)</label>
+        <input type="number" id="adj-archived-val" class="admin-form-input" step="0.01" min="0" value="${archived.toFixed(2)}">
+        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Ganancias que se guardaron cuando borraste torneos antiguos. Si el usuario tiene un saldo muy alto irreal (historial fantasma), pon este valor y los Retiros en 0.</div>
       </div>
       
-      <button class="btn btn-primary" onclick="saveWithdrawalAdjustment('${uid}')" style="width: 100%;">💾 Guardar Nuevo Valor</button>
+      <button class="btn btn-primary" onclick="saveWithdrawalAdjustment('${uid}')" style="width: 100%;">💾 Guardar Nuevos Valores</button>
     `;
   }).catch(err => {
     resultArea.innerHTML = '<p style="color:#ef4444; margin:0;">Error en la búsqueda.</p>';
@@ -3158,13 +3166,16 @@ window.searchUserForAdjustment = function() {
 };
 
 window.saveWithdrawalAdjustment = function(uid) {
-  const newVal = parseFloat(document.getElementById('adj-withdrawn-val').value);
-  if (isNaN(newVal) || newVal < 0) return alert('Monto inválido');
+  const newWithdrawn = parseFloat(document.getElementById('adj-withdrawn-val').value);
+  const newArchived = parseFloat(document.getElementById('adj-archived-val').value);
+  
+  if (isNaN(newWithdrawn) || newWithdrawn < 0 || isNaN(newArchived) || newArchived < 0) return alert('Montos inválidos');
   
   firebase.database().ref('users/' + uid).update({
-    withdrawnTournamentEarnings: newVal
+    withdrawnTournamentEarnings: newWithdrawn,
+    archivedTournamentEarnings: newArchived
   }).then(() => {
-    alert('✅ Historial de retiros actualizado correctamente.');
+    alert('✅ Historial del cliente actualizado correctamente.');
     closeAdminModal();
   }).catch(err => {
     alert('Error al actualizar: ' + err.message);
