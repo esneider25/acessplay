@@ -291,7 +291,7 @@ function renderTorneos(torneos) {
       
     // Rules
     const rulesHTML = torneo.rules
-      ? `<button class="torneo-btn" style="background: rgba(14, 165, 233, 0.1); color: #38bdf8; border-color: rgba(14, 165, 233, 0.3); padding: 5px; font-size: 0.8rem; margin-bottom: 10px;" onclick="event.stopPropagation(); viewTournamentRules('${torneo.id}')">📜 Ver Reglas</button>`
+      ? `<div onclick="event.stopPropagation();" style="position: relative; z-index: 10;"><button class="torneo-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px; font-size: 0.8rem; margin-bottom: 10px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'" onclick="viewTournamentRules('${torneo.id}')">⚠️ Ver Reglas</button></div>`
       : '';
     
     // Leaderboard preview (removed to save space, user can open modal to see it)
