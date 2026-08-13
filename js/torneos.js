@@ -223,16 +223,44 @@ function renderTorneos(torneos) {
     // Prizes
     let prizesHTML = '';
     const prizes = torneo.prizes || [];
+    const isCompleted = torneo.status === 'completed' || torneo.status === 'completado';
+    const hasLeaderboard = isCompleted && torneo.leaderboard && torneo.leaderboard.length > 0;
+    
     if (prizes.length > 0) {
       const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️'];
       const classes = ['gold', 'silver', 'bronze', '', ''];
       prizesHTML = '<div class="torneo-prizes">';
       prizes.forEach((p, i) => {
-        prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${p.place ? p.place + ': ' : ''}${p.reward}</span></div>`;
+        let winnerText = '';
+        if (hasLeaderboard) {
+          const winner = torneo.leaderboard.find(l => l.position === i + 1);
+          if (winner && winner.playerName) {
+            winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${winner.playerName}</span>`;
+          }
+        }
+        
+        let placeText = p.place ? p.place + ': ' : '';
+        if (winnerText) {
+          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${p.reward})</span></span></div>`;
+        } else {
+          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${p.reward}</span></div>`;
+        }
       });
       prizesHTML += '</div>';
     } else if (torneo.prize) {
-      prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text gold">${torneo.prize}</span></div></div>`;
+      let winnerText = '';
+      if (hasLeaderboard) {
+        const winner = torneo.leaderboard.find(l => l.position === 1);
+        if (winner && winner.playerName) {
+          winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${winner.playerName}</span>`;
+        }
+      }
+      
+      if (winnerText) {
+        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🏆</span><span class="torneo-prize-text gold">Ganador: ${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${torneo.prize})</span></span></div></div>`;
+      } else {
+        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text gold">${torneo.prize}</span></div></div>`;
+      }
     }
     
     // Tags
@@ -787,9 +815,17 @@ window.viewTournamentResults = function(id) {
         medal = '<span style="opacity:0.6;">-</span>';
       }
       let displayPos = l.position === 0 ? 'N/C' : `${l.position}º Lugar`;
+      let prizeText = '';
+      if (l.position > 0 && torneo.prizes && torneo.prizes[l.position - 1]) {
+        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🎁 ${torneo.prizes[l.position - 1].reward}</div>`;
+      } else if (l.position === 1 && torneo.prize) {
+        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🎁 ${torneo.prize}</div>`;
+      }
+      
       statsHtml = `
         <div style="display:flex; flex-direction:column; align-items:flex-end;">
           <div style="color:var(--accent); font-size:0.95rem; font-weight:bold;">${displayPos}</div>
+          ${prizeText}
           <div style="color:var(--text-secondary); font-size:0.8rem;"><strong style="color:white;">${l.kills || 0}</strong> Kills</div>
         </div>
       `;
@@ -927,20 +963,44 @@ window.openDetailModal = function(tournamentId) {
   // 1. Mostrar tabla de posiciones manual (leaderboard) si existe
   if (torneo.leaderboard && torneo.leaderboard.length > 0) {
     hasContent = true;
-    const sorted = [...torneo.leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+    const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
+    
+    const sorted = [...torneo.leaderboard].sort((a, b) => {
+      if (isPrizeFormat) {
+        if (a.position === 0 && b.position === 0) return (b.kills || 0) - (a.kills || 0);
+        if (a.position === 0) return 1;
+        if (b.position === 0) return -1;
+        return a.position - b.position;
+      } else {
+        return (b.kills || 0) - (a.kills || 0);
+      }
+    });
     
     let tableRows = '';
     sorted.forEach((entry, i) => {
       let rankStyle = '';
-      if (i === 0) rankStyle = 'color:#fbbf24; font-weight:bold;';
-      else if (i === 1) rankStyle = 'color:#9ca3af; font-weight:bold;';
-      else if (i === 2) rankStyle = 'color:#b45309; font-weight:bold;';
+      let displayPos = isPrizeFormat && entry.position > 0 ? entry.position : i + 1;
+      if (isPrizeFormat && entry.position === 0) displayPos = '-';
+      
+      if (displayPos === 1) rankStyle = 'color:#fbbf24; font-weight:bold;';
+      else if (displayPos === 2) rankStyle = 'color:#9ca3af; font-weight:bold;';
+      else if (displayPos === 3) rankStyle = 'color:#b45309; font-weight:bold;';
+      
+      let prizeText = '';
+      if (isPrizeFormat && entry.position > 0 && torneo.prizes && torneo.prizes[entry.position - 1]) {
+        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🎁 ${torneo.prizes[entry.position - 1].reward}</div>`;
+      } else if (isPrizeFormat && entry.position === 1 && torneo.prize) {
+        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🎁 ${torneo.prize}</div>`;
+      }
       
       tableRows += `
         <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background: ${i%2===0?'rgba(255,255,255,0.02)':'transparent'}">
           <div style="display:flex; gap:15px; align-items:center;">
-            <span style="width:25px; text-align:center; ${rankStyle}">${i+1}</span>
-            <span style="font-weight:600; color:var(--text-primary);">${entry.playerName || 'Jugador'}</span>
+            <span style="width:25px; text-align:center; ${rankStyle}">${displayPos}</span>
+            <div style="display:flex; flex-direction:column;">
+              <span style="font-weight:600; color:var(--text-primary);">${entry.playerName || 'Jugador'}</span>
+              ${prizeText}
+            </div>
           </div>
           <div style="color:var(--accent); font-weight:bold;">
             ${entry.kills || 0} kills
