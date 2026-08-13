@@ -774,6 +774,15 @@ window.closeTorneoModal = function() {
 window.switchTab = function(btn, tabId) {
   const tabs = btn.parentElement.querySelectorAll('.torneo-tab-btn');
   tabs.forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  
+  const contents = btn.parentElement.parentElement.querySelectorAll('.torneo-tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  
+  const target = btn.parentElement.parentElement.querySelector('#' + tabId);
+  if (target) target.classList.add('active');
+};
+
 window.viewTournamentResults = function(id) {
   const torneo = torneosData.find(t => t.id === id);
   if (!torneo) return;
