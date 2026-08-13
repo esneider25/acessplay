@@ -698,11 +698,29 @@ window.openInscriptionModal = function(tournamentId) {
               read: false
             });
 
+            const showWhatsappPrompt = () => {
+              const channelLink = (typeof SITE_SETTINGS !== 'undefined' && SITE_SETTINGS.whatsappChannel) ? SITE_SETTINGS.whatsappChannel : 'https://whatsapp.com/channel/TU_CANAL_AQUI';
+              Swal.fire({
+                title: '¡Atención!',
+                html: `Tienes que unirte al canal de WhatsApp para ver los anuncios del torneo <b>${torneo.title}</b> minutos antes que comience.`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: '<i class="ph ph-whatsapp-logo"></i> Ir al canal',
+                cancelButtonText: 'Cerrar',
+                confirmButtonColor: '#25D366',
+                cancelButtonColor: '#ef4444'
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  window.open(channelLink, '_blank');
+                }
+              });
+            };
+
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
               launchConfetti();
-              Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80' });
+              Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80' }).then(() => showWhatsappPrompt());
             } else {
-              Swal.fire({ icon: 'info', title: 'Inscripción pendiente', text: 'En breve un administrador validará tu pago y confirmará tu cupo.', confirmButtonColor: '#fbbf24' });
+              Swal.fire({ icon: 'info', title: 'Inscripción pendiente', text: 'En breve un administrador validará tu pago y confirmará tu cupo.', confirmButtonColor: '#fbbf24' }).then(() => showWhatsappPrompt());
             }
             renderTorneos(torneosData);
           }).catch(err => {
