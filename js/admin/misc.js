@@ -3137,48 +3137,102 @@ window.searchUserForAdjustment = function() {
       userData = child.val();
     });
     
-    const withdrawn = parseFloat(userData.withdrawnTournamentEarnings) || 0;
-    const archived = parseFloat(userData.withdrawnTournamentEarnings === undefined && userData.archivedTournamentEarnings ? userData.archivedTournamentEarnings : (userData.archivedTournamentEarnings || 0));
-    
-    resultArea.innerHTML = `
-      <div style="margin-bottom: 10px;">
-        <div style="font-weight: bold; color: var(--text-primary);">${userData.name || 'Sin nombre'}</div>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">${uid}</div>
-      </div>
+    // Now fetch all tournaments to calculate their exact active balance
+    firebase.database().ref('tournaments').once('value').then(tSnap => {
+      let totalTournamentEarnings = 0;
       
-      <div style="margin-bottom: 15px;">
-        <label class="admin-form-label">Retiros Acumulados ($ USD)</label>
-        <input type="number" id="adj-withdrawn-val" class="admin-form-input" step="0.01" min="0" value="${withdrawn.toFixed(2)}">
-        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Todo lo que el usuario ha retirado.</div>
-      </div>
-
-      <div style="margin-bottom: 15px;">
-        <label class="admin-form-label">Ganancias de Torneos Borrados ($ USD)</label>
-        <input type="number" id="adj-archived-val" class="admin-form-input" step="0.01" min="0" value="${archived.toFixed(2)}">
-        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Ganancias que se guardaron cuando borraste torneos antiguos. Si el usuario tiene un saldo muy alto irreal (historial fantasma), pon este valor y los Retiros en 0.</div>
-      </div>
+      tSnap.forEach(tChild => {
+        const t = tChild.val();
+        if (t.participants && t.participants[uid] && t.participants[uid].paymentStatus !== 'rejected') {
+          if ((t.status === 'completed' || t.status === 'completado') && t.pricePerKill && t.leaderboard) {
+            const myEntry = t.participants[uid];
+            let myKills = 0;
+            const myGameName = (myEntry.gameName || myEntry.name || 'Sin Nombre').trim().toLowerCase();
+            const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
+            if (lbLider) myKills = parseInt(lbLider.kills) || 0;
+            
+            let totalTeamKills = myKills;
+            if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
+              myEntry.teamMembers.forEach(tm => {
+                const tmName = (tm.gameName || 'Compañero').trim().toLowerCase();
+                const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
+                if (lbTm) totalTeamKills += (parseInt(lbTm.kills) || 0);
+              });
+            }
+            totalTournamentEarnings += (totalTeamKills * (parseFloat(t.pricePerKill) || 0));
+          }
+        }
+      });
       
-      <button class="btn btn-primary" onclick="saveWithdrawalAdjustment('${uid}')" style="width: 100%;">💾 Guardar Nuevos Valores</button>
-    `;
+      const withdrawn = parseFloat(userData.withdrawnTournamentEarnings) || 0;
+      const archived = parseFloat(userData.archivedTournamentEarnings) || 0;
+      const refunded = parseFloat(userData.refundedTournamentEarnings) || 0;
+      
+      const totalHistorical = totalTournamentEarnings + archived + refunded;
+      const currentAvailable = Math.max(0, totalHistorical - withdrawn);
+      
+      resultArea.innerHTML = `
+        <div style="margin-bottom: 10px;">
+          <div style="font-weight: bold; color: var(--text-primary);">${userData.name || 'Sin nombre'}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">${email}</div>
+          
+          <div style="margin-top: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+            <div style="font-size: 0.8rem; color: #10b981;">Historial Bruto: $${totalHistorical.toFixed(2)} USD</div>
+            <div style="font-size: 0.8rem; color: #ef4444;">Retiros Actuales: $${withdrawn.toFixed(2)} USD</div>
+            <div style="font-size: 1rem; font-weight: bold; color: var(--text-primary); margin-top: 5px;">Saldo Actual Mostrado: <span style="color:#10b981;">$${currentAvailable.toFixed(2)} USD</span></div>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 15px; margin-top: 20px;">
+          <label class="admin-form-label" style="color:var(--accent);">¿Cuánto dinero exacto quieres que tenga el usuario en su billetera?</label>
+          <input type="number" id="adj-desired-val" class="admin-form-input" step="0.01" min="0" value="${currentAvailable.toFixed(2)}" style="font-size: 1.2rem; font-weight: bold;">
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Escribe el monto que quieres que el cliente vea en pantalla. El sistema calculará la matemática por ti.</div>
+        </div>
+        
+        <input type="hidden" id="adj-historical-val" value="${totalHistorical}">
+        <button class="btn btn-primary" onclick="saveWithdrawalAdjustment('${uid}')" style="width: 100%; font-weight: bold;">🪄 Ajustar Billetera Automáticamente</button>
+      `;
+    });
   }).catch(err => {
     resultArea.innerHTML = '<p style="color:#ef4444; margin:0;">Error en la búsqueda.</p>';
   });
 };
 
 window.saveWithdrawalAdjustment = function(uid) {
-  const newWithdrawn = parseFloat(document.getElementById('adj-withdrawn-val').value);
-  const newArchived = parseFloat(document.getElementById('adj-archived-val').value);
+  const desiredVal = parseFloat(document.getElementById('adj-desired-val').value);
+  const historicalVal = parseFloat(document.getElementById('adj-historical-val').value);
   
-  if (isNaN(newWithdrawn) || newWithdrawn < 0 || isNaN(newArchived) || newArchived < 0) return alert('Montos inválidos');
+  if (isNaN(desiredVal) || desiredVal < 0) return alert('Monto inválido');
   
-  firebase.database().ref('users/' + uid).update({
-    withdrawnTournamentEarnings: newWithdrawn,
-    archivedTournamentEarnings: newArchived
-  }).then(() => {
-    alert('✅ Historial del cliente actualizado correctamente.');
-    closeAdminModal();
-  }).catch(err => {
-    alert('Error al actualizar: ' + err.message);
-  });
+  // Math: available = historical - withdrawn
+  // withdrawn = historical - desired
+  let newWithdrawn = historicalVal - desiredVal;
+  
+  // If they want more money than historical, we can't have negative withdrawals, so we just set withdrawals to 0
+  // and give them the rest in archivedEarnings.
+  let updates = {};
+  if (newWithdrawn < 0) {
+    updates['withdrawnTournamentEarnings'] = 0;
+    
+    // They need extra money to reach desiredVal. The extra is Math.abs(newWithdrawn).
+    // We add it to archivedEarnings.
+    firebase.database().ref('users/' + uid + '/archivedTournamentEarnings').once('value').then(snap => {
+      const currentArchived = parseFloat(snap.val()) || 0;
+      updates['archivedTournamentEarnings'] = currentArchived + Math.abs(newWithdrawn);
+      
+      firebase.database().ref('users/' + uid).update(updates).then(() => {
+        alert('✅ ¡Magia completada! El saldo del cliente ahora es exactamente $' + desiredVal.toFixed(2));
+        closeAdminModal();
+      });
+    });
+  } else {
+    updates['withdrawnTournamentEarnings'] = newWithdrawn;
+    firebase.database().ref('users/' + uid).update(updates).then(() => {
+      alert('✅ ¡Magia completada! El saldo del cliente ahora es exactamente $' + desiredVal.toFixed(2));
+      closeAdminModal();
+    }).catch(err => {
+      alert('Error al actualizar: ' + err.message);
+    });
+  }
 };
 
