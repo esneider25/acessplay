@@ -437,35 +437,44 @@ function renderHallOfFame(data, isPreAggregated = false) {
     topPremium = Array.isArray(premiumData) ? premiumData : Object.values(premiumData);
     topFree = Array.isArray(freeData) ? freeData : Object.values(freeData);
     
-    topPremium.sort((a, b) => b.kills - a.kills);
-    topFree.sort((a, b) => b.kills - a.kills);
+    // Sort by totalWins (primary) and totalEarnings (secondary)
+    topPremium.sort((a, b) => {
+       if (b.totalWins !== a.totalWins) return (b.totalWins || 0) - (a.totalWins || 0);
+       return (b.totalEarnings || 0) - (a.totalEarnings || 0);
+    });
+    topFree.sort((a, b) => {
+       if (b.totalWins !== a.totalWins) return (b.totalWins || 0) - (a.totalWins || 0);
+       return (b.totalEarnings || 0) - (a.totalEarnings || 0);
+    });
     
     topPremium = topPremium.slice(0, 10);
     topFree = topFree.slice(0, 10);
   } else {
+    // Fallback if data is not pre-aggregated (just in case)
     const playerStatsPremium = {};
     const playerStatsFree = {};
     
-    // Aggregate stats across all completed tournaments
     data.forEach(t => {
-      if ((t.status === 'completed' || t.status === 'completado') && t.leaderboard && t.leaderboard.length > 0) {
+      if ((t.status === 'completed' || t.status === 'completado') && t.winners && t.winners.length > 0) {
         const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
         const targetStats = isFree ? playerStatsFree : playerStatsPremium;
         
-        t.leaderboard.forEach(entry => {
-          if (!entry.playerName) return;
-          const name = entry.playerName.trim();
+        t.winners.forEach(entry => {
+          if (!entry.name) return;
+          const name = entry.name.trim();
           if (!targetStats[name]) {
-            targetStats[name] = { name: name, kills: 0, gamesPlayed: 0 };
+            targetStats[name] = { name: name, totalWins: 0, tournamentsPlayed: 0, totalEarnings: 0 };
           }
-          targetStats[name].kills += (parseInt(entry.kills) || 0);
-          targetStats[name].gamesPlayed += 1;
+          targetStats[name].totalWins += 1;
+          const wStr = (entry.reward || '').replace(/[^0-9.]/g, '');
+          const val = parseFloat(wStr);
+          if (!isNaN(val)) targetStats[name].totalEarnings += val;
         });
       }
     });
     
-    topPremium = Object.values(playerStatsPremium).sort((a, b) => b.kills - a.kills).slice(0, 10);
-    topFree = Object.values(playerStatsFree).sort((a, b) => b.kills - a.kills).slice(0, 10);
+    topPremium = Object.values(playerStatsPremium).sort((a, b) => (b.totalWins || 0) - (a.totalWins || 0)).slice(0, 10);
+    topFree = Object.values(playerStatsFree).sort((a, b) => (b.totalWins || 0) - (a.totalWins || 0)).slice(0, 10);
   }
   
   premiumContainer.innerHTML = buildHofHtml(topPremium, 'Aún no hay campeones en torneos premium. ¡Sé el primero!');
@@ -498,6 +507,8 @@ function buildHofHtml(topPlayers, emptyMessage) {
       rankBadge = `<span style="color:var(--text-muted); font-size:1.2rem; font-weight:bold;">#${i+1}</span>`;
     }
     
+    const earns = player.totalEarnings > 0 ? `<div style="text-align:center;"><div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Ganancias</div><div style="font-weight:800; color:#4ade80; font-size:1.1rem;">$${player.totalEarnings.toFixed(2)}</div></div>` : '';
+
     html += `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border-radius:12px; ${cardStyle} transition: 0.3s; cursor:default;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
         
@@ -509,12 +520,13 @@ function buildHofHtml(topPlayers, emptyMessage) {
         <div style="display:flex; gap:30px; align-items:center;">
           <div style="text-align:center;">
             <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Partidas</div>
-            <div style="font-weight:600; color:var(--text-secondary);">${player.gamesPlayed}</div>
+            <div style="font-weight:600; color:var(--text-secondary);">${player.tournamentsPlayed || player.gamesPlayed || 0}</div>
           </div>
           <div style="text-align:center;">
-            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Kills Totales</div>
-            <div style="font-weight:800; color:var(--accent); font-size:1.2rem;">${player.kills}</div>
+            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Victorias</div>
+            <div style="font-weight:800; color:var(--accent); font-size:1.2rem;">${player.totalWins || 0}</div>
           </div>
+          ${earns}
         </div>
         
       </div>

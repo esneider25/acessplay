@@ -3393,7 +3393,7 @@ window.migrateTournamentsData = async function() {
 
         // Global stats aggregation
         if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
-            if (!playerStats[uid]) playerStats[uid] = { uid, name: p.name || 'Desconocido', gameName: p.gameName || 'Sin IGN', tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, type: p.paymentStatus === 'approved' ? 'premium' : 'free' };
+            if (!playerStats[uid]) playerStats[uid] = { uid, name: p.name || 'Desconocido', gameName: p.gameName || 'Sin IGN', tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0, type: p.paymentStatus === 'approved' ? 'premium' : 'free' };
             playerStats[uid].tournamentsPlayed += 1;
             // Upgrade type if they ever pay
             if (p.paymentStatus === 'approved') playerStats[uid].type = 'premium';
@@ -3415,6 +3415,48 @@ window.migrateTournamentsData = async function() {
              const wStr = (w.reward || '').replace(/[^0-9.]/g, '');
              const val = parseFloat(wStr);
              if (!isNaN(val)) playerStats[w.uid].totalEarnings += val;
+         }
+      });
+
+      // Calculate kills from leaderboard
+      const leaderboard = t.leaderboard || [];
+      leaderboard.forEach(entry => {
+         if (!entry.playerName) return;
+         let matchedUid = null;
+         const entryName = entry.playerName.trim().toLowerCase();
+         for (const uid in participants) {
+             const p = participants[uid];
+             if ((p.gameName || '').trim().toLowerCase() === entryName || (p.name || '').trim().toLowerCase() === entryName) {
+                 matchedUid = uid;
+                 break;
+             }
+             if (p.teamMembers) {
+                 const tm = p.teamMembers.find(m => (m.gameName || '').trim().toLowerCase() === entryName || (m.playerName || '').trim().toLowerCase() === entryName);
+                 if (tm) { matchedUid = uid; break; }
+             }
+         }
+         
+         const killsToAdd = parseInt(entry.kills) || 0;
+         if (matchedUid && playerStats[matchedUid]) {
+             playerStats[matchedUid].totalKills = (playerStats[matchedUid].totalKills || 0) + killsToAdd;
+         } else {
+             // Fallback for legacy leaderboard entries without a linked participant UID
+             const legacyId = 'legacy_' + entry.playerName.replace(/\s/g, '');
+             if (!playerStats[legacyId]) {
+                 playerStats[legacyId] = { 
+                     uid: legacyId, 
+                     name: entry.playerName, 
+                     gameName: entry.playerName, 
+                     tournamentsPlayed: 1, 
+                     totalWins: 0, 
+                     totalEarnings: 0, 
+                     totalKills: 0, 
+                     type: (!t.entryFee || parseFloat(t.entryFee) === 0) ? 'free' : 'premium' 
+                 };
+             } else {
+                 playerStats[legacyId].tournamentsPlayed += 1;
+             }
+             playerStats[legacyId].totalKills += killsToAdd;
          }
       });
     }
