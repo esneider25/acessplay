@@ -42,6 +42,21 @@ function getGameModeLabel(mode) {
 }
 
 // ── Init ──
+
+window.userTournamentRegistrations = {};
+async function fetchUserRegistrations(torneos) {
+   if (!window.currentUser || !torneos || torneos.length === 0) return;
+   const promises = torneos.map(t => 
+      firebase.database().ref(`tournament_participants/${t.id}/${window.currentUser.uid}`).once('value')
+      .then(snap => {
+          if (snap.exists()) {
+              window.userTournamentRegistrations[t.id] = snap.val();
+          }
+      })
+   );
+   await Promise.all(promises);
+}
+
 function initTorneos() {
   if (typeof firebase === 'undefined') {
     setTimeout(initTorneos, 500);
@@ -50,11 +65,15 @@ function initTorneos() {
   
   const db = firebase.database();
   
-  firebase.auth().onAuthStateChanged(user => {
-    if (window.currentUser !== undefined) {
+  firebase.auth().onAuthStateChanged(async user => {
+    if (user) {
       window.currentUser = user;
+      await fetchUserRegistrations(torneosData);
+    } else {
+      window.currentUser = null;
+      window.userTournamentRegistrations = {};
     }
-    renderTorneos(torneosData);
+    if (window.currentUser) { fetchUserRegistrations(torneosData).then(() => renderTorneos(torneosData)); } else { renderTorneos(torneosData); }
   });
   
   let currentLimit = 5;
@@ -106,7 +125,7 @@ function initTorneos() {
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
       
-      renderTorneos(torneosData);
+      if (window.currentUser) { fetchUserRegistrations(torneosData).then(() => renderTorneos(torneosData)); } else { renderTorneos(torneosData); }
     });
   }
   
@@ -119,7 +138,7 @@ function initTorneos() {
     document.querySelectorAll('.torneos-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentFilter = btn.dataset.filter;
-    renderTorneos(torneosData);
+    if (window.currentUser) { fetchUserRegistrations(torneosData).then(() => renderTorneos(torneosData)); } else { renderTorneos(torneosData); }
   });
 }
 
@@ -741,6 +760,7 @@ window.openInscriptionModal = function(tournamentId) {
         
         firebase.database().ref('tournament_participants/' + tournamentId + '/' + user.uid).set(participantData)
           .then(() => {
+            window.userTournamentRegistrations[tournamentId] = participantData;
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
               const countAddition = 1 + (participantData.teamMembers ? participantData.teamMembers.length : 0);
               firebase.database().ref('tournaments/' + tournamentId + '/participantsCount').transaction(c => (c || 0) + countAddition);
@@ -776,13 +796,14 @@ window.openInscriptionModal = function(tournamentId) {
               });
             };
 
+            window.userTournamentRegistrations[tournamentId] = participantData;
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
               launchConfetti();
               Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
             } else {
               Swal.fire({ icon: 'info', title: 'Inscripción pendiente', text: 'En breve un administrador validará tu pago y confirmará tu cupo.', confirmButtonColor: '#fbbf24', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
             }
-            renderTorneos(torneosData);
+            if (window.currentUser) { fetchUserRegistrations(torneosData).then(() => renderTorneos(torneosData)); } else { renderTorneos(torneosData); }
           }).catch(err => {
             console.error('Error al inscribirse:', err);
             submitBtn.disabled = false;
