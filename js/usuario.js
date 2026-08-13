@@ -1826,7 +1826,8 @@ window.renderDashboardTournaments = async function() {
     
     const withdrawnEarnings = (userProfile && userProfile.withdrawnTournamentEarnings) || 0;
     const refundedEarnings = (userProfile && userProfile.refundedTournamentEarnings) || 0;
-    window.availableTournamentEarnings = Math.max(0, (totalTournamentEarnings + refundedEarnings) - withdrawnEarnings);
+    const archivedEarnings = (userProfile && userProfile.archivedTournamentEarnings) || 0;
+    window.availableTournamentEarnings = Math.max(0, (totalTournamentEarnings + refundedEarnings + archivedEarnings) - withdrawnEarnings);
     
     const pointsDisplay = document.getElementById('tournaments-points-display');
     if (pointsDisplay) {

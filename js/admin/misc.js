@@ -1885,8 +1885,48 @@ window.updateTournamentStatus = function(id, newStatus) {
 };
 
 window.deleteTournament = function(id) {
-  if (confirm('¿Estás seguro de ELIMINAR este torneo de prueba? Esta acción no reembolsará a nadie y no se puede deshacer.')) {
-    firebase.database().ref('tournaments/' + id).remove();
+  if (confirm('¿Estás seguro de ELIMINAR este torneo? Para proteger el saldo de los jugadores, se calcularán y archivarán automáticamente las ganancias obtenidas en este torneo antes de borrarlo. Esta acción no se puede deshacer.')) {
+    firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+      const t = snap.val();
+      if (!t) return;
+      
+      const pricePerKill = parseFloat(t.pricePerKill) || 0;
+      const isCompleted = t.status === 'completed' || t.status === 'completado';
+      const hasLeaderboard = t.leaderboard && Array.isArray(t.leaderboard);
+      const hasParticipants = t.participants && typeof t.participants === 'object';
+      
+      if (isCompleted && pricePerKill > 0 && hasLeaderboard && hasParticipants) {
+        Object.keys(t.participants).forEach(uid => {
+           const myEntry = t.participants[uid];
+           if (myEntry.paymentStatus === 'rejected') return;
+           
+           let myKills = 0;
+           const myGameName = (myEntry.gameName || myEntry.name || 'Sin Nombre').trim().toLowerCase();
+           const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
+           if (lbLider) myKills = parseInt(lbLider.kills) || 0;
+           
+           let totalTeamKills = myKills;
+           if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
+              myEntry.teamMembers.forEach(tm => {
+                 const tmName = (tm.gameName || 'Compañero').trim().toLowerCase();
+                 const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
+                 if (lbTm) totalTeamKills += (parseInt(lbTm.kills) || 0);
+              });
+           }
+           
+           const earnings = totalTeamKills * pricePerKill;
+           if (earnings > 0) {
+              firebase.database().ref('users/' + uid + '/archivedTournamentEarnings').transaction(current => {
+                 return (current || 0) + earnings;
+              });
+           }
+        });
+      }
+      
+      firebase.database().ref('tournaments/' + id).remove().then(() => {
+        alert('Torneo eliminado y ganancias archivadas exitosamente.');
+      });
+    });
   }
 };
 
