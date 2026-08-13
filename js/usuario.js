@@ -908,6 +908,7 @@ function renderDashboardContent() {
             <div style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Tus Ganancias</div>
             <div style="font-size: 1.2rem; font-weight: bold; color: #10b981;" id="tournaments-points-display">$0.00 USD</div>
           </div>
+          <button onclick="window.location.href='/torneos'" class="btn-secondary" style="padding: 10px 15px; font-size: 0.85rem; border-radius: 10px; display:flex; align-items:center; gap:6px; background: rgba(14, 165, 233, 0.1); color: #0ea5e9; border: 1px solid rgba(14, 165, 233, 0.3);"><i class="ph-fill ph-sword"></i> Ir a Torneos</button>
           <button onclick="requestTournamentCashout()" class="btn-primary" style="padding: 10px 15px; font-size: 0.85rem; background: linear-gradient(135deg, #10b981, #059669); border:none; border-radius: 10px; display:flex; align-items:center; gap:6px; box-shadow: 0 4px 12px rgba(16,185,129,0.3);"><i class="ph-fill ph-wallet"></i> Retirar Premio</button>
         </div>
       </div>

@@ -1,6 +1,9 @@
 // ════════════════════════════════════════
 // WITHDRAWALS (RETIROS)
 // ════════════════════════════════════════
+window.withdrawalsCurrentPage = 1;
+window.allWithdrawals = [];
+
 function renderWithdrawals(container) {
   firebase.database().ref('withdrawals').once('value').then(snap => {
     let withdrawals = [];
@@ -12,8 +15,28 @@ function renderWithdrawals(container) {
     }
 
     withdrawals.sort((a, b) => b.createdAt - a.createdAt);
+    window.allWithdrawals = withdrawals;
+    window.withdrawalsCurrentPage = 1;
+    window.renderWithdrawalsTable(container);
+  }).catch(err => {
+    console.error(err);
+    if(container) container.innerHTML = `<div style="color:red; padding:20px;">Error cargando retiros: ${err.message}</div>`;
+  });
+}
 
-    const html = `
+window.renderWithdrawalsTable = function(container) {
+  if (!container) container = document.getElementById('admin-main-content');
+  if (!container) return;
+  
+  const limit = 20;
+  const totalPages = Math.max(1, Math.ceil(window.allWithdrawals.length / limit));
+  if (window.withdrawalsCurrentPage > totalPages) window.withdrawalsCurrentPage = totalPages;
+  if (window.withdrawalsCurrentPage < 1) window.withdrawalsCurrentPage = 1;
+  
+  const startIdx = (window.withdrawalsCurrentPage - 1) * limit;
+  const withdrawalsPage = window.allWithdrawals.slice(startIdx, startIdx + limit);
+
+  const html = `
       <div class="admin-header">
         <h2 class="admin-title">Retiros de Ganancias</h2>
       </div>
@@ -33,7 +56,7 @@ function renderWithdrawals(container) {
               </tr>
             </thead>
             <tbody>
-              ${withdrawals.map(w => {
+              ${withdrawalsPage.map(w => {
       let detailsStr = '';
       if (w.method === 'binance') {
         detailsStr = `Binance Pay: <strong>${w.details?.account}</strong>`;
@@ -70,18 +93,25 @@ function renderWithdrawals(container) {
                 `;
     }).join('')}
               
-              ${withdrawals.length === 0 ? `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-secondary);">No hay retiros registrados.</td></tr>` : ''}
+              ${window.allWithdrawals.length === 0 ? `<tr><td colspan="7" style="text-align:center; padding:20px; color:var(--text-secondary);">No hay retiros registrados.</td></tr>` : ''}
             </tbody>
           </table>
         </div>
+        
+        <!-- Paginación -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 10px;">
+          <div style="font-size: 0.85rem; color: var(--text-secondary);">
+            Mostrando ${startIdx + 1} - ${Math.min(startIdx + limit, window.allWithdrawals.length)} de ${window.allWithdrawals.length}
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="window.withdrawalsCurrentPage--; renderWithdrawalsTable()" ${window.withdrawalsCurrentPage === 1 ? 'disabled' : ''}>Anterior</button>
+            <button class="btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="window.withdrawalsCurrentPage++; renderWithdrawalsTable()" ${window.withdrawalsCurrentPage === totalPages ? 'disabled' : ''}>Siguiente</button>
+          </div>
+        </div>
       </div>
     `;
-    container.innerHTML = html;
-  }).catch(err => {
-    console.error(err);
-    container.innerHTML = `<div style="color:red; padding:20px;">Error cargando retiros: ${err.message}</div>`;
-  });
-}
+  container.innerHTML = html;
+};
 
 window.updateWithdrawalStatus = function (withdrawalId, newStatus, userId, pointsToRefund, wType, amountUsd) {
   if (!confirm(newStatus === 'completed' ? '¿Confirmas que ya enviaste el dinero a este usuario?' : '¿Seguro que deseas RECHAZAR este retiro? (Se le devolverá el saldo al usuario)')) return;
