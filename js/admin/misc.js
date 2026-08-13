@@ -2455,15 +2455,18 @@ window.manageTournamentResults = function(id) {
       }
     });
     
-    // Build lookup for existing kills
+    // Build lookup for existing kills and pos
     const killsMap = {};
+    const posMap = {};
     leaderboard.forEach(entry => {
       killsMap[entry.playerName] = entry.kills || 0;
+      posMap[entry.playerName] = entry.position || 0;
     });
     
     // Build grouped rows
     let leaderboardRows = '';
     const groupedParticipants = validParticipants;
+    const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
     
     if (groupedParticipants.length > 0 || leaderboard.length > 0) {
       let index = 1;
@@ -2484,12 +2487,20 @@ window.manageTournamentResults = function(id) {
         
         // Captain row
         const capKills = killsMap[pName] || 0;
+        const capPos = posMap[pName] || 0;
+        const inputsHTML = isPrizeFormat
+          ? `<div style="display:flex; gap:5px;">
+               <input type="number" class="admin-form-input bulk-pos-input" data-player="${pName.replace(/"/g, '&quot;')}" value="${capPos}" min="0" placeholder="Pos" style="width:60px; padding:6px; margin:0;" title="Posición (1,2,3...)">
+               <input type="number" class="admin-form-input bulk-kill-input" data-player="${pName.replace(/"/g, '&quot;')}" value="${capKills}" min="0" placeholder="Kills" style="width:60px; padding:6px; margin:0;" title="Kills logradas">
+             </div>`
+          : `<input type="number" class="admin-form-input bulk-kill-input" data-player="${pName.replace(/"/g, '&quot;')}" value="${capKills}" min="0" style="width:70px; padding:6px; margin:0;" title="Kills logradas">`;
+
         leaderboardRows += `
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:8px; color:var(--text-muted);">${index++}</td>
             <td style="padding:8px; font-weight:500;">${pName} ${teamType !== 'Solo' ? '<span style="font-size:0.7rem; color:var(--text-muted);">(Líder)</span>' : ''}</td>
             <td style="padding:8px;">
-              <input type="number" class="admin-form-input bulk-kill-input" data-player="${pName.replace(/"/g, '&quot;')}" value="${capKills}" min="0" style="width:70px; padding:6px; margin:0;">
+              ${inputsHTML}
             </td>
           </tr>
         `;
@@ -2499,12 +2510,20 @@ window.manageTournamentResults = function(id) {
           p.teamMembers.forEach(tm => {
             const tmName = tm.gameName || 'Compañero';
             const tmKills = killsMap[tmName] || 0;
+            const tmPos = posMap[tmName] || 0;
+            const tmInputsHTML = isPrizeFormat
+              ? `<div style="display:flex; gap:5px;">
+                   <input type="number" class="admin-form-input bulk-pos-input" data-player="${tmName.replace(/"/g, '&quot;')}" value="${tmPos}" min="0" placeholder="Pos" style="width:60px; padding:6px; margin:0;" title="Posición (1,2,3...)">
+                   <input type="number" class="admin-form-input bulk-kill-input" data-player="${tmName.replace(/"/g, '&quot;')}" value="${tmKills}" min="0" placeholder="Kills" style="width:60px; padding:6px; margin:0;" title="Kills logradas">
+                 </div>`
+              : `<input type="number" class="admin-form-input bulk-kill-input" data-player="${tmName.replace(/"/g, '&quot;')}" value="${tmKills}" min="0" style="width:70px; padding:6px; margin:0;" title="Kills logradas">`;
+              
             leaderboardRows += `
               <tr style="border-bottom:1px solid var(--border);">
                 <td style="padding:8px; color:var(--text-muted);">${index++}</td>
                 <td style="padding:8px;">${tmName}</td>
                 <td style="padding:8px;">
-                  <input type="number" class="admin-form-input bulk-kill-input" data-player="${tmName.replace(/"/g, '&quot;')}" value="${tmKills}" min="0" style="width:70px; padding:6px; margin:0;">
+                  ${tmInputsHTML}
                 </td>
               </tr>
             `;
@@ -2515,12 +2534,21 @@ window.manageTournamentResults = function(id) {
       // Also render players in leaderboard that aren't in participants (manual additions)
       leaderboard.forEach(entry => {
         if (entry.playerName && !allPlayers.includes(entry.playerName)) {
+          const ePos = entry.position || 0;
+          const eKills = entry.kills || 0;
+          const eInputsHTML = isPrizeFormat
+            ? `<div style="display:flex; gap:5px;">
+                 <input type="number" class="admin-form-input bulk-pos-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${ePos}" min="0" placeholder="Pos" style="width:60px; padding:6px; margin:0;" title="Posición (1,2,3...)">
+                 <input type="number" class="admin-form-input bulk-kill-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${eKills}" min="0" placeholder="Kills" style="width:60px; padding:6px; margin:0;" title="Kills logradas">
+               </div>`
+            : `<input type="number" class="admin-form-input bulk-kill-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${eKills}" min="0" style="width:70px; padding:6px; margin:0;" title="Kills logradas">`;
+
           leaderboardRows += `
             <tr style="border-bottom:1px solid var(--border);">
               <td style="padding:8px; color:var(--text-muted);">${index++}</td>
               <td style="padding:8px;">${entry.playerName} <span style="font-size:0.7rem; color:var(--text-muted);">(Manual)</span></td>
               <td style="padding:8px;">
-                <input type="number" class="admin-form-input bulk-kill-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${entry.kills}" min="0" style="width:70px; padding:6px; margin:0;">
+                ${eInputsHTML}
               </td>
             </tr>
           `;
@@ -2531,8 +2559,7 @@ window.manageTournamentResults = function(id) {
       leaderboardRows = '<tr><td colspan="3" style="text-align:center; padding:15px; color:var(--text-muted);">No hay jugadores inscritos</td></tr>';
     }
 
-    const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
-    const scoreLabel = isPrizeFormat ? 'Posición' : 'Kills';
+    const scoreLabel = isPrizeFormat ? 'Pos. y Kills' : 'Kills';
 
     let html = `
       <div style="padding:20px;">
@@ -2540,10 +2567,10 @@ window.manageTournamentResults = function(id) {
         <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">${torneo.productName || ''}</p>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <h4 style="margin:0;">📋 ${isPrizeFormat ? 'Posiciones Individuales' : 'Kills Individuales'}</h4>
+          <h4 style="margin:0;">📋 ${isPrizeFormat ? 'Posiciones y Kills Individuales' : 'Kills Individuales'}</h4>
           <button class="btn btn-primary" onclick="saveBulkLeaderboard('${id}')" style="padding:8px 15px;">💾 Guardar Puntuaciones</button>
         </div>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa ${isPrizeFormat ? 'la posición (1, 2, 3...) en la que quedó cada jugador. Pon 0 si no clasificó o no participó.' : 'las kills exactas de cada jugador individual. Los que tengan 0 no aparecerán en el top.'}</p>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa ${isPrizeFormat ? 'la posición (1, 2, 3...) y las KILLS (para el salón de la fama). Pon 0 en Posición si no clasificó.' : 'las kills exactas de cada jugador individual. Los que tengan 0 no aparecerán en el top.'}</p>
         
         <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
           <table style="width:100%; border-collapse:collapse;">
@@ -2589,12 +2616,26 @@ window.manageTournamentResults = function(id) {
 
 window.saveBulkLeaderboard = function(id) {
   const inputs = document.querySelectorAll('.bulk-kill-input');
+  const posInputs = document.querySelectorAll('.bulk-pos-input');
   const newLeaderboard = [];
   
+  // Create a map to combine pos and kills per player
+  const playerStats = {};
+  
   inputs.forEach(input => {
-    const kills = parseInt(input.value) || 0;
     const playerName = input.getAttribute('data-player');
-    newLeaderboard.push({ playerName, kills });
+    if (!playerStats[playerName]) playerStats[playerName] = { playerName, kills: 0, position: 0 };
+    playerStats[playerName].kills = parseInt(input.value) || 0;
+  });
+  
+  posInputs.forEach(input => {
+    const playerName = input.getAttribute('data-player');
+    if (!playerStats[playerName]) playerStats[playerName] = { playerName, kills: 0, position: 0 };
+    playerStats[playerName].position = parseInt(input.value) || 0;
+  });
+  
+  Object.values(playerStats).forEach(stat => {
+    newLeaderboard.push(stat);
   });
   
   firebase.database().ref('tournaments/' + id).once('value').then(snap => {
@@ -2603,10 +2644,10 @@ window.saveBulkLeaderboard = function(id) {
     
     if (isPrizeFormat) {
       newLeaderboard.sort((a, b) => {
-        if (a.kills === 0 && b.kills === 0) return 0;
-        if (a.kills === 0) return 1;
-        if (b.kills === 0) return -1;
-        return a.kills - b.kills;
+        if (a.position === 0 && b.position === 0) return (b.kills || 0) - (a.kills || 0);
+        if (a.position === 0) return 1;
+        if (b.position === 0) return -1;
+        return a.position - b.position;
       });
     } else {
       newLeaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
