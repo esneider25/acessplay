@@ -1500,6 +1500,9 @@ window.submitTournamentCashout = function() {
   }
   
   // Submit
+  const exchangeRate = typeof EXCHANGE_RATE !== 'undefined' ? (EXCHANGE_RATE.tournamentsUsdToBs || EXCHANGE_RATE.usdToBs || 1) : 1;
+  const amountBs = parseFloat((amount * exchangeRate).toFixed(2));
+
   const withdrawRef = firebase.database().ref('withdrawals').push();
   const withdrawalData = {
     id: withdrawRef.key,
@@ -1508,6 +1511,7 @@ window.submitTournamentCashout = function() {
     userName: userProfile.name || '',
     amountPoints: 0,
     amountUsd: amount,
+    amountBs: amountBs,
     method: method,
     details: details,
     type: 'tournament_prize',
