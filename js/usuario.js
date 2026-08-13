@@ -1807,14 +1807,14 @@ window.renderDashboardTournaments = async function() {
         if ((t.status === 'completed' || t.status === 'completado') && t.pricePerKill && t.leaderboard) {
            const myEntry = t.participants[currentUser.uid];
            let myKills = 0;
-           const myGameName = (myEntry.gameName || '').trim().toLowerCase();
+           const myGameName = (myEntry.gameName || myEntry.name || 'Sin Nombre').trim().toLowerCase();
            const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
            if (lbLider) myKills = parseInt(lbLider.kills) || 0;
            
            let totalTeamKills = myKills;
            if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
               myEntry.teamMembers.forEach(tm => {
-                 const tmName = (tm.gameName || '').trim().toLowerCase();
+                 const tmName = (tm.gameName || 'Compañero').trim().toLowerCase();
                  const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
                  if (lbTm) totalTeamKills += (parseInt(lbTm.kills) || 0);
               });
@@ -1923,7 +1923,8 @@ window.renderDashboardTournaments = async function() {
          let resultsHtml = '';
          if (t.status === 'completed' && t.leaderboard) {
             let myKills = 0;
-            const lbLider = t.leaderboard.find(l => l.playerName === myEntry.gameName);
+            const myGameName = (myEntry.gameName || myEntry.name || 'Sin Nombre').trim().toLowerCase();
+            const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
             if (lbLider) myKills = lbLider.kills || 0;
             
             let myTeamKillsHtml = '';
@@ -1931,7 +1932,8 @@ window.renderDashboardTournaments = async function() {
             
             if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
               myEntry.teamMembers.forEach(tm => {
-                const lbTm = t.leaderboard.find(l => l.playerName === tm.gameName);
+                const tmName = (tm.gameName || 'Compañero').trim().toLowerCase();
+                const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
                 const tmKills = lbTm ? (lbTm.kills || 0) : 0;
                 totalTeamKills += tmKills;
                 myTeamKillsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${tm.gameName || 'Compañero'}:</span> <strong>${tmKills} Kills</strong></div>`;
