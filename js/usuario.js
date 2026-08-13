@@ -1440,29 +1440,12 @@ window.requestTournamentCashout = function() {
 
         <div class="form-group">
           <label>Método de Pago</label>
-          <select id="cashout-tournament-method" class="form-input" onchange="
-            const method = this.value;
-            if(method === 'binance') {
-              document.getElementById('cashout-tournament-binance-fields').style.display = 'block';
-              document.getElementById('cashout-tournament-pagomovil-fields').style.display = 'none';
-            } else {
-              document.getElementById('cashout-tournament-binance-fields').style.display = 'none';
-              document.getElementById('cashout-tournament-pagomovil-fields').style.display = 'block';
-            }
-          ">
-            <option value="binance">Binance Pay</option>
+          <select id="cashout-tournament-method" class="form-input">
             <option value="pagomovil">Pago Móvil</option>
           </select>
         </div>
         
-        <div id="cashout-tournament-binance-fields">
-          <div class="form-group">
-            <label>Correo / PayID / Binance ID</label>
-            <input type="text" id="cashout-tournament-binance-id" class="form-input" placeholder="ej. usuario@gmail.com o 12345678">
-          </div>
-        </div>
-        
-        <div id="cashout-tournament-pagomovil-fields" style="display:none;">
+        <div id="cashout-tournament-pagomovil-fields" style="display:block;">
           <div class="form-group">
             <label>Banco</label>
             <input type="text" id="cashout-tournament-pm-bank" class="form-input" placeholder="ej. Banesco, Mercantil...">

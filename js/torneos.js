@@ -516,7 +516,7 @@ window.openInscriptionModal = function(tournamentId) {
     let pmOptions = '<option value="wallet">Mi Billetera Virtual</option>';
     if (typeof PAYMENT_METHODS !== 'undefined') {
       PAYMENT_METHODS.forEach(pm => {
-        if (pm.id !== 'wallet') pmOptions += `<option value="${pm.id}">${pm.name}</option>`;
+        if (pm.id !== 'wallet' && pm.name.toLowerCase().indexOf('binance') === -1) pmOptions += `<option value="${pm.id}">${pm.name}</option>`;
       });
     } else {
       pmOptions += '<option value="pagomovil">Pago Móvil / Transferencia</option>';
