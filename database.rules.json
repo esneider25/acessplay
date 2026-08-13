@@ -58,7 +58,10 @@
     },
     "tournament_metadata": {
       ".read": "true",
-      ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+      ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+      "participants": {
+        ".write": "auth != null"
+      }
     },
     "product_stats": {
       ".read": "true",

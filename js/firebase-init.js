@@ -12,4 +12,11 @@ const firebaseConfig = {
 // Initialize Firebase using the Compat SDK
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const storage = firebase.storage();
+let storage;
+try {
+  if (typeof firebase.storage === 'function') {
+    storage = firebase.storage();
+  }
+} catch (e) {
+  console.warn('Firebase Storage no inicializado en esta página.');
+}
