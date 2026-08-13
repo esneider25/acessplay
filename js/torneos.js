@@ -759,7 +759,20 @@ window.viewTournamentResults = function(id) {
   const torneo = torneosData.find(t => t.id === id);
   if (!torneo) return;
   const leaderboard = torneo.leaderboard || [];
-  const sorted = [...leaderboard].sort((a, b) => (b.kills || 0) - (a.kills || 0));
+  
+  const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
+  const scoreLabel = isPrizeFormat ? 'Lugar' : 'Kills';
+  
+  const sorted = [...leaderboard].sort((a, b) => {
+    if (isPrizeFormat) {
+      if (a.kills === 0 && b.kills === 0) return 0;
+      if (a.kills === 0) return 1;
+      if (b.kills === 0) return -1;
+      return a.kills - b.kills;
+    } else {
+      return (b.kills || 0) - (a.kills || 0);
+    }
+  });
   
   let rows = '';
   sorted.forEach((l, i) => {
@@ -769,10 +782,17 @@ window.viewTournamentResults = function(id) {
     else if (i === 2) medal = '🥉';
     else medal = `<span style="opacity:0.6;">${i+1}º</span>`;
     
+    // Si tiene 0 y es formato premio, significa que no clasificó.
+    if (isPrizeFormat && l.kills === 0) {
+      medal = '<span style="opacity:0.6;">-</span>';
+    }
+    
+    let displayScore = (isPrizeFormat && l.kills === 0) ? 'N/C' : l.kills;
+    
     rows += `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:rgba(255,255,255,0.03); margin-bottom:8px; border-radius:8px;">
         <div style="font-size:1.05rem;"><strong style="color:var(--accent); font-size:1.2rem; display:inline-block; width:30px; text-align:center;">${medal}</strong> <span style="margin-left:10px; font-weight:600;">${l.playerName}</span></div>
-        <div style="color:var(--text-secondary); font-size:0.95rem; font-family:var(--font-mono);"><strong style="color:white;">${l.kills}</strong> Kills</div>
+        <div style="color:var(--text-secondary); font-size:0.95rem; font-family:var(--font-mono);"><strong style="color:white;">${displayScore}</strong> ${scoreLabel}</div>
       </div>
     `;
   });

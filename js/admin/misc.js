@@ -2531,16 +2531,19 @@ window.manageTournamentResults = function(id) {
       leaderboardRows = '<tr><td colspan="3" style="text-align:center; padding:15px; color:var(--text-muted);">No hay jugadores inscritos</td></tr>';
     }
 
+    const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
+    const scoreLabel = isPrizeFormat ? 'Posición' : 'Kills';
+
     let html = `
       <div style="padding:20px;">
         <h3>📊 Resultados: ${torneo.title}</h3>
         <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">${torneo.productName || ''}</p>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <h4 style="margin:0;">📋 Kills Individuales</h4>
+          <h4 style="margin:0;">📋 ${isPrizeFormat ? 'Posiciones Individuales' : 'Kills Individuales'}</h4>
           <button class="btn btn-primary" onclick="saveBulkLeaderboard('${id}')" style="padding:8px 15px;">💾 Guardar Puntuaciones</button>
         </div>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa las kills exactas de cada jugador individual. Los que tengan 0 no aparecerán en el top.</p>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa ${isPrizeFormat ? 'la posición (1, 2, 3...) en la que quedó cada jugador. Pon 0 si no clasificó o no participó.' : 'las kills exactas de cada jugador individual. Los que tengan 0 no aparecerán en el top.'}</p>
         
         <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
           <table style="width:100%; border-collapse:collapse;">
@@ -2548,7 +2551,7 @@ window.manageTournamentResults = function(id) {
               <tr style="border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02);">
                 <th style="padding:8px; text-align:left; width:40px;">#</th>
                 <th style="padding:8px; text-align:left;">Jugador</th>
-                <th style="padding:8px; text-align:left; width:100px;">Kills</th>
+                <th style="padding:8px; text-align:left; width:100px;">${scoreLabel}</th>
               </tr>
             </thead>
             <tbody>${leaderboardRows}</tbody>
@@ -2591,18 +2594,31 @@ window.saveBulkLeaderboard = function(id) {
   inputs.forEach(input => {
     const kills = parseInt(input.value) || 0;
     const playerName = input.getAttribute('data-player');
-    // Save EVERYONE, even with 0 kills, as requested by the user
     newLeaderboard.push({ playerName, kills });
   });
   
-  newLeaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
-  
-  firebase.database().ref('tournaments/' + id).update({
-    leaderboard: newLeaderboard,
-    status: 'completed'
-  }).then(() => {
-    alert('✅ Puntuaciones guardadas y torneo finalizado.');
-    manageTournamentResults(id);
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
+    
+    if (isPrizeFormat) {
+      newLeaderboard.sort((a, b) => {
+        if (a.kills === 0 && b.kills === 0) return 0;
+        if (a.kills === 0) return 1;
+        if (b.kills === 0) return -1;
+        return a.kills - b.kills;
+      });
+    } else {
+      newLeaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
+    }
+    
+    firebase.database().ref('tournaments/' + id).update({
+      leaderboard: newLeaderboard,
+      status: 'completed'
+    }).then(() => {
+      alert('✅ Puntuaciones guardadas y torneo finalizado.');
+      manageTournamentResults(id);
+    });
   });
 };
 
