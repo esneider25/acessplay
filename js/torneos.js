@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // AccessPlay â€” Torneos Logic (RediseÃ±o Profesional v2)
 // ============================================================
 
@@ -25,9 +25,9 @@ function getGameBannerClass(productName) {
 
 function getGameModeIcon(mode) {
   switch(mode) {
-    case 'solo': return 'ðŸ‘¤';
-    case 'duo': return 'ðŸ‘¥';
-    case 'squad': return 'ðŸŽ¯';
+    case 'solo': return '👤';
+    case 'duo': return '👥';
+    case 'squad': return '🎯';
     default: return 'ðŸŽ®';
   }
 }
@@ -238,7 +238,8 @@ function renderTorneos(torneos) {
     const count = Object.keys(participants).length;
     const max = torneo.maxParticipants || 100;
     const progress = max > 0 ? Math.min((count / max) * 100, 100) : 0;
-    const isJoined = user && (participants[user.uid] || (window.userTournamentRegistrations && window.userTournamentRegistrations[torneo.id]));
+    const userReg = user ? (participants[user.uid] || (window.userTournamentRegistrations && window.userTournamentRegistrations[torneo.id])) : null;
+    const isJoined = !!userReg;
 
     let badgeClass = '';
     let statusText = '';
@@ -341,7 +342,11 @@ function renderTorneos(torneos) {
     const deadlinePassed = torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date();
     
     if (isJoined) {
-      actionButton = `<button class="torneo-btn torneo-btn-joined" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#4ade80; cursor:default;">✅ Ya estás inscrito</button>`;
+      if (userReg.paymentStatus === 'pending_payment') {
+        actionButton = `<button class="torneo-btn torneo-btn-joined" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.4); color:#fbbf24; cursor:default;">⏳ Validación Pendiente</button>`;
+      } else {
+        actionButton = `<button class="torneo-btn torneo-btn-joined" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#4ade80; cursor:default;">✅ Ya estás inscrito</button>`;
+      }
     } else if (torneo.status === 'registration_open' && !deadlinePassed && count < max) {
       actionButton = `<button class="torneo-btn torneo-btn-join" onclick="event.stopPropagation(); openInscriptionModal('${torneo.id}')" style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:linear-gradient(135deg, #38bdf8, #06b6d4); border:none; color:white; cursor:pointer;">⚡ Inscribirse Ahora</button>`;
     } else if (isCompleted) {
@@ -493,14 +498,14 @@ function buildHofHtml(topPlayers, emptyMessage) {
     let nameStyle = 'color: white; font-weight: 600;';
     
     if (i === 0) {
-      rankBadge = 'ðŸ‘‘';
+      rankBadge = '👑';
       cardStyle = 'background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02)); border: 1px solid rgba(255, 215, 0, 0.3);';
       nameStyle = 'color: #fbbf24; font-weight: 800; font-size: 1.2rem;';
     } else if (i === 1) {
-      rankBadge = 'ðŸ¥ˆ';
+      rankBadge = '🥈';
       nameStyle = 'color: #9ca3af; font-weight: 700;';
     } else if (i === 2) {
-      rankBadge = 'ðŸ¥‰';
+      rankBadge = '🥉';
       nameStyle = 'color: #b45309; font-weight: 700;';
     } else {
       rankBadge = `<span style="color:var(--text-muted); font-size:1.2rem; font-weight:bold;">#${i+1}</span>`;
@@ -562,7 +567,7 @@ window.openInscriptionModal = function(tournamentId) {
   let extraMembersHtml = '';
   if (gm === 'duo') {
     extraMembersHtml = `
-      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸ‘¥ Miembro 2</h4>
+      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👥 Miembro 2</h4>
       <div class="torneo-form-group">
         <div style="display:flex; gap:5px;">
           <input class="torneo-form-input tm-id" type="text" required placeholder="ID del Juego (Miembro 2)">
@@ -572,7 +577,7 @@ window.openInscriptionModal = function(tournamentId) {
     `;
   } else if (gm === 'squad') {
     extraMembersHtml = `
-      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸŽ¯ Miembros del EscuadrÃ³n</h4>
+      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">🎯 Miembros del EscuadrÃ³n</h4>
       <div class="torneo-form-group">
         <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 2</label>
         <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
@@ -629,7 +634,7 @@ window.openInscriptionModal = function(tournamentId) {
     <p class="torneo-modal-subtitle">${torneo.title} - ${gm.toUpperCase()}</p>
     
     <form id="inscription-form" style="max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-right: -5px;">
-      <h4 style="margin-top: 10px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸ‘‘ Lider (TÃº)</h4>
+      <h4 style="margin-top: 10px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👑 Lider (TÃº)</h4>
       <div class="torneo-form-group">
         <label class="torneo-form-label">Tu nombre</label>
         <input class="torneo-form-input" id="insc-name" type="text" value="${userName}" required placeholder="Tu nombre">
@@ -914,9 +919,9 @@ window.viewTournamentResults = function(id) {
   let rows = '';
   sorted.forEach((group, i) => {
     let medal = '';
-    if (i === 0) medal = 'ðŸ¥‡';
-    else if (i === 1) medal = 'ðŸ¥ˆ';
-    else if (i === 2) medal = 'ðŸ¥‰';
+    if (i === 0) medal = '🥇';
+    else if (i === 1) medal = '🥈';
+    else if (i === 2) medal = '🥉';
     else medal = `<span style="opacity:0.6;">${i+1}Âº</span>`;
     
     let statsHtml = '';
@@ -1021,11 +1026,11 @@ window.openDetailModal = function(tournamentId) {
   let prizesHTML = '';
   const prizes = torneo.prizes || [];
   if (prizes.length > 0) {
-    const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰', 'ðŸ…', 'ðŸŽ–ï¸'];
-    prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || 'ðŸŽ–ï¸'}</span><span class="torneo-prize-text">${p.place ? p.place + ': ' : ''}${p.reward}</span></div>`).join('');
-    prizesHTML = `<div class="torneo-detail-section"><h4>ðŸ… Premios</h4><div class="torneo-prizes" style="margin-top: 10px;">${prizesHTML}</div></div>`;
+    const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️'];
+    prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text">${p.place ? p.place + ': ' : ''}${p.reward}</span></div>`).join('');
+    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;">${prizesHTML}</div></div>`;
   } else if (torneo.prize) {
-    prizesHTML = `<div class="torneo-detail-section"><h4>ðŸ… Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">ðŸŽ</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
+    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">ðŸŽ</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
   }
   
   // Rules and Description
@@ -1078,7 +1083,7 @@ window.openDetailModal = function(tournamentId) {
         participantsHTML += `
           <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; font-weight:bold; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
-              ðŸ‘¥ Equipo ${teamType}
+              👥 Equipo ${teamType}
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               ${membersHTML}
@@ -1231,13 +1236,13 @@ window.openDetailModal = function(tournamentId) {
   // Winners 
   let winnersHTML = '';
   if (torneo.status === 'completed' && torneo.winners && torneo.winners.length > 0) {
-    const medals = ['ðŸ‘‘', 'ðŸ¥ˆ', 'ðŸ¥‰', 'ðŸ…', 'ðŸŽ–ï¸'];
+    const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
     
     winnersHTML = '<div class="torneo-detail-section"><h4>ðŸ† Campeones del Torneo</h4><div style="margin-top:10px;">';
     torneo.winners.forEach((p, i) => {
       const rewardStr = p.reward ? ' â€” ' + p.reward : '';
       winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
-        <span style="font-size:1.6rem;">${medals[i] || 'ðŸ…'}</span>
+        <span style="font-size:1.6rem;">${medals[i] || '🏅'}</span>
         <div>
           <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${p.name || p.playerName || 'Jugador'}</div>
           <div style="font-size:0.85rem; color:var(--text-secondary);">${p.place || (i + 1) + 'Â° Lugar'}${rewardStr}</div>
