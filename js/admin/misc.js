@@ -1814,7 +1814,7 @@ function renderTournaments(container) {
         
         let deadlineStr = '';
         if (torneo.registrationDeadline) {
-          try { deadlineStr = ' | Cierre: ' + new Date(torneo.registrationDeadline).toLocaleString(); } catch(e) {}
+          try { deadlineStr = ' | Cierre: ' + new Date(torneo.registrationDeadline).toLocaleString([], { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }); } catch(e) {}
         }
 
         // Winners display
@@ -3334,4 +3334,181 @@ window.migrateTournamentsData = async function() {
       btn.disabled = false;
     }
   }
+};
+window.editTournament = function(id) {
+  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
+    const torneo = snap.val();
+    if (!torneo) return alert('Torneo no encontrado.');
+
+    let deadlineValue = '';
+    if (torneo.registrationDeadline) {
+      // Input datetime-local expects YYYY-MM-DDTHH:MM
+      const d = new Date(torneo.registrationDeadline);
+      const pad = (n) => n.toString().padStart(2, '0');
+      deadlineValue = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    let prizesHtml = '';
+    const prizes = torneo.prizes || [];
+    if (prizes.length > 0) {
+      const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '⭐'];
+      prizes.forEach((p, i) => {
+        prizesHtml += `
+          <div style="display:flex; gap:8px; align-items:center;">
+            <span style="font-size:1.2rem; min-width:28px;">${medals[i] || '🎖️'}</span>
+            <input type="text" class="admin-form-input ct-prize-input" value="${p.reward || ''}" placeholder="${i+1}° lugar" style="flex:1; padding:8px 10px;">
+          </div>
+        `;
+      });
+    } else {
+      // Default empty if none exist
+      prizesHtml = `
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span style="font-size:1.2rem; min-width:28px;">🥇</span>
+          <input type="text" class="admin-form-input ct-prize-input" value="${torneo.prize || ''}" placeholder="1er lugar (opcional)" style="flex:1; padding:8px 10px;">
+        </div>
+      `;
+    }
+
+    let html = `
+      <div style="padding: 20px; max-height:80vh; overflow-y:auto;">
+        <h3>✏️ Editar Torneo</h3>
+        
+        <form id="edit-tournament-form" style="display: flex; flex-direction: column; gap: 14px; margin-top:15px;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Modo de Juego</label>
+              <select id="et-gamemode" class="admin-form-input" style="width: 100%; padding: 10px;">
+                <option value="">Libre</option>
+                <option value="solo" ${torneo.gameMode === 'solo' ? 'selected' : ''}>👤 Solo</option>
+                <option value="duo" ${torneo.gameMode === 'duo' ? 'selected' : ''}>👥 Dúo</option>
+                <option value="squad" ${torneo.gameMode === 'squad' ? 'selected' : ''}>🎯 Escuadras</option>
+              </select>
+            </div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Título del Torneo</label>
+              <input type="text" id="et-title" class="admin-form-input" style="width: 100%; padding: 10px;" value="${torneo.title || ''}" required>
+            </div>
+            <div>
+              <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Precio por Kill ($ USD)</label>
+              <input type="number" step="0.01" min="0" id="et-price-per-kill" class="admin-form-input" style="width: 100%; padding: 10px;" value="${torneo.pricePerKill || '0.00'}">
+            </div>
+          </div>
+          
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Descripción Corta</label>
+            <textarea id="et-description" class="admin-form-input" style="width: 100%; padding: 10px; min-height:60px; resize:vertical;">${torneo.description || ''}</textarea>
+          </div>
+          
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">📜 Reglamento (Opcional)</label>
+            <textarea id="et-rules" class="admin-form-input" style="width: 100%; padding: 10px; min-height:80px; resize:vertical;" placeholder="Reglas, restricciones, etc.">${torneo.rules || ''}</textarea>
+          </div>
+          
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Imagen del Banner</label>
+            <div style="display:flex; gap:10px;">
+              <input type="text" id="et-banner" class="admin-form-input" style="flex:1; padding: 10px;" value="${torneo.bannerUrl || ''}" placeholder="URL o subir desde dispositivo...">
+              <button type="button" id="et-banner-btn" class="btn btn-secondary" onclick="uploadTournamentBanner('et-banner', 'et-banner-btn')" style="padding: 0 15px; flex-shrink: 0;">🖼️ Subir</button>
+            </div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div>
+              <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Participantes Máximos</label>
+              <input type="number" id="et-max" class="admin-form-input" style="width: 100%; padding: 10px;" value="${torneo.maxParticipants || 100}" min="2" required>
+            </div>
+            <div>
+              <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Cierre de Inscripciones</label>
+              <input type="datetime-local" id="et-deadline" class="admin-form-input" style="width: 100%; padding: 10px;" value="${deadlineValue}">
+            </div>
+          </div>
+          
+          <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">🏅 Premios</label>
+            <div id="et-prizes-list" style="display:flex; flex-direction:column; gap:8px;">
+              ${prizesHtml}
+            </div>
+            <button type="button" onclick="addEditPrizeRow()" style="margin-top:6px; background:none; border:1px dashed var(--border); color:var(--text-muted); padding:6px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:0.8rem;">+ Agregar premio</button>
+          </div>
+          
+          <div style="display: flex; gap: 10px; margin-top: 10px; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </div>
+        </form>
+      </div>
+    `;
+    openAdminModal(html);
+
+    setTimeout(() => {
+      document.getElementById('edit-tournament-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('et-title').value.trim();
+        const description = document.getElementById('et-description').value.trim();
+        const rules = document.getElementById('et-rules').value.trim();
+        const gameMode = document.getElementById('et-gamemode').value;
+        const maxP = parseInt(document.getElementById('et-max').value) || 100;
+        const deadline = document.getElementById('et-deadline').value;
+        const bannerUrl = document.getElementById('et-banner').value.trim();
+        const pricePerKill = parseFloat(document.getElementById('et-price-per-kill').value) || 0;
+        
+        const prizeInputs = document.querySelectorAll('#et-prizes-list .ct-prize-input');
+        const places = ['1er Lugar', '2do Lugar', '3er Lugar', '4to Lugar', '5to Lugar', '6to Lugar'];
+        const newPrizes = [];
+        prizeInputs.forEach((input, i) => {
+          const val = input.value.trim();
+          if (val) newPrizes.push({ place: places[i] || (i + 1) + '° Lugar', reward: val });
+        });
+        
+        const updateData = {
+          title: title,
+          description: description || null,
+          rules: rules || null,
+          gameMode: gameMode || null,
+          maxParticipants: maxP,
+          pricePerKill: pricePerKill,
+          bannerUrl: bannerUrl || null,
+          prizes: newPrizes.length > 0 ? newPrizes : null,
+          prize: newPrizes.length > 0 ? newPrizes[0].reward : (pricePerKill > 0 ? `Pago por Kill: $${pricePerKill.toFixed(2)}` : 'Sin Premios Fijos')
+        };
+        
+        if (deadline) {
+          updateData.registrationDeadline = new Date(deadline).toISOString();
+        } else {
+          updateData.registrationDeadline = null;
+        }
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'Guardando...';
+
+        firebase.database().ref('tournaments/' + id).update(updateData).then(() => {
+          alert('✅ Torneo actualizado correctamente.');
+          closeAdminModal();
+        }).catch(err => {
+          alert('Error: ' + err.message);
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Guardar Cambios';
+        });
+      });
+    }, 100);
+  });
+};
+
+window.addEditPrizeRow = function() {
+  const list = document.getElementById('et-prizes-list');
+  const count = list.children.length + 1;
+  const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '⭐'];
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex; gap:8px; align-items:center;';
+  div.innerHTML = `
+    <span style="font-size:1.2rem; min-width:28px;">${medals[count - 1] || '🎖️'}</span>
+    <input type="text" class="admin-form-input ct-prize-input" placeholder="${count}° lugar" style="flex:1; padding:8px 10px;">
+  `;
+  list.appendChild(div);
 };
