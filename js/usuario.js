@@ -1883,8 +1883,8 @@ function processAndRenderDashboardTournaments() {
               <div style="flex:1;">
                 <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:3px;">ID de la Sala</div>
                 <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; font-family:monospace; font-size:1.1rem; color:#fff; display:flex; justify-content:space-between; align-items:center;">
-                  ${t.credentials.roomId}
-                  <i class="ph ph-copy" style="cursor:pointer; opacity:0.7;" onclick="navigator.clipboard.writeText('${t.credentials.roomId}'); this.style.color='var(--accent)';"></i>
+                  ${escapeHTML(t.credentials.roomId)}
+                  <i class="ph ph-copy" style="cursor:pointer; opacity:0.7;" onclick="navigator.clipboard.writeText('${escapeHTML(t.credentials.roomId)}'); this.style.color='var(--accent)';"></i>
                 </div>
               </div>
             </div>
@@ -1893,8 +1893,8 @@ function processAndRenderDashboardTournaments() {
               <div style="flex:1;">
                 <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:3px;">Contraseña</div>
                 <div style="background:rgba(0,0,0,0.3); padding:8px 10px; border-radius:6px; font-family:monospace; font-size:1.1rem; color:#fff; display:flex; justify-content:space-between; align-items:center;">
-                  ${t.credentials.password || 'Sin contraseña'}
-                  <i class="ph ph-copy" style="cursor:pointer; opacity:0.7;" onclick="navigator.clipboard.writeText('${t.credentials.password || ''}'); this.style.color='var(--accent)';"></i>
+                  ${escapeHTML(t.credentials.password || 'Sin contraseña')}
+                  <i class="ph ph-copy" style="cursor:pointer; opacity:0.7;" onclick="navigator.clipboard.writeText('${escapeHTML(t.credentials.password || '')}'); this.style.color='var(--accent)';"></i>
                 </div>
               </div>
             </div>
@@ -1927,7 +1927,7 @@ function processAndRenderDashboardTournaments() {
          let teamHtml = '';
          if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
            teamHtml = `<div style="width:100%; margin-top:5px; font-size:0.8rem; color:var(--text-secondary);"><strong>Compañeros:</strong> `;
-           teamHtml += myEntry.teamMembers.map(tm => `<span style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px; margin-right:6px; display:inline-block; margin-bottom:6px;">Jugador: ${tm.gameName || 'Sin Nombre'} (ID: ${tm.gameId || 'N/A'})</span>`).join('');
+           teamHtml += myEntry.teamMembers.map(tm => `<span style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px; margin-right:6px; display:inline-block; margin-bottom:6px;">Jugador: ${escapeHTML(tm.gameName || 'Sin Nombre')} (ID: ${escapeHTML(tm.gameId || 'N/A')})</span>`).join('');
            teamHtml += `</div>`;
          }
          
@@ -1958,9 +1958,9 @@ function processAndRenderDashboardTournaments() {
             let myPrizeText = '';
             if (myPosition > 0) {
               if (t.prizes && t.prizes[myPosition - 1]) {
-                myPrizeText = t.prizes[myPosition - 1].reward;
+                myPrizeText = escapeHTML(t.prizes[myPosition - 1].reward);
               } else if (myPosition === 1 && t.prize) {
-                myPrizeText = t.prize;
+                myPrizeText = escapeHTML(t.prize);
               }
             }
 
@@ -2001,14 +2001,14 @@ function processAndRenderDashboardTournaments() {
                 const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
                 const tmKills = lbTm ? (lbTm.kills || 0) : 0;
                 totalTeamKills += tmKills;
-                myTeamKillsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${tm.gameName || 'Compañero'}:</span> <strong>${tmKills} Kills</strong></div>`;
+                myTeamKillsHtml += `<div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${escapeHTML(tm.gameName || 'Compañero')}:</span> <strong>${tmKills} Kills</strong></div>`;
               });
               
               resultsHtml = `
                 <div style="margin-top: 15px; padding: 12px; background: rgba(102, 187, 106, 0.1); border: 1px solid rgba(102, 187, 106, 0.3); border-radius: 6px;">
                   <div style="font-size:0.75rem; color:#66bb6a; text-transform:uppercase; margin-bottom:8px; font-weight:bold;"><i class="ph-fill ph-chart-bar"></i> Tus Resultados</div>
                   <div style="font-size:0.85rem; color:var(--text-primary);">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${myEntry.gameName} (Tú):</span> <strong>${myKills} Kills</strong></div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:3px;"><span>${escapeHTML(myEntry.gameName || 'Tú')}:</span> <strong>${myKills} Kills</strong></div>
                     ${myTeamKillsHtml}
                     <div style="border-top:1px solid rgba(255,255,255,0.05); margin-top:6px; padding-top:6px; display:flex; justify-content:space-between; color:var(--text-primary);"><span>Total Equipo:</span> <strong>${totalTeamKills} Kills</strong></div>
                     ${extraHtml}
@@ -2040,9 +2040,9 @@ function processAndRenderDashboardTournaments() {
          <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tu Registro:</div>
             <div style="font-size: 0.85rem; display:flex; flex-wrap:wrap; gap:12px; color: var(--text-primary);">
-              ${myEntry.gameName ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Jugador:</strong> ${myEntry.gameName}</div>` : ''}
-              ${myEntry.gameId ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>ID:</strong> ${myEntry.gameId}</div>` : ''}
-              ${myEntry.name ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Titular:</strong> ${myEntry.name}</div>` : ''}
+              ${myEntry.gameName ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Jugador:</strong> ${escapeHTML(myEntry.gameName)}</div>` : ''}
+              ${myEntry.gameId ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>ID:</strong> ${escapeHTML(myEntry.gameId)}</div>` : ''}
+              ${myEntry.name ? `<div style="background:rgba(255,255,255,0.05); padding:4px 8px; border-radius:4px;"><strong>Titular:</strong> ${escapeHTML(myEntry.name)}</div>` : ''}
               ${teamHtml}
             </div>
             ${statusBadgeHtml}
@@ -2055,12 +2055,12 @@ function processAndRenderDashboardTournaments() {
           <div style="height: 4px; background: ${st.color}; width: 100%;"></div>
           <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-              <h3 style="margin:0; font-family:var(--font-display); font-size:1.3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${t.title}</h3>
+              <h3 style="margin:0; font-family:var(--font-display); font-size:1.3rem; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">${escapeHTML(t.title)}</h3>
               <span style="background:${st.color}15; color:${st.color}; padding:4px 10px; border-radius:12px; font-size:0.75rem; border:1px solid ${st.color}40; white-space:nowrap; font-weight:600; box-shadow: 0 2px 8px ${st.color}20;">${st.text}</span>
             </div>
             
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-              <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">🎮 ${t.productName || 'Juego'}</span>
+              <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">🎮 ${escapeHTML(t.productName || 'Juego')}</span>
               ${modeStr ? `<span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">${modeStr}</span>` : ''}
             </div>
             

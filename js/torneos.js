@@ -13,6 +13,14 @@ let torneosData = [];
 let currentFilter = 'all';
 let countdownIntervals = [];
 
+// XSS Prevention: sanitize all user-provided strings before inserting into HTML
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
 // â”€â”€ Game Banner Helpers â”€â”€
 function getGameBannerClass(productName) {
   const name = (productName || '').toLowerCase();
@@ -278,14 +286,14 @@ function renderTorneos(torneos) {
         if (hasLeaderboard) {
           const winner = torneo.leaderboard.find(l => l.position === i + 1);
           if (winner && winner.playerName) {
-            winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${winner.playerName}</span>`;
+            winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${escapeHTML(winner.playerName)}</span>`;
           }
         }
-        let placeText = p.place ? p.place + ': ' : '';
+        let placeText = p.place ? escapeHTML(p.place) + ': ' : '';
         if (winnerText) {
-          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${p.reward})</span></span></div>`;
+          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${escapeHTML(p.reward)})</span></span></div>`;
         } else {
-          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${p.reward}</span></div>`;
+          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${escapeHTML(p.reward)}</span></div>`;
         }
       });
       prizesHTML += '</div>';
@@ -294,13 +302,13 @@ function renderTorneos(torneos) {
       if (hasLeaderboard) {
         const winner = torneo.leaderboard.find(l => l.position === 1);
         if (winner && winner.playerName) {
-          winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${winner.playerName}</span>`;
+          winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${escapeHTML(winner.playerName)}</span>`;
         }
       }
       if (winnerText) {
-        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🥇</span><span class="torneo-prize-text gold">${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${torneo.prize})</span></span></div></div>`;
+        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🥇</span><span class="torneo-prize-text gold">${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${escapeHTML(torneo.prize)})</span></span></div></div>`;
       } else {
-        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text">${torneo.prize}</span></div></div>`;
+        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text">${escapeHTML(torneo.prize)}</span></div></div>`;
       }
     }
 
@@ -308,7 +316,7 @@ function renderTorneos(torneos) {
     let descriptionHTML = '';
     if (torneo.description) {
       const shortDesc = torneo.description.length > 80 ? torneo.description.substring(0, 80) + '...' : torneo.description;
-      descriptionHTML = `<p class="torneo-description" style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">${shortDesc}</p>`;
+      descriptionHTML = `<p class="torneo-description" style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">${escapeHTML(shortDesc)}</p>`;
     }
 
     // Rules button
@@ -320,7 +328,7 @@ function renderTorneos(torneos) {
     // Tags
     let tagsHTML = '<div class="torneo-tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">';
     if (torneo.productName) {
-      tagsHTML += `<span class="torneo-tag" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:var(--text-secondary);">🎮 ${torneo.productName}</span>`;
+      tagsHTML += `<span class="torneo-tag" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:var(--text-secondary);">🎮 ${escapeHTML(torneo.productName)}</span>`;
     }
     if (torneo.gameMode) {
       tagsHTML += `<span class="torneo-tag" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:var(--text-secondary);">${getGameModeIcon(torneo.gameMode)} ${getGameModeLabel(torneo.gameMode)}</span>`;
@@ -369,7 +377,7 @@ function renderTorneos(torneos) {
           </div>
         </div>
         <div class="torneo-card-body">
-          <h3 class="torneo-title">${torneo.title}</h3>
+          <h3 class="torneo-title">${escapeHTML(torneo.title)}</h3>
           ${descriptionHTML}
           ${rulesHTML}
           ${tagsHTML}
@@ -518,7 +526,7 @@ function buildHofHtml(topPlayers, emptyMessage) {
         
         <div style="display:flex; align-items:center; gap:20px;">
           <div style="width:30px; text-align:center; font-size:1.5rem;">${rankBadge}</div>
-          <div style="${nameStyle}">${player.gameName || player.name}</div>
+          <div style="${nameStyle}">${escapeHTML(player.gameName || player.name)}</div>
         </div>
         
         <div style="display:flex; gap:30px; align-items:center;">
@@ -631,7 +639,7 @@ window.openInscriptionModal = function(tournamentId) {
   
   content.innerHTML = `
     <h3>⚡ Inscripción</h3>
-    <p class="torneo-modal-subtitle">${torneo.title} - ${gm.toUpperCase()}</p>
+    <p class="torneo-modal-subtitle">${escapeHTML(torneo.title)} - ${gm.toUpperCase()}</p>
     
     <form id="inscription-form" style="max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-right: -5px;">
       <h4 style="margin-top: 10px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👑 Lider (Tú)</h4>
@@ -801,34 +809,20 @@ window.openInscriptionModal = function(tournamentId) {
         const paymentMethod = document.getElementById('insc-payment-method').value;
         
         if (paymentMethod === 'wallet') {
-          // Check balance and deduct
-          firebase.database().ref('users/' + user.uid + '/wallet/balance').once('value').then(snap => {
-            const currentBalance = snap.val() || 0;
-            if (currentBalance >= torneo.entryFee) {
-              const newBalance = currentBalance - torneo.entryFee;
-              const updates = {};
-              updates['users/' + user.uid + '/wallet/balance'] = newBalance;
-              
-              const txId = 'tx_' + Date.now();
-              updates['users/' + user.uid + '/wallet/transactions/' + txId] = {
-                type: 'tournament_fee',
-                amount: -torneo.entryFee,
-                description: 'Inscripción a ' + torneo.title,
-                timestamp: new Date().toISOString()
-              };
-              
-              firebase.database().ref().update(updates).then(() => {
-                processInscription('approved', 'wallet');
-              }).catch(err => {
-                submitBtn.disabled = false;
-                submitBtn.innerText = '⚡ Confirmar Inscripción';
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Error al procesar pago: ' + err.message, confirmButtonColor: '#ef4444' });
-              });
-            } else {
-              submitBtn.disabled = false;
-              submitBtn.innerText = '⚡ Confirmar Inscripción';
-              Swal.fire({ icon: 'error', title: 'Saldo insuficiente', text: 'Saldo insuficiente en tu Billetera Virtual. Tienes $' + currentBalance.toFixed(2), confirmButtonColor: '#ef4444' });
-            }
+          // ✅ SEGURO: Pago vía API backend con transacción atómica (evita race conditions)
+          firebase.auth().currentUser.getIdToken().then(idToken => {
+            return fetch('/api/wallet', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+              body: JSON.stringify({ action: 'tournament_entry', amount: torneo.entryFee, tournamentId: tournamentId, tournamentTitle: escapeHTML(torneo.title) })
+            });
+          }).then(res => res.json()).then(data => {
+            if (data.error) throw new Error(data.error);
+            processInscription('approved', 'wallet');
+          }).catch(err => {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '⚡ Confirmar Inscripción';
+            Swal.fire({ icon: 'error', title: 'Error', text: err.message || 'Error al procesar pago', confirmButtonColor: '#ef4444', background: 'var(--bg-surface)', color: 'var(--text-primary)' });
           });
         } else if (paymentMethod !== 'wallet') {
           const paymentRef = document.getElementById('insc-payment-ref').value.trim();
@@ -932,16 +926,16 @@ window.viewTournamentResults = function(id) {
       let displayPos = group.position === 0 ? 'N/C' : `${group.position}º Lugar`;
       let prizeText = '';
       if (group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">ðŸŽ ${torneo.prizes[group.position - 1].reward}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🏆 ${escapeHTML(torneo.prizes[group.position - 1].reward)}</div>`;
       } else if (group.position === 1 && torneo.prize) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">ðŸŽ ${torneo.prize}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🏆 ${escapeHTML(torneo.prize)}</div>`;
       }
       
       let membersHtml = '';
       if (group.isTeam) {
          membersHtml = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-align:right;">`;
          group.members.forEach(m => {
-            membersHtml += `<div>${m.playerName}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
+            membersHtml += `<div>${escapeHTML(m.playerName)}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
          });
          membersHtml += `</div>`;
       }
@@ -959,7 +953,7 @@ window.viewTournamentResults = function(id) {
       if (group.isTeam) {
          membersHtml = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-align:right;">`;
          group.members.forEach(m => {
-            membersHtml += `<div>${m.playerName}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
+            membersHtml += `<div>${escapeHTML(m.playerName)}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
          });
          membersHtml += `</div>`;
       }
@@ -972,7 +966,7 @@ window.viewTournamentResults = function(id) {
       `;
     }
     
-    const displayName = group.isTeam ? `Equipo de ${group.leaderName}` : group.playerName;
+    const displayName = group.isTeam ? `Equipo de ${escapeHTML(group.leaderName)}` : escapeHTML(group.playerName);
     
     rows += `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background: ${i%2===0?'rgba(255,255,255,0.02)':'transparent'}">
@@ -986,7 +980,7 @@ window.viewTournamentResults = function(id) {
   });
   
   Swal.fire({
-    title: `<h3 style="color:var(--text-primary); margin:0;">ðŸ† Clasificación Final</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
+    title: `<h3 style="color:var(--text-primary); margin:0;">🏆 Clasificación Final</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${escapeHTML(torneo.title)}</p>`,
     html: `<div style="max-height: 400px; overflow-y:auto; text-align:left; margin-top:15px; padding-right:5px;">${rows}</div>`,
     background: 'var(--bg-surface)',
     color: 'var(--text-primary)',
@@ -1003,7 +997,7 @@ window.viewTournamentRules = function(id) {
   const formattedRules = torneo.rules.replace(/\n/g, '<br>');
   
   Swal.fire({
-    title: `<h3 style="color:var(--text-primary); margin:0; display: flex; align-items: center; justify-content: center; gap: 10px;"><i class="ph-fill ph-warning-circle" style="color:#ef4444;"></i> Reglamento</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
+    title: `<h3 style="color:var(--text-primary); margin:0; display: flex; align-items: center; justify-content: center; gap: 10px;"><i class="ph-fill ph-warning-circle" style="color:#ef4444;"></i> Reglamento</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${escapeHTML(torneo.title)}</p>`,
     html: `<div style="max-height: 400px; overflow-y:auto; text-align:left; margin-top:15px; font-family:var(--font-body); font-size: 0.95rem; line-height: 1.6; color: var(--text-secondary); background: rgba(220, 38, 38, 0.05); border-left: 4px solid #dc2626; padding: 15px; border-radius: 0 8px 8px 0;">${formattedRules}</div>`,
     background: 'var(--bg-surface)',
     color: 'var(--text-primary)',
@@ -1020,26 +1014,26 @@ window.openDetailModal = function(tournamentId) {
   const participants = torneo.participants || {};
   const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
   const max = torneo.maxParticipants || 100;
-  const avatars = ['👾', 'ðŸ¤ ', '🥶', '🤖', 'ðŸ¦¸â€â™‚', '🧟', 'ðŸ§™â€â™‚', '🧛', '🦹', '👽'];
+  const avatars = ['👾', '👽', '🥶', '🤖', '🦸‍♂️', '🧟', '🧙‍♂️', '🧛', '🦹', '👽'];
   
   // Prizes
   let prizesHTML = '';
   const prizes = torneo.prizes || [];
   if (prizes.length > 0) {
     const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️'];
-    prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text">${p.place ? p.place + ': ' : ''}${p.reward}</span></div>`).join('');
+    prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text">${p.place ? escapeHTML(p.place) + ': ' : ''}${escapeHTML(p.reward)}</span></div>`).join('');
     prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;">${prizesHTML}</div></div>`;
   } else if (torneo.prize) {
-    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">ðŸŽ</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
+    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">🏆</span><span class="torneo-prize-text">${escapeHTML(torneo.prize)}</span></div></div></div>`;
   }
   
   // Rules and Description
-  const formattedDesc = torneo.description ? torneo.description.replace(/\n/g, '<br>') : '';
+  const formattedDesc = torneo.description ? escapeHTML(torneo.description).replace(/\n/g, '<br>') : '';
   let rulesHTML = formattedDesc
     ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedDesc}</div></div>`
     : '';
     
-  const formattedRulesText = torneo.rules ? torneo.rules.replace(/\n/g, '<br>') : '';
+  const formattedRulesText = torneo.rules ? escapeHTML(torneo.rules).replace(/\n/g, '<br>') : '';
   if (formattedRulesText) {
     rulesHTML += `<div class="torneo-detail-section" style="margin-top:20px;">
         <div style="background: rgba(220, 38, 38, 0.05); border-left: 4px solid #dc2626; padding: 15px; border-radius: 0 8px 8px 0;">
@@ -1062,7 +1056,7 @@ window.openDetailModal = function(tournamentId) {
     participantsList.forEach((p, i) => {
       const avatarCap = avatars[i % avatars.length];
       const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
-      const capName = p.gameName || p.name || 'Jugador';
+      const capName = escapeHTML(p.gameName || p.name || 'Jugador');
       
       if (teamType === 'Solo') {
         participantsHTML += `
@@ -1076,7 +1070,7 @@ window.openDetailModal = function(tournamentId) {
         let membersHTML = `<span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName} <span style="font-size:0.65rem; opacity:0.6;">(Líder)</span></span></span>`;
         p.teamMembers.forEach((tm, tmIdx) => {
           const avatarTm = avatars[(i + tmIdx + 1) % avatars.length];
-          const tmName = tm.gameName || 'Compañero';
+          const tmName = escapeHTML(tm.gameName || 'Compañero');
           membersHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatarTm}</span> <span>${tmName}</span></span>`;
         });
         
@@ -1161,21 +1155,21 @@ window.openDetailModal = function(tournamentId) {
       
       let prizeText = '';
       if (isPrizeFormat && group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">ðŸŽ ${torneo.prizes[group.position - 1].reward}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🏆 ${escapeHTML(torneo.prizes[group.position - 1].reward)}</div>`;
       } else if (isPrizeFormat && group.position === 1 && torneo.prize) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">ðŸŽ ${torneo.prize}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🏆 ${escapeHTML(torneo.prize)}</div>`;
       }
       
       let membersHtml = '';
       if (group.isTeam) {
          membersHtml = `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">`;
          group.members.forEach(m => {
-            membersHtml += `<div>â€¢ ${m.playerName}: <strong style="color:white;">${m.kills || 0}</strong> kills</div>`;
+            membersHtml += `<div>â€¢ ${escapeHTML(m.playerName)}: <strong style="color:white;">${m.kills || 0}</strong> kills</div>`;
          });
          membersHtml += `</div>`;
       }
       
-      const displayName = group.isTeam ? `Equipo de ${group.leaderName}` : group.playerName;
+      const displayName = group.isTeam ? `Equipo de ${escapeHTML(group.leaderName)}` : escapeHTML(group.playerName);
 
       tableRows += `
         <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid rgba(255,255,255,0.05); background: ${i%2===0?'rgba(255,255,255,0.02)':'transparent'}">
@@ -1240,12 +1234,12 @@ window.openDetailModal = function(tournamentId) {
     
     winnersHTML = '<div class="torneo-detail-section"><h4>ðŸ† Campeones del Torneo</h4><div style="margin-top:10px;">';
     torneo.winners.forEach((p, i) => {
-      const rewardStr = p.reward ? ' â€” ' + p.reward : '';
+      const rewardStr = p.reward ? ' â€” ' + escapeHTML(p.reward) : '';
       winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
         <span style="font-size:1.6rem;">${medals[i] || '🏅'}</span>
         <div>
-          <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${p.name || p.playerName || 'Jugador'}</div>
-          <div style="font-size:0.85rem; color:var(--text-secondary);">${p.place || (i + 1) + '° Lugar'}${rewardStr}</div>
+          <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${escapeHTML(p.name || p.playerName || 'Jugador')}</div>
+          <div style="font-size:0.85rem; color:var(--text-secondary);">${p.place ? escapeHTML(p.place) : (i + 1) + '° Lugar'}${rewardStr}</div>
         </div>
       </div>`;
     });
@@ -1254,8 +1248,8 @@ window.openDetailModal = function(tournamentId) {
   
   const content = document.getElementById('torneo-detail-content');
   content.innerHTML = `
-    <h3 style="font-family: var(--font-display); text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 5px; font-size: 1.8rem; line-height: 1.1;">${torneo.title}</h3>
-    <p class="torneo-modal-subtitle">${torneo.productName || ''} ${torneo.gameMode ? '· ' + getGameModeLabel(torneo.gameMode) : ''}</p>
+    <h3 style="font-family: var(--font-display); text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 5px; font-size: 1.8rem; line-height: 1.1;">${escapeHTML(torneo.title)}</h3>
+    <p class="torneo-modal-subtitle">${escapeHTML(torneo.productName || '')} ${torneo.gameMode ? '· ' + getGameModeLabel(torneo.gameMode) : ''}</p>
     
     <div class="torneo-tabs">
       <button class="torneo-tab-btn active" onclick="switchTab(this, 'tab-resumen')">Resumen</button>

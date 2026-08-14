@@ -1,4 +1,12 @@
 // ════════════════════════════════════════
+// XSS Prevention
+function escapeHtml(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = String(text);
+  return div.innerHTML;
+}
+
 function openProductModal(productId = null) {
   const overlay = document.getElementById('admin-modal-overlay');
   const modalContent = document.getElementById('admin-modal-content');
@@ -2085,9 +2093,9 @@ window.viewTournamentParticipants = function(id) {
         tableRows += `
           <tr style="border-bottom: 1px solid var(--border);">
             <td style="padding: 8px;">${i + 1}</td>
-            <td style="padding: 8px;">${p.name || 'Sin nombre'}</td>
-            <td style="padding: 8px;">${p.gameName || '-'}${teamInfo}</td>
-            <td style="padding: 8px;">${p.gameId || '-'}</td>
+            <td style="padding: 8px;">${escapeHtml(p.name) || 'Sin nombre'}</td>
+            <td style="padding: 8px;">${escapeHtml(p.gameName) || '-'}${teamInfo}</td>
+            <td style="padding: 8px;">${escapeHtml(p.gameId) || '-'}</td>
             <td style="padding: 8px; text-align: center;">${paymentBadge}</td>
             <td style="padding: 8px;">${new Date(p.joinedAt).toLocaleString()}</td>
             <td style="padding: 8px; text-align: center; white-space: nowrap;">

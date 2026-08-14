@@ -35,12 +35,11 @@
       "$tournamentId": {
         ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         "participants": {
-          "$uid": {
-            ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
-          }
+          ".read": "true",
+          ".write": "false"
         },
         "participantsCount": {
-          ".write": "auth != null"
+          ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
         }
       }
     },
@@ -49,7 +48,8 @@
       "$tournamentId": {
         ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
         "$uid": {
-          ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+          ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
+          ".validate": "(!data.exists() && root.child('tournaments').child($tournamentId).child('status').val() === 'registration_open') || auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin'"
         }
       }
     },
@@ -59,10 +59,7 @@
     },
     "tournament_metadata": {
       ".read": "true",
-      ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')",
-      "participants": {
-        ".write": "auth != null"
-      }
+      ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
     },
     "product_stats": {
       ".read": "true",

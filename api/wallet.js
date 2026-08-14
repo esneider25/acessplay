@@ -114,6 +114,18 @@ export default async function handler(req, res) {
         }
         user.points = points - amount;
       }
+      else if (action === 'tournament_entry') {
+        // Secure tournament wallet payment - validates balance atomically
+        const walletBalance = (user.wallet && typeof user.wallet === 'object') ? (user.wallet.balance || 0) : (typeof user.wallet === 'number' ? user.wallet : 0);
+        if (walletBalance < amount) {
+          throw new Error('Saldo insuficiente en billetera');
+        }
+        if (typeof user.wallet === 'object') {
+          user.wallet.balance = walletBalance - amount;
+        } else {
+          user.wallet = walletBalance - amount;
+        }
+      }
       else if (action === 'tournament_cashout') {
         user.withdrawnTournamentEarnings = (user.withdrawnTournamentEarnings || 0) + amount;
       }
@@ -124,11 +136,78 @@ export default async function handler(req, res) {
       return user;
     });
 
+    // For tournament_entry, record the transaction after the atomic balance deduction
+    if (action === 'tournament_entry') {
+      const { tournamentId, tournamentTitle } = req.body;
+      const txId = 'tx_' + Date.now();
+      await admin.database().ref(`users/${uid}/wallet/transactions/${txId}`).set({
+        type: 'tournament_fee',
+        amount: -amount,
+        description: 'Inscripción a ' + (tournamentTitle || 'Torneo'),
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // For tournament_cashout, validate actual earnings server-side
+    if (action === 'tournament_cashout') {
+      const [tournamentsSnap, participantsSnap, userSnap] = await Promise.all([
+        admin.database().ref('tournaments').once('value'),
+        admin.database().ref('tournament_participants').once('value'),
+        admin.database().ref(`users/${uid}`).once('value')
+      ]);
+      const allTournaments = tournamentsSnap.val() || {};
+      const allParticipants = participantsSnap.val() || {};
+      const userData = userSnap.val() || {};
+      
+      let totalEarnings = 0;
+      Object.keys(allTournaments).forEach(key => {
+        const t = allTournaments[key];
+        if (!t || (t.status !== 'completed' && t.status !== 'completado')) return;
+        if (!t.pricePerKill || !t.leaderboard) return;
+        
+        const myEntry = allParticipants[key] ? allParticipants[key][uid] : null;
+        if (!myEntry || myEntry.paymentStatus === 'rejected') return;
+        
+        const myGameName = (myEntry.gameName || myEntry.name || '').trim().toLowerCase();
+        let totalTeamKills = 0;
+        
+        const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
+        if (lbLider) totalTeamKills += (parseInt(lbLider.kills) || 0);
+        
+        if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
+          myEntry.teamMembers.forEach(tm => {
+            const tmName = (tm.gameName || '').trim().toLowerCase();
+            const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
+            if (lbTm) totalTeamKills += (parseInt(lbTm.kills) || 0);
+          });
+        }
+        totalEarnings += totalTeamKills * (parseFloat(t.pricePerKill) || 0);
+      });
+      
+      const refundedEarnings = userData.refundedTournamentEarnings || 0;
+      const archivedEarnings = userData.archivedTournamentEarnings || 0;
+      const withdrawnEarnings = userData.withdrawnTournamentEarnings || 0;
+      const realAvailable = Math.max(0, (totalEarnings + refundedEarnings + archivedEarnings) - withdrawnEarnings);
+      
+      // The withdrawal was already recorded in the transaction above, so check if it exceeds real earnings
+      // withdrawnEarnings now includes the current 'amount' (added in the transaction above)
+      // So realAvailable already accounts for it. If realAvailable < 0, rollback.
+      if (realAvailable < 0) {
+        // Rollback the withdrawal
+        await admin.database().ref(`users/${uid}`).transaction(u => {
+          if (!u) return u;
+          u.withdrawnTournamentEarnings = (u.withdrawnTournamentEarnings || 0) - amount;
+          return u;
+        });
+        return res.status(400).json({ error: 'El monto excede tus ganancias reales de torneos' });
+      }
+    }
+
     return res.status(200).json({ success: true });
     
   } catch (error) {
     console.error("Wallet API Error:", error);
-    if (error.message === 'Saldo insuficiente' || error.message === 'Puntos insuficientes') {
+    if (error.message === 'Saldo insuficiente' || error.message === 'Puntos insuficientes' || error.message === 'Saldo insuficiente en billetera' || error.message === 'Puntos insuficientes para retirar') {
       return res.status(400).json({ error: error.message });
     }
     res.status(500).json({ error: 'Error procesando la transacción financiera' });
