@@ -2303,10 +2303,13 @@ window.saveSorteoResults = function(id) {
 
 // ── Manage Results / Leaderboard ──
 window.manageTournamentResults = function(id) {
-  firebase.database().ref('tournaments/' + id).once('value').then(snap => {
-    const torneo = snap.val();
+  Promise.all([
+    firebase.database().ref('tournaments/' + id).once('value'),
+    firebase.database().ref('tournament_participants/' + id).once('value')
+  ]).then(snaps => {
+    const torneo = snaps[0].val();
     const leaderboard = torneo.leaderboard || [];
-    const participants = torneo.participants || {};
+    const participants = snaps[1].val() || {};
     
     // Only include valid participants in results
     const validParticipants = Object.values(participants).filter(p => !p.paymentStatus || p.paymentStatus === 'approved' || p.paymentStatus === 'free');
