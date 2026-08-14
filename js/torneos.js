@@ -28,7 +28,7 @@ function getGameModeIcon(mode) {
     case 'solo': return '👤';
     case 'duo': return '👥';
     case 'squad': return '🎯';
-    default: return 'ðŸŽ®';
+    default: return '🎮';
   }
 }
 
@@ -608,7 +608,7 @@ window.openInscriptionModal = function(tournamentId) {
     }
 
     paymentHtml = `
-      <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸ’³ Pago de Inscripción</h4>
+      <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">💳 Pago de Inscripción</h4>
       <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Costo del torneo: <strong style="color:var(--text-primary);">Bs. ${feeBs}</strong> (Aprox. $${torneo.entryFee.toFixed(2)} USD)</p>
       
       <div class="torneo-form-group">
@@ -630,7 +630,7 @@ window.openInscriptionModal = function(tournamentId) {
   }
   
   content.innerHTML = `
-    <h3>âš¡ Inscripción</h3>
+    <h3>⚡ Inscripción</h3>
     <p class="torneo-modal-subtitle">${torneo.title} - ${gm.toUpperCase()}</p>
     
     <form id="inscription-form" style="max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-right: -5px;">
@@ -654,7 +654,7 @@ window.openInscriptionModal = function(tournamentId) {
       
       <div style="display:flex; gap:10px; margin-top:24px;">
         <button type="button" class="torneo-btn btn-login" onclick="closeTorneoModal()" style="flex:1;">Cancelar</button>
-        <button type="submit" class="torneo-btn" id="insc-submit-btn" style="flex:2;">âš¡ Confirmar Inscripción</button>
+        <button type="submit" class="torneo-btn" id="insc-submit-btn" style="flex:2;">⚡ Confirmar Inscripción</button>
       </div>
     </form>
   `;
@@ -681,8 +681,8 @@ window.openInscriptionModal = function(tournamentId) {
                   <span style="color:var(--text-muted); font-size:0.75rem; display:block; margin-bottom:2px; text-transform: uppercase; letter-spacing: 0.5px;">${formattedKey}</span>
                   <span style="font-weight:600; font-size:0.95rem; color:var(--text-primary); user-select: all;">${val}</span>
                 </div>
-                <button type="button" onclick="navigator.clipboard.writeText('${val}'); if(typeof showToast !== 'undefined') showToast('âœ… Copiado al portapapeles'); this.innerText='âœ”'; setTimeout(()=>this.innerText='ðŸ“‹', 1500);" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary); padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9rem; transition:0.2s; hover:background:rgba(255,255,255,0.2);" title="Copiar ${formattedKey}">
-                  ðŸ“‹
+                <button type="button" onclick="navigator.clipboard.writeText('${val}'); if(typeof showToast !== 'undefined') showToast('✅ Copiado al portapapeles'); this.innerText='✔'; setTimeout(()=>this.innerText='📋', 1500);" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary); padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9rem; transition:0.2s; hover:background:rgba(255,255,255,0.2);" title="Copiar ${formattedKey}">
+                  📋
                 </button>
               </div>
             `;
@@ -755,7 +755,7 @@ window.openInscriptionModal = function(tournamentId) {
             
             firebase.database().ref('users/' + user.uid + '/notifications').push({
               title: 'Inscripción a Torneo ðŸ†',
-              body: `Tu solicitud de inscripción al torneo ha sido registrada. Estado: ${paymentStatus === 'approved' || paymentStatus === 'free' ? 'Confirmado âœ…' : 'Pendiente de Pago ³'}`,
+              body: `Tu solicitud de inscripción al torneo ha sido registrada. Estado: ${paymentStatus === 'approved' || paymentStatus === 'free' ? 'Confirmado ✅' : 'Pendiente de Pago ³'}`,
               type: 'tournament',
               timestamp: new Date().toISOString(),
               read: false
@@ -792,7 +792,7 @@ window.openInscriptionModal = function(tournamentId) {
           }).catch(err => {
             console.error('Error al inscribirse:', err);
             submitBtn.disabled = false;
-            submitBtn.innerText = 'âš¡ Confirmar Inscripción';
+            submitBtn.innerText = '⚡ Confirmar Inscripción';
             Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al inscribirte. Verifica tu conexión.', confirmButtonColor: '#ef4444', background: 'var(--bg-surface)', color: 'var(--text-primary)' });
           });
       };
@@ -821,12 +821,12 @@ window.openInscriptionModal = function(tournamentId) {
                 processInscription('approved', 'wallet');
               }).catch(err => {
                 submitBtn.disabled = false;
-                submitBtn.innerText = 'âš¡ Confirmar Inscripción';
+                submitBtn.innerText = '⚡ Confirmar Inscripción';
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Error al procesar pago: ' + err.message, confirmButtonColor: '#ef4444' });
               });
             } else {
               submitBtn.disabled = false;
-              submitBtn.innerText = 'âš¡ Confirmar Inscripción';
+              submitBtn.innerText = '⚡ Confirmar Inscripción';
               Swal.fire({ icon: 'error', title: 'Saldo insuficiente', text: 'Saldo insuficiente en tu Billetera Virtual. Tienes $' + currentBalance.toFixed(2), confirmButtonColor: '#ef4444' });
             }
           });
@@ -835,7 +835,7 @@ window.openInscriptionModal = function(tournamentId) {
           if (!paymentRef) {
             Swal.fire({ icon: 'warning', title: 'Referencia requerida', text: 'Por favor ingresa el número de referencia del pago.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
             submitBtn.disabled = false;
-            submitBtn.innerText = 'âš¡ Confirmar Inscripción';
+            submitBtn.innerText = '⚡ Confirmar Inscripción';
             return;
           }
           
@@ -1020,7 +1020,7 @@ window.openDetailModal = function(tournamentId) {
   const participants = torneo.participants || {};
   const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
   const max = torneo.maxParticipants || 100;
-  const avatars = ['ðŸ‘¾', 'ðŸ¤ ', 'ðŸ¥·', 'ðŸ¤–', 'ðŸ¦¸â€â™‚', 'ðŸ§Ÿ', 'ðŸ§™â€â™‚', 'ðŸ§›', 'ðŸ¦¹', 'ðŸ‘½'];
+  const avatars = ['👾', 'ðŸ¤ ', '🥶', '🤖', 'ðŸ¦¸â€â™‚', '🧟', 'ðŸ§™â€â™‚', '🧛', '🦹', '👽'];
   
   // Prizes
   let prizesHTML = '';
@@ -1036,7 +1036,7 @@ window.openDetailModal = function(tournamentId) {
   // Rules and Description
   const formattedDesc = torneo.description ? torneo.description.replace(/\n/g, '<br>') : '';
   let rulesHTML = formattedDesc
-    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>ðŸ“‹ Descripción</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedDesc}</div></div>`
+    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedDesc}</div></div>`
     : '';
     
   const formattedRulesText = torneo.rules ? torneo.rules.replace(/\n/g, '<br>') : '';
@@ -1196,7 +1196,7 @@ window.openDetailModal = function(tournamentId) {
     
     leaderboardHTML += `
       <div style="margin-top: 15px;">
-        <h4 style="margin-bottom:10px; color:var(--accent-light);">ðŸ“‹ Tabla de Posiciones</h4>
+        <h4 style="margin-bottom:10px; color:var(--accent-light);">📋 Tabla de Posiciones</h4>
         <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow:hidden;">
           <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(0,0,0,0.3); font-size:0.85rem; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">
             <div style="display:flex; gap:15px;"><span style="width:25px; text-align:center;">#</span> <span>Jugador</span></div>
@@ -1223,7 +1223,7 @@ window.openDetailModal = function(tournamentId) {
     
     leaderboardHTML += `
       <div style="margin-top: ${torneo.leaderboard && torneo.leaderboard.length > 0 ? '25px' : '15px'};">
-        <h4 style="margin-bottom:10px; color:var(--accent-light);">ðŸ“¸ Capturas de Resultados</h4>
+        <h4 style="margin-bottom:10px; color:var(--accent-light);">📸 Capturas de Resultados</h4>
         ${imagesHTML}
       </div>
     `;

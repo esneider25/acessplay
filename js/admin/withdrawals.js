@@ -284,7 +284,7 @@ async function showUserDetailsModal(uid) {
               <i class="ph ph-eye" id="toggle-force-confirm-${uid}" onclick="togglePasswordVisibility('admin-force-confirm-${uid}', 'toggle-force-confirm-${uid}')" style="position: absolute; right: 15px; top: 14px; cursor: pointer; color: var(--text-secondary);"></i>
             </div>
             <button class="btn btn-primary" onclick="forceCustomerPassword('${uid}', this)" style="width: 100%; justify-content: center; margin-top: 5px;">
-              ðŸ’¾ Actualizar ContraseÃ±a del Cliente
+              💾 Actualizar ContraseÃ±a del Cliente
             </button>
           </div>
         </div>
@@ -446,7 +446,7 @@ window.saveUserRole = function (uid) {
     referralLimit: role === 'influencer' ? referralLimit : null,
     autoProcessExternal: role === 'revendedor' ? autoProcessExternal : false
   }).then(() => {
-    showAdminToast('âœ… Rol actualizado', 'success');
+    showAdminToast('✅ Rol actualizado', 'success');
     document.getElementById('role-modal-overlay').remove();
     renderActiveTab();
   });
@@ -457,7 +457,7 @@ window.toggleBlockUser = function (uid, isBlocked) {
     firebase.database().ref('users/' + uid).update({
       isBlocked: !isBlocked
     }).then(() => {
-      showAdminToast(isBlocked ? 'âœ… Usuario desbloqueado' : 'ðŸš« Usuario bloqueado', 'success');
+      showAdminToast(isBlocked ? '✅ Usuario desbloqueado' : '🚫 Usuario bloqueado', 'success');
       renderActiveTab();
     });
   }
@@ -470,7 +470,7 @@ function renderBanners(container) {
     <div class="admin-header-flex">
       <h2>ðŸ–¼ï¸ GestiÃ³n de Banners</h2>
       <div style="display: flex; gap: 10px;">
-        <button class="btn-secondary" onclick="saveToDb('banners', BANNERS); showAdminToast('âœ… Banners guardados', 'success');">ðŸ’¾ Guardar Cambios</button>
+        <button class="btn-secondary" onclick="saveToDb('banners', BANNERS); showAdminToast('✅ Banners guardados', 'success');">💾 Guardar Cambios</button>
         <button class="btn-primary" onclick="adminEditBanner(null)">+ Nuevo Banner</button>
       </div>
     </div>
