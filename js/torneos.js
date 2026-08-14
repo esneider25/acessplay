@@ -1,5 +1,5 @@
-// ============================================================
-// AccessPlay — Torneos Logic (Rediseño Profesional v2)
+﻿// ============================================================
+// AccessPlay â€” Torneos Logic (RediseÃ±o Profesional v2)
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -13,7 +13,7 @@ let torneosData = [];
 let currentFilter = 'all';
 let countdownIntervals = [];
 
-// ── Game Banner Helpers ──
+// â”€â”€ Game Banner Helpers â”€â”€
 function getGameBannerClass(productName) {
   const name = (productName || '').toLowerCase();
   if (name.includes('free') && name.includes('fire')) return 'torneo-banner-freefire';
@@ -25,23 +25,23 @@ function getGameBannerClass(productName) {
 
 function getGameModeIcon(mode) {
   switch(mode) {
-    case 'solo': return '👤';
-    case 'duo': return '👥';
-    case 'squad': return '🎯';
-    default: return '🎮';
+    case 'solo': return 'ðŸ‘¤';
+    case 'duo': return 'ðŸ‘¥';
+    case 'squad': return 'ðŸŽ¯';
+    default: return 'ðŸŽ®';
   }
 }
 
 function getGameModeLabel(mode) {
   switch(mode) {
     case 'solo': return 'Solo';
-    case 'duo': return 'Dúo';
+    case 'duo': return 'DÃºo';
     case 'squad': return 'Escuadras';
     default: return 'Libre';
   }
 }
 
-// ── Init ──
+// â”€â”€ Init â”€â”€
 
 window.userTournamentRegistrations = {};
 async function fetchUserRegistrations(torneos) {
@@ -142,7 +142,7 @@ function initTorneos() {
   });
 }
 
-// ── Stats ──
+// â”€â”€ Stats â”€â”€
 function updateStats(torneos) {
   // Handled by global metadata listener now
 }
@@ -167,7 +167,7 @@ function animateCounter(elementId, target) {
   }, 16);
 }
 
-// ── Countdown ──
+// â”€â”€ Countdown â”€â”€
 function getCountdownHTML(deadline) {
   if (!deadline) return '';
   
@@ -176,7 +176,7 @@ function getCountdownHTML(deadline) {
   const diff = deadlineDate - now;
   
   if (diff <= 0) {
-    return '<span class="torneo-countdown-expired">⏰ Inscripciones cerradas</span>';
+    return '<span class="torneo-countdown-expired">â° Inscripciones cerradas</span>';
   }
   
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
@@ -185,7 +185,7 @@ function getCountdownHTML(deadline) {
   
   let html = '<div class="torneo-countdown">';
   if (days > 0) {
-    html += `<div class="torneo-countdown-unit"><div class="torneo-countdown-value">${days}</div><div class="torneo-countdown-label">Días</div></div>`;
+    html += `<div class="torneo-countdown-unit"><div class="torneo-countdown-value">${days}</div><div class="torneo-countdown-label">DÃ­as</div></div>`;
   }
   html += `<div class="torneo-countdown-unit"><div class="torneo-countdown-value">${hours}</div><div class="torneo-countdown-label">Hrs</div></div>`;
   html += `<div class="torneo-countdown-unit"><div class="torneo-countdown-value">${String(mins).padStart(2,'0')}</div><div class="torneo-countdown-label">Min</div></div>`;
@@ -238,7 +238,7 @@ function renderTorneos(torneos) {
     const count = Object.keys(participants).length;
     const max = torneo.maxParticipants || 100;
     const progress = max > 0 ? Math.min((count / max) * 100, 100) : 0;
-    const isJoined = user && participants[user.uid];
+    const isJoined = user && (participants[user.uid] || (window.userTournamentRegistrations && window.userTournamentRegistrations[torneo.id]));
 
     let badgeClass = '';
     let statusText = '';
@@ -280,7 +280,6 @@ function renderTorneos(torneos) {
             winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${winner.playerName}</span>`;
           }
         }
-        
         let placeText = p.place ? p.place + ': ' : '';
         if (winnerText) {
           prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${p.reward})</span></span></div>`;
@@ -297,75 +296,62 @@ function renderTorneos(torneos) {
           winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${winner.playerName}</span>`;
         }
       }
-      
       if (winnerText) {
-        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🏆</span><span class="torneo-prize-text gold">Ganador: ${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${torneo.prize})</span></span></div></div>`;
+        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🥇</span><span class="torneo-prize-text gold">${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${torneo.prize})</span></span></div></div>`;
       } else {
-        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text gold">${torneo.prize}</span></div></div>`;
+        prizesHTML = `<div class="torneo-prizes"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text">${torneo.prize}</span></div></div>`;
       }
     }
-    
+
+    // Description
+    let descriptionHTML = '';
+    if (torneo.description) {
+      const shortDesc = torneo.description.length > 80 ? torneo.description.substring(0, 80) + '...' : torneo.description;
+      descriptionHTML = `<p class="torneo-description" style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:10px;">${shortDesc}</p>`;
+    }
+
+    // Rules button
+    let rulesHTML = '';
+    if (torneo.rules) {
+      rulesHTML = `<button class="torneo-rules-btn" onclick="event.stopPropagation(); viewTournamentRules('${torneo.id}')" style="width:100%; padding:8px; margin-bottom:12px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; color:#fbbf24; font-weight:600; cursor:pointer; font-size:0.85rem;">⚠ Ver Reglas</button>`;
+    }
+
     // Tags
-    let tagsHTML = '<div class="torneo-tags">';
-    tagsHTML += `<span class="torneo-tag">🎮 ${torneo.productName || 'Juego'}</span>`;
+    let tagsHTML = '<div class="torneo-tags" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">';
+    if (torneo.productName) {
+      tagsHTML += `<span class="torneo-tag" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:var(--text-secondary);">🎮 ${torneo.productName}</span>`;
+    }
     if (torneo.gameMode) {
-      tagsHTML += `<span class="torneo-tag">${getGameModeIcon(torneo.gameMode)} ${getGameModeLabel(torneo.gameMode)}</span>`;
+      tagsHTML += `<span class="torneo-tag" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:var(--text-secondary);">${getGameModeIcon(torneo.gameMode)} ${getGameModeLabel(torneo.gameMode)}</span>`;
     }
     if (torneo.entryFee && torneo.entryFee > 0) {
       const exchangeRate = typeof EXCHANGE_RATE !== 'undefined' ? (EXCHANGE_RATE.tournamentsUsdToBs || EXCHANGE_RATE.usdToBs || 1) : 1;
       const feeBs = (torneo.entryFee * exchangeRate).toFixed(2);
-      tagsHTML += `<span class="torneo-tag" style="color:#fbbf24; border-color:rgba(251,191,36,0.3); background:rgba(251,191,36,0.1);">💎 Bs. ${feeBs}</span>`;
+      tagsHTML += `<span class="torneo-tag" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:#f87171;">💰 Bs. ${feeBs}</span>`;
     } else {
-      tagsHTML += `<span class="torneo-tag" style="color:#4ade80; border-color:rgba(74,222,128,0.3); background:rgba(74,222,128,0.1);">🆓 GRATIS</span>`;
+      tagsHTML += `<span class="torneo-tag" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:#4ade80;">💳 GRATIS</span>`;
+    }
+    if (torneo.pricePerKill && torneo.pricePerKill > 0) {
+      tagsHTML += `<span class="torneo-tag" style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:#fbbf24;">🎯 Pago por Kill: $${torneo.pricePerKill.toFixed(2)}</span>`;
     }
     tagsHTML += '</div>';
-    
-    // Action Button
+
+    // Action button
     let actionButton = '';
-    if (torneo.status === 'registration_open') {
-      // Check if deadline expired
-      const deadlineExpired = torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date();
-      
-      if (user) {
-        if (isJoined) {
-          const myP = participants[user.uid];
-          if (myP.paymentStatus === 'pending_payment') {
-            actionButton = `<button class="torneo-btn" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);" disabled>⏳ Inscripción Pendiente</button>`;
-          } else {
-            actionButton = `<button class="torneo-btn btn-joined" disabled>✅ Ya estás inscrito</button>`;
-          }
-        } else if (count >= max) {
-          actionButton = `<button class="torneo-btn" disabled>🚫 Cupos Agotados</button>`;
-        } else if (deadlineExpired) {
-          actionButton = `<button class="torneo-btn" disabled>⏰ Inscripciones Cerradas</button>`;
-        } else {
-          actionButton = `<button class="torneo-btn" onclick="openInscriptionModal('${torneo.id}')">⚡ Inscribirse Ahora</button>`;
-        }
-      } else {
-        actionButton = `<button class="torneo-btn btn-login" onclick="showAuthModal()">🔑 Inicia Sesión para Inscribirte</button>`;
-      }
-    } else if (torneo.status === 'ongoing') {
-      actionButton = `<button class="torneo-btn" disabled>⚔️ Torneo en progreso</button>`;
-    } else if (torneo.status === 'completed' || torneo.status === 'completado') {
-      const leaderboard = torneo.leaderboard || [];
-      if (leaderboard.length > 0) {
-        actionButton = `<button class="torneo-btn" style="background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: rgba(251, 191, 36, 0.3);" onclick="viewTournamentResults('${torneo.id}')">🏆 Ver Resultados</button>`;
-      } else {
-        actionButton = `<button class="torneo-btn" disabled>Torneo Finalizado</button>`;
-      }
+    const deadlinePassed = torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date();
+    
+    if (isJoined) {
+      actionButton = `<button class="torneo-btn torneo-btn-joined" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.4); color:#4ade80; cursor:default;">✅ Ya estás inscrito</button>`;
+    } else if (torneo.status === 'registration_open' && !deadlinePassed && count < max) {
+      actionButton = `<button class="torneo-btn torneo-btn-join" onclick="event.stopPropagation(); openInscriptionModal('${torneo.id}')" style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:linear-gradient(135deg, #38bdf8, #06b6d4); border:none; color:white; cursor:pointer;">⚡ Inscribirse Ahora</button>`;
+    } else if (isCompleted) {
+      actionButton = `<button class="torneo-btn torneo-btn-results" onclick="event.stopPropagation(); viewTournamentResults('${torneo.id}')" style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; cursor:pointer;">🏆 Ver Resultados</button>`;
+    } else if (deadlinePassed) {
+      actionButton = `<button class="torneo-btn" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:default;">🔒 Inscripciones Cerradas</button>`;
+    } else if (count >= max) {
+      actionButton = `<button class="torneo-btn" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:default;">🚫 Cupo Lleno</button>`;
     }
-    
-    // Description
-    const descriptionHTML = torneo.description
-      ? `<p class="torneo-description">${torneo.description}</p>`
-      : '';
-      
-    // Rules
-    const rulesHTML = torneo.rules
-      ? `<div onclick="event.stopPropagation();" style="position: relative; z-index: 10;"><button class="torneo-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px; font-size: 0.8rem; margin-bottom: 10px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.background='rgba(239, 68, 68, 0.2)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.1)'" onclick="viewTournamentRules('${torneo.id}')">⚠️ Ver Reglas</button></div>`
-      : '';
-    
-    // Leaderboard preview (removed to save space, user can open modal to see it)
+
     let leaderboardPreview = '';
     
     html += `
@@ -419,22 +405,18 @@ window.switchHofTab = function(type) {
     premiumBtn.style.background = 'var(--accent)';
     premiumBtn.style.color = 'white';
     premiumBtn.style.border = 'none';
-    
     freeBtn.style.background = 'rgba(255,255,255,0.05)';
     freeBtn.style.color = 'var(--text-muted)';
     freeBtn.style.border = '1px solid rgba(255,255,255,0.1)';
-    
     premiumContainer.style.display = 'block';
     freeContainer.style.display = 'none';
   } else {
     freeBtn.style.background = 'var(--accent)';
     freeBtn.style.color = 'white';
     freeBtn.style.border = 'none';
-    
     premiumBtn.style.background = 'rgba(255,255,255,0.05)';
     premiumBtn.style.color = 'var(--text-muted)';
     premiumBtn.style.border = '1px solid rgba(255,255,255,0.1)';
-    
     freeContainer.style.display = 'block';
     premiumContainer.style.display = 'none';
   }
@@ -494,8 +476,8 @@ function renderHallOfFame(data, isPreAggregated = false) {
     topFree = Object.values(playerStatsFree).sort((a, b) => (b.totalWins || 0) - (a.totalWins || 0)).slice(0, 10);
   }
   
-  premiumContainer.innerHTML = buildHofHtml(topPremium, 'Aún no hay campeones en torneos premium. ¡Sé el primero!');
-  freeContainer.innerHTML = buildHofHtml(topFree, 'Aún no hay campeones en torneos gratuitos. ¡Sé el primero!');
+  premiumContainer.innerHTML = buildHofHtml(topPremium, 'AÃºn no hay campeones en torneos premium. Â¡SÃ© el primero!');
+  freeContainer.innerHTML = buildHofHtml(topFree, 'AÃºn no hay campeones en torneos gratuitos. Â¡SÃ© el primero!');
 }
 
 function buildHofHtml(topPlayers, emptyMessage) {
@@ -511,14 +493,14 @@ function buildHofHtml(topPlayers, emptyMessage) {
     let nameStyle = 'color: white; font-weight: 600;';
     
     if (i === 0) {
-      rankBadge = '👑';
+      rankBadge = 'ðŸ‘‘';
       cardStyle = 'background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.02)); border: 1px solid rgba(255, 215, 0, 0.3);';
       nameStyle = 'color: #fbbf24; font-weight: 800; font-size: 1.2rem;';
     } else if (i === 1) {
-      rankBadge = '🥈';
+      rankBadge = 'ðŸ¥ˆ';
       nameStyle = 'color: #9ca3af; font-weight: 700;';
     } else if (i === 2) {
-      rankBadge = '🥉';
+      rankBadge = 'ðŸ¥‰';
       nameStyle = 'color: #b45309; font-weight: 700;';
     } else {
       rankBadge = `<span style="color:var(--text-muted); font-size:1.2rem; font-weight:bold;">#${i+1}</span>`;
@@ -554,13 +536,13 @@ function buildHofHtml(topPlayers, emptyMessage) {
   return html;
 }
 
-// ── Inscription Modal ──
+// â”€â”€ Inscription Modal â”€â”€
 window.openInscriptionModal = function(tournamentId) {
   const user = firebase.auth().currentUser;
   if (!user) {
     if (typeof showAuthModal === 'function') showAuthModal();
     else if (typeof openAuthModal === 'function') openAuthModal();
-    else Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Debes iniciar sesión para inscribirte.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
+    else Swal.fire({ icon: 'warning', title: 'Oops...', text: 'Debes iniciar sesiÃ³n para inscribirte.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
     return;
   }
   
@@ -580,7 +562,7 @@ window.openInscriptionModal = function(tournamentId) {
   let extraMembersHtml = '';
   if (gm === 'duo') {
     extraMembersHtml = `
-      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👥 Miembro 2</h4>
+      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸ‘¥ Miembro 2</h4>
       <div class="torneo-form-group">
         <div style="display:flex; gap:5px;">
           <input class="torneo-form-input tm-id" type="text" required placeholder="ID del Juego (Miembro 2)">
@@ -590,7 +572,7 @@ window.openInscriptionModal = function(tournamentId) {
     `;
   } else if (gm === 'squad') {
     extraMembersHtml = `
-      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">🎯 Miembros del Escuadrón</h4>
+      <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸŽ¯ Miembros del EscuadrÃ³n</h4>
       <div class="torneo-form-group">
         <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 2</label>
         <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
@@ -617,15 +599,15 @@ window.openInscriptionModal = function(tournamentId) {
         if (pm.id !== 'wallet' && pm.name.toLowerCase().indexOf('binance') === -1) pmOptions += `<option value="${pm.id}">${pm.name}</option>`;
       });
     } else {
-      pmOptions += '<option value="pagomovil">Pago Móvil / Transferencia</option>';
+      pmOptions += '<option value="pagomovil">Pago MÃ³vil / Transferencia</option>';
     }
 
     paymentHtml = `
-      <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">💳 Pago de Inscripción</h4>
+      <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸ’³ Pago de InscripciÃ³n</h4>
       <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Costo del torneo: <strong style="color:var(--text-primary);">Bs. ${feeBs}</strong> (Aprox. $${torneo.entryFee.toFixed(2)} USD)</p>
       
       <div class="torneo-form-group">
-        <label class="torneo-form-label">Método de Pago</label>
+        <label class="torneo-form-label">MÃ©todo de Pago</label>
         <select class="torneo-form-input" id="insc-payment-method" onchange="toggleInscPaymentMethod()" required>
           ${pmOptions}
         </select>
@@ -636,18 +618,18 @@ window.openInscriptionModal = function(tournamentId) {
         <div id="insc-pm-dynamic-info" style="font-size:0.85rem; font-family:var(--font-mono); color:var(--text-primary); margin-bottom:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px;">
           <!-- Loaded dynamically -->
         </div>
-        <p style="font-size:0.75rem; color:var(--accent); margin-bottom:6px; font-weight:600;"><i class="ph-fill ph-info"></i> Coloca los últimos 6 dígitos de la referencia</p>
-        <input class="torneo-form-input" id="insc-payment-ref" type="text" placeholder="Número de Referencia / ID">
+        <p style="font-size:0.75rem; color:var(--accent); margin-bottom:6px; font-weight:600;"><i class="ph-fill ph-info"></i> Coloca los Ãºltimos 6 dÃ­gitos de la referencia</p>
+        <input class="torneo-form-input" id="insc-payment-ref" type="text" placeholder="NÃºmero de Referencia / ID">
       </div>
     `;
   }
   
   content.innerHTML = `
-    <h3>⚡ Inscripción</h3>
+    <h3>âš¡ InscripciÃ³n</h3>
     <p class="torneo-modal-subtitle">${torneo.title} - ${gm.toUpperCase()}</p>
     
     <form id="inscription-form" style="max-height: 60vh; overflow-y: auto; padding-right: 5px; margin-right: -5px;">
-      <h4 style="margin-top: 10px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👑 Lider (Tú)</h4>
+      <h4 style="margin-top: 10px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">ðŸ‘‘ Lider (TÃº)</h4>
       <div class="torneo-form-group">
         <label class="torneo-form-label">Tu nombre</label>
         <input class="torneo-form-input" id="insc-name" type="text" value="${userName}" required placeholder="Tu nombre">
@@ -655,7 +637,7 @@ window.openInscriptionModal = function(tournamentId) {
       <div class="torneo-form-group">
         <label class="torneo-form-label">ID del juego</label>
         <input class="torneo-form-input" id="insc-game-id" type="text" required placeholder="Ej: 123456789">
-        <p class="torneo-form-hint" style="margin-top:2px;">Tu ID numérico dentro del juego</p>
+        <p class="torneo-form-hint" style="margin-top:2px;">Tu ID numÃ©rico dentro del juego</p>
       </div>
       <div class="torneo-form-group">
         <label class="torneo-form-label">Nombre en el juego (Jugador)</label>
@@ -667,7 +649,7 @@ window.openInscriptionModal = function(tournamentId) {
       
       <div style="display:flex; gap:10px; margin-top:24px;">
         <button type="button" class="torneo-btn btn-login" onclick="closeTorneoModal()" style="flex:1;">Cancelar</button>
-        <button type="submit" class="torneo-btn" id="insc-submit-btn" style="flex:2;">⚡ Confirmar Inscripción</button>
+        <button type="submit" class="torneo-btn" id="insc-submit-btn" style="flex:2;">âš¡ Confirmar InscripciÃ³n</button>
       </div>
     </form>
   `;
@@ -694,8 +676,8 @@ window.openInscriptionModal = function(tournamentId) {
                   <span style="color:var(--text-muted); font-size:0.75rem; display:block; margin-bottom:2px; text-transform: uppercase; letter-spacing: 0.5px;">${formattedKey}</span>
                   <span style="font-weight:600; font-size:0.95rem; color:var(--text-primary); user-select: all;">${val}</span>
                 </div>
-                <button type="button" onclick="navigator.clipboard.writeText('${val}'); if(typeof showToast !== 'undefined') showToast('✅ Copiado al portapapeles'); this.innerText='✔️'; setTimeout(()=>this.innerText='📋', 1500);" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary); padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9rem; transition:0.2s; hover:background:rgba(255,255,255,0.2);" title="Copiar ${formattedKey}">
-                  📋
+                <button type="button" onclick="navigator.clipboard.writeText('${val}'); if(typeof showToast !== 'undefined') showToast('âœ… Copiado al portapapeles'); this.innerText='âœ”ï¸'; setTimeout(()=>this.innerText='ðŸ“‹', 1500);" style="background:rgba(255,255,255,0.1); border:none; color:var(--text-primary); padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9rem; transition:0.2s; hover:background:rgba(255,255,255,0.2);" title="Copiar ${formattedKey}">
+                  ðŸ“‹
                 </button>
               </div>
             `;
@@ -721,7 +703,7 @@ window.openInscriptionModal = function(tournamentId) {
       const name = document.getElementById('insc-name').value.trim();
       
       if (!gameName || !gameId || !name) {
-        Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa todos los campos del líder.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
+        Swal.fire({ icon: 'warning', title: 'Datos incompletos', text: 'Por favor completa todos los campos del lÃ­der.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
         return;
       }
       
@@ -767,8 +749,8 @@ window.openInscriptionModal = function(tournamentId) {
             closeTorneoModal();
             
             firebase.database().ref('users/' + user.uid + '/notifications').push({
-              title: 'Inscripción a Torneo 🏆',
-              body: `Tu solicitud de inscripción al torneo ha sido registrada. Estado: ${paymentStatus === 'approved' || paymentStatus === 'free' ? 'Confirmado ✅' : 'Pendiente de Pago ⏳'}`,
+              title: 'InscripciÃ³n a Torneo ðŸ†',
+              body: `Tu solicitud de inscripciÃ³n al torneo ha sido registrada. Estado: ${paymentStatus === 'approved' || paymentStatus === 'free' ? 'Confirmado âœ…' : 'Pendiente de Pago â³'}`,
               type: 'tournament',
               timestamp: new Date().toISOString(),
               read: false
@@ -777,7 +759,7 @@ window.openInscriptionModal = function(tournamentId) {
             const showWhatsappPrompt = () => {
               const channelLink = (typeof SITE_SETTINGS !== 'undefined' && SITE_SETTINGS.whatsappChannel) ? SITE_SETTINGS.whatsappChannel : 'https://whatsapp.com/channel/TU_CANAL_AQUI';
               Swal.fire({
-                title: '¡Atención!',
+                title: 'Â¡AtenciÃ³n!',
                 html: `Tienes que unirte al canal de WhatsApp para ver los anuncios del torneo <b>${torneo.title}</b> minutos antes que comience.`,
                 icon: 'info',
                 showCancelButton: true,
@@ -797,16 +779,16 @@ window.openInscriptionModal = function(tournamentId) {
             window.userTournamentRegistrations[tournamentId] = participantData;
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
               launchConfetti();
-              Swal.fire({ icon: 'success', title: '¡Inscripción exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
+              Swal.fire({ icon: 'success', title: 'Â¡InscripciÃ³n exitosa!', text: 'Tu cupo ha sido confirmado.', confirmButtonColor: '#4ade80', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
             } else {
-              Swal.fire({ icon: 'info', title: 'Inscripción pendiente', text: 'En breve un administrador validará tu pago y confirmará tu cupo.', confirmButtonColor: '#fbbf24', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
+              Swal.fire({ icon: 'info', title: 'InscripciÃ³n pendiente', text: 'En breve un administrador validarÃ¡ tu pago y confirmarÃ¡ tu cupo.', confirmButtonColor: '#fbbf24', background: 'var(--bg-surface)', color: 'var(--text-primary)' }).then(() => showWhatsappPrompt());
             }
             if (window.currentUser) { fetchUserRegistrations(torneosData).then(() => renderTorneos(torneosData)); } else { renderTorneos(torneosData); }
           }).catch(err => {
             console.error('Error al inscribirse:', err);
             submitBtn.disabled = false;
-            submitBtn.innerText = '⚡ Confirmar Inscripción';
-            Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al inscribirte. Verifica tu conexión.', confirmButtonColor: '#ef4444', background: 'var(--bg-surface)', color: 'var(--text-primary)' });
+            submitBtn.innerText = 'âš¡ Confirmar InscripciÃ³n';
+            Swal.fire({ icon: 'error', title: 'Error', text: 'OcurriÃ³ un error al inscribirte. Verifica tu conexiÃ³n.', confirmButtonColor: '#ef4444', background: 'var(--bg-surface)', color: 'var(--text-primary)' });
           });
       };
       
@@ -826,7 +808,7 @@ window.openInscriptionModal = function(tournamentId) {
               updates['users/' + user.uid + '/wallet/transactions/' + txId] = {
                 type: 'tournament_fee',
                 amount: -torneo.entryFee,
-                description: 'Inscripción a ' + torneo.title,
+                description: 'InscripciÃ³n a ' + torneo.title,
                 timestamp: new Date().toISOString()
               };
               
@@ -834,21 +816,21 @@ window.openInscriptionModal = function(tournamentId) {
                 processInscription('approved', 'wallet');
               }).catch(err => {
                 submitBtn.disabled = false;
-                submitBtn.innerText = '⚡ Confirmar Inscripción';
+                submitBtn.innerText = 'âš¡ Confirmar InscripciÃ³n';
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Error al procesar pago: ' + err.message, confirmButtonColor: '#ef4444' });
               });
             } else {
               submitBtn.disabled = false;
-              submitBtn.innerText = '⚡ Confirmar Inscripción';
+              submitBtn.innerText = 'âš¡ Confirmar InscripciÃ³n';
               Swal.fire({ icon: 'error', title: 'Saldo insuficiente', text: 'Saldo insuficiente en tu Billetera Virtual. Tienes $' + currentBalance.toFixed(2), confirmButtonColor: '#ef4444' });
             }
           });
         } else if (paymentMethod !== 'wallet') {
           const paymentRef = document.getElementById('insc-payment-ref').value.trim();
           if (!paymentRef) {
-            Swal.fire({ icon: 'warning', title: 'Referencia requerida', text: 'Por favor ingresa el número de referencia del pago.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
+            Swal.fire({ icon: 'warning', title: 'Referencia requerida', text: 'Por favor ingresa el nÃºmero de referencia del pago.', confirmButtonColor: '#fbbf24' , background: 'var(--bg-surface)', color: 'var(--text-primary)' });
             submitBtn.disabled = false;
-            submitBtn.innerText = '⚡ Confirmar Inscripción';
+            submitBtn.innerText = 'âš¡ Confirmar InscripciÃ³n';
             return;
           }
           
@@ -867,7 +849,7 @@ window.closeTorneoModal = function() {
   document.getElementById('torneo-inscription-modal').classList.remove('active');
 };
 
-// ── Detail Modal ──
+// â”€â”€ Detail Modal â”€â”€
 window.switchTab = function(btn, tabId) {
   const tabs = btn.parentElement.querySelectorAll('.torneo-tab-btn');
   tabs.forEach(t => t.classList.remove('active'));
@@ -932,22 +914,22 @@ window.viewTournamentResults = function(id) {
   let rows = '';
   sorted.forEach((group, i) => {
     let medal = '';
-    if (i === 0) medal = '🥇';
-    else if (i === 1) medal = '🥈';
-    else if (i === 2) medal = '🥉';
-    else medal = `<span style="opacity:0.6;">${i+1}º</span>`;
+    if (i === 0) medal = 'ðŸ¥‡';
+    else if (i === 1) medal = 'ðŸ¥ˆ';
+    else if (i === 2) medal = 'ðŸ¥‰';
+    else medal = `<span style="opacity:0.6;">${i+1}Âº</span>`;
     
     let statsHtml = '';
     if (isPrizeFormat) {
       if (group.position === 0) {
         medal = '<span style="opacity:0.6;">-</span>';
       }
-      let displayPos = group.position === 0 ? 'N/C' : `${group.position}º Lugar`;
+      let displayPos = group.position === 0 ? 'N/C' : `${group.position}Âº Lugar`;
       let prizeText = '';
       if (group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🎁 ${torneo.prizes[group.position - 1].reward}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">ðŸŽ ${torneo.prizes[group.position - 1].reward}</div>`;
       } else if (group.position === 1 && torneo.prize) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🎁 ${torneo.prize}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">ðŸŽ ${torneo.prize}</div>`;
       }
       
       let membersHtml = '';
@@ -999,7 +981,7 @@ window.viewTournamentResults = function(id) {
   });
   
   Swal.fire({
-    title: `<h3 style="color:var(--text-primary); margin:0;">🏆 Clasificación Final</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
+    title: `<h3 style="color:var(--text-primary); margin:0;">ðŸ† ClasificaciÃ³n Final</h3><p style="font-size:0.9rem; color:var(--text-muted); font-weight:normal; margin-top:5px;">${torneo.title}</p>`,
     html: `<div style="max-height: 400px; overflow-y:auto; text-align:left; margin-top:15px; padding-right:5px;">${rows}</div>`,
     background: 'var(--bg-surface)',
     color: 'var(--text-primary)',
@@ -1033,23 +1015,23 @@ window.openDetailModal = function(tournamentId) {
   const participants = torneo.participants || {};
   const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
   const max = torneo.maxParticipants || 100;
-  const avatars = ['👾', '🤠', '🥷', '🤖', '🦸‍♂️', '🧟', '🧙‍♂️', '🧛', '🦹', '👽'];
+  const avatars = ['ðŸ‘¾', 'ðŸ¤ ', 'ðŸ¥·', 'ðŸ¤–', 'ðŸ¦¸â€â™‚ï¸', 'ðŸ§Ÿ', 'ðŸ§™â€â™‚ï¸', 'ðŸ§›', 'ðŸ¦¹', 'ðŸ‘½'];
   
   // Prizes
   let prizesHTML = '';
   const prizes = torneo.prizes || [];
   if (prizes.length > 0) {
-    const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️'];
-    prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text">${p.place ? p.place + ': ' : ''}${p.reward}</span></div>`).join('');
-    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;">${prizesHTML}</div></div>`;
+    const medals = ['ðŸ¥‡', 'ðŸ¥ˆ', 'ðŸ¥‰', 'ðŸ…', 'ðŸŽ–ï¸'];
+    prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || 'ðŸŽ–ï¸'}</span><span class="torneo-prize-text">${p.place ? p.place + ': ' : ''}${p.reward}</span></div>`).join('');
+    prizesHTML = `<div class="torneo-detail-section"><h4>ðŸ… Premios</h4><div class="torneo-prizes" style="margin-top: 10px;">${prizesHTML}</div></div>`;
   } else if (torneo.prize) {
-    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">🎁</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
+    prizesHTML = `<div class="torneo-detail-section"><h4>ðŸ… Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">ðŸŽ</span><span class="torneo-prize-text">${torneo.prize}</span></div></div></div>`;
   }
   
   // Rules and Description
   const formattedDesc = torneo.description ? torneo.description.replace(/\n/g, '<br>') : '';
   let rulesHTML = formattedDesc
-    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>📋 Descripción</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedDesc}</div></div>`
+    ? `<div class="torneo-detail-section" style="margin-top:20px;"><h4>ðŸ“‹ DescripciÃ³n</h4><div class="torneo-detail-rules" style="margin-top:10px; line-height: 1.5;">${formattedDesc}</div></div>`
     : '';
     
   const formattedRulesText = torneo.rules ? torneo.rules.replace(/\n/g, '<br>') : '';
@@ -1074,7 +1056,7 @@ window.openDetailModal = function(tournamentId) {
     
     participantsList.forEach((p, i) => {
       const avatarCap = avatars[i % avatars.length];
-      const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
+      const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'DÃºo' : 'Escuadra') : 'Solo';
       const capName = p.gameName || p.name || 'Jugador';
       
       if (teamType === 'Solo') {
@@ -1086,17 +1068,17 @@ window.openDetailModal = function(tournamentId) {
           </div>
         `;
       } else {
-        let membersHTML = `<span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName} <span style="font-size:0.65rem; opacity:0.6;">(Líder)</span></span></span>`;
+        let membersHTML = `<span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName} <span style="font-size:0.65rem; opacity:0.6;">(LÃ­der)</span></span></span>`;
         p.teamMembers.forEach((tm, tmIdx) => {
           const avatarTm = avatars[(i + tmIdx + 1) % avatars.length];
-          const tmName = tm.gameName || 'Compañero';
+          const tmName = tm.gameName || 'CompaÃ±ero';
           membersHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatarTm}</span> <span>${tmName}</span></span>`;
         });
         
         participantsHTML += `
           <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
             <div style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; font-weight:bold; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
-              👥 Equipo ${teamType}
+              ðŸ‘¥ Equipo ${teamType}
             </div>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               ${membersHTML}
@@ -1108,10 +1090,10 @@ window.openDetailModal = function(tournamentId) {
     
     participantsHTML += '</div>';
   } else {
-    participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Aún no hay inscritos en este torneo.</p>';
+    participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">AÃºn no hay inscritos en este torneo.</p>';
   }
   
-  // Clasificación (Tabla de líderes y Capturas)
+  // ClasificaciÃ³n (Tabla de lÃ­deres y Capturas)
   let leaderboardHTML = '';
   let hasContent = false;
   
@@ -1174,16 +1156,16 @@ window.openDetailModal = function(tournamentId) {
       
       let prizeText = '';
       if (isPrizeFormat && group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🎁 ${torneo.prizes[group.position - 1].reward}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">ðŸŽ ${torneo.prizes[group.position - 1].reward}</div>`;
       } else if (isPrizeFormat && group.position === 1 && torneo.prize) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">🎁 ${torneo.prize}</div>`;
+        prizeText = `<div style="color:#fbbf24; font-size:0.75rem; margin-top:2px;">ðŸŽ ${torneo.prize}</div>`;
       }
       
       let membersHtml = '';
       if (group.isTeam) {
          membersHtml = `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">`;
          group.members.forEach(m => {
-            membersHtml += `<div>• ${m.playerName}: <strong style="color:white;">${m.kills || 0}</strong> kills</div>`;
+            membersHtml += `<div>â€¢ ${m.playerName}: <strong style="color:white;">${m.kills || 0}</strong> kills</div>`;
          });
          membersHtml += `</div>`;
       }
@@ -1209,7 +1191,7 @@ window.openDetailModal = function(tournamentId) {
     
     leaderboardHTML += `
       <div style="margin-top: 15px;">
-        <h4 style="margin-bottom:10px; color:var(--accent-light);">📋 Tabla de Posiciones</h4>
+        <h4 style="margin-bottom:10px; color:var(--accent-light);">ðŸ“‹ Tabla de Posiciones</h4>
         <div style="border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow:hidden;">
           <div style="display:flex; justify-content:space-between; padding:12px; background:rgba(0,0,0,0.3); font-size:0.85rem; color:var(--text-muted); font-weight:bold; text-transform:uppercase;">
             <div style="display:flex; gap:15px;"><span style="width:25px; text-align:center;">#</span> <span>Jugador</span></div>
@@ -1236,29 +1218,29 @@ window.openDetailModal = function(tournamentId) {
     
     leaderboardHTML += `
       <div style="margin-top: ${torneo.leaderboard && torneo.leaderboard.length > 0 ? '25px' : '15px'};">
-        <h4 style="margin-bottom:10px; color:var(--accent-light);">📸 Capturas de Resultados</h4>
+        <h4 style="margin-bottom:10px; color:var(--accent-light);">ðŸ“¸ Capturas de Resultados</h4>
         ${imagesHTML}
       </div>
     `;
   }
   
   if (!hasContent) {
-    leaderboardHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Resultados no disponibles o el torneo está en curso.</p>';
+    leaderboardHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Resultados no disponibles o el torneo estÃ¡ en curso.</p>';
   }
   
   // Winners 
   let winnersHTML = '';
   if (torneo.status === 'completed' && torneo.winners && torneo.winners.length > 0) {
-    const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
+    const medals = ['ðŸ‘‘', 'ðŸ¥ˆ', 'ðŸ¥‰', 'ðŸ…', 'ðŸŽ–ï¸'];
     
-    winnersHTML = '<div class="torneo-detail-section"><h4>🏆 Campeones del Torneo</h4><div style="margin-top:10px;">';
+    winnersHTML = '<div class="torneo-detail-section"><h4>ðŸ† Campeones del Torneo</h4><div style="margin-top:10px;">';
     torneo.winners.forEach((p, i) => {
-      const rewardStr = p.reward ? ' — ' + p.reward : '';
+      const rewardStr = p.reward ? ' â€” ' + p.reward : '';
       winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
-        <span style="font-size:1.6rem;">${medals[i] || '🏅'}</span>
+        <span style="font-size:1.6rem;">${medals[i] || 'ðŸ…'}</span>
         <div>
           <div style="font-weight:700; color:#fbbf24; font-size:1.1rem; font-family:var(--font-display);">${p.name || p.playerName || 'Jugador'}</div>
-          <div style="font-size:0.85rem; color:var(--text-secondary);">${p.place || (i + 1) + '° Lugar'}${rewardStr}</div>
+          <div style="font-size:0.85rem; color:var(--text-secondary);">${p.place || (i + 1) + 'Â° Lugar'}${rewardStr}</div>
         </div>
       </div>`;
     });
@@ -1268,12 +1250,12 @@ window.openDetailModal = function(tournamentId) {
   const content = document.getElementById('torneo-detail-content');
   content.innerHTML = `
     <h3 style="font-family: var(--font-display); text-transform: uppercase; letter-spacing: -0.5px; margin-bottom: 5px; font-size: 1.8rem; line-height: 1.1;">${torneo.title}</h3>
-    <p class="torneo-modal-subtitle">${torneo.productName || ''} ${torneo.gameMode ? '· ' + getGameModeLabel(torneo.gameMode) : ''}</p>
+    <p class="torneo-modal-subtitle">${torneo.productName || ''} ${torneo.gameMode ? 'Â· ' + getGameModeLabel(torneo.gameMode) : ''}</p>
     
     <div class="torneo-tabs">
       <button class="torneo-tab-btn active" onclick="switchTab(this, 'tab-resumen')">Resumen</button>
       <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-participantes')">Participantes (${count}/${max})</button>
-      <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-leaderboard')">Clasificación</button>
+      <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-leaderboard')">ClasificaciÃ³n</button>
     </div>
     
     <div id="tab-resumen" class="torneo-tab-content active">
@@ -1302,7 +1284,7 @@ window.closeDetailModal = function() {
   document.getElementById('torneo-detail-modal').classList.remove('active');
 };
 
-// ── Confetti ──
+// â”€â”€ Confetti â”€â”€
 function launchConfetti() {
   const canvas = document.createElement('canvas');
   canvas.className = 'confetti-canvas';
