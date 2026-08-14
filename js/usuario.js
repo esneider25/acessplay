@@ -791,13 +791,13 @@ function renderDashboardContent() {
           <h3 style="margin: 0 0 5px 0; color: var(--accent); display: flex; align-items: center; gap: 8px;"><i class="ph-fill ph-users-three"></i> ¡Invita y Gana!</h3>
           <p style="margin: 0 0 10px 0; color: var(--text-secondary); font-size: 0.9rem;">Gana AccessPoints cada vez que tus invitados realicen compras.</p>
           <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85rem;">
-            <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: var(--accent); font-weight: bold;">${userProfile.referralsCount || 0} / ${(currentRole === 'influencer' || currentRole === 'partner') ? (userProfile.referralLimit || 100) : 10}</span> Amigos</div>
-            <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: #3b82f6; font-weight: bold;">${userProfile.referralsEarnedPoints || 0}</span> Puntos Ganados</div>
+            <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: var(--accent); font-weight: bold;">${userProfile?.referralsCount || 0} / ${(currentRole === 'influencer' || currentRole === 'partner') ? (userProfile?.referralLimit || 100) : 10}</span> Amigos</div>
+            <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: #3b82f6; font-weight: bold;">${userProfile?.referralsEarnedPoints || 0}</span> Puntos Ganados</div>
           </div>
         </div>
         <div style="flex: 1; display: flex; align-items: center; gap: 10px;">
-          <input type="text" readonly value="${window.location.origin}/?ref=${userProfile.referralCode || ''}" style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 10px; font-size: 0.9rem; outline: none;">
-          <button onclick="navigator.clipboard.writeText('${window.location.origin}/?ref=${userProfile.referralCode || ''}'); usuarioToast('¡Enlace copiado!', 'success')" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 10px; display: flex; align-items: center; gap: 6px;">
+          <input type="text" readonly value="${window.location.origin}/?ref=${userProfile?.referralCode || ''}" style="flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 10px 15px; border-radius: 10px; font-size: 0.9rem; outline: none;">
+          <button onclick="navigator.clipboard.writeText('${window.location.origin}/?ref=${userProfile?.referralCode || ''}'); usuarioToast('¡Enlace copiado!', 'success')" class="btn-primary" style="padding: 10px 20px; font-size: 0.9rem; border-radius: 10px; display: flex; align-items: center; gap: 6px;">
             <i class="ph ph-copy"></i> Copiar
           </button>
         </div>
@@ -1775,8 +1775,12 @@ window.renderDashboardTournaments = async function() {
   if (!container || !currentUser) return;
   
   try {
-    const snap = await firebase.database().ref('tournaments').once('value');
-    const allTournaments = snap.val() || {};
+    const [tournamentsSnap, participantsSnap] = await Promise.all([
+      firebase.database().ref('tournaments').once('value'),
+      firebase.database().ref('tournament_participants').once('value')
+    ]);
+    const allTournaments = tournamentsSnap.val() || {};
+    const allParticipants = participantsSnap.val() || {};
     
     let totalTournamentEarnings = 0;
     const myTournaments = [];
@@ -1784,12 +1788,12 @@ window.renderDashboardTournaments = async function() {
     Object.keys(allTournaments).forEach(key => {
       const t = allTournaments[key];
       t.id = key;
-      if (t.participants && t.participants[currentUser.uid] && t.participants[currentUser.uid].paymentStatus !== 'rejected') {
+      const myEntry = allParticipants[key] ? allParticipants[key][currentUser.uid] : null;
+      if (myEntry && myEntry.paymentStatus !== 'rejected') {
         myTournaments.push(t);
         
         // Calculate earnings from Kills
         if ((t.status === 'completed' || t.status === 'completado') && t.pricePerKill && t.leaderboard) {
-           const myEntry = t.participants[currentUser.uid];
            let myKills = 0;
            const myGameName = (myEntry.gameName || myEntry.name || 'Sin Nombre').trim().toLowerCase();
            const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
