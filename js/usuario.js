@@ -1787,6 +1787,7 @@ window.renderDashboardTournaments = async function() {
     
     Object.keys(allTournaments).forEach(key => {
       const t = allTournaments[key];
+      if (!t) return;
       t.id = key;
       const myEntry = allParticipants[key] ? allParticipants[key][currentUser.uid] : null;
       if (myEntry && myEntry.paymentStatus !== 'rejected') {
@@ -1899,7 +1900,7 @@ window.renderDashboardTournaments = async function() {
       const modeLabels = { solo: '👤 Solo', duo: '👥 Dúo', squad: '🎯 Escuadras' };
       const modeStr = t.gameMode ? modeLabels[t.gameMode] || t.gameMode : '';
       
-      const myEntry = t.participants[currentUser.uid];
+      const myEntry = allParticipants[t.id] ? allParticipants[t.id][currentUser.uid] : null;
       let myInfoHtml = '';
       if (myEntry) {
          let teamHtml = '';
