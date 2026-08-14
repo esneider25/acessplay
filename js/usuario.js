@@ -1770,17 +1770,38 @@ function initNotifications() {
   });
 }
 
-window.renderDashboardTournaments = async function() {
+let isDashboardTournamentsListening = false;
+let dbtData = {};
+let dbpData = {};
+
+window.renderDashboardTournaments = function() {
+  const container = document.getElementById('dashboard-tournaments-container');
+  if (!container || !currentUser) return;
+  
+  if (!isDashboardTournamentsListening) {
+     isDashboardTournamentsListening = true;
+     
+     firebase.database().ref('tournaments').on('value', snap => {
+        dbtData = snap.val() || {};
+        processAndRenderDashboardTournaments();
+     });
+     firebase.database().ref('tournament_participants').on('value', snap => {
+        dbpData = snap.val() || {};
+        processAndRenderDashboardTournaments();
+     });
+     return;
+  }
+  
+  processAndRenderDashboardTournaments();
+};
+
+function processAndRenderDashboardTournaments() {
   const container = document.getElementById('dashboard-tournaments-container');
   if (!container || !currentUser) return;
   
   try {
-    const [tournamentsSnap, participantsSnap] = await Promise.all([
-      firebase.database().ref('tournaments').once('value'),
-      firebase.database().ref('tournament_participants').once('value')
-    ]);
-    const allTournaments = tournamentsSnap.val() || {};
-    const allParticipants = participantsSnap.val() || {};
+    const allTournaments = dbtData || {};
+    const allParticipants = dbpData || {};
     
     let totalTournamentEarnings = 0;
     const myTournaments = [];
