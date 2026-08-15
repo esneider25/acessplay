@@ -2476,8 +2476,7 @@ function showProfileModal() {
            <button class="btn-primary" style="width: 100%; margin-bottom: 10px;" onclick="loadUserHistory()">Ver Historial de Compras</button>
            <button class="btn-secondary" style="width: 100%;" onclick="startWalletRecharge()">Recargar Monedero</button>
         </div>
-
-        <button onclick="logout()" class="btn-secondary" style="width: 100%; color: #ff5252; border-color: #ff5252;">Cerrar Sesión</button>
+        <button onclick="logout()" class="btn-secondary" style="width: 100%; color: #ff5252; border-color: #ff5252;">Cerrar Sesion</button>
       </div>
     </div>`;
   document.body.appendChild(modalContainer);
@@ -2556,12 +2555,12 @@ function logout() {
 // Initialize auth when app loads
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(initPublicAuth, 1000);
+  initTournamentAlert();
 });
 
 
 
-
-// ── Carousel Auto-Slide ──
+// ─ Carousel Auto-Slide ─
 let carouselInterval = null;
 function initCarousel() {
   const carousel = document.getElementById('promo-carousel');
@@ -2623,7 +2622,8 @@ function initCarousel() {
   carousel.addEventListener('pointerdown', resetInterval);
   carousel.addEventListener('touchstart', resetInterval, { passive: true });
 }
-// ── Catalog Carousel Controls ──
+
+// ─ Catalog Carousel Controls ─
 function scrollCatalogCarousel(direction) {
   const carousel = document.getElementById('products-grid');
   if (!carousel) return;
@@ -2707,17 +2707,19 @@ function initCatalogCarousel() {
 
 function initTournamentAlert() {
   if (window.location.pathname.includes('torneos')) return;
-  if (sessionStorage.getItem('accesplay_tournament_alert_shown')) return;
+  if (sessionStorage.getItem('accesplay_tournament_alert_shown_v4')) return;
 
   setTimeout(() => {
+    console.log("Checking for open tournaments...");
     firebase.database().ref('tournaments').orderByChild('status').equalTo('registration_open').once('value', snap => {
+      console.log("Tournaments query result:", snap.exists());
       if (snap.exists()) {
         const tList = [];
         snap.forEach(child => { tList.push(child.val()); });
         if (tList.length > 0) {
           const t = tList[tList.length - 1]; // Get one of them
           
-          sessionStorage.setItem('accesplay_tournament_alert_shown', 'true');
+          sessionStorage.setItem('accesplay_tournament_alert_shown_v4', 'true');
           
           const alertEl = document.createElement('div');
           alertEl.className = 'tournament-floating-alert';
@@ -2745,9 +2747,9 @@ function initTournamentAlert() {
             <div class="tournament-alert-icon">🏆</div>
             <div class="tournament-alert-content">
               <strong>¡Torneo Disponible!</strong>
-              <p>Inscríbete ahora en el torneo de <strong>${t.gameTitle || 'juego'}</strong>. ¡Demuestra tu habilidad!</p>
+              <p>Inscríbete ahora en el torneo de <strong>${t.productName || 'juego'}</strong>. ¡Demuestra tu habilidad!</p>
             </div>
-            <button class="tournament-alert-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300); event.stopPropagation();">✕</button>
+            <button class="tournament-alert-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300); event.stopPropagation();">❌</button>
           `;
           alertEl.onclick = () => {
              window.location.href = '/torneos.html';
@@ -2765,5 +2767,5 @@ function initTournamentAlert() {
         }
       }
     }).catch(console.error);
-  }, 5000);
+  }, 2000);
 }
