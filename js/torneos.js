@@ -20,6 +20,7 @@ function escapeHtml(text) {
   div.textContent = String(text);
   return div.innerHTML;
 }
+window.escapeHTML = escapeHtml; // Alias for case-sensitive mismatch
 
 // â”€â”€ Game Banner Helpers â”€â”€
 function getGameBannerClass(productName) {
@@ -139,6 +140,9 @@ function initTorneos() {
   
   loadTournaments();
   
+  // Expose currentLimit to global scope so renderTorneos can check it for the load more button
+  window.currentLimit = currentLimit;
+
   // Filter buttons
   document.getElementById('torneos-filters').addEventListener('click', (e) => {
     const btn = e.target.closest('.torneos-filter-btn');
@@ -242,11 +246,10 @@ function renderTorneos(torneos) {
 
   filtered.forEach(torneo => {
     const user = typeof window.currentUser !== 'undefined' ? window.currentUser : (window.user || null);
-    const participants = torneo.participants || {};
-    const count = Object.keys(participants).length;
+    const count = torneo.participantsCount || 0;
     const max = torneo.maxParticipants || 100;
     const progress = max > 0 ? Math.min((count / max) * 100, 100) : 0;
-    const userReg = user ? (participants[user.uid] || (window.userTournamentRegistrations && window.userTournamentRegistrations[torneo.id])) : null;
+    const userReg = user ? (window.userTournamentRegistrations && window.userTournamentRegistrations[torneo.id]) : null;
     const isJoined = !!userReg;
 
     let badgeClass = '';
@@ -266,15 +269,14 @@ function renderTorneos(torneos) {
     } else if (torneo.status === 'completed' || torneo.status === 'completado') {
       badgeClass = 'bg-gray-500';
       statusText = 'Finalizado';
+      isCompleted = true; // Added flag for later use
     } else {
       badgeClass = 'bg-blue-500';
       statusText = torneo.status;
     }
 
-    // Prizes
     let prizesHTML = '';
     const prizes = torneo.prizes || [];
-    const isCompleted = torneo.status === 'completed' || torneo.status === 'completado';
     const hasLeaderboard = isCompleted && torneo.leaderboard && torneo.leaderboard.length > 0;
     
     if (prizes.length > 0) {
@@ -349,7 +351,9 @@ function renderTorneos(torneos) {
     let actionButton = '';
     const deadlinePassed = torneo.registrationDeadline && new Date(torneo.registrationDeadline) < new Date();
     
-    if (isJoined) {
+    if (isCompleted) {
+      actionButton = `<button class="torneo-btn torneo-btn-results" onclick="event.stopPropagation(); viewTournamentResults('${torneo.id}')" style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; cursor:pointer;">🏆 Ver Resultados</button>`;
+    } else if (isJoined) {
       if (userReg.paymentStatus === 'pending_payment') {
         actionButton = `<button class="torneo-btn torneo-btn-joined" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.4); color:#fbbf24; cursor:default;">⏳ Validación Pendiente</button>`;
       } else {
@@ -357,8 +361,6 @@ function renderTorneos(torneos) {
       }
     } else if (torneo.status === 'registration_open' && !deadlinePassed && count < max) {
       actionButton = `<button class="torneo-btn torneo-btn-join" onclick="event.stopPropagation(); openInscriptionModal('${torneo.id}')" style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:linear-gradient(135deg, #38bdf8, #06b6d4); border:none; color:white; cursor:pointer;">⚡ Inscribirse Ahora</button>`;
-    } else if (isCompleted) {
-      actionButton = `<button class="torneo-btn torneo-btn-results" onclick="event.stopPropagation(); viewTournamentResults('${torneo.id}')" style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(251,191,36,0.15); border:1px solid rgba(251,191,36,0.3); color:#fbbf24; cursor:pointer;">🏆 Ver Resultados</button>`;
     } else if (deadlinePassed) {
       actionButton = `<button class="torneo-btn" disabled style="width:100%; padding:12px; border-radius:12px; font-weight:700; font-size:0.95rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); cursor:default;">🔒 Inscripciones Cerradas</button>`;
     } else if (count >= max) {
@@ -405,6 +407,15 @@ function renderTorneos(torneos) {
   
   container.innerHTML = html;
   startCountdowns();
+  
+  const loadMoreBtn = document.getElementById('btn-load-more');
+  if (loadMoreBtn) {
+    if (torneosData.length < window.currentLimit) {
+      loadMoreBtn.style.display = 'none';
+    } else {
+      loadMoreBtn.style.display = 'inline-block';
+    }
+  }
 }
 
 // ── Hall of Fame (Global Top 10) ──
@@ -1011,8 +1022,7 @@ window.openDetailModal = function(tournamentId) {
   const torneo = torneosData.find(t => t.id === tournamentId);
   if (!torneo) return;
   
-  const participants = torneo.participants || {};
-  const count = Object.values(participants).reduce((acc, p) => acc + 1 + (p.teamMembers ? p.teamMembers.length : 0), 0);
+  const count = torneo.participantsCount || 0;
   const max = torneo.maxParticipants || 100;
   const avatars = ['👾', '👽', '🥶', '🤖', '🦸‍♂️', '🧟', '🧙‍♂️', '🧛', '🦹', '👽'];
   
@@ -1047,50 +1057,56 @@ window.openDetailModal = function(tournamentId) {
        </div>`;
   }
   
-  // Participants
-  const participantsList = Object.values(participants);
-  let participantsHTML = '';
-  if (participantsList.length > 0) {
-    participantsHTML = '<div class="torneo-detail-participants-grouped" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">';
+  // Load participants asynchronously
+  firebase.database().ref('tournament_participants/' + tournamentId).once('value').then(snap => {
+    const participants = snap.val() || {};
+    const participantsList = Object.values(participants);
+    let participantsHTML = '';
     
-    participantsList.forEach((p, i) => {
-      const avatarCap = avatars[i % avatars.length];
-      const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
-      const capName = escapeHTML(p.gameName || p.name || 'Jugador');
+    if (participantsList.length > 0) {
+      participantsHTML = '<div class="torneo-detail-participants-grouped" style="display:flex; flex-direction:column; gap:10px; margin-top: 15px;">';
       
-      if (teamType === 'Solo') {
-        participantsHTML += `
-          <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName}</span></span>
-            </div>
-          </div>
-        `;
-      } else {
-        let membersHTML = `<span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName} <span style="font-size:0.65rem; opacity:0.6;">(Líder)</span></span></span>`;
-        p.teamMembers.forEach((tm, tmIdx) => {
-          const avatarTm = avatars[(i + tmIdx + 1) % avatars.length];
-          const tmName = escapeHTML(tm.gameName || 'Compañero');
-          membersHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatarTm}</span> <span>${tmName}</span></span>`;
-        });
+      participantsList.forEach((p, i) => {
+        const avatarCap = avatars[i % avatars.length];
+        const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
+        const capName = escapeHTML(p.gameName || p.name || 'Jugador');
         
-        participantsHTML += `
-          <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
-            <div style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; font-weight:bold; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
-              👥 Equipo ${teamType}
+        if (teamType === 'Solo') {
+          participantsHTML += `
+            <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName}</span></span>
+              </div>
             </div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              ${membersHTML}
+          `;
+        } else {
+          let membersHTML = `<span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName} <span style="font-size:0.65rem; opacity:0.6;">(Líder)</span></span></span>`;
+          p.teamMembers.forEach((tm, tmIdx) => {
+            const avatarTm = avatars[(i + tmIdx + 1) % avatars.length];
+            const tmName = escapeHTML(tm.gameName || 'Compañero');
+            membersHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatarTm}</span> <span>${tmName}</span></span>`;
+          });
+          
+          participantsHTML += `
+            <div style="background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-size:0.75rem; color:var(--accent); text-transform:uppercase; font-weight:bold; margin-bottom:8px; display:flex; align-items:center; gap:5px;">
+                👥 Equipo ${teamType}
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                ${membersHTML}
+              </div>
             </div>
-          </div>
-        `;
-      }
-    });
+          `;
+        }
+      });
+      
+      participantsHTML += '</div>';
+    } else {
+      participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Aún no hay inscritos en este torneo.</p>';
+    }
     
-    participantsHTML += '</div>';
-  } else {
-    participantsHTML = '<p style="color:var(--text-muted); margin-top:15px; text-align:center;">Aún no hay inscritos en este torneo.</p>';
-  }
+    document.getElementById('tab-participantes').innerHTML = participantsHTML;
+  });
   
   // Clasificación (Tabla de líderes y Capturas)
   let leaderboardHTML = '';
@@ -1164,7 +1180,7 @@ window.openDetailModal = function(tournamentId) {
       if (group.isTeam) {
          membersHtml = `<div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">`;
          group.members.forEach(m => {
-            membersHtml += `<div>â€¢ ${escapeHTML(m.playerName)}: <strong style="color:white;">${m.kills || 0}</strong> kills</div>`;
+            membersHtml += `<div>• ${escapeHTML(m.playerName)}: <strong style="color:white;">${m.kills || 0}</strong> kills</div>`;
          });
          membersHtml += `</div>`;
       }
@@ -1232,7 +1248,7 @@ window.openDetailModal = function(tournamentId) {
   if (torneo.status === 'completed' && torneo.winners && torneo.winners.length > 0) {
     const medals = ['👑', '🥈', '🥉', '🏅', '🎖️'];
     
-    winnersHTML = '<div class="torneo-detail-section"><h4>ðŸ† Campeones del Torneo</h4><div style="margin-top:10px;">';
+    winnersHTML = '<div class="torneo-detail-section"><h4>🏆 Campeones del Torneo</h4><div style="margin-top:10px;">';
     torneo.winners.forEach((p, i) => {
       const rewardStr = p.reward ? ' — ' + escapeHTML(p.reward) : '';
       winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
@@ -1253,7 +1269,7 @@ window.openDetailModal = function(tournamentId) {
     
     <div class="torneo-tabs">
       <button class="torneo-tab-btn active" onclick="switchTab(this, 'tab-resumen')">Resumen</button>
-      <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-participantes')">Participantes (${count}/${max})</button>
+      <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-participantes')">Participantes</button>
       <button class="torneo-tab-btn" onclick="switchTab(this, 'tab-leaderboard')">Clasificación</button>
     </div>
     
@@ -1264,7 +1280,7 @@ window.openDetailModal = function(tournamentId) {
     </div>
     
     <div id="tab-participantes" class="torneo-tab-content">
-      ${participantsHTML}
+      <p style="text-align:center; padding:20px;">Cargando participantes...</p>
     </div>
     
     <div id="tab-leaderboard" class="torneo-tab-content">
