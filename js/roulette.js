@@ -150,12 +150,12 @@ async function spinRoulette(orderId, productId) {
   
   setTimeout(() => {
     if (isWinner) {
-      winSound.play().catch(e => console.log('Audio autoplay blocked'));
+      winSound.play().catch(() => {});
       resultDiv.innerHTML = "🎉 ¡FELICIDADES! ¡GANASTE UN PREMIO! 🎉<br><small>Tu premio ya se ha añadido a tu cuenta.</small>";
       resultDiv.style.color = "var(--accent)";
       if (typeof createConfetti === 'function') createConfetti();
     } else {
-      loseSound.play().catch(e => console.log('Audio autoplay blocked'));
+      loseSound.play().catch(() => {});
       resultDiv.innerHTML = "😔 Sigue participando. ¡Suerte a la próxima!";
       resultDiv.style.color = "#f87171";
     }

@@ -1021,7 +1021,7 @@ function checkAdminNotifications() {
   const currentUnread = getUnreadMessagesCount();
 
   if (currentPending > lastPendingOrders || currentUnread > lastUnreadMessages) {
-    if (typeof notifySound !== 'undefined' && notifySound.play) notifySound.play().catch(e => console.log('Audio autoplay blocked'));
+    if (typeof notifySound !== 'undefined' && notifySound.play) notifySound.play().catch(() => {});
 
     // Web Push Notification
     if ('Notification' in window && Notification.permission === 'granted') {
