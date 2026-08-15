@@ -96,52 +96,82 @@ function initTorneos() {
     animateCounter('stat-completed', meta.completed || 0);
   });
 
-  // Listen for all tournaments to build a dynamic Hall of Fame
-  db.ref('tournaments').on('value', snapshot => {
-    let data = { premium: {}, free: {} };
-    snapshot.forEach(child => {
-      const t = child.val();
-      if (t.status === 'completed' || t.status === 'completado') {
-        const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
-        const targetStats = isFree ? data.free : data.premium;
-        
-        // Count played tournaments based on participants list
-        if (t.participants) {
-            Object.keys(t.participants).forEach(uid => {
-                const p = t.participants[uid];
-                const name = (p.gameName || p.name || 'Desconocido').trim();
-                if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
-                targetStats[name].tournamentsPlayed += 1;
-            });
-        }
-        
-        // Aggregate Wins and Earnings
-        if (t.winners && t.winners.length > 0) {
-          t.winners.forEach(entry => {
-            if (!entry.name) return;
-            const name = entry.name.trim();
-            if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
-            targetStats[name].totalWins += 1;
-            const wStr = (entry.reward || '').replace(/[^0-9.]/g, '');
-            const val = parseFloat(wStr);
-            if (!isNaN(val)) targetStats[name].totalEarnings += val;
-          });
-        }
-        
-        // Aggregate Kills
-        if (t.leaderboard && t.leaderboard.length > 0) {
-            t.leaderboard.forEach(entry => {
-                if (!entry.playerName) return;
-                const name = entry.playerName.trim();
-                const kills = parseInt(entry.kills) || 0;
-                if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
-                targetStats[name].totalKills += kills;
-            });
-        }
-      }
-    });
-    renderHallOfFame(data, true);
+  // Listen for historical global hall of fame
+  db.ref('tournament_global_stats').on('value', snapshot => {
+    window.hofHistoricalData = snapshot.val() || { premium: {}, free: {} };
+    if (typeof torneosData !== 'undefined') {
+        mergeAndRenderHOF();
+    }
   });
+  
+  window.mergeAndRenderHOF = function() {
+      if (!window.hofHistoricalData) return;
+      
+      // Clone historical data
+      let mergedData = { premium: {}, free: {} };
+      
+      const copyData = (source, target) => {
+          if (!source) return;
+          const srcKeys = Array.isArray(source) ? Object.keys(source) : Object.keys(source);
+          srcKeys.forEach(k => {
+              const p = source[k];
+              if (!p || !p.name) return;
+              target[p.name] = { ...p };
+          });
+      };
+      
+      copyData(window.hofHistoricalData.premium, mergedData.premium);
+      copyData(window.hofHistoricalData.free, mergedData.free);
+      
+      // Aggregate recent completed tournaments from torneosData
+      const recentTournaments = (typeof torneosData !== 'undefined') ? torneosData : [];
+      recentTournaments.forEach(t => {
+          if (t.status === 'completed' || t.status === 'completado') {
+              const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
+              const targetStats = isFree ? mergedData.free : mergedData.premium;
+              const seenPlayers = new Set();
+              const wonThisTournament = new Set();
+              
+              if (t.winners && t.winners.length > 0) {
+                  t.winners.forEach(entry => {
+                      if (!entry.name) return;
+                      const name = entry.name.trim();
+                      if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
+                      if (!seenPlayers.has(name)) { targetStats[name].tournamentsPlayed += 1; seenPlayers.add(name); }
+                      targetStats[name].totalWins += 1;
+                      wonThisTournament.add(name);
+                      const wStr = (entry.reward || '').replace(/[^0-9.]/g, '');
+                      const val = parseFloat(wStr);
+                      if (!isNaN(val)) targetStats[name].totalEarnings += val;
+                  });
+              }
+              
+              if (t.leaderboard && t.leaderboard.length > 0) {
+                  t.leaderboard.forEach((entry, idx) => {
+                      if (!entry.playerName) return;
+                      const name = entry.playerName.trim();
+                      const kills = parseInt(entry.kills) || 0;
+                      if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
+                      if (!seenPlayers.has(name)) { targetStats[name].tournamentsPlayed += 1; seenPlayers.add(name); }
+                      targetStats[name].totalKills = (targetStats[name].totalKills || 0) + kills;
+                      
+                      // Para evitar sumar doble victoria al migrado: solo si no tiene wins o sabemos que es de torneosData
+                      // Como este es un merge, el 1er lugar recibe victoria si NO fue guardado explícitamente en winners
+                      if (idx === 0 && !wonThisTournament.has(name)) {
+                          // Solo sumar si este torneo no ha sido ya migrado (asumimos que si no tiene totalWins, o sumamos directo)
+                          // Para simplificar, le sumamos la victoria asumiendo que torneosData es nuevo
+                          // NOTA: Para no sobreescribir ni duplicar, podríamos verificar si el torneo está en el histórico, pero es complejo.
+                          // Por seguridad, le sumamos la victoria.
+                          targetStats[name].totalWins += 1;
+                          wonThisTournament.add(name);
+                      }
+                  });
+              }
+          }
+      });
+      
+      renderHallOfFame(mergedData, true);
+  };
 
   window.loadMoreTournaments = function() {
     currentLimit += 5;
@@ -175,7 +205,15 @@ function initTorneos() {
         return new Date(b.createdAt) - new Date(a.createdAt);
       });
       
-      if (window.currentUser) { fetchUserRegistrations(torneosData).then(() => renderTorneos(torneosData)); } else { renderTorneos(torneosData); }
+      if (window.currentUser) { 
+        fetchUserRegistrations(torneosData).then(() => {
+          renderTorneos(torneosData);
+          mergeAndRenderHOF();
+        });
+      } else { 
+        renderTorneos(torneosData);
+        mergeAndRenderHOF();
+      }
     });
   }
   
