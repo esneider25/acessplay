@@ -2205,23 +2205,23 @@ window.verifyGameId = async function (productId) {
       // Buscar el nombre en la raíz o dentro del objeto "data" (solo si es un objeto válido)
       const src = (data.data && typeof data.data === 'object' && !Array.isArray(data.data)) ? data.data : data;
 
-      // Probar múltiples campos. Ignoramos temporalmente los que tengan "@" (como los correos internos de NetEase)
+      // Probar múltiples campos.
       let name = src.nickname || src.nick_name || src.rolename || src.role_name || src.PlayerName || src.player_name || src.nombre || src.Name;
 
       if (!name) {
         // Si no encontró los primarios, intentar con estos
         const secondary = src.username || src.name || src.role || src.account;
-        if (secondary && typeof secondary === 'string' && !secondary.includes('@')) {
+        if (secondary && typeof secondary === 'string' && !secondary.includes('.com') && !secondary.includes('@gmail')) {
           name = secondary;
         }
       }
 
-      if (name && typeof name === 'string' && name.trim() !== '' && !name.includes('@')) {
+      if (name && typeof name === 'string' && name.trim() !== '') {
         appState.verifiedPlayerName = name;
         resultDiv.innerHTML = `<span style="color: #0ea5e9;">✅ Nombre: <b>${escapeHTML(name)}</b></span>`;
       } else {
         // Fallback inteligente: buscar cualquier string que no sea un correo y tenga longitud de nombre
-        let fallbackName = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && !v.includes('@'));
+        let fallbackName = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && v !== 'green' && !v.includes('.com') && !v.includes('@gmail'));
 
         if (fallbackName) {
           appState.verifiedPlayerName = fallbackName;

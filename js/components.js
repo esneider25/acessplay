@@ -1815,10 +1815,10 @@ window.verifyPinGameId = async function(productId) {
       let name = src.nickname || src.nick_name || src.rolename || src.role_name || src.PlayerName || src.player_name || src.nombre || src.Name;
       if (!name) {
         const secondary = src.username || src.name || src.role || src.account;
-        if (secondary && typeof secondary === 'string' && !secondary.includes('@')) name = secondary;
+        if (secondary && typeof secondary === 'string' && !secondary.includes('.com') && !secondary.includes('@gmail')) name = secondary;
       }
-      if (!name || name.includes('@')) {
-        name = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && !v.includes('@'));
+      if (!name) {
+        name = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && v !== 'green' && !v.includes('.com') && !v.includes('@gmail'));
       }
       
       if (name) {
