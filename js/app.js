@@ -2705,18 +2705,28 @@ function initCatalogCarousel() {
   updateIndicators();
 }
 
+let isCheckingTournament = false;
+
 function initTournamentAlert() {
   if (window.location.pathname.includes('torneos')) return;
   if (sessionStorage.getItem('accesplay_tournament_alert_shown_v4')) return;
+  
+  // Evitar doble ejecución concurrente
+  if (isCheckingTournament) return;
+  isCheckingTournament = true;
 
   setTimeout(() => {
     console.log("Checking for open tournaments...");
     firebase.database().ref('tournaments').orderByChild('status').equalTo('registration_open').once('value', snap => {
+      isCheckingTournament = false; // Liberar flag
       console.log("Tournaments query result:", snap.exists());
       if (snap.exists()) {
         const tList = [];
         snap.forEach(child => { tList.push(child.val()); });
         if (tList.length > 0) {
+          // Extra guard por si acaso
+          if (document.querySelector('.tournament-floating-alert')) return;
+          
           const t = tList[tList.length - 1]; // Get one of them
           
           sessionStorage.setItem('accesplay_tournament_alert_shown_v4', 'true');
