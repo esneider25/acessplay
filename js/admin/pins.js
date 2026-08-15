@@ -126,7 +126,7 @@ function generatePinCode() {
     randomStr4 += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   // User requested format: ESPLAY-XXXXXXXX
-  return \`ESPLAY-\${randomStr1}\${randomStr2}\`;
+  return `ESPLAY-${randomStr1}${randomStr2}`;
 }
 
 function openCreatePinModal() {
