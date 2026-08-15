@@ -66,6 +66,8 @@ function renderPins(container) {
           ${pin.status === 'redeemed' && pin.redeemedBy ? `
             <div style="font-size: 0.85rem; color: #4ade80; margin-top: 4px;">
               ✅ Canjeado por: <strong>${escapeHTML(pin.redeemedBy)}</strong> el ${new Date(pin.redeemedAt).toLocaleDateString('es-VE')}
+              ${pin.redeemedGameId ? `<br>🎮 ID del Juego: <strong>${escapeHTML(pin.redeemedGameId)}</strong> ${pin.redeemedPlayerName ? `(${escapeHTML(pin.redeemedPlayerName)})` : ''}` : ''}
+              ${pin.redeemedAccount ? `<br>📧 Cuenta: <strong>${escapeHTML(pin.redeemedAccount)}</strong>` : ''}
               <br>🔗 Orden: <a href="#" onclick="openOrderDetailModal('${pin.redemptionOrderId}')">${pin.redemptionOrderId}</a>
             </div>
           ` : ''}

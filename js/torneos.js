@@ -681,27 +681,61 @@ window.openInscriptionModal = function(tournamentId) {
   if (gm === 'duo') {
     extraMembersHtml = `
       <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👥 Miembro 2</h4>
-      <div class="torneo-form-group">
-        <div style="display:flex; gap:5px;">
-          <input class="torneo-form-input tm-id" type="text" required placeholder="ID del Juego (Miembro 2)">
-          <input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador (Miembro 2)">
+      <div style="display:flex; gap:10px; margin-bottom: 15px;">
+        <div style="flex:1;">
+          <label class="torneo-form-label" style="font-size: 0.75rem; margin-bottom:4px; color:var(--text-muted)">ID del Juego</label>
+          <input class="torneo-form-input tm-id" type="text" required placeholder="Ej: 123456789">
+        </div>
+        <div style="flex:1;">
+          <label class="torneo-form-label" style="font-size: 0.75rem; margin-bottom:4px; color:var(--text-muted)">Nombre en el juego</label>
+          <input class="torneo-form-input tm-ign" type="text" required placeholder="Ej: ProPlayer99">
         </div>
       </div>
     `;
   } else if (gm === 'squad') {
     extraMembersHtml = `
       <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">🎯 Miembros del Escuadrón</h4>
-      <div class="torneo-form-group">
-        <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 2</label>
-        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
+      
+      <div style="margin-bottom: 15px;">
+        <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 2</h5>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
+            <input class="torneo-form-input tm-id" type="text" required placeholder="ID">
+          </div>
+          <div style="flex:1;">
+            <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">Nombre en el juego</label>
+            <input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador">
+          </div>
+        </div>
       </div>
-      <div class="torneo-form-group">
-        <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 3</label>
-        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
+
+      <div style="margin-bottom: 15px;">
+        <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 3</h5>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
+            <input class="torneo-form-input tm-id" type="text" required placeholder="ID">
+          </div>
+          <div style="flex:1;">
+            <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">Nombre en el juego</label>
+            <input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador">
+          </div>
+        </div>
       </div>
-      <div class="torneo-form-group">
-        <label class="torneo-form-label" style="font-size: 0.8rem; margin-bottom:4px;">Miembro 4</label>
-        <div style="display:flex; gap:5px;"><input class="torneo-form-input tm-id" type="text" required placeholder="ID"><input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador"></div>
+
+      <div style="margin-bottom: 15px;">
+        <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 4</h5>
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
+            <input class="torneo-form-input tm-id" type="text" required placeholder="ID">
+          </div>
+          <div style="flex:1;">
+            <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">Nombre en el juego</label>
+            <input class="torneo-form-input tm-ign" type="text" required placeholder="Jugador">
+          </div>
+        </div>
       </div>
     `;
   }

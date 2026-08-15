@@ -130,6 +130,11 @@ export default async function handler(req, res) {
       currentData.redeemerUid = uid;
       currentData.redemptionOrderId = orderId;
       
+      if (gameId) currentData.redeemedGameId = gameId;
+      if (zoneId) currentData.redeemedZoneId = zoneId;
+      if (playerName) currentData.redeemedPlayerName = playerName;
+      if (accountEmail) currentData.redeemedAccount = accountEmail;
+      
       pinDataSnapshot = currentData;
       return currentData;
     });
@@ -176,14 +181,32 @@ export default async function handler(req, res) {
       playerName: playerName || null,
       accountEmail: accountEmail || '',
       accountPassword: accountPassword || '',
-      status: 'pending',
-      adminNote: `Canje de PIN: ${codeToSearch}`,
+      status: 'completed',
+      adminNote: `Aprobado y entregado automáticamente (PIN: ${codeToSearch})`,
       statusHistory: [
-        { status: 'pending', timestamp: new Date().toISOString(), note: `Pedido creado via PIN de regalo (${codeToSearch})` }
+        { status: 'pending', timestamp: new Date().toISOString(), note: `Pedido creado via PIN de regalo (${codeToSearch})` },
+        { status: 'completed', timestamp: new Date().toISOString(), note: `Aprobado y entregado automáticamente (PIN: ${codeToSearch})` }
       ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
+
+    // Push notifications
+    await db.ref(`users/${uid}/notifications`).push({
+      title: 'Pedido Recibido 📦',
+      body: `Hemos recibido tu pedido de ${pinData.productName || 'producto'}. Pronto lo procesaremos.`,
+      type: 'order',
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+
+    await db.ref(`users/${uid}/notifications`).push({
+      title: 'Pedido Completado ✅',
+      body: `Tu pedido de ${pinData.productName || 'producto'} ha sido procesado con éxito. Nota: Aprobado y entregado automáticamente (luego de procesar).`,
+      type: 'order',
+      timestamp: new Date().toISOString(),
+      read: false
+    });
 
     // Guardar la orden
     await db.ref(`orders/${orderId}`).set(newOrder);
