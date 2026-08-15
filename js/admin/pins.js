@@ -51,7 +51,6 @@ function renderPins(container) {
     }
 
     return `
-    return `
       <div class="pin-row-wrapper">
         
         <!-- PIN Column -->
