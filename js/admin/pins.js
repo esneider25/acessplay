@@ -125,7 +125,7 @@ function generatePinCode() {
     randomStr3 += chars.charAt(Math.floor(Math.random() * chars.length));
     randomStr4 += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  // User requested format: ESPLAY-XXXXXXXX
+  // User requested format: ACCESPLAY-XXXXXXXX
   return `ESPLAY-${randomStr1}${randomStr2}`;
 }
 
@@ -143,7 +143,7 @@ function openCreatePinModal() {
     </div>
     
     <div class="admin-form-group">
-      <label class="admin-form-label">Código del PIN (ESPLAY-XXXXXXXX)</label>
+      <label class="admin-form-label">Código del PIN (ACCESPLAY-XXXXXXXX)</label>
       <div style="display: flex; gap: 10px;">
         <input type="text" id="pin-code" class="admin-form-input" style="font-family: monospace;" value="${generatePinCode()}" oninput="this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')">
         <button class="btn btn-secondary" onclick="document.getElementById('pin-code').value = generatePinCode()">🔄 Generar</button>

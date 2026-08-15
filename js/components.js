@@ -1596,7 +1596,7 @@ function renderPinRedemption() {
     stateHtml = `
       <div class="form-group" style="max-width: 400px; margin: 0 auto;">
         <label for="pin-input" style="text-align: center; display: block; font-size: 1.1rem;">Ingresa tu código PIN</label>
-        <input type="text" class="form-input" id="pin-input" placeholder="ESPLAY-XXXXXXXX" autocomplete="off" style="text-transform: uppercase; text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+        <input type="text" class="form-input" id="pin-input" placeholder="ACCESPLAY-XXXXXXXX" autocomplete="off" style="text-transform: uppercase; text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
       </div>
       <button class="btn-primary" id="btn-verify-pin" onclick="verifyPinCode()" style="margin: 25px auto 0; width: 100%; max-width: 400px; padding: 16px; font-size: 1.1rem;">Verificar PIN</button>
     `;
