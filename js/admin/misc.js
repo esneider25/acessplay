@@ -2116,6 +2116,9 @@ window.viewTournamentParticipants = function(id) {
           </div>
           <button class="btn btn-secondary" onclick="exportParticipantsCSV('${id}')" style="padding:8px 14px; font-size:0.85rem;">📥 Exportar CSV</button>
         </div>
+        
+        <input type="text" class="admin-form-input" placeholder="🔍 Buscar por nombre o ID..." style="width: 100%; margin-bottom: 15px; padding: 10px;" onkeyup="filterAdminTable(this.value, 'admin-participants-tbody')">
+        
         <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm);">
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
@@ -2129,7 +2132,7 @@ window.viewTournamentParticipants = function(id) {
                 <th style="padding: 10px; text-align: center;">Acción</th>
               </tr>
             </thead>
-            <tbody>${tableRows}</tbody>
+            <tbody id="admin-participants-tbody">${tableRows}</tbody>
           </table>
         </div>
         <div style="margin-top: 20px; text-align: right;">
@@ -2454,6 +2457,8 @@ window.manageTournamentResults = function(id) {
         </div>
         <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa la posición final del jugador/equipo en la partida (1, 2, 3...) y sus kills logradas. Pon 0 en posición si no clasificó al top. Los de kills 0 no aparecerán a menos que tengan posición.</p>
         
+        <input type="text" class="admin-form-input" placeholder="🔍 Buscar participante..." style="width: 100%; margin-bottom: 15px; padding: 10px;" onkeyup="filterAdminTable(this.value, 'admin-results-tbody')">
+        
         <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
           <table style="width:100%; border-collapse:collapse;">
             <thead>
@@ -2463,7 +2468,7 @@ window.manageTournamentResults = function(id) {
                 <th style="padding:8px; text-align:left; width:100px;">Pos. y Kills</th>
               </tr>
             </thead>
-            <tbody>${leaderboardRows}</tbody>
+            <tbody id="admin-results-tbody">${leaderboardRows}</tbody>
           </table>
         </div>
         
@@ -2893,6 +2898,36 @@ window.addPrizeRow = function() {
     <input type="text" class="admin-form-input ct-prize-input" placeholder="${count}° lugar (opcional)" style="flex:1; padding:8px 10px;">
   `;
   list.appendChild(div);
+};
+
+window.filterAdminTable = function(query, tbodyId) {
+  const tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+  const filterText = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const rows = tbody.getElementsByTagName('tr');
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (row.cells.length === 1 && row.cells[0].colSpan > 1 && row.cells[0].textContent.includes("Nadie")) continue;
+    if (row.cells.length === 1 && row.cells[0].colSpan > 1 && row.cells[0].textContent.includes("No hay")) continue;
+    
+    let textToSearch = row.textContent;
+    const inputs = row.querySelectorAll('input[type="text"], input[type="number"]');
+    inputs.forEach(input => {
+       if (input.getAttribute('data-player')) {
+          textToSearch += " " + input.getAttribute('data-player');
+       }
+       if (input.getAttribute('data-leader')) {
+          textToSearch += " " + input.getAttribute('data-leader');
+       }
+    });
+
+    const rowText = textToSearch.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (rowText.includes(filterText)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  }
 };
 
 window.setTournamentWinner = function(id) {
