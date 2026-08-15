@@ -51,62 +51,33 @@ function renderPins(container) {
     }
 
     return `
-      <div class="admin-order-card" style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+      <div class="admin-order-card" style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px;">
         
-        <!-- Top Section: Code & Status/Actions -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-          <div class="admin-order-product" style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-family: monospace; font-size: 1.3rem; color: var(--accent); background: rgba(14, 165, 233, 0.1); padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(14, 165, 233, 0.3); font-weight: bold; letter-spacing: 1px;">${pin.code}</span>
-            <button class="copy-btn" onclick="adminCopyText('${pin.code}')" title="Copiar" style="background: var(--bg-deep); border: 1px solid var(--border); padding: 8px; border-radius: 8px; cursor: pointer; transition: all 0.2s;">📋</button>
+        <!-- Top Section: Code & Basic Meta -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-family: monospace; font-size: 1.1rem; color: var(--accent); background: rgba(14, 165, 233, 0.1); padding: 4px 10px; border-radius: 6px; font-weight: bold;">${pin.code}</span>
+            <button class="copy-btn" onclick="adminCopyText('${pin.code}')" title="Copiar" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; padding: 0;">📋</button>
+            <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 8px;">🎮 ${escapeHTML(pin.productName)} — ${escapeHTML(pin.packageLabel)}</span>
           </div>
           
-          <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 12px;">
-            <span class="admin-status-badge admin-status-${statusClass}" style="padding: 6px 14px; font-size: 0.9rem; border-radius: 20px;">${statusIcon} ${statusLabel}</span>
-            <div class="admin-order-actions" style="display: flex; gap: 8px;">
-              ${actionsHtml}
-              <button class="admin-order-action-btn admin-action-invalid" onclick="deletePin('${pin.code}')" title="Eliminar">🗑️</button>
-            </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="admin-status-badge admin-status-${statusClass}" style="padding: 4px 10px; font-size: 0.8rem; border-radius: 12px;">${statusIcon} ${statusLabel}</span>
+            ${actionsHtml}
+            <button class="admin-order-action-btn admin-action-invalid" onclick="deletePin('${pin.code}')" title="Eliminar" style="padding: 4px 8px; border-radius: 6px;">🗑️</button>
           </div>
         </div>
-
-        <!-- Middle Section: Meta Info -->
-        <div class="admin-order-meta" style="display: flex; flex-wrap: wrap; gap: 12px;">
-          <span style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-deep); padding: 6px 12px; border-radius: 8px; font-size: 0.95rem; border: 1px solid var(--border);">
-            🎮 <strong style="color: white;">${escapeHTML(pin.productName)}</strong> — ${escapeHTML(pin.packageLabel)}
-          </span>
-          <span style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-deep); padding: 6px 12px; border-radius: 8px; font-size: 0.95rem; border: 1px solid var(--border);">
-            💰 <strong style="color: #4ade80;">$${parseFloat(pin.priceUsd).toFixed(2)}</strong>
-          </span>
-          <span style="display: inline-flex; align-items: center; gap: 6px; background: var(--bg-deep); padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; color: var(--text-muted); border: 1px solid var(--border);">
-            📅 Creado: ${date.toLocaleDateString('es-VE')}
-          </span>
-        </div>
         
-        ${pin.note ? `<div style="font-size: 0.9rem; color: var(--text-secondary); background: var(--bg-deep); padding: 10px 14px; border-radius: 8px; border-left: 3px solid var(--text-muted);">📝 ${escapeHTML(pin.note)}</div>` : ''}
+        <!-- Optional Note -->
+        ${pin.note ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -4px;">📝 ${escapeHTML(pin.note)}</div>` : ''}
 
-        <!-- Bottom Section: Redemption Details -->
+        <!-- Redemption Details -->
         ${pin.status === 'redeemed' && pin.redeemedBy ? `
-          <div style="background: rgba(74, 222, 128, 0.05); border: 1px solid rgba(74, 222, 128, 0.2); border-radius: 10px; padding: 16px; margin-top: 4px;">
-            <div style="font-size: 1rem; color: #4ade80; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; font-weight: 500;">
-              ✅ Canjeado por <strong style="color: white;">${escapeHTML(pin.redeemedBy)}</strong> el ${new Date(pin.redeemedAt).toLocaleDateString('es-VE')} a las ${new Date(pin.redeemedAt).toLocaleTimeString('es-VE', {hour: '2-digit', minute:'2-digit'})}
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; font-size: 0.9rem; color: var(--text-secondary);">
-              ${pin.redeemedGameId ? `
-                <div style="background: var(--bg-dark); padding: 8px 12px; border-radius: 6px;">
-                  🎮 ID Juego: <strong style="color: white; font-family: monospace; font-size: 1rem;">${escapeHTML(pin.redeemedGameId)}</strong> 
-                  ${pin.redeemedPlayerName ? `<div style="color: var(--accent); margin-top: 4px;">👤 ${escapeHTML(pin.redeemedPlayerName)}</div>` : ''}
-                </div>` : ''}
-                
-              ${pin.redeemedAccount ? `
-                <div style="background: var(--bg-dark); padding: 8px 12px; border-radius: 6px;">
-                  📧 Cuenta: <strong style="color: white;">${escapeHTML(pin.redeemedAccount)}</strong>
-                </div>` : ''}
-                
-              <div style="background: var(--bg-dark); padding: 8px 12px; border-radius: 6px; display: flex; align-items: center;">
-                🔗 Orden: &nbsp;<a href="#" onclick="openOrderDetailModal('${pin.redemptionOrderId}')" style="color: var(--accent); text-decoration: underline; font-weight: bold;">${pin.redemptionOrderId}</a>
-              </div>
-            </div>
+          <div style="background: rgba(74, 222, 128, 0.05); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; color: var(--text-secondary); border-left: 3px solid #4ade80;">
+            <div style="color: #4ade80; display: flex; align-items: center; gap: 4px;">✅ <strong style="color: white;">${escapeHTML(pin.redeemedBy)}</strong> (${new Date(pin.redeemedAt).toLocaleDateString('es-VE')})</div>
+            ${pin.redeemedGameId ? `<div>🎮 ID: <strong style="color: white;">${escapeHTML(pin.redeemedGameId)}</strong> ${pin.redeemedPlayerName ? `<span style="color: var(--accent);">(${escapeHTML(pin.redeemedPlayerName)})</span>` : ''}</div>` : ''}
+            ${pin.redeemedAccount ? `<div>📧 Cuenta: <strong style="color: white;">${escapeHTML(pin.redeemedAccount)}</strong></div>` : ''}
+            <div>🔗 <a href="#" onclick="openOrderDetailModal('${pin.redemptionOrderId}')" style="color: var(--accent); text-decoration: underline;">Ver Orden</a></div>
           </div>
         ` : ''}
       </div>
