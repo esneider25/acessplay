@@ -23,7 +23,7 @@ function generateOrderRef() {
 
 export default async function handler(req, res) {
   // Rate Limiting
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'unknown';
+  const ip = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || (req.connection && req.connection.remoteAddress) || req.socket?.remoteAddress || 'unknown';
   const now = Date.now();
   if (!global.rateLimitPins) global.rateLimitPins = new Map();
   const rateLimit = global.rateLimitPins;
