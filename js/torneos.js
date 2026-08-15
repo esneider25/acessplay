@@ -186,9 +186,9 @@ function initTorneos() {
     let query = db.ref('tournaments');
     // If filter is active, Firebase doesn't allow multiple orderBy.
     // So we just fetch all chronological and filter locally, but to paginate correctly
-    // we need to fetch enough. To simplify, we keep ordering by createdAt.
+    // we need to fetch enough.
     // In a production app with huge data we'd need composite indices.
-    query = query.orderByChild('createdAt').limitToLast(currentLimit);
+    query = query.orderByKey().limitToLast(currentLimit);
     
     tournamentsListener = query;
     tournamentsListener.on('value', snapshot => {
@@ -196,13 +196,13 @@ function initTorneos() {
       snapshot.forEach(child => {
         torneosData.push(child.val());
       });
-      
+      torneosData = torneosData.filter(t => t !== null && typeof t === 'object');
       torneosData.sort((a, b) => {
         const order = { 'registration_open': 1, 'ongoing': 2, 'upcoming': 3, 'completed': 4, 'completado': 4 };
-        const statusA = order[a.status] || 99;
-        const statusB = order[b.status] || 99;
+        const statusA = order[a.status || ''] || 99;
+        const statusB = order[b.status || ''] || 99;
         if (statusA !== statusB) return statusA - statusB;
-        return new Date(b.createdAt) - new Date(a.createdAt);
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       });
       
       if (window.currentUser) { 

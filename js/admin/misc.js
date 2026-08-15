@@ -1575,12 +1575,12 @@ window.fixWalletSpendingBug = async function() {
         if (!userOrdersMap[o.userId]) userOrdersMap[o.userId] = [];
         userOrdersMap[o.userId].push(o);
 
-        if (o.productType !== 'wallet-recharge' && !o.discountCode) {
+        if (o.productType !== 'wallet-recharge') {
           const price = Number(o.priceUsd) || 0;
           spentMap[o.userId] = (spentMap[o.userId] || 0) + price;
 
           const userRole = usersData[o.userId]?.role || 'cliente';
-          if (userRole !== 'revendedor') {
+          if (userRole !== 'revendedor' && !o.discountCode) {
             let earnedPoints = 0;
             if (price < 5) earnedPoints = 2;
             else if (price <= 12) earnedPoints = 4;
