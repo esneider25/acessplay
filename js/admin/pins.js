@@ -66,7 +66,7 @@ function renderPins(container) {
     }
 
     return `
-      <div class="pin-table-grid pin-table-row" style="padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+      <div class="pin-table-row" style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 2fr 1fr; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
         
         <!-- PIN Column -->
         <div style="display: flex; align-items: center; gap: 6px;">
@@ -108,7 +108,7 @@ function renderPins(container) {
   `;
 
   const tableHeader = filteredPins.length > 0 ? `
-    <div class="pin-table-grid" style="padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+    <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 2fr 1fr; gap: 10px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
       <div>CÓDIGO DE TARJETA</div>
       <div>PREMIO</div>
       <div>ESTADO</div>
@@ -131,9 +131,11 @@ function renderPins(container) {
       ${filtersHtml}
     </div>
     
-    <div class="admin-orders-list" style="display: flex; flex-direction: column; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto;">
-      ${tableHeader}
-      ${pinsHtml}
+    <div class="admin-orders-list" style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto;">
+      <div style="min-width: 900px; display: flex; flex-direction: column;">
+        ${tableHeader}
+        ${pinsHtml}
+      </div>
     </div>
   `;
 }
