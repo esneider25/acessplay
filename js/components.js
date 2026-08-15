@@ -21,9 +21,8 @@ function renderNavbar() {
           <li><a onclick="navigateTo('home')" class="active" data-section="home">Inicio</a></li>
           <li><a onclick="scrollToSection('catalog')" data-section="catalog">Catálogo</a></li>
           <li><a onclick="scrollToSection('how-it-works')" data-section="how-it-works">¿Cómo Funciona?</a></li>
-          <li><a onclick="scrollToSection('features')" data-section="features">Ventajas</a></li>
-          <li><a onclick="navigateTo('redeem-pin')" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer; color: white;">🎫 Canjear PIN</a></li>
           <li><a onclick="navigateTo('lookup')" data-section="lookup">🔍 Mis Pedidos</a></li>
+          <li><a onclick="navigateTo('redeem-pin')" class="nav-cta" style="cursor:pointer;">🎫 Canjear PIN</a></li>
           <li id="auth-nav-item" class="desktop-auth-item">
             ${(typeof currentUser !== 'undefined' && currentUser) 
               ? `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Mi Perfil ($${Number((typeof userProfile !== 'undefined' && userProfile && userProfile.wallet) ? userProfile.wallet : 0).toFixed(2)})</a>`
@@ -1634,7 +1633,7 @@ function renderPinRedemption() {
       let verifierHtml = '';
       if (product && product.apiVerifierProvider) {
         verifierHtml = `
-          <button type="button" class="btn-secondary" onclick="verifyPinGameId('${product.id}')" style="width: 100%; margin-top: 10px;">Verificar ID</button>
+          <button type="button" onclick="verifyPinGameId('${product.id}')" style="width: 100%; margin-top: 10px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;">Verificar ID</button>
           <div id="pin-verify-result" style="margin-top: 8px; font-weight: bold; text-align: center; min-height: 20px;"></div>
         `;
       }
@@ -1650,7 +1649,7 @@ function renderPinRedemption() {
       if (product && product.apiVerifierProvider) {
         verifierHtml = `
           <div style="grid-column: 1 / -1; margin-top: 5px;">
-            <button type="button" class="btn-secondary" onclick="verifyPinGameId('${product.id}')" style="width: 100%;">Verificar ID + Zona</button>
+            <button type="button" onclick="verifyPinGameId('${product.id}')" style="width: 100%; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px;">Verificar ID + Zona</button>
             <div id="pin-verify-result" style="margin-top: 8px; font-weight: bold; text-align: center; min-height: 20px;"></div>
           </div>
         `;
@@ -1699,9 +1698,9 @@ function renderPinRedemption() {
         </div>
         ${typeFieldsHtml}
         
-        <div style="display: flex; gap: 10px; margin-top: 25px;">
-          <button class="btn-secondary" onclick="appState.pinData = null; renderApp();" style="flex: 1;">Cancelar</button>
-          <button class="btn-primary" id="btn-submit-pin" onclick="submitPinRedemption()" style="flex: 2;">Confirmar Canje</button>
+        <div style="display: flex; gap: 12px; margin-top: 30px;">
+          <button onclick="appState.pinData = null; renderApp();" style="flex: 1; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: all 0.3s;">Cancelar</button>
+          <button class="btn-primary" id="btn-submit-pin" onclick="submitPinRedemption()" style="flex: 2; padding: 14px; border-radius: 12px; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4); text-transform: uppercase; letter-spacing: 0.5px;">Confirmar Canje</button>
         </div>
       </div>
     `;
