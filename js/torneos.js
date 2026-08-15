@@ -335,6 +335,7 @@ function renderTorneos(torneos) {
     let statusText = '';
     let bannerClass = typeof getGameBannerClass === 'function' ? getGameBannerClass(torneo.productName) : '';
     let countdownHTML = '';
+    let isCompleted = false;
 
     if (torneo.status === 'registration_open') {
       badgeClass = 'bg-green-500';
