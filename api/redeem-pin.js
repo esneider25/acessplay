@@ -116,7 +116,7 @@ export default async function handler(req, res) {
 
     const result = await pinRef.transaction((currentData) => {
       if (currentData === null) {
-        return undefined; // Abortar transacción si el PIN no existe
+        return currentData; // Retornar null para que Firebase obtenga el dato real del servidor si existe
       }
       
       if (currentData.status !== 'available') {
@@ -139,8 +139,12 @@ export default async function handler(req, res) {
       return currentData;
     });
 
+    if (result.committed && result.snapshot.val() === null) {
+      return res.status(404).json({ error: 'PIN inválido o no encontrado.' });
+    }
+
     if (!result.committed) {
-      // Determinar la razón por la que no se comprometió
+      // Determinar la razón por la que no se comprometió (fue undefined por status)
       const snap = await pinRef.once('value');
       const val = snap.val();
       if (!val) {
