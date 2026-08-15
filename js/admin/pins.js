@@ -50,53 +50,36 @@ function renderPins(container) {
       actionsHtml += `<button class="admin-order-action-btn admin-action-approve" onclick="togglePinStatus('${pin.code}', 'available')" title="Habilitar">✅ Habilitar</button>`;
     }
 
-    const dateStr = date.toLocaleDateString('es-VE', {day: '2-digit', month: '2-digit', year: '2-digit'}) + ' ' + date.toLocaleTimeString('es-VE', {hour: '2-digit', minute:'2-digit'});
-    
-    let redemptionStr = '';
-    if (pin.status === 'redeemed' && pin.redeemedBy) {
-       const redeemedDate = new Date(pin.redeemedAt);
-       const rDateStr = redeemedDate.toLocaleDateString('es-VE', {day: '2-digit', month: '2-digit'}) + ' ' + redeemedDate.toLocaleTimeString('es-VE', {hour: '2-digit', minute:'2-digit'});
-       redemptionStr = `
-         <div style="font-weight: 600; color: white; font-size: 0.95rem;">${escapeHTML(pin.redeemedPlayerName || pin.redeemedBy)}</div>
-         ${pin.redeemedGameId ? `<div style="color: #3b82f6; font-family: monospace; font-size: 0.9rem;">${escapeHTML(pin.redeemedGameId)}</div>` : ''}
-         <div style="color: var(--text-muted); font-size: 0.8rem;">${rDateStr}</div>
-       `;
-    } else {
-       redemptionStr = `<div style="color: var(--text-muted); font-size: 0.85rem;">--</div>`;
-    }
-
     return `
-      <div class="pin-table-row" style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 2fr 1fr; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;">
+      <div class="admin-order-card" style="display: flex; flex-direction: column; gap: 10px; padding: 12px 16px; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border);">
         
-        <!-- PIN Column -->
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <span style="font-family: monospace; font-size: 1.1rem; color: var(--accent); font-weight: bold; cursor: pointer;" onclick="adminCopyText('${pin.code}')" title="Copiar PIN">${pin.code}</span>
+        <!-- Top Section: Code & Basic Meta -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span style="font-family: monospace; font-size: 1.1rem; color: var(--accent); background: rgba(14, 165, 233, 0.1); padding: 4px 10px; border-radius: 6px; font-weight: bold;">${pin.code}</span>
+            <button class="copy-btn" onclick="adminCopyText('${pin.code}')" title="Copiar" style="background: transparent; border: none; cursor: pointer; font-size: 1.1rem; padding: 0;">📋</button>
+            <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 8px;">🎮 ${escapeHTML(pin.productName)} — ${escapeHTML(pin.packageLabel)}</span>
+          </div>
+          
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="admin-status-badge admin-status-${statusClass}" style="padding: 4px 10px; font-size: 0.8rem; border-radius: 12px;">${statusIcon} ${statusLabel}</span>
+            ${actionsHtml}
+            <button class="admin-order-action-btn admin-action-invalid" onclick="deletePin('${pin.code}')" title="Eliminar" style="padding: 4px 8px; border-radius: 6px;">🗑️</button>
+          </div>
         </div>
+        
+        <!-- Optional Note -->
+        ${pin.note ? `<div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: -4px;">📝 ${escapeHTML(pin.note)}</div>` : ''}
 
-        <!-- Package Column -->
-        <div style="font-size: 1.1rem; font-weight: bold; color: #4ade80;">
-          ${escapeHTML(pin.packageLabel)}
-          <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal; margin-top: 2px;">${escapeHTML(pin.productName)}</div>
-        </div>
-
-        <!-- Status Column -->
-        <div>
-          <span style="display: inline-flex; align-items: center; gap: 4px; color: ${pin.status === 'redeemed' ? '#4ade80' : pin.status === 'available' ? '#38bdf8' : '#f87171'}; font-weight: 600; font-size: 0.9rem; background: ${pin.status === 'redeemed' ? 'rgba(74, 222, 128, 0.1)' : pin.status === 'available' ? 'rgba(56, 189, 248, 0.1)' : 'rgba(248, 113, 113, 0.1)'}; padding: 4px 10px; border-radius: 6px;">
-            ${statusIcon} ${statusLabel}
-          </span>
-        </div>
-
-        <!-- Redeemed By Column -->
-        <div>
-          ${redemptionStr}
-        </div>
-
-        <!-- Actions Column -->
-        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-          ${actionsHtml}
-          <button style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: #f87171; padding: 4px 8px; border-radius: 4px; cursor: pointer;" onclick="deletePin('${pin.code}')" title="Eliminar">🗑️</button>
-        </div>
-
+        <!-- Redemption Details -->
+        ${pin.status === 'redeemed' && pin.redeemedBy ? `
+          <div style="background: rgba(74, 222, 128, 0.05); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; color: var(--text-secondary); border-left: 3px solid #4ade80;">
+            <div style="color: #4ade80; display: flex; align-items: center; gap: 4px;">✅ <strong style="color: white;">${escapeHTML(pin.redeemedBy)}</strong> (${new Date(pin.redeemedAt).toLocaleDateString('es-VE')})</div>
+            ${pin.redeemedGameId ? `<div>🎮 ID: <strong style="color: white;">${escapeHTML(pin.redeemedGameId)}</strong> ${pin.redeemedPlayerName ? `<span style="color: var(--accent);">(${escapeHTML(pin.redeemedPlayerName)})</span>` : ''}</div>` : ''}
+            ${pin.redeemedAccount ? `<div>📧 Cuenta: <strong style="color: white;">${escapeHTML(pin.redeemedAccount)}</strong></div>` : ''}
+            <div>🔗 <a href="#" onclick="openOrderDetailModal('${pin.redemptionOrderId}')" style="color: var(--accent); text-decoration: underline;">Ver Orden</a></div>
+          </div>
+        ` : ''}
       </div>
     `;
   }).join('') : `
@@ -106,16 +89,6 @@ function renderPins(container) {
       <p style="color: var(--text-muted);">Crea nuevos PINes de regalo para tus clientes.</p>
     </div>
   `;
-
-  const tableHeader = filteredPins.length > 0 ? `
-    <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 2fr 1fr; gap: 10px; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
-      <div>CÓDIGO DE TARJETA</div>
-      <div>PREMIO</div>
-      <div>ESTADO</div>
-      <div>CANJEADO POR</div>
-      <div style="text-align: right;">ACCIONES</div>
-    </div>
-  ` : '';
 
   container.innerHTML = `
     <div class="admin-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
@@ -127,15 +100,12 @@ function renderPins(container) {
         <span>➕</span> Crear Tarjeta
       </button>
     </div>
-    <div class="admin-orders-filters" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+    <div class="admin-orders-filters" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px;">
       ${filtersHtml}
     </div>
     
-    <div class="admin-orders-list" style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); overflow-x: auto;">
-      <div style="min-width: 900px; display: flex; flex-direction: column;">
-        ${tableHeader}
-        ${pinsHtml}
-      </div>
+    <div class="admin-orders-list" style="display: flex; flex-direction: column; gap: 12px;">
+      ${pinsHtml}
     </div>
   `;
 }
