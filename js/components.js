@@ -849,7 +849,7 @@ function renderOrderTracking(orderId) {
   const isEligibleByDate = orderTime >= rouletteCutoffTime;
   const playedLocally = localStorage.getItem('roulette_played_' + order.id) === 'true';
 
-  if (config.enableRoulette !== false && order.status === 'completed' && !order.roulettePlayed && !playedLocally && isEligibleByDate) {
+  if (config.enableRoulette !== false && order.status === 'completed' && !order.roulettePlayed && !playedLocally && isEligibleByDate && order.paymentMethodId !== 'pin-redemption') {
     const products = typeof getProducts === 'function' ? getProducts() : [];
     const product = products.find(p => p.id === order.productId);
     const profile = typeof userProfile !== 'undefined' ? userProfile : null;
