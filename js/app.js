@@ -2757,6 +2757,14 @@ function initTournamentAlert() {
 
           document.body.appendChild(alertEl);
 
+          // Reproducir sonido
+          try {
+            const torneoAudio = new Audio('/audio/torneo.mp3');
+            // Bajamos un poco el volumen para que no asuste
+            torneoAudio.volume = 0.5; 
+            torneoAudio.play().catch(e => console.log('Auto-play bloqueado o archivo no encontrado:', e));
+          } catch(e) {}
+
           // Auto-hide after 15s if not clicked
           setTimeout(() => {
             if (document.body.contains(alertEl)) {
