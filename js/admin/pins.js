@@ -50,6 +50,19 @@ function renderPins(container) {
       actionsHtml += `<button class="admin-order-action-btn admin-action-approve" onclick="togglePinStatus('${pin.code}', 'available')" title="Habilitar">✅ Habilitar</button>`;
     }
 
+    let redemptionStr = '';
+    if (pin.status === 'redeemed' && pin.redeemedBy) {
+       const redeemedDate = new Date(pin.redeemedAt);
+       const rDateStr = redeemedDate.toLocaleDateString('es-VE', {day: '2-digit', month: '2-digit'}) + ' ' + redeemedDate.toLocaleTimeString('es-VE', {hour: '2-digit', minute:'2-digit'});
+       redemptionStr = `
+         <div style="font-weight: 600; color: white; font-size: 0.95rem;">${escapeHTML(pin.redeemedPlayerName || pin.redeemedBy)}</div>
+         ${pin.redeemedGameId ? `<div style="color: #3b82f6; font-family: monospace; font-size: 0.9rem;">${escapeHTML(pin.redeemedGameId)}</div>` : ''}
+         <div style="color: var(--text-muted); font-size: 0.8rem;">${rDateStr}</div>
+       `;
+    } else {
+       redemptionStr = `<div style="color: var(--text-muted); font-size: 0.85rem;">--</div>`;
+    }
+
     return `
       <div class="pin-row-wrapper">
         
