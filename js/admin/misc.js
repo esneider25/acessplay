@@ -1571,7 +1571,7 @@ window.fixWalletSpendingBug = async function() {
     const userOrdersMap = {};
 
     Object.values(ordersData).forEach(o => {
-      if ((o.status === 'completed' || o.status === 'completado') && o.userId) {
+      if ((o.status === 'completed' || o.status === 'completado' || o.status === 'old') && o.userId) {
         if (!userOrdersMap[o.userId]) userOrdersMap[o.userId] = [];
         userOrdersMap[o.userId].push(o);
 
