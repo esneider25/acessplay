@@ -1,5 +1,5 @@
 // ============================================================
-// AccessPlay â€” Torneos Logic (Rediseño Profesional v2)
+// AccessPlay — Torneos Logic (Rediseño Profesional v2)
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1234,7 +1234,7 @@ window.openDetailModal = function(tournamentId) {
     
     winnersHTML = '<div class="torneo-detail-section"><h4>ðŸ† Campeones del Torneo</h4><div style="margin-top:10px;">';
     torneo.winners.forEach((p, i) => {
-      const rewardStr = p.reward ? ' â€” ' + escapeHTML(p.reward) : '';
+      const rewardStr = p.reward ? ' — ' + escapeHTML(p.reward) : '';
       winnersHTML += `<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; margin-bottom:8px; background:linear-gradient(90deg, rgba(255,215,0,0.1), transparent); border-left:3px solid #fbbf24; border-radius:4px;">
         <span style="font-size:1.6rem;">${medals[i] || '🏅'}</span>
         <div>
