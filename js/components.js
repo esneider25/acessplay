@@ -1584,7 +1584,7 @@ function renderPinRedemption() {
       <section class="game-detail" style="text-align: center; padding: 60px 20px;">
         <div style="font-size: 4rem; margin-bottom: 20px;">🎫</div>
         <h2>Canjear Código de Regalo</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 20px;">Debes iniciar sesión para canjear un PIN de regalo.</p>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Debes iniciar sesión para canjear una tarjeta de regalo.</p>
         <button class="btn-primary" onclick="showAuthModal()" style="margin: 0 auto;">Iniciar Sesión</button>
       </section>
     `;
@@ -1595,10 +1595,10 @@ function renderPinRedemption() {
     stateHtml = `
       <div style="display: flex; flex-direction: column; align-items: center;">
         <div class="form-group" style="width: 100%; max-width: 400px;">
-          <label for="pin-input" style="text-align: center; display: block; font-size: 1.1rem;">Ingresa tu código PIN</label>
+          <label for="pin-input" style="text-align: center; display: block; font-size: 1.1rem;">Ingresa el código de la tarjeta</label>
           <input type="text" class="form-input" id="pin-input" placeholder="ACCESPLAY-XXXXXXXX" autocomplete="off" style="text-transform: uppercase; text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
         </div>
-        <button class="btn-primary" id="btn-verify-pin" onclick="verifyPinCode()" style="margin-top: 25px; width: 100%; max-width: 400px; padding: 16px; font-size: 1.1rem;">Verificar PIN</button>
+        <button class="btn-primary" id="btn-verify-pin" onclick="verifyPinCode()" style="margin-top: 25px; width: 100%; max-width: 400px; padding: 16px; font-size: 1.1rem;">Verificar Tarjeta</button>
       </div>
     `;
   } else {
@@ -1711,8 +1711,8 @@ function renderPinRedemption() {
   return `
     <section class="game-detail" id="redeem-pin-section" style="max-width: 600px; margin: 0 auto;">
       <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="font-size: 2.2rem; margin-bottom: 10px;">🎫 Canjear PIN de Regalo</h1>
-        <p style="color: var(--text-secondary);">Ingresa tu código PIN para recibir tu recarga o producto instantáneamente.</p>
+        <h1 style="font-size: 2.2rem; margin-bottom: 10px;">🎫 Canjear Tarjeta de Regalo</h1>
+        <p style="color: var(--text-secondary);">Ingresa el código de la tarjeta para recibir tu recarga o producto instantáneamente.</p>
       </div>
       
       <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
@@ -1724,8 +1724,8 @@ function renderPinRedemption() {
 
 // Global functions for PIN redemption
 window.verifyPinCode = async function() {
-  const pinInput = document.getElementById('pin-input').value.trim();
-  if (!pinInput) return showToast('⚠️ Ingresa un código PIN');
+  const pinInput = document.getElementById('pin-input').value.trim().toUpperCase();
+  if (!pinInput) return showToast('⚠️ Ingresa el código de la tarjeta');
   if (!pinInput.toUpperCase().startsWith('ACCESPLAY-')) return showToast('⚠️ El código debe empezar con ACCESPLAY-');
 
   const btn = document.getElementById('btn-verify-pin');
