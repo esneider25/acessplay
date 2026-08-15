@@ -943,8 +943,9 @@
 
 @media (max-width: 480px) {
   .torneo-card-banner {
-    height: 80px;
-    padding: 10px;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    padding: 12px;
   }
 
   .torneo-card-body {
