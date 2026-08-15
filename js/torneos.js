@@ -291,6 +291,7 @@ function startCountdowns() {
   
   document.querySelectorAll('[data-countdown-deadline]').forEach(el => {
     const deadline = el.dataset.countdownDeadline;
+    el.innerHTML = getCountdownHTML(deadline); // Actualización inicial inmediata
     const intervalId = setInterval(() => {
       el.innerHTML = getCountdownHTML(deadline);
       // Auto-close if expired
@@ -424,6 +425,12 @@ function renderTorneos(torneos) {
     }
     if (torneo.pricePerKill && torneo.pricePerKill > 0) {
       tagsHTML += `<span class="torneo-tag" style="background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:#fbbf24;">🎯 Pago por Kill: $${torneo.pricePerKill.toFixed(2)}</span>`;
+    }
+    const targetDate = torneo.scheduledDate || torneo.registrationDeadline || torneo.startDate;
+    if (targetDate) {
+       const d = new Date(targetDate);
+       const dStr = d.toLocaleDateString('es-VE', {day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit'});
+       tagsHTML += `<span class="torneo-tag" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; font-size:0.75rem; color:var(--text-secondary);">📅 ${dStr}</span>`;
     }
     tagsHTML += '</div>';
 
