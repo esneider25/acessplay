@@ -470,8 +470,9 @@ function renderHallOfFame(data, isPreAggregated = false) {
        return (b.totalEarnings || 0) - (a.totalEarnings || 0);
     });
     
-    topPremium = topPremium.slice(0, 10);
-    topFree = topFree.slice(0, 10);
+    // Filter out players with 0 wins
+    topPremium = topPremium.filter(p => (p.totalWins || 0) > 0).slice(0, 10);
+    topFree = topFree.filter(p => (p.totalWins || 0) > 0).slice(0, 10);
   } else {
     // Fallback if data is not pre-aggregated (just in case)
     const playerStatsPremium = {};
