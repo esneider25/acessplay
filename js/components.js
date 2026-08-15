@@ -1725,7 +1725,7 @@ function renderPinRedemption() {
 window.verifyPinCode = async function() {
   const pinInput = document.getElementById('pin-input').value.trim();
   if (!pinInput) return showToast('⚠️ Ingresa un código PIN');
-  if (!pinInput.toUpperCase().startsWith('ESPLAY-')) return showToast('⚠️ El código debe empezar con ESPLAY-');
+  if (!pinInput.toUpperCase().startsWith('ACCESPLAY-')) return showToast('⚠️ El código debe empezar con ACCESPLAY-');
 
   const btn = document.getElementById('btn-verify-pin');
   const originalHtml = btn.innerHTML;

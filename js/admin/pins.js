@@ -126,7 +126,7 @@ function generatePinCode() {
     randomStr4 += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   // User requested format: ACCESPLAY-XXXXXXXX
-  return `ESPLAY-${randomStr1}${randomStr2}`;
+  return `ACCESPLAY-${randomStr1}${randomStr2}`;
 }
 
 function openCreatePinModal() {
@@ -211,7 +211,7 @@ function saveNewPin() {
   const note = document.getElementById('pin-note').value.trim();
 
   if (!codeInput) return showAdminToast('⚠️ El código del PIN no puede estar vacío', 'error');
-  if (!codeInput.startsWith('ESPLAY-')) return showAdminToast('⚠️ El código del PIN debe empezar con ESPLAY-', 'error');
+  if (!codeInput.startsWith('ACCESPLAY-')) return showAdminToast('⚠️ El código del PIN debe empezar con ACCESPLAY-', 'error');
   if (!productId) return showAdminToast('⚠️ Selecciona un producto', 'error');
   if (packageIdxStr === '') return showAdminToast('⚠️ Selecciona un paquete', 'error');
 
