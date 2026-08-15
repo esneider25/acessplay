@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollEffects();
   initCounters();
   initCarousel();
+  initTournamentAlert();
 });
 
 function toggleTheme() {
@@ -2702,4 +2703,67 @@ function initCatalogCarousel() {
   
   // Initial check
   updateIndicators();
+}
+
+function initTournamentAlert() {
+  if (window.location.pathname.includes('torneos')) return;
+  if (sessionStorage.getItem('accesplay_tournament_alert_shown')) return;
+
+  setTimeout(() => {
+    firebase.database().ref('tournaments').orderByChild('status').equalTo('registration_open').once('value', snap => {
+      if (snap.exists()) {
+        const tList = [];
+        snap.forEach(child => { tList.push(child.val()); });
+        if (tList.length > 0) {
+          const t = tList[tList.length - 1]; // Get one of them
+          
+          sessionStorage.setItem('accesplay_tournament_alert_shown', 'true');
+          
+          const alertEl = document.createElement('div');
+          alertEl.className = 'tournament-floating-alert';
+          
+          // Swipe up to dismiss for mobile
+          let startY = 0;
+          let startX = 0;
+          alertEl.addEventListener('touchstart', e => {
+            startY = e.touches[0].clientY;
+            startX = e.touches[0].clientX;
+          }, {passive: true});
+          
+          alertEl.addEventListener('touchmove', e => {
+            if (!startY) return;
+            const yDiff = startY - e.touches[0].clientY;
+            const xDiff = startX - e.touches[0].clientX;
+            // Swipe Up or Left/Right
+            if (yDiff > 30 || Math.abs(xDiff) > 50) {
+              alertEl.classList.add('hiding');
+              setTimeout(() => alertEl.remove(), 300);
+            }
+          }, {passive: true});
+
+          alertEl.innerHTML = `
+            <div class="tournament-alert-icon">🏆</div>
+            <div class="tournament-alert-content">
+              <strong>¡Torneo Disponible!</strong>
+              <p>Inscríbete ahora en el torneo de <strong>${t.gameTitle || 'juego'}</strong>. ¡Demuestra tu habilidad!</p>
+            </div>
+            <button class="tournament-alert-close" onclick="this.parentElement.classList.add('hiding'); setTimeout(() => this.parentElement.remove(), 300); event.stopPropagation();">✕</button>
+          `;
+          alertEl.onclick = () => {
+             window.location.href = '/torneos.html';
+          };
+
+          document.body.appendChild(alertEl);
+
+          // Auto-hide after 15s if not clicked
+          setTimeout(() => {
+            if (document.body.contains(alertEl)) {
+               alertEl.classList.add('hiding');
+               setTimeout(() => alertEl.remove(), 300);
+            }
+          }, 15000);
+        }
+      }
+    }).catch(console.error);
+  }, 5000);
 }

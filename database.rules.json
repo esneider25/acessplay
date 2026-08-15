@@ -47,7 +47,7 @@
           ".write": "false"
         },
         "participantsCount": {
-          ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || root.child('users').child(auth.uid).child('role').val() === 'admin')"
+          ".write": "auth != null"
         }
       }
     },
@@ -136,6 +136,12 @@
     "api_configs": {
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
+    },
+    "tournament_metadata": {
+      ".read": "true",
+      "participants": {
+        ".write": "auth != null"
+      }
     },
     "users": {
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",

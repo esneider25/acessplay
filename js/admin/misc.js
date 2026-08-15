@@ -2900,6 +2900,43 @@ window.addPrizeRow = function() {
   list.appendChild(div);
 };
 
+window.recalcTournamentCounters = async function() {
+    if (!confirm('¿Recalcular todos los contadores de participantes en la base de datos basándose en los inscritos actuales?')) return;
+    const btn = document.activeElement;
+    const oldText = btn.innerText;
+    if(btn) btn.innerText = 'Recalculando...';
+    try {
+        const snap = await firebase.database().ref('tournaments').once('value');
+        const torneos = snap.val();
+        if (!torneos) {
+           if(btn) btn.innerText = oldText;
+           return alert('No hay torneos.');
+        }
+        
+        let updates = {};
+        for (let tId of Object.keys(torneos)) {
+            const pSnap = await firebase.database().ref('tournament_participants/' + tId).once('value');
+            const participants = pSnap.val();
+            let count = 0;
+            if (participants) {
+                Object.keys(participants).forEach(uid => {
+                    const p = participants[uid];
+                    if (p.paymentStatus !== 'rejected') {
+                        count += 1 + (p.teamMembers ? p.teamMembers.length : 0);
+                    }
+                });
+            }
+            updates['tournaments/' + tId + '/participantsCount'] = count;
+        }
+        
+        await firebase.database().ref().update(updates);
+        alert('✅ Todos los contadores han sido recalculados correctamente.');
+    } catch (err) {
+        alert('Error: ' + err.message);
+    }
+    if(btn) btn.innerText = oldText;
+};
+
 window.filterAdminTable = function(query, tbodyId) {
   const tbody = document.getElementById(tbodyId);
   if (!tbody) return;
