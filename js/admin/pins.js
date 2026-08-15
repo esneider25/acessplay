@@ -116,6 +116,52 @@ function renderPins(container) {
   ` : '';
 
   container.innerHTML = `
+    <style>
+      .pin-desktop-header {
+        display: grid;
+        grid-template-columns: 1.5fr 1.5fr 1fr 2fr auto;
+        gap: 10px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .pin-row-wrapper {
+        display: grid;
+        grid-template-columns: 1.5fr 1.5fr 1fr 2fr auto;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        transition: background 0.2s;
+      }
+      .pin-row-wrapper:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      @media (max-width: 768px) {
+        .pin-desktop-header {
+          display: none !important;
+        }
+        .pin-row-wrapper {
+          grid-template-columns: 1fr 1fr;
+          grid-template-areas: 
+            "code actions"
+            "prize status"
+            "redeemed redeemed";
+          gap: 12px 8px;
+        }
+        .pin-col-code { grid-area: code; }
+        .pin-col-prize { grid-area: prize; }
+        .pin-col-status { grid-area: status; }
+        .pin-col-redeemed { grid-area: redeemed; background: rgba(255,255,255,0.03); padding: 8px; border-radius: 8px;}
+        .pin-col-actions { grid-area: actions; text-align: right; display: flex; justify-content: flex-end; }
+      }
+    </style>
     <div class="admin-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
       <div>
         <h1 class="admin-title" style="margin: 0; font-size: 1.8rem; font-weight: 700;">Gestión de Tarjetas</h1>
