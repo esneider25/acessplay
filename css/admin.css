@@ -1712,3 +1712,16 @@ select.admin-form-input {
     transform: none !important;
   }
 }
+ / *   P I N s   T a b l e   R e s p o n s i v e   L a y o u t   * / 
+ . p i n - t a b l e - g r i d   { 
+     d i s p l a y :   g r i d ; 
+     g r i d - t e m p l a t e - c o l u m n s :   2 f r   1 . 5 f r   1 . 2 f r   2 f r   1 f r ; 
+     a l i g n - i t e m s :   c e n t e r ; 
+     g a p :   1 5 p x ; 
+     m i n - w i d t h :   9 5 0 p x ; 
+ } 
+ . p i n - t a b l e - r o w : h o v e r   { 
+     b a c k g r o u n d :   r g b a ( 2 5 5 ,   2 5 5 ,   2 5 5 ,   0 . 0 2 ) ; 
+ } 
+  
+ 
