@@ -96,9 +96,50 @@ function initTorneos() {
     animateCounter('stat-completed', meta.completed || 0);
   });
 
-  // Listen for global hall of fame
-  db.ref('tournament_global_stats').on('value', snapshot => {
-    let data = snapshot.val() || { premium: [], free: [] };
+  // Listen for all tournaments to build a dynamic Hall of Fame
+  db.ref('tournaments').on('value', snapshot => {
+    let data = { premium: {}, free: {} };
+    snapshot.forEach(child => {
+      const t = child.val();
+      if (t.status === 'completed' || t.status === 'completado') {
+        const isFree = !t.entryFee || parseFloat(t.entryFee) === 0;
+        const targetStats = isFree ? data.free : data.premium;
+        
+        // Count played tournaments based on participants list
+        if (t.participants) {
+            Object.keys(t.participants).forEach(uid => {
+                const p = t.participants[uid];
+                const name = (p.gameName || p.name || 'Desconocido').trim();
+                if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
+                targetStats[name].tournamentsPlayed += 1;
+            });
+        }
+        
+        // Aggregate Wins and Earnings
+        if (t.winners && t.winners.length > 0) {
+          t.winners.forEach(entry => {
+            if (!entry.name) return;
+            const name = entry.name.trim();
+            if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
+            targetStats[name].totalWins += 1;
+            const wStr = (entry.reward || '').replace(/[^0-9.]/g, '');
+            const val = parseFloat(wStr);
+            if (!isNaN(val)) targetStats[name].totalEarnings += val;
+          });
+        }
+        
+        // Aggregate Kills
+        if (t.leaderboard && t.leaderboard.length > 0) {
+            t.leaderboard.forEach(entry => {
+                if (!entry.playerName) return;
+                const name = entry.playerName.trim();
+                const kills = parseInt(entry.kills) || 0;
+                if (!targetStats[name]) targetStats[name] = { name: name, tournamentsPlayed: 0, totalWins: 0, totalEarnings: 0, totalKills: 0 };
+                targetStats[name].totalKills += kills;
+            });
+        }
+      }
+    });
     renderHallOfFame(data, true);
   });
 
