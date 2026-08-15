@@ -404,7 +404,7 @@ function renderTorneos(torneos) {
     // Rules button
     let rulesHTML = '';
     if (torneo.rules) {
-      rulesHTML = `<button class="torneo-rules-btn" onclick="event.stopPropagation(); viewTournamentRules('${torneo.id}')" style="width:100%; padding:8px; margin-bottom:12px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; color:#fbbf24; font-weight:600; cursor:pointer; font-size:0.85rem;">⚠ Ver Reglas</button>`;
+      rulesHTML = `<button class="torneo-rules-btn" onclick="event.stopPropagation(); viewTournamentRules('${torneo.id}')" style="width:100%; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:8px; color:#fbbf24; font-weight:600; cursor:pointer;">⚠ Ver Reglas</button>`;
     }
 
     // Tags
