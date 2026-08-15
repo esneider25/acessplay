@@ -1771,8 +1771,10 @@ window.verifyPinCode = async function() {
 };
 
 window.verifyPinGameId = async function(productId) {
-  const gameId = document.getElementById('pin-game-uid') ? document.getElementById('pin-game-uid').value.trim() : '';
-  const zoneId = document.getElementById('pin-game-zone') ? document.getElementById('pin-game-zone').value.trim() : '';
+  const uidInput = document.getElementById('pin-game-uid');
+  const zoneInput = document.getElementById('pin-game-zone');
+  const gameId = uidInput ? uidInput.value.trim() : '';
+  const zoneId = zoneInput ? zoneInput.value.trim() : '';
   
   if (!gameId) return showToast('⚠️ Ingresa el ID');
   const btn = event.currentTarget;
@@ -1781,22 +1783,57 @@ window.verifyPinGameId = async function(productId) {
   btn.disabled = true;
   
   try {
-    const res = await fetch('/api/verify-id', {
+    const product = PRODUCTS.find(p => p.id === productId);
+    if (!product || typeof API_CONFIGS === 'undefined' || API_CONFIGS.length === 0) throw new Error('Verificador inactivo');
+    
+    const verifierIdx = parseInt(product.apiVerifierProvider);
+    const api = API_CONFIGS[verifierIdx];
+    if (!api || !api.enabled) throw new Error('Verificador inactivo');
+
+    const requestBody = {
+      action: 'verify_id',
+      apiIdx: verifierIdx,
+      data: {
+        producto_id: parseInt(product.apiServiceId) || 0,
+        id_juego: gameId
+      }
+    };
+    if (zoneId) requestBody.data.input2 = zoneId;
+
+    const res = await fetch('/api/proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ productId, gameId, zoneId })
+      body: JSON.stringify(requestBody)
     });
     const data = await res.json();
     const resDiv = document.getElementById('pin-verify-result');
-    if (data.valid) {
-      resDiv.innerHTML = `<span style="color: #4ade80;">✅ ${data.playerName}</span>`;
-      appState.verifiedPlayerName = data.playerName;
+    
+    const isSuccess = data.ok || data.status == 200 || data.code == 200 || data.success || data.alerta === 'green' || data.mensaje === 'Consulta exitosa' || (data.data && typeof data.data === 'object' && !Array.isArray(data.data));
+
+    if (isSuccess) {
+      const src = (data.data && typeof data.data === 'object' && !Array.isArray(data.data)) ? data.data : data;
+      let name = src.nickname || src.nick_name || src.rolename || src.role_name || src.PlayerName || src.player_name || src.nombre || src.Name;
+      if (!name) {
+        const secondary = src.username || src.name || src.role || src.account;
+        if (secondary && typeof secondary === 'string' && !secondary.includes('@')) name = secondary;
+      }
+      if (!name || name.includes('@')) {
+        name = Object.values(src).find(v => typeof v === 'string' && v.length > 2 && v.length < 30 && v !== 'success' && v !== 'OK' && !v.includes('@'));
+      }
+      
+      if (name) {
+        resDiv.innerHTML = `<span style="color: #4ade80;">✅ ${name}</span>`;
+        appState.verifiedPlayerName = name;
+      } else {
+        resDiv.innerHTML = `<span style="color: #ef4444;">❌ ID Inválido o no encontrado</span>`;
+        appState.verifiedPlayerName = null;
+      }
     } else {
       resDiv.innerHTML = `<span style="color: #ef4444;">❌ ID Inválido o no encontrado</span>`;
       appState.verifiedPlayerName = null;
     }
   } catch (err) {
-    document.getElementById('pin-verify-result').innerHTML = `<span style="color: #ef4444;">❌ Error de conexión</span>`;
+    document.getElementById('pin-verify-result').innerHTML = `<span style="color: #ef4444;">❌ Error: ${err.message || 'de conexión'}</span>`;
   }
   btn.innerHTML = originalHtml;
   btn.disabled = false;
