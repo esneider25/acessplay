@@ -1593,11 +1593,13 @@ function renderPinRedemption() {
   let stateHtml = '';
   if (!appState.pinData) {
     stateHtml = `
-      <div class="form-group" style="max-width: 400px; margin: 0 auto;">
-        <label for="pin-input" style="text-align: center; display: block; font-size: 1.1rem;">Ingresa tu código PIN</label>
-        <input type="text" class="form-input" id="pin-input" placeholder="ACCESPLAY-XXXXXXXX" autocomplete="off" style="text-transform: uppercase; text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+      <div style="display: flex; flex-direction: column; align-items: center;">
+        <div class="form-group" style="width: 100%; max-width: 400px;">
+          <label for="pin-input" style="text-align: center; display: block; font-size: 1.1rem;">Ingresa tu código PIN</label>
+          <input type="text" class="form-input" id="pin-input" placeholder="ACCESPLAY-XXXXXXXX" autocomplete="off" style="text-transform: uppercase; text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+        </div>
+        <button class="btn-primary" id="btn-verify-pin" onclick="verifyPinCode()" style="margin-top: 25px; width: 100%; max-width: 400px; padding: 16px; font-size: 1.1rem;">Verificar PIN</button>
       </div>
-      <button class="btn-primary" id="btn-verify-pin" onclick="verifyPinCode()" style="margin: 25px auto 0; width: 100%; max-width: 400px; padding: 16px; font-size: 1.1rem;">Verificar PIN</button>
     `;
   } else {
     // We already have a verified PIN. We need to collect the remaining fields if it's a game-id, etc.
