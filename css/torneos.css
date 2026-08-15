@@ -831,6 +831,51 @@
   color: var(--text-secondary);
 }
 
+/* ── Hall of Fame Card Structure ── */
+.hof-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-radius: 12px;
+  transition: 0.3s;
+  cursor: default;
+}
+
+.hof-card-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.hof-card-rank {
+  width: 30px;
+  text-align: center;
+  font-size: 1.5rem;
+}
+
+.hof-card-right {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.hof-stat-item {
+  text-align: center;
+}
+
+.hof-stat-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.hof-stat-val {
+  font-size: 1.1rem;
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .torneos-hero {
@@ -847,7 +892,33 @@
   }
 
   .hall-of-fame-grid {
-    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .hof-card-row {
+    flex-direction: column;
+    padding: 12px;
+    gap: 12px;
+    min-width: 250px;
+  }
+
+  .hof-card-left {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hof-card-right {
+    width: 100%;
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .hof-stat-label {
+    font-size: 0.65rem;
+  }
+
+  .hof-stat-val {
+    font-size: 1rem;
   }
 
   .torneo-modal {
@@ -862,16 +933,40 @@
 
 @media (max-width: 480px) {
   .torneo-card-banner {
-    height: 120px;
+    height: 80px;
+    padding: 10px;
+  }
+
+  .torneo-card-body {
+    padding: 12px;
+  }
+
+  .torneo-title {
+    font-size: 1.1rem;
+    margin-bottom: 4px;
   }
 
   .torneo-countdown-unit {
-    min-width: 34px;
-    padding: 3px 5px;
+    min-width: 30px;
+    padding: 2px 4px;
   }
 
   .torneo-countdown-value {
+    font-size: 0.75rem;
+  }
+  
+  .torneo-tag {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+  }
+
+  .torneo-btn {
+    padding: 10px;
     font-size: 0.85rem;
+  }
+
+  .torneos-grid {
+    gap: 12px;
   }
 }
 

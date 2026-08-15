@@ -622,25 +622,25 @@ function buildHofHtml(topPlayers, emptyMessage) {
       rankBadge = `<span style="color:var(--text-muted); font-size:1.2rem; font-weight:bold;">#${i+1}</span>`;
     }
     
-    const earns = player.totalEarnings > 0 ? `<div style="text-align:center;"><div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Ganancias</div><div style="font-weight:800; color:#4ade80; font-size:1.1rem;">$${player.totalEarnings.toFixed(2)}</div></div>` : '';
-    const killsHTML = (player.totalKills && player.totalKills > 0) ? `<div style="text-align:center;"><div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Kills</div><div style="font-weight:800; color:#ef4444; font-size:1.1rem;">${player.totalKills}</div></div>` : '';
+    const earns = player.totalEarnings > 0 ? `<div class="hof-stat-item"><div class="hof-stat-label">Ganancias</div><div class="hof-stat-val" style="color:#4ade80;">$${player.totalEarnings.toFixed(2)}</div></div>` : '';
+    const killsHTML = (player.totalKills && player.totalKills > 0) ? `<div class="hof-stat-item"><div class="hof-stat-label">Kills</div><div class="hof-stat-val" style="color:#ef4444;">${player.totalKills}</div></div>` : '';
 
     html += `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border-radius:12px; ${cardStyle} transition: 0.3s; cursor:default;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+      <div class="hof-card-row" style="${cardStyle}" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
         
-        <div style="display:flex; align-items:center; gap:20px;">
-          <div style="width:30px; text-align:center; font-size:1.5rem;">${rankBadge}</div>
-          <div style="${nameStyle}">${escapeHTML(player.gameName || player.name)}</div>
+        <div class="hof-card-left">
+          <div class="hof-card-rank">${rankBadge}</div>
+          <div class="hof-card-name" style="${nameStyle}">${escapeHTML(player.gameName || player.name)}</div>
         </div>
         
-        <div style="display:flex; gap:30px; align-items:center;">
-          <div style="text-align:center;">
-            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Partidas</div>
-            <div style="font-weight:600; color:var(--text-secondary);">${player.tournamentsPlayed || player.gamesPlayed || 0}</div>
+        <div class="hof-card-right">
+          <div class="hof-stat-item">
+            <div class="hof-stat-label">Partidas</div>
+            <div class="hof-stat-val" style="color:var(--text-secondary); font-weight:600; font-size:1rem;">${player.tournamentsPlayed || player.gamesPlayed || 0}</div>
           </div>
-          <div style="text-align:center;">
-            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Victorias</div>
-            <div style="font-weight:800; color:var(--accent); font-size:1.2rem;">${player.totalWins || 0}</div>
+          <div class="hof-stat-item">
+            <div class="hof-stat-label">Victorias</div>
+            <div class="hof-stat-val" style="color:var(--accent); font-weight:800;">${player.totalWins || 0}</div>
           </div>
           ${killsHTML}
           ${earns}
