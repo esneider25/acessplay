@@ -22,7 +22,7 @@ function renderNavbar() {
           <li><a onclick="scrollToSection('catalog')" data-section="catalog">Catálogo</a></li>
           <li><a onclick="scrollToSection('how-it-works')" data-section="how-it-works">¿Cómo Funciona?</a></li>
           <li><a onclick="navigateTo('lookup')" data-section="lookup">🔍 Mis Pedidos</a></li>
-          <li><a onclick="navigateTo('redeem-pin')" class="nav-cta" style="cursor:pointer;">🎫 Canjear PIN</a></li>
+          <li><a onclick="navigateTo('redeem-pin')" class="nav-cta" style="cursor:pointer;">🎫 Canjear Código</a></li>
           <li id="auth-nav-item" class="desktop-auth-item">
             ${(typeof currentUser !== 'undefined' && currentUser) 
               ? `<a onclick="navigateTo('dashboard')" class="nav-cta" style="background: linear-gradient(135deg, #0ea5e9, #0284c7); cursor:pointer;">Mi Perfil ($${Number((typeof userProfile !== 'undefined' && userProfile && userProfile.wallet) ? userProfile.wallet : 0).toFixed(2)})</a>`
