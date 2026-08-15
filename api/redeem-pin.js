@@ -83,7 +83,7 @@ export default async function handler(req, res) {
     const userRecord = await admin.auth().getUser(uid);
     const userName = userRecord.displayName || userRecord.email || uid;
     
-    const { pinCode, gameId, zoneId, playerName, accountEmail, accountPassword } = req.body;
+    const { action, pinCode, gameId, zoneId, playerName, accountEmail, accountPassword } = req.body;
     
     if (!pinCode) return res.status(400).json({ error: 'Falta el código PIN' });
 
@@ -92,6 +92,24 @@ export default async function handler(req, res) {
     const db = admin.database();
     const pinRef = db.ref(`pins/${codeToSearch}`);
     
+    if (action === 'verify') {
+      const snap = await pinRef.once('value');
+      const pinData = snap.val();
+      
+      if (!pinData) return res.status(404).json({ error: 'PIN inválido o no encontrado.' });
+      if (pinData.status === 'redeemed') return res.status(400).json({ error: 'Este PIN ya ha sido canjeado anteriormente.' });
+      if (pinData.status === 'disabled') return res.status(400).json({ error: 'Este PIN se encuentra deshabilitado.' });
+      
+      return res.status(200).json({
+        valid: true,
+        productName: pinData.productName,
+        packageLabel: pinData.packageLabel,
+        productType: pinData.productType,
+        apiVerifierProvider: pinData.apiVerifierProvider || null,
+        productId: pinData.productId
+      });
+    }
+
     // Transacción atómica para canjear el PIN (evita race conditions de canje múltiple)
     let pinDataSnapshot = null;
     let orderId = generateOrderRef();
@@ -141,13 +159,13 @@ export default async function handler(req, res) {
       id: orderId,
       userId: uid,
       userName: userName,
-      productId: pinData.productId,
-      productName: pinData.productName,
-      productType: pinData.productType,
-      packageLabel: pinData.packageLabel,
+      productId: pinData.productId || '',
+      productName: pinData.productName || '',
+      productType: pinData.productType || '',
+      packageLabel: pinData.packageLabel || '',
       apiProductId: pinData.apiProductId || null,
       apiProvider: pinData.apiProvider || null,
-      priceUsd: pinData.priceUsd,
+      priceUsd: pinData.priceUsd || 0,
       priceBs: 0, // Regalo
       costUsd: 0, // Contablemente ya fue pagado/asumido al crearlo
       paymentMethodId: 'pin-redemption',
