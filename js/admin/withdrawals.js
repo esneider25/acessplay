@@ -463,12 +463,12 @@ window.toggleBlockUser = function (uid, isBlocked) {
   }
 };
 
-// â”€â”€ Banners Management â”€â”€
+// -- Banners Management --
 
 function renderBanners(container) {
   let html = `
     <div class="admin-header-flex">
-      <h2>ðŸ–¼ï¸ Gestión de Banners</h2>
+      <h2>🖼️ Gestión de Banners</h2>
       <div style="display: flex; gap: 10px;">
         <button class="btn-secondary" onclick="saveToDb('banners', BANNERS); showAdminToast('✅ Banners guardados', 'success');">💾 Guardar Cambios</button>
         <button class="btn-primary" onclick="adminEditBanner(null)">+ Nuevo Banner</button>
@@ -529,7 +529,7 @@ function adminEditBanner(id) {
       <h3>${isEdit ? 'Editar Banner' : 'Nuevo Banner'}</h3>
       
       <div class="form-group" style="margin-top: 15px;">
-        <label>ðŸ–¼ï¸ Imagen de Fondo (Opcional)</label>
+        <label>🖼️ Imagen de Fondo (Opcional)</label>
         <input type="file" id="banner-file" accept="image/*" class="admin-input" style="padding: 10px;" onchange="handleBannerImageUpload(this)">
         <input type="hidden" id="banner-imageUrl" value="${b.imageUrl || ''}">
         <div id="banner-image-preview" style="margin-top: 10px; height: 120px; border-radius: 8px; border: 1px dashed var(--border-color); background: ${b.imageUrl ? `url('${b.imageUrl}') center/contain no-repeat, ${b.bgGradient || 'rgba(0,0,0,0.2)'}` : 'rgba(0,0,0,0.2)'}; display: flex; align-items: center; justify-content: center;">
@@ -629,7 +629,7 @@ function handleBannerImageUpload(input) {
 
 function adminSaveBanner(id) {
   const title = document.getElementById('banner-title').value.trim();
-  if (!title) { showToast('âš ï¸ El título es obligatorio'); return; }
+  if (!title) { showToast('⚠️ El título es obligatorio'); return; }
 
   const b = {
     id: id,
@@ -657,7 +657,7 @@ function adminSaveBanner(id) {
 function adminDeleteBanner(id) {
   const modalHtml = `
     <div class="admin-modal-content" style="max-width: 400px; text-align: center;">
-      <h3 style="color: #ef5350;">âš ï¸ Eliminar Banner</h3>
+      <h3 style="color: #ef5350;">⚠️ Eliminar Banner</h3>
       <p style="margin: 15px 0; color: var(--text-secondary);">¿Estás seguro que deseas eliminar este banner?</p>
       <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
         <button class="btn-secondary" onclick="closeAdminModal()">Cancelar</button>
@@ -675,7 +675,6 @@ function executeDeleteBanner(id) {
     saveToDb('banners', BANNERS);
     closeAdminModal();
     renderActiveTab();
-    showToast('ðŸ—‘ï¸ Banner eliminado');
+    showToast('🗑️ Banner eliminado');
   }
 }
-

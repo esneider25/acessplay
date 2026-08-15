@@ -2364,9 +2364,7 @@ window.manageTournamentResults = function(id) {
         const pName = p.gameName || p.name || 'Sin Nombre';
         
         if (teamType !== 'Solo') {
-          let teamPosInputHTML = isPrizeFormat 
-             ? `<div style="display:inline-block; margin-left:15px;"><input type="number" class="admin-form-input bulk-team-pos-input" data-leader="${pName.replace(/"/g, '&quot;')}" value="${posMap[pName] || 0}" min="0" placeholder="Pos" style="width:60px; padding:4px; margin:0; color:white; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);"> <span style="font-weight:normal; text-transform:none;">Posición Final</span></div>`
-             : '';
+          let teamPosInputHTML = `<div style="display:inline-block; margin-left:15px;"><input type="number" class="admin-form-input bulk-team-pos-input" data-leader="${pName.replace(/"/g, '&quot;')}" value="${posMap[pName] || 0}" min="0" placeholder="Pos" style="width:60px; padding:4px; margin:0; color:white; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.2);"> <span style="font-weight:normal; text-transform:none;">Posición Final</span></div>`;
 
           leaderboardRows += `
             <tr style="background:rgba(255,255,255,0.05);">
@@ -2380,7 +2378,7 @@ window.manageTournamentResults = function(id) {
         // Captain row
         const capKills = killsMap[pName] || 0;
         const capPos = posMap[pName] || 0;
-        const inputsHTML = (isPrizeFormat && teamType === 'Solo')
+        const inputsHTML = (teamType === 'Solo')
           ? `<div style="display:flex; gap:5px;">
                <input type="number" class="admin-form-input bulk-pos-input" data-player="${pName.replace(/"/g, '&quot;')}" value="${capPos}" min="0" placeholder="Pos" style="width:60px; padding:6px; margin:0;" title="Posición (1,2,3...)">
                <input type="number" class="admin-form-input bulk-kill-input" data-player="${pName.replace(/"/g, '&quot;')}" value="${capKills}" min="0" placeholder="Kills" style="width:60px; padding:6px; margin:0;" title="Kills logradas">
@@ -2422,12 +2420,10 @@ window.manageTournamentResults = function(id) {
         if (entry.playerName && !allPlayers.includes(entry.playerName)) {
           const ePos = entry.position || 0;
           const eKills = entry.kills || 0;
-          const eInputsHTML = isPrizeFormat
-            ? `<div style="display:flex; gap:5px;">
+          const eInputsHTML = `<div style="display:flex; gap:5px;">
                  <input type="number" class="admin-form-input bulk-pos-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${ePos}" min="0" placeholder="Pos" style="width:60px; padding:6px; margin:0;" title="Posición (1,2,3...)">
                  <input type="number" class="admin-form-input bulk-kill-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${eKills}" min="0" placeholder="Kills" style="width:60px; padding:6px; margin:0;" title="Kills logradas">
-               </div>`
-            : `<input type="number" class="admin-form-input bulk-kill-input" data-player="${entry.playerName.replace(/"/g, '&quot;')}" value="${eKills}" min="0" style="width:70px; padding:6px; margin:0;" title="Kills logradas">`;
+               </div>`;
 
           leaderboardRows += `
             <tr style="border-bottom:1px solid var(--border);">
@@ -2453,10 +2449,10 @@ window.manageTournamentResults = function(id) {
         <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:20px;">${torneo.productName || ''}</p>
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <h4 style="margin:0;">📋 ${isPrizeFormat ? 'Posiciones y Kills Individuales' : 'Kills Individuales'}</h4>
+          <h4 style="margin:0;">📋 Posiciones y Kills Individuales</h4>
           <button class="btn btn-primary" onclick="saveBulkLeaderboard('${id}')" style="padding:8px 15px;">💾 Guardar Puntuaciones</button>
         </div>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa ${isPrizeFormat ? 'la posición (1, 2, 3...) y las KILLS (para el salón de la fama). Pon 0 en Posición si no clasificó.' : 'las kills exactas de cada jugador individual. Los que tengan 0 no aparecerán en el top.'}</p>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Ingresa la posición final del jugador/equipo en la partida (1, 2, 3...) y sus kills logradas. Pon 0 en posición si no clasificó al top. Los de kills 0 no aparecerán a menos que tengan posición.</p>
         
         <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border); border-radius:var(--radius-sm);">
           <table style="width:100%; border-collapse:collapse;">
@@ -2464,7 +2460,7 @@ window.manageTournamentResults = function(id) {
               <tr style="border-bottom:1px solid var(--border); background:rgba(255,255,255,0.02);">
                 <th style="padding:8px; text-align:left; width:40px;">#</th>
                 <th style="padding:8px; text-align:left;">Jugador</th>
-                <th style="padding:8px; text-align:left; width:100px;">${scoreLabel}</th>
+                <th style="padding:8px; text-align:left; width:100px;">Pos. y Kills</th>
               </tr>
             </thead>
             <tbody>${leaderboardRows}</tbody>
@@ -2540,16 +2536,15 @@ window.saveBulkLeaderboard = function(id) {
     const torneo = snap.val();
     const isPrizeFormat = torneo.prizes && torneo.prizes.length > 0;
     
-    if (isPrizeFormat) {
-      newLeaderboard.sort((a, b) => {
-        if (a.position === 0 && b.position === 0) return (b.kills || 0) - (a.kills || 0);
-        if (a.position === 0) return 1;
-        if (b.position === 0) return -1;
+    newLeaderboard.sort((a, b) => {
+      if (a.position > 0 && b.position > 0) {
+        if (a.position === b.position) return (b.kills || 0) - (a.kills || 0);
         return a.position - b.position;
-      });
-    } else {
-      newLeaderboard.sort((a, b) => (b.kills || 0) - (a.kills || 0));
-    }
+      }
+      if (a.position > 0) return -1;
+      if (b.position > 0) return 1;
+      return (b.kills || 0) - (a.kills || 0);
+    });
     
     firebase.database().ref('tournaments/' + id).update({
       leaderboard: newLeaderboard,

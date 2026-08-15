@@ -867,8 +867,8 @@ window.openInscriptionModal = function(tournamentId) {
             closeTorneoModal();
             
             firebase.database().ref('users/' + user.uid + '/notifications').push({
-              title: 'Inscripción a Torneo ðŸ†',
-              body: `Tu solicitud de inscripción al torneo ha sido registrada. Estado: ${paymentStatus === 'approved' || paymentStatus === 'free' ? 'Confirmado ✅' : 'Pendiente de Pago ³'}`,
+              title: 'Inscripción a Torneo 🏆',
+              body: `Tu solicitud de inscripción al torneo ha sido registrada. Estado: ${paymentStatus === 'approved' || paymentStatus === 'free' ? 'Confirmado ✅' : 'Pendiente de Pago ⏳'}`,
               type: 'tournament',
               timestamp: new Date().toISOString(),
               read: false
@@ -1005,14 +1005,13 @@ window.viewTournamentResults = function(id) {
   });
   
   const sorted = [...groupedLeaderboard].sort((a, b) => {
-    if (isPrizeFormat) {
-      if (a.position === 0 && b.position === 0) return (b.totalKills || 0) - (a.totalKills || 0);
-      if (a.position === 0) return 1;
-      if (b.position === 0) return -1;
+    if (a.position > 0 && b.position > 0) {
+      if (a.position === b.position) return (b.totalKills || 0) - (a.totalKills || 0);
       return a.position - b.position;
-    } else {
-      return (b.totalKills || 0) - (a.totalKills || 0);
     }
+    if (a.position > 0) return -1;
+    if (b.position > 0) return 1;
+    return (b.totalKills || 0) - (a.totalKills || 0);
   });
   
   let rows = '';
@@ -1024,52 +1023,31 @@ window.viewTournamentResults = function(id) {
     else medal = `<span style="opacity:0.6;">${i+1}º</span>`;
     
     let statsHtml = '';
-    if (isPrizeFormat) {
-      if (group.position === 0) {
-        medal = '<span style="opacity:0.6;">-</span>';
-      }
-      let displayPos = group.position === 0 ? 'N/C' : `${group.position}º Lugar`;
-      let prizeText = '';
-      if (group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🏆 ${escapeHTML(torneo.prizes[group.position - 1].reward)}</div>`;
-      } else if (group.position === 1 && torneo.prize) {
-        prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🏆 ${escapeHTML(torneo.prize)}</div>`;
-      }
-      
-      let membersHtml = '';
-      if (group.isTeam) {
-         membersHtml = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-align:right;">`;
-         group.members.forEach(m => {
-            membersHtml += `<div>${escapeHTML(m.playerName)}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
-         });
-         membersHtml += `</div>`;
-      }
-      
-      statsHtml = `
-        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-          <div style="color:var(--accent); font-size:0.95rem; font-weight:bold;">${displayPos}</div>
-          ${prizeText}
-          <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:2px;"><strong style="color:white;">${group.totalKills}</strong> Kills ${group.isTeam?'(Total)':''}</div>
-          ${membersHtml}
-        </div>
-      `;
-    } else {
-      let membersHtml = '';
-      if (group.isTeam) {
-         membersHtml = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-align:right;">`;
-         group.members.forEach(m => {
-            membersHtml += `<div>${escapeHTML(m.playerName)}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
-         });
-         membersHtml += `</div>`;
-      }
-
-      statsHtml = `
-        <div style="display:flex; flex-direction:column; align-items:flex-end;">
-          <div style="color:var(--text-secondary); font-size:1rem;"><strong style="color:white;">${group.totalKills}</strong> Kills ${group.isTeam?'(Total)':''}</div>
-          ${membersHtml}
-        </div>
-      `;
+    let displayPos = group.position > 0 ? `${group.position}º Lugar` : '';
+    let prizeText = '';
+    if (group.position > 0 && torneo.prizes && torneo.prizes[group.position - 1]) {
+      prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🏆 ${escapeHTML(torneo.prizes[group.position - 1].reward)}</div>`;
+    } else if (group.position === 1 && torneo.prize) {
+      prizeText = `<div style="color:#fbbf24; font-size:0.85rem; font-weight:bold; margin-top:2px;">🏆 ${escapeHTML(torneo.prize)}</div>`;
     }
+    
+    let membersHtml = '';
+    if (group.isTeam) {
+       membersHtml = `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; text-align:right;">`;
+       group.members.forEach(m => {
+          membersHtml += `<div>${escapeHTML(m.playerName)}: <span style="color:white;">${m.kills || 0} kills</span></div>`;
+       });
+       membersHtml += `</div>`;
+    }
+    
+    statsHtml = `
+      <div style="display:flex; flex-direction:column; align-items:flex-end;">
+        ${displayPos ? `<div style="color:var(--accent); font-size:0.95rem; font-weight:bold;">${displayPos}</div>` : ''}
+        ${prizeText}
+        <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:2px;"><strong style="color:white;">${group.totalKills}</strong> Kills ${group.isTeam?'(Total)':''}</div>
+        ${membersHtml}
+      </div>
+    `;
     
     const displayName = group.isTeam ? `Equipo de ${escapeHTML(group.leaderName)}` : escapeHTML(group.playerName);
     
