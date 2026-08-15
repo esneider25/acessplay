@@ -308,6 +308,7 @@ function getCategoryById(categoryId) {
 
 // ── Data Arrays for Firebase ──
 let ORDERS = [];
+let PINS = [];
 let QUICK_REPLIES = [];
 let BANNERS = [
   {
@@ -377,7 +378,7 @@ function initFirebaseData() {
   
   const baseKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'discounts'];
   const keysToLoad = isAdmin 
-    ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', '_sysTracking', 'order_counter', 'banners', 'landing_config']
+    ? ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'api_configs', 'discounts', 'messages', 'orders', 'telegram_config', 'quick_replies', '_sysTracking', 'order_counter', 'banners', 'landing_config', 'pins']
     : baseKeys;
   
   const loadedKeys = new Set();
@@ -390,7 +391,7 @@ function initFirebaseData() {
       if (typeof initAdminApp === 'function') initAdminApp();
     } else if (window.DATA_LOADED) {
       const uiKeys = ['products', 'categories', 'payment_methods', 'exchange_rate', 'settings', 'banners', 'landing_config', 'discounts'];
-      const adminKeys = [...uiKeys, 'orders', 'api_configs', 'discounts', 'quick_replies'];
+      const adminKeys = [...uiKeys, 'orders', 'api_configs', 'discounts', 'quick_replies', 'pins'];
       if (uiKeys.includes(key)) {
         if (typeof renderApp === 'function' && typeof appState !== 'undefined' && appState.currentView === 'home') renderApp();
       }
@@ -453,6 +454,7 @@ function initFirebaseData() {
           }
           else if (key === 'telegram_config') Object.assign(TELEGRAM_CONFIG, data);
           else if (key === 'quick_replies') QUICK_REPLIES = data;
+          else if (key === 'pins') { PINS.length = 0; toArray(data).forEach(p => PINS.push(p)); }
           else if (key === '_sysTracking') {
             _sysTracking.attempts = data.attempts || [];
             _sysTracking.blocked = data.blocked || [];

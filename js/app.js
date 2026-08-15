@@ -15,6 +15,7 @@ if (typeof Swal !== 'undefined') {
 // AccessPlay — Main App Logic & SPA Routing (v2 + Orders)
 // ============================================================
 
+
 // ── State ──
 const appState = {
   currentView: 'home',        // 'home' | 'product' | 'tracking' | 'lookup'
@@ -25,7 +26,8 @@ const appState = {
   trackingOrderId: null,
   appliedDiscount: null,
   historyContactStr: null,
-  verifiedPlayerName: null
+  verifiedPlayerName: null,
+  pinData: null
 };
 
 // ── Init ──
@@ -197,22 +199,22 @@ function showAnnouncementModal(config) {
     `;
   }
 
-window.handleAnnouncementClick = function(e, link) {
-  e.preventDefault();
-  const modalContainer = document.getElementById('announcement-modal-container');
-  if (modalContainer) {
-    sessionStorage.setItem('recargaaccessplay_announcement_seen', 'true');
-    const overlay = modalContainer.querySelector('.modal-overlay');
-    if (overlay) overlay.classList.remove('active');
-    setTimeout(() => modalContainer.remove(), 300);
-  }
-  
-  if (link.startsWith('product:')) {
-    if (typeof navigateTo === 'function') navigateTo('product', link.split(':')[1]);
-  } else {
-    if (typeof scrollToSection === 'function') scrollToSection(link);
-  }
-};
+  window.handleAnnouncementClick = function(e, link) {
+    e.preventDefault();
+    const modalContainer = document.getElementById('announcement-modal-container');
+    if (modalContainer) {
+      sessionStorage.setItem('recargaaccessplay_announcement_seen', 'true');
+      const overlay = modalContainer.querySelector('.modal-overlay');
+      if (overlay) overlay.classList.remove('active');
+      setTimeout(() => modalContainer.remove(), 300);
+    }
+    
+    if (link.startsWith('product:')) {
+      if (typeof navigateTo === 'function') navigateTo('product', link.split(':')[1]);
+    } else {
+      if (typeof scrollToSection === 'function') scrollToSection(link);
+    }
+  };
 
   modalContainer.innerHTML = `
     <div class="modal-overlay active" style="z-index: 99999; backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; position: fixed; inset: 0; background: rgba(0,0,0,0.85); padding: 15px;">
@@ -358,6 +360,17 @@ function renderApp() {
       ${typeof renderSupportWidget === 'function' ? renderSupportWidget() : ''}
       ${termsHtml}
     `;
+  } else if (appState.currentView === 'redeem-pin') {
+    app.innerHTML = `
+      <div class="bg-ocean-grid">${typeof renderBubbles === 'function' ? renderBubbles() : ''}</div>
+      ${typeof renderNavbar === 'function' ? renderNavbar() : ''}
+      <div class="app-container">
+        ${typeof renderPinRedemption === 'function' ? renderPinRedemption() : ''}
+        ${typeof renderFooter === 'function' ? renderFooter() : ''}
+      </div>
+      ${typeof renderSupportWidget === 'function' ? renderSupportWidget() : ''}
+      ${termsHtml}
+    `;
   }
 }
 
@@ -395,6 +408,9 @@ function navigateTo(view, param) {
   } else if (view === 'dashboard') {
     window.location.href = 'usuario.html';
     return;
+  } else if (view === 'redeem-pin') {
+    appState.currentView = 'redeem-pin';
+    appState.pinData = null;
   }
   renderApp();
   window.scrollTo({ top: 0, behavior: 'smooth' });

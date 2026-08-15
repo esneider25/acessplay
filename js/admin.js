@@ -159,6 +159,9 @@ function initAdminApp() {
           <li class="admin-nav-item" data-tab="telegram" onclick="switchTab('telegram')">
             <span class="admin-nav-icon">📲</span> Telegram
           </li>
+          <li class="admin-nav-item" data-tab="pins" onclick="switchTab('pins')">
+            <span class="admin-nav-icon">🎫</span> Pines
+          </li>
           <li class="admin-nav-item" data-tab="messages" onclick="switchTab('messages')">
             <span class="admin-nav-icon">💬</span> Mensajes
             ${getUnreadMessagesCount() > 0 ? `<span class="admin-nav-badge" style="background:var(--error);">${getUnreadMessagesCount()}</span>` : ''}
@@ -305,6 +308,9 @@ function renderActiveTab() {
     case 'quick-replies': renderQuickReplies(main); break;
     case 'withdrawals': renderWithdrawals(main); break;
     case 'settings': renderSettings(main); break;
+    case 'pins':
+      if (typeof renderPins === 'function') renderPins(main);
+      break;
     default: renderDashboard(main);
   }
 }

@@ -1,5 +1,13 @@
 {
   "rules": {
+    "pins": {
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
+    },
+    "pin_redemptions": {
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
+    },
     "products": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"

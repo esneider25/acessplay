@@ -22,6 +22,7 @@ function renderNavbar() {
           <li><a onclick="scrollToSection('catalog')" data-section="catalog">Catálogo</a></li>
           <li><a onclick="scrollToSection('how-it-works')" data-section="how-it-works">¿Cómo Funciona?</a></li>
           <li><a onclick="scrollToSection('features')" data-section="features">Ventajas</a></li>
+          <li><a onclick="navigateTo('redeem-pin')" class="nav-cta" style="background: linear-gradient(135deg, #10b981, #059669); cursor:pointer; color: white;">🎫 Canjear PIN</a></li>
           <li><a onclick="navigateTo('lookup')" data-section="lookup">🔍 Mis Pedidos</a></li>
           <li id="auth-nav-item" class="desktop-auth-item">
             ${(typeof currentUser !== 'undefined' && currentUser) 
@@ -1411,7 +1412,7 @@ function renderDashboard() {
         <div style="background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(16, 185, 129, 0.3); padding: 25px; border-radius: 16px; position: relative; overflow: hidden;">
           <div style="position: absolute; bottom: -50px; left: -50px; width: 100px; height: 100px; background: #0ea5e9; filter: blur(50px); opacity: 0.2;"></div>
           <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px;">Saldo Monedero</div>
-          <div style="font-size: 2.8rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);">\$${wallet.toFixed(2)}</div>
+          <div style="font-size: 2.8rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 15px rgba(16, 185, 129, 0.3);">$${wallet.toFixed(2)}</div>
           <div style="margin-top: 15px; display: flex; gap: 10px;">
             <button onclick="startWalletRecharge()" class="btn-primary" style="flex: 1; padding: 8px;">+ Recargar</button>
           </div>
@@ -1550,7 +1551,7 @@ function renderDashboardTransactions() {
            <div style="font-size: 0.75rem; color: var(--text-secondary);">${new Date(tx.date).toLocaleString()}</div>
          </div>
        </div>
-       <div style="font-weight: bold; color: ${color};">${sign}\$${parseFloat(tx.amount).toFixed(2)}</div>
+       <div style="font-weight: bold; color: ${color};">${sign}$${parseFloat(tx.amount).toFixed(2)}</div>
     </div>
     `;
   }).join('');
@@ -1574,5 +1575,310 @@ window.fillSavedId = function(uid, zoneId) {
   if (zoneInput && zoneId && zoneId !== 'undefined' && zoneId !== 'null') {
     zoneInput.value = zoneId;
     zoneInput.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+};
+
+// ── Redeem PIN ──
+function renderPinRedemption() {
+  if (!currentUser) {
+    return `
+      <section class="game-detail" style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🎫</div>
+        <h2>Canjear Código de Regalo</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Debes iniciar sesión para canjear un PIN de regalo.</p>
+        <button class="btn-primary" onclick="showAuthModal()" style="margin: 0 auto;">Iniciar Sesión</button>
+      </section>
+    `;
+  }
+
+  let stateHtml = '';
+  if (!appState.pinData) {
+    stateHtml = `
+      <div class="form-group" style="max-width: 400px; margin: 0 auto;">
+        <label for="pin-input" style="text-align: center; display: block; font-size: 1.1rem;">Ingresa tu código PIN</label>
+        <input type="text" class="form-input" id="pin-input" placeholder="ESPLAY-XXXXXXXX" autocomplete="off" style="text-transform: uppercase; text-align: center; font-size: 1.2rem; letter-spacing: 2px;">
+      </div>
+      <button class="btn-primary" id="btn-verify-pin" onclick="verifyPinCode()" style="margin: 25px auto 0; width: 100%; max-width: 400px; padding: 16px; font-size: 1.1rem;">Verificar PIN</button>
+    `;
+  } else {
+    // We already have a verified PIN. We need to collect the remaining fields if it's a game-id, etc.
+    const product = PRODUCTS.find(p => p.id === appState.pinData.productId);
+    const productType = appState.pinData.productType || 'game-id';
+    
+    let typeFieldsHtml = '';
+    
+    // Saved IDs handling
+    let savedIdsHtml = '';
+    if (typeof userProfile !== 'undefined' && userProfile && userProfile.savedIds && userProfile.savedIds.length > 0 && product) {
+      const relevantIds = userProfile.savedIds.filter(id => id.gameName && id.gameName.toLowerCase().includes(product.name.toLowerCase()));
+      const idsToShow = relevantIds.length > 0 ? relevantIds : userProfile.savedIds;
+      
+      savedIdsHtml = `
+        <div style="margin-bottom: 20px; padding: 16px; background: rgba(14, 165, 233, 0.05); border: 1px solid rgba(14, 165, 233, 0.2); border-radius: 12px;">
+          <div style="font-size: 0.9rem; color: #38bdf8; margin-bottom: 12px; font-weight: 600;">Autocompletar con tus cuentas guardadas</div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            ${idsToShow.map(id => `
+              <button type="button" 
+                      onclick="document.getElementById('pin-game-uid').value = '${id.uid}'; if(document.getElementById('pin-game-zone')) document.getElementById('pin-game-zone').value = '${id.zoneId || ''}';"
+                      style="background: linear-gradient(145deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.8)); border: 1px solid rgba(56, 189, 248, 0.3); color: #f8fafc; padding: 8px 12px; border-radius: 8px; cursor: pointer;">
+                <span style="font-size: 0.70rem; color: #94a3b8; display: block;">${id.gameName}</span>
+                <span style="font-size: 1rem; font-weight: bold; color: #38bdf8;">${id.uid}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (productType === 'game-id') {
+      let verifierHtml = '';
+      if (product && product.apiVerifierProvider) {
+        verifierHtml = `
+          <button type="button" class="btn-secondary" onclick="verifyPinGameId('${product.id}')" style="width: 100%; margin-top: 10px;">Verificar ID</button>
+          <div id="pin-verify-result" style="margin-top: 8px; font-weight: bold; text-align: center; min-height: 20px;"></div>
+        `;
+      }
+      typeFieldsHtml = savedIdsHtml + `
+        <div class="form-group">
+          <label>🎮 ID del juego</label>
+          <input type="text" class="form-input" id="pin-game-uid" placeholder="Ingresa tu ID" autocomplete="off">
+          ${verifierHtml}
+        </div>
+      `;
+    } else if (productType === 'game-id-zone') {
+      let verifierHtml = '';
+      if (product && product.apiVerifierProvider) {
+        verifierHtml = `
+          <div style="grid-column: 1 / -1; margin-top: 5px;">
+            <button type="button" class="btn-secondary" onclick="verifyPinGameId('${product.id}')" style="width: 100%;">Verificar ID + Zona</button>
+            <div id="pin-verify-result" style="margin-top: 8px; font-weight: bold; text-align: center; min-height: 20px;"></div>
+          </div>
+        `;
+      }
+      typeFieldsHtml = savedIdsHtml + `
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+          <div class="form-group">
+            <label>🎮 Player ID</label>
+            <input type="text" class="form-input" id="pin-game-uid" placeholder="Ej. 12345678" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label>🌐 Zone ID</label>
+            <input type="text" class="form-input" id="pin-game-zone" placeholder="Ej. 1234" autocomplete="off">
+          </div>
+          ${verifierHtml}
+        </div>
+      `;
+    } else if (productType === 'account') {
+      typeFieldsHtml = savedIdsHtml + `
+        <div class="form-group">
+          <label>📧 Correo de la cuenta</label>
+          <input type="text" class="form-input" id="pin-account-email" placeholder="Correo" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>🔒 Contraseña</label>
+          <input type="password" class="form-input" id="pin-account-password" placeholder="Contraseña">
+        </div>
+      `;
+    } else if (productType === 'code') {
+      typeFieldsHtml = `
+        <div class="form-group" style="text-align: center;">
+          <div style="font-size: 3rem;">🎫</div>
+          <p style="color: var(--text-secondary); margin-top: 10px;">Este código de regalo será enviado directamente a tu cuenta/correo registrado o mostrado en pantalla al procesarse.</p>
+        </div>
+      `;
+    }
+    
+    stateHtml = `
+      <div class="order-summary" style="margin: 0 auto 30px; max-width: 500px; text-align: left;">
+        <div class="summary-item" style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
+          <span style="font-size: 2rem; margin-right: 15px;">🎁</span>
+          <div>
+            <div style="font-weight: bold; font-size: 1.2rem;">${appState.pinData.productName}</div>
+            <div style="color: var(--accent);">${appState.pinData.packageLabel}</div>
+          </div>
+        </div>
+        ${typeFieldsHtml}
+        
+        <div style="display: flex; gap: 10px; margin-top: 25px;">
+          <button class="btn-secondary" onclick="appState.pinData = null; renderApp();" style="flex: 1;">Cancelar</button>
+          <button class="btn-primary" id="btn-submit-pin" onclick="submitPinRedemption()" style="flex: 2;">Confirmar Canje</button>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <section class="game-detail" id="redeem-pin-section" style="max-width: 600px; margin: 0 auto;">
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 2.2rem; margin-bottom: 10px;">🎫 Canjear PIN de Regalo</h1>
+        <p style="color: var(--text-secondary);">Ingresa tu código PIN para recibir tu recarga o producto instantáneamente.</p>
+      </div>
+      
+      <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 30px; border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        ${stateHtml}
+      </div>
+    </section>
+  `;
+}
+
+// Global functions for PIN redemption
+window.verifyPinCode = async function() {
+  const pinInput = document.getElementById('pin-input').value.trim();
+  if (!pinInput) return showToast('⚠️ Ingresa un código PIN');
+  if (!pinInput.toUpperCase().startsWith('ESPLAY-')) return showToast('⚠️ El código debe empezar con ESPLAY-');
+
+  const btn = document.getElementById('btn-verify-pin');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '⏳ Verificando...';
+  btn.disabled = true;
+
+  try {
+    const idToken = await firebase.auth().currentUser.getIdToken();
+    const res = await fetch('/api/redeem-pin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ pinCode: pinInput, action: 'verify' })
+    });
+    
+    const data = await res.json();
+    if (data.error) {
+      showToast('❌ ' + data.error);
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+      return;
+    }
+    
+    // El server devolvió info del PIN
+    appState.pinData = {
+      code: pinInput.toUpperCase(),
+      productId: data.productId,
+      productName: data.productName,
+      packageLabel: data.packageLabel,
+      productType: data.productType
+    };
+    renderApp();
+    
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Error al verificar PIN');
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+  }
+};
+
+window.verifyPinGameId = async function(productId) {
+  const gameId = document.getElementById('pin-game-uid') ? document.getElementById('pin-game-uid').value.trim() : '';
+  const zoneId = document.getElementById('pin-game-zone') ? document.getElementById('pin-game-zone').value.trim() : '';
+  
+  if (!gameId) return showToast('⚠️ Ingresa el ID');
+  const btn = event.currentTarget;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '⏳ Verificando...';
+  btn.disabled = true;
+  
+  try {
+    const res = await fetch('/api/verify-id', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId, gameId, zoneId })
+    });
+    const data = await res.json();
+    const resDiv = document.getElementById('pin-verify-result');
+    if (data.valid) {
+      resDiv.innerHTML = `<span style="color: #4ade80;">✅ ${data.playerName}</span>`;
+      appState.verifiedPlayerName = data.playerName;
+    } else {
+      resDiv.innerHTML = `<span style="color: #ef4444;">❌ ID Inválido o no encontrado</span>`;
+      appState.verifiedPlayerName = null;
+    }
+  } catch (err) {
+    document.getElementById('pin-verify-result').innerHTML = `<span style="color: #ef4444;">❌ Error de conexión</span>`;
+  }
+  btn.innerHTML = originalHtml;
+  btn.disabled = false;
+};
+
+window.submitPinRedemption = async function() {
+  const btn = document.getElementById('btn-submit-pin');
+  btn.innerHTML = '⏳ Procesando Canje...';
+  btn.disabled = true;
+
+  const productType = appState.pinData.productType || 'game-id';
+  let gameId = '';
+  let zoneId = '';
+  let accountEmail = '';
+  let accountPassword = '';
+
+  if (productType === 'game-id') {
+    gameId = document.getElementById('pin-game-uid').value.trim();
+    if (!gameId) {
+      showToast('⚠️ Debes ingresar el ID del juego');
+      btn.innerHTML = 'Confirmar Canje';
+      btn.disabled = false;
+      return;
+    }
+  } else if (productType === 'game-id-zone') {
+    gameId = document.getElementById('pin-game-uid').value.trim();
+    zoneId = document.getElementById('pin-game-zone').value.trim();
+    if (!gameId || !zoneId) {
+      showToast('⚠️ Debes ingresar Player ID y Zone ID');
+      btn.innerHTML = 'Confirmar Canje';
+      btn.disabled = false;
+      return;
+    }
+  } else if (productType === 'account') {
+    accountEmail = document.getElementById('pin-account-email').value.trim();
+    accountPassword = document.getElementById('pin-account-password').value;
+    if (!accountEmail || !accountPassword) {
+      showToast('⚠️ Debes ingresar los datos de la cuenta');
+      btn.innerHTML = 'Confirmar Canje';
+      btn.disabled = false;
+      return;
+    }
+  }
+
+  try {
+    const idToken = await firebase.auth().currentUser.getIdToken();
+    const res = await fetch('/api/redeem-pin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${idToken}`
+      },
+      body: JSON.stringify({
+        action: 'redeem',
+        pinCode: appState.pinData.code,
+        gameId,
+        zoneId,
+        playerName: appState.verifiedPlayerName,
+        accountEmail,
+        accountPassword
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) {
+      Swal.fire('Error', data.error, 'error');
+      btn.innerHTML = 'Confirmar Canje';
+      btn.disabled = false;
+    } else {
+      appState.pinData = null;
+      Swal.fire({
+        title: '¡Regalo Canjeado!',
+        text: `Tu pedido de ${data.productName} (${data.packageLabel}) está en proceso. N° Orden: ${data.orderId}`,
+        icon: 'success',
+        confirmButtonText: 'Rastrear Pedido'
+      }).then(() => {
+        navigateTo('tracking', data.orderId);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('❌ Error de conexión al canjear el PIN');
+    btn.innerHTML = 'Confirmar Canje';
+    btn.disabled = false;
   }
 };

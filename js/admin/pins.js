@@ -1,0 +1,295 @@
+// ════════════════════════════════════════
+// PINES DE REGALO (GIFT PINS)
+// ════════════════════════════════════════
+
+let pinsFilter = 'all';
+
+function renderPins(container) {
+  const allPins = PINS || [];
+  let filteredPins = allPins;
+  
+  if (pinsFilter !== 'all') {
+    filteredPins = allPins.filter(p => p.status === pinsFilter);
+  }
+
+  // Ordenar por fecha de creación (más recientes primero)
+  filteredPins.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const counts = {
+    all: allPins.length,
+    available: allPins.filter(p => p.status === 'available').length,
+    redeemed: allPins.filter(p => p.status === 'redeemed').length,
+    disabled: allPins.filter(p => p.status === 'disabled').length
+  };
+
+  const filters = [
+    { id: 'all', label: 'Todos', icon: '🎫' },
+    { id: 'available', label: 'Disponibles', icon: '✅' },
+    { id: 'redeemed', label: 'Canjeados', icon: '📦' },
+    { id: 'disabled', label: 'Deshabilitados', icon: '⛔' }
+  ];
+
+  const filtersHtml = filters.map(f => `
+    <button class="admin-filter-pill ${pinsFilter === f.id ? 'active' : ''}" onclick="filterPins('${f.id}')">
+      ${f.icon} ${f.label}
+      <span class="admin-filter-count">${counts[f.id]}</span>
+    </button>
+  `).join('');
+
+  const pinsHtml = filteredPins.length > 0 ? filteredPins.map(pin => {
+    let statusClass = pin.status === 'available' ? 'completed' : pin.status === 'redeemed' ? 'processing' : 'rejected';
+    let statusLabel = pin.status === 'available' ? 'Disponible' : pin.status === 'redeemed' ? 'Canjeado' : 'Deshabilitado';
+    let statusIcon = pin.status === 'available' ? '✅' : pin.status === 'redeemed' ? '📦' : '⛔';
+
+    const date = new Date(pin.createdAt);
+    
+    let actionsHtml = '';
+    if (pin.status === 'available') {
+      actionsHtml += `<button class="admin-order-action-btn admin-action-reject" onclick="togglePinStatus('${pin.code}', 'disabled')" title="Deshabilitar">⛔ Deshabilitar</button>`;
+    } else if (pin.status === 'disabled') {
+      actionsHtml += `<button class="admin-order-action-btn admin-action-approve" onclick="togglePinStatus('${pin.code}', 'available')" title="Habilitar">✅ Habilitar</button>`;
+    }
+
+    return `
+      <div class="admin-order-card" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="admin-order-info" style="flex: 2;">
+          <div class="admin-order-product">
+            <span style="font-family: monospace; font-size: 1.1rem; color: var(--accent); background: var(--bg-deep); padding: 2px 8px; border-radius: 4px;">${pin.code}</span>
+            <button class="copy-btn" onclick="adminCopyText('${pin.code}')" title="Copiar">📋</button>
+          </div>
+          <div class="admin-order-meta">
+            <span class="admin-order-meta-item">🎮 ${escapeHTML(pin.productName)} — ${escapeHTML(pin.packageLabel)}</span>
+            <span class="admin-order-meta-item">💰 $${parseFloat(pin.priceUsd).toFixed(2)}</span>
+            <span class="admin-order-meta-item">📅 Creado: ${date.toLocaleDateString('es-VE')}</span>
+          </div>
+          ${pin.note ? `<div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">📝 ${escapeHTML(pin.note)}</div>` : ''}
+          ${pin.status === 'redeemed' && pin.redeemedBy ? `
+            <div style="font-size: 0.85rem; color: #4ade80; margin-top: 4px;">
+              ✅ Canjeado por: <strong>${escapeHTML(pin.redeemedBy)}</strong> el ${new Date(pin.redeemedAt).toLocaleDateString('es-VE')}
+              <br>🔗 Orden: <a href="#" onclick="openOrderDetailModal('${pin.redemptionOrderId}')">${pin.redemptionOrderId}</a>
+            </div>
+          ` : ''}
+        </div>
+        <div class="admin-order-status-col" style="flex: 1; text-align: right;">
+          <span class="admin-status-badge admin-status-${statusClass}">${statusIcon} ${statusLabel}</span>
+        </div>
+        <div class="admin-order-actions" style="flex: 1; justify-content: flex-end;">
+          ${actionsHtml}
+          <button class="admin-order-action-btn admin-action-invalid" onclick="deletePin('${pin.code}')" title="Eliminar" style="margin-left: 8px;">🗑️ Eliminar</button>
+        </div>
+      </div>
+    `;
+  }).join('') : `
+    <div class="admin-empty-orders">
+      <div class="admin-empty-orders-icon">🎫</div>
+      <h3>No hay PINes encontrados</h3>
+      <p>Crea nuevos PINes de regalo para tus clientes.</p>
+    </div>
+  `;
+
+  container.innerHTML = `
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Gestión de PINes</h1>
+        <p class="admin-subtitle">Crea códigos de regalo para sorteos o ventas directas</p>
+      </div>
+      <button class="btn btn-primary" onclick="openCreatePinModal()">
+        <span>➕</span> Crear PIN
+      </button>
+    </div>
+    <div class="admin-orders-filters">
+      ${filtersHtml}
+    </div>
+    <div class="admin-orders-list">
+      ${pinsHtml}
+    </div>
+  `;
+}
+
+function filterPins(status) {
+  pinsFilter = status;
+  renderActiveTab();
+}
+
+function generatePinCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let randomStr1 = '';
+  let randomStr2 = '';
+  for (let i = 0; i < 4; i++) {
+    randomStr1 += chars.charAt(Math.floor(Math.random() * chars.length));
+    randomStr2 += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  let randomStr3 = '';
+  let randomStr4 = '';
+  for (let i = 0; i < 4; i++) {
+    randomStr3 += chars.charAt(Math.floor(Math.random() * chars.length));
+    randomStr4 += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  // User requested format: ESPLAY-XXXXXXXX
+  return \`ESPLAY-\${randomStr1}\${randomStr2}\`;
+}
+
+function openCreatePinModal() {
+  const overlay = document.getElementById('admin-modal-overlay');
+  const modalContent = document.getElementById('admin-modal-content');
+  if (!overlay || !modalContent) return;
+
+  const productsOptions = PRODUCTS.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+  modalContent.innerHTML = `
+    <div class="admin-modal-header">
+      <h2 class="admin-modal-title">🎫 Crear Nuevo PIN</h2>
+      <button class="admin-modal-close" onclick="closeAdminModal()">✕</button>
+    </div>
+    
+    <div class="admin-form-group">
+      <label class="admin-form-label">Código del PIN (ESPLAY-XXXXXXXX)</label>
+      <div style="display: flex; gap: 10px;">
+        <input type="text" id="pin-code" class="admin-form-input" style="font-family: monospace;" value="${generatePinCode()}" oninput="this.value = this.value.replace(/[^a-zA-Z0-9-]/g, '')">
+        <button class="btn btn-secondary" onclick="document.getElementById('pin-code').value = generatePinCode()">🔄 Generar</button>
+      </div>
+    </div>
+
+    <div class="admin-form-group">
+      <label class="admin-form-label">Producto</label>
+      <select id="pin-product-id" class="admin-form-input" onchange="updatePinPackagesDropdown()">
+        <option value="">Selecciona un producto...</option>
+        ${productsOptions}
+      </select>
+    </div>
+
+    <div class="admin-form-group">
+      <label class="admin-form-label">Paquete / Cantidad</label>
+      <select id="pin-package-index" class="admin-form-input" disabled>
+        <option value="">Primero selecciona un producto</option>
+      </select>
+    </div>
+
+    <div class="admin-form-group">
+      <label class="admin-form-label">Nota (Opcional)</label>
+      <input type="text" id="pin-note" class="admin-form-input" placeholder="Ej: Sorteo Instagram 15 Ago">
+    </div>
+
+    <div class="admin-modal-footer">
+      <button class="btn btn-secondary" onclick="closeAdminModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveNewPin()">Guardar PIN</button>
+    </div>
+  `;
+
+  overlay.classList.add('active');
+}
+
+function updatePinPackagesDropdown() {
+  const productId = document.getElementById('pin-product-id').value;
+  const packageSelect = document.getElementById('pin-package-index');
+  
+  if (!productId) {
+    packageSelect.innerHTML = '<option value="">Primero selecciona un producto</option>';
+    packageSelect.disabled = true;
+    return;
+  }
+
+  const product = PRODUCTS.find(p => p.id === productId);
+  if (!product || !product.packages || product.packages.length === 0) {
+    packageSelect.innerHTML = '<option value="">Este producto no tiene paquetes configurados</option>';
+    packageSelect.disabled = true;
+    return;
+  }
+
+  packageSelect.innerHTML = '<option value="">Selecciona el paquete...</option>' + 
+    product.packages.map((pkg, idx) => {
+      let label = pkg.amount + (pkg.hideCurrency ? '' : ' ' + (product.currency || ''));
+      return `<option value="${idx}">${label} — $${pkg.priceUsd.toFixed(2)}</option>`;
+    }).join('');
+  packageSelect.disabled = false;
+}
+
+function saveNewPin() {
+  const codeInput = document.getElementById('pin-code').value.trim();
+  const productId = document.getElementById('pin-product-id').value;
+  const packageIdxStr = document.getElementById('pin-package-index').value;
+  const note = document.getElementById('pin-note').value.trim();
+
+  if (!codeInput) return showAdminToast('⚠️ El código del PIN no puede estar vacío', 'error');
+  if (!codeInput.startsWith('ESPLAY-')) return showAdminToast('⚠️ El código del PIN debe empezar con ESPLAY-', 'error');
+  if (!productId) return showAdminToast('⚠️ Selecciona un producto', 'error');
+  if (packageIdxStr === '') return showAdminToast('⚠️ Selecciona un paquete', 'error');
+
+  const packageIndex = parseInt(packageIdxStr);
+  const product = PRODUCTS.find(p => p.id === productId);
+  if (!product) return showAdminToast('⚠️ Producto inválido', 'error');
+  const pkg = product.packages[packageIndex];
+  if (!pkg) return showAdminToast('⚠️ Paquete inválido', 'error');
+
+  const btn = event.target;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '⏳ Guardando...';
+  btn.disabled = true;
+
+  const pinData = {
+    code: codeInput,
+    productId: product.id,
+    productName: product.name,
+    packageIndex: packageIndex,
+    packageLabel: pkg.amount + (pkg.hideCurrency ? '' : ' ' + (product.currency || '')),
+    productType: product.type || 'game-id',
+    priceUsd: pkg.priceUsd,
+    apiProductId: pkg.apiServiceId || null,
+    apiProvider: product.apiProvider || null,
+    status: 'available',
+    createdAt: new Date().toISOString(),
+    createdBy: firebase.auth().currentUser.email,
+    redeemedAt: null,
+    redeemedBy: null,
+    redemptionOrderId: null,
+    note: note
+  };
+
+  firebase.database().ref('pins/' + codeInput).once('value', snap => {
+    if (snap.exists()) {
+      showAdminToast('❌ Ese código de PIN ya existe', 'error');
+      btn.innerHTML = originalHtml;
+      btn.disabled = false;
+      return;
+    }
+
+    firebase.database().ref('pins/' + codeInput).set(pinData)
+      .then(() => {
+        showAdminToast('✅ PIN creado exitosamente', 'success');
+        closeAdminModal();
+        renderActiveTab();
+      })
+      .catch(err => {
+        console.error(err);
+        showAdminToast('❌ Error al crear PIN: ' + err.message, 'error');
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+      });
+  });
+}
+
+function togglePinStatus(code, newStatus) {
+  firebase.database().ref('pins/' + code + '/status').set(newStatus)
+    .then(() => {
+      showAdminToast('✅ Estado del PIN actualizado', 'success');
+      renderActiveTab();
+    })
+    .catch(err => {
+      console.error(err);
+      showAdminToast('❌ Error al actualizar PIN: ' + err.message, 'error');
+    });
+}
+
+function deletePin(code) {
+  if (confirm(`¿Estás seguro de eliminar el PIN ${code}? Esta acción no se puede deshacer.`)) {
+    firebase.database().ref('pins/' + code).remove()
+      .then(() => {
+        showAdminToast('🗑️ PIN eliminado', 'success');
+        renderActiveTab();
+      })
+      .catch(err => {
+        console.error(err);
+        showAdminToast('❌ Error al eliminar PIN: ' + err.message, 'error');
+      });
+  }
+}
