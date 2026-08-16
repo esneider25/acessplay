@@ -830,17 +830,18 @@ function createOrder(data) {
   orders.unshift(order);
   ORDERS = orders;
   
-  if (order.userId && typeof firebase !== 'undefined') {
-    firebase.database().ref('users/' + order.userId + '/notifications').push({
-      title: 'Pedido Recibido 📦',
-      body: `Hemos recibido tu pedido de ${order.productName || 'producto'}. Pronto lo procesaremos.`,
-      type: 'order',
-      timestamp: new Date().toISOString(),
-      read: false
-    });
-  }
-  
-  return saveOrderToDb(order).then(() => order);
+  return saveOrderToDb(order).then(() => {
+    if (order.userId && typeof firebase !== 'undefined') {
+      firebase.database().ref('users/' + order.userId + '/notifications').push({
+        title: 'Pedido Recibido 📦',
+        body: `Hemos recibido tu pedido de ${order.productName || 'producto'}. Pronto lo procesaremos.`,
+        type: 'order',
+        timestamp: new Date().toISOString(),
+        read: false
+      });
+    }
+    return order;
+  });
 }
 
 function getOrderById(orderId) {
