@@ -1254,7 +1254,7 @@ function showOrderConfirmation(order) {
               <div style="font-family: 'Courier New', monospace; font-size: 1.6rem; font-weight: 800; color: var(--accent); letter-spacing: 2px; margin-bottom: 12px; text-shadow: 0 0 10px rgba(0,229,195,0.3);">
                 ${order.id}
               </div>
-              <div style="display: inline-block; background: rgba(255, 183, 77, 0.1); border: 1px solid rgba(255, 183, 77, 0.3); color: #ffb74d; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
+              <div id="pf-order-status-badge-${order.id}" style="display: inline-block; background: rgba(255, 183, 77, 0.1); border: 1px solid rgba(255, 183, 77, 0.3); color: #ffb74d; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; transition: all 0.3s ease;">
                 ⏳ Pendiente de verificación
               </div>
             </div>
@@ -1268,6 +1268,48 @@ function showOrderConfirmation(order) {
     </div>
   `;
   document.body.appendChild(modalContainer);
+
+  // Escuchar cambios de estado en tiempo real mientras el modal está abierto
+  const statusRef = firebase.database().ref('orders/' + order.id + '/status');
+  const statusListener = statusRef.on('value', snap => {
+    const status = snap.val() || 'pending';
+    const badge = document.getElementById(`pf-order-status-badge-${order.id}`);
+    if (badge) {
+      if (status === 'completed') {
+        badge.innerHTML = '✅ Completado';
+        badge.style.background = 'rgba(0, 229, 195, 0.1)';
+        badge.style.borderColor = 'rgba(0, 229, 195, 0.3)';
+        badge.style.color = '#00e5c3';
+      } else if (status === 'rejected') {
+        badge.innerHTML = '❌ Rechazado';
+        badge.style.background = 'rgba(255, 82, 82, 0.1)';
+        badge.style.borderColor = 'rgba(255, 82, 82, 0.3)';
+        badge.style.color = '#ff5252';
+      } else if (status === 'invalid-id') {
+        badge.innerHTML = '⚠️ ID Inválido';
+        badge.style.background = 'rgba(255, 183, 77, 0.1)';
+        badge.style.borderColor = 'rgba(255, 183, 77, 0.3)';
+        badge.style.color = '#ffb74d';
+      } else if (status === 'processing') {
+        badge.innerHTML = '⚙️ Procesando';
+        badge.style.background = 'rgba(14, 165, 233, 0.1)';
+        badge.style.borderColor = 'rgba(14, 165, 233, 0.3)';
+        badge.style.color = '#0ea5e9';
+      } else {
+        badge.innerHTML = '⏳ Pendiente de verificación';
+        badge.style.background = 'rgba(255, 183, 77, 0.1)';
+        badge.style.borderColor = 'rgba(255, 183, 77, 0.3)';
+        badge.style.color = '#ffb74d';
+      }
+    }
+  });
+
+  // Limpiar listener cuando se cierre el modal
+  const originalRemove = modalContainer.remove.bind(modalContainer);
+  modalContainer.remove = function() {
+    statusRef.off('value', statusListener);
+    originalRemove();
+  };
 
   // Animate through steps
   setTimeout(() => {
