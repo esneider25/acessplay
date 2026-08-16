@@ -2454,7 +2454,11 @@ function authWithGoogle() {
       }
     });
   }).catch((error) => {
-    alert('Error al iniciar sesión: ' + error.message);
+    if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+      console.log('Login popup cancelled or duplicate request ignored.');
+      return;
+    }
+    showToast('Error al iniciar sesión: ' + error.message, 'error');
   });
 }
 
