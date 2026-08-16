@@ -609,12 +609,14 @@ function formatDetailLabel(key) {
 }
 
 function renderOrderSummary(product, pkg, method, discount = null) {
-  let originalPriceUsd = pkg.priceUsd;
-  let finalUsd = pkg.priceUsd;
+  let originalPriceUsd = parseFloat(String(pkg.priceUsd).replace(',', '.'));
+  if (isNaN(originalPriceUsd)) originalPriceUsd = 0;
+  let finalUsd = originalPriceUsd;
 
   if (typeof userProfile !== 'undefined' && userProfile && userProfile.role === 'revendedor' && userProfile.discountPercentage > 0 && product.id !== 'wallet-recharge') {
-    if (pkg.costUsd && pkg.costUsd > 0) {
-      finalUsd = pkg.costUsd + (pkg.costUsd * (userProfile.discountPercentage / 100));
+    let costUsd = parseFloat(String(pkg.costUsd || 0).replace(',', '.'));
+    if (costUsd > 0) {
+      finalUsd = costUsd + (costUsd * (userProfile.discountPercentage / 100));
       originalPriceUsd = finalUsd;
     }
   }

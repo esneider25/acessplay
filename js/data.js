@@ -288,13 +288,13 @@ function applyProfitMargin(globalMargin) {
 }
 
 function generateOrderRef() {
-  const randomNum = Math.floor(1000 + Math.random() * 9000);
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let randomStr = '';
   for (let i = 0; i < 4; i++) {
     randomStr += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  return 'AP-' + randomNum + '-' + randomStr;
+  const timePart = Date.now().toString(36).toUpperCase().slice(-5);
+  return 'AP-' + timePart + '-' + randomStr;
 }
 
 function getProductsByCategory(categoryId) {
@@ -764,16 +764,21 @@ function saveOrders(orders) {
   ORDERS = orders;
 }
 
-function saveOrderToDb(order) {
+async function saveOrderToDb(order) {
   if (typeof firebase !== 'undefined' && order && order.id) {
     const cleanOrder = JSON.parse(JSON.stringify(order));
-    firebase.database().ref('orders/' + order.id).set(cleanOrder)
-      .catch(err => console.error("Firebase write error:", err));
-    if (order.userId) {
-      firebase.database().ref('users/' + order.userId + '/orders/' + order.id).set(true)
-        .catch(err => console.error("Firebase user index write error:", err));
+    try {
+      await firebase.database().ref('orders/' + order.id).set(cleanOrder);
+      if (order.userId) {
+        await firebase.database().ref('users/' + order.userId + '/orders/' + order.id).set(true);
+      }
+      return true;
+    } catch (err) {
+      console.error("Firebase write error:", err);
+      throw err;
     }
   }
+  return false;
 }
 
 function removeOrderFromDb(orderId) {
@@ -823,7 +828,6 @@ function createOrder(data) {
     updatedAt: new Date().toISOString()
   };
   orders.unshift(order);
-  saveOrderToDb(order);
   ORDERS = orders;
   
   if (order.userId && typeof firebase !== 'undefined') {
@@ -836,7 +840,7 @@ function createOrder(data) {
     });
   }
   
-  return order;
+  return saveOrderToDb(order).then(() => order);
 }
 
 function getOrderById(orderId) {

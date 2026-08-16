@@ -794,11 +794,13 @@ async function _submitOrderLogic() {
     method = { id: 'wallet', name: 'Saldo (Monedero)', currency: 'usd' };
   }
 
-  let finalUsd = pkg.priceUsd;
+  let finalUsd = parseFloat(String(pkg.priceUsd).replace(',', '.'));
+  if (isNaN(finalUsd)) finalUsd = 0;
 
   if (typeof userProfile !== 'undefined' && userProfile && userProfile.role === 'revendedor' && userProfile.discountPercentage > 0 && product.id !== 'wallet-recharge') {
-    if (pkg.costUsd && pkg.costUsd > 0) {
-      finalUsd = pkg.costUsd + (pkg.costUsd * (userProfile.discountPercentage / 100));
+    let costUsd = parseFloat(String(pkg.costUsd || 0).replace(',', '.'));
+    if (costUsd > 0) {
+      finalUsd = costUsd + (costUsd * (userProfile.discountPercentage / 100));
     }
   }
 
@@ -1019,35 +1021,42 @@ async function _submitOrderLogic() {
       }
     }
 
-    const order = createOrder({
-      id: orderId,
-      screenshot: sharedScreenshotUrl,
-      userId: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.uid : null,
-      userName: (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.displayName || currentUser.email) : null,
-      productId: product.id,
-      productName: product.name,
-      productType: productType,
-      packageLabel: pkg.label,
-      apiProductId: pkg.apiServiceId,
-      apiProvider: product.apiProvider,
-      priceUsd: orderPriceUsd,
-      priceBs: orderPriceBs,
-      costUsd: pkg.costUsd || 0,
-      paymentMethodId: method.id,
-      paymentMethodName: method.name,
-      paymentCurrency: method.currency || 'bs',
-      customerContact: contactInput.value.trim(),
-      gameId: singleGameId,
-      accountEmail: accountEmail,
-      accountPassword: secureAccountPassword,
-      ocrNumbers: appState.selectedScreenshotOcr || [],
-      manualRef: (uploadRes && typeof uploadRes === 'object' && uploadRes.manualRef) ? uploadRes.manualRef : null,
-      imageHash: appState.selectedScreenshotHash || null,
-      discountCode: discountCode,
-      discountValue: discountValue / numberOfOrders,
-      discountType: discountType,
-      playerName: appState.verifiedPlayerName
-    });
+    let order;
+    try {
+      order = await createOrder({
+        id: orderId,
+        screenshot: sharedScreenshotUrl,
+        userId: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.uid : null,
+        userName: (typeof currentUser !== 'undefined' && currentUser) ? (currentUser.displayName || currentUser.email) : null,
+        productId: product.id,
+        productName: product.name,
+        productType: productType,
+        packageLabel: pkg.label,
+        apiProductId: pkg.apiServiceId,
+        apiProvider: product.apiProvider,
+        priceUsd: orderPriceUsd,
+        priceBs: orderPriceBs,
+        costUsd: pkg.costUsd || 0,
+        paymentMethodId: method.id,
+        paymentMethodName: method.name,
+        paymentCurrency: method.currency || 'bs',
+        customerContact: contactInput.value.trim(),
+        gameId: singleGameId,
+        accountEmail: accountEmail,
+        accountPassword: secureAccountPassword,
+        ocrNumbers: appState.selectedScreenshotOcr || [],
+        manualRef: (uploadRes && typeof uploadRes === 'object' && uploadRes.manualRef) ? uploadRes.manualRef : null,
+        imageHash: appState.selectedScreenshotHash || null,
+        discountCode: discountCode,
+        discountValue: discountValue / numberOfOrders,
+        discountType: discountType,
+        playerName: appState.verifiedPlayerName
+      });
+    } catch (dbErr) {
+      console.error('Error guardando la orden:', dbErr);
+      showToast('⚠️ Error de conexión. El pedido no pudo ser registrado, por favor recarga la página.');
+      return false;
+    }
 
     if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
 
@@ -1157,25 +1166,32 @@ async function _submitWalletRechargeLogic() {
 
   const priceBs = parseFloat(usdToBs(amount));
 
-  const order = createOrder({
-    userId: currentUser.uid,
-    userName: currentUser.displayName || currentUser.email,
-    productId: 'wallet-recharge',
-    productName: 'Recarga de Monedero',
-    productType: 'wallet-recharge',
-    packageLabel: `$${amount} USD`,
-    priceUsd: amount,
-    priceBs: priceBs,
-    costUsd: 0,
-    paymentMethodId: method.id,
-    paymentMethodName: method.name,
-    paymentCurrency: method.currency || 'bs',
-    customerContact: currentUser.email,
-    accountEmail: currentUser.email,
-    screenshot: sharedScreenshotUrl,
-    ocrNumbers: appState.selectedScreenshotOcr || [],
-    manualRef: manualRef,
-  });
+  let order;
+  try {
+    order = await createOrder({
+      userId: currentUser.uid,
+      userName: currentUser.displayName || currentUser.email,
+      productId: 'wallet-recharge',
+      productName: 'Recarga de Monedero',
+      productType: 'wallet-recharge',
+      packageLabel: `$${amount} USD`,
+      priceUsd: amount,
+      priceBs: priceBs,
+      costUsd: 0,
+      paymentMethodId: method.id,
+      paymentMethodName: method.name,
+      paymentCurrency: method.currency || 'bs',
+      customerContact: currentUser.email,
+      accountEmail: currentUser.email,
+      screenshot: sharedScreenshotUrl,
+      ocrNumbers: appState.selectedScreenshotOcr || [],
+      manualRef: manualRef,
+    });
+  } catch (dbErr) {
+    console.error('Error guardando recarga:', dbErr);
+    showToast('⚠️ Error de conexión. La recarga no pudo ser registrada.');
+    return false;
+  }
 
   if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
 
@@ -1410,7 +1426,7 @@ async function lookupOrder() {
 }
 
 // ── Rectify Order ID ──
-function rectifyOrderId(orderId, btnElement) {
+async function rectifyOrderId(orderId, btnElement) {
   const orders = getOrders();
   const orderIndex = orders.findIndex(o => o.id === orderId);
   if (orderIndex === -1) {
@@ -1468,7 +1484,14 @@ function rectifyOrderId(orderId, btnElement) {
   order.updatedAt = new Date().toISOString();
   order.gameId = newGameId; // IMPORTANT: update the gameId on the existing order!
   
-  saveOrderToDb(order);
+  try {
+    await saveOrderToDb(order);
+  } catch (err) {
+    console.error('Error rectificando:', err);
+    showToast('⚠️ No se pudo rectificar el pedido debido a un error de conexión.');
+    if (btnElement) { btnElement.disabled = false; btnElement.innerHTML = 'Re-enviar Pedido'; }
+    return;
+  }
 
   // Update local state
   orders[orderIndex] = order;
