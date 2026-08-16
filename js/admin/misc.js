@@ -2067,40 +2067,45 @@ window.viewTournamentParticipants = function(id) {
     
     let tableRows = '';
     if (pList.length === 0) {
-      tableRows = '<tr><td colspan="6" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
+      tableRows = '<tr><td colspan="7" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
     } else {
       pList.forEach((p, i) => {
         let teamInfo = '';
         if (p.teamMembers && p.teamMembers.length > 0) {
-          teamInfo = `<br><span style="font-size:0.75rem; color:var(--accent);">👥 Equipo: ` + p.teamMembers.map(tm => `${tm.gameName} (${tm.gameId})`).join(', ') + `</span>`;
+          teamInfo = `<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px;">` + 
+            p.teamMembers.map(tm => `<span style="background: rgba(0, 229, 195, 0.1); color: var(--accent); border: 1px solid rgba(0, 229, 195, 0.2); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; white-space: nowrap;">👥 ${escapeHtml(tm.gameName)} <small style="opacity:0.7">(${escapeHtml(tm.gameId)})</small></span>`).join('') + 
+            `</div>`;
         }
         let paymentBadge = '';
         let paymentActions = '';
         if (p.paymentStatus === 'pending_payment') {
-          paymentBadge = `<span style="background:rgba(245,158,11,0.2); color:#fbbf24; padding:2px 6px; border-radius:4px; font-size:0.7rem; display:inline-block; margin-bottom:4px;">⏳ Pendiente</span><br><span style="font-size:0.7rem; color:var(--text-muted);">Ref: ${p.paymentRef || 'N/A'}</span>`;
+          paymentBadge = `<span style="background:rgba(245,158,11,0.2); color:#fbbf24; padding:4px 8px; border-radius:6px; font-size:0.75rem; display:inline-block; margin-bottom:4px; font-weight: 500; white-space: nowrap;">⏳ Pendiente</span><br><span style="font-size:0.75rem; color:var(--text-muted); white-space: nowrap;">Ref: ${escapeHtml(p.paymentRef || 'N/A')}</span>`;
           paymentActions = `
-            <button class="btn btn-primary" onclick="approveTournamentPayment('${id}', '${p.uid}')" style="padding: 4px; font-size: 1rem; background:transparent; border:none; box-shadow:none; color:#4ade80;" title="Aprobar Pago">✅</button>
-            <button class="btn btn-secondary" onclick="rejectTournamentPayment('${id}', '${p.uid}')" style="padding: 4px; font-size: 1rem; background:transparent; border:none; box-shadow:none; color:#ef4444;" title="Rechazar Pago">❌</button>
+            <button class="btn btn-primary" onclick="approveTournamentPayment('${id}', '${p.uid}')" style="padding: 6px; font-size: 1.1rem; background:transparent; border:none; box-shadow:none; color:#4ade80; cursor:pointer;" title="Aprobar Pago">✅</button>
+            <button class="btn btn-secondary" onclick="rejectTournamentPayment('${id}', '${p.uid}')" style="padding: 6px; font-size: 1.1rem; background:transparent; border:none; box-shadow:none; color:#ef4444; cursor:pointer;" title="Rechazar Pago">❌</button>
           `;
         } else if (p.paymentStatus === 'approved') {
-          paymentBadge = `<span style="background:rgba(34,197,94,0.2); color:#4ade80; padding:2px 6px; border-radius:4px; font-size:0.7rem;">✅ Aprobado (${p.paymentMethod})</span>`;
+          paymentBadge = `<span style="background:rgba(34,197,94,0.2); color:#4ade80; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight: 500; white-space: nowrap;">✅ Aprobado (${escapeHtml(p.paymentMethod)})</span>`;
         } else if (p.paymentStatus === 'rejected') {
-          paymentBadge = `<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:2px 6px; border-radius:4px; font-size:0.7rem;">❌ Rechazado</span>`;
+          paymentBadge = `<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight: 500; white-space: nowrap;">❌ Rechazado</span>`;
         } else {
-          paymentBadge = `<span style="font-size:0.7rem; color:var(--text-muted);">Gratis</span>`;
+          paymentBadge = `<span style="background:rgba(255,255,255,0.05); color:var(--text-muted); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight: 500; white-space: nowrap;">Gratis</span>`;
         }
         
         tableRows += `
-          <tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 8px;">${i + 1}</td>
-            <td style="padding: 8px;">${escapeHtml(p.name) || 'Sin nombre'}</td>
-            <td style="padding: 8px;">${escapeHtml(p.gameName) || '-'}${teamInfo}</td>
-            <td style="padding: 8px;">${escapeHtml(p.gameId) || '-'}</td>
-            <td style="padding: 8px; text-align: center;">${paymentBadge}</td>
-            <td style="padding: 8px;">${new Date(p.joinedAt).toLocaleString()}</td>
-            <td style="padding: 8px; text-align: center; white-space: nowrap;">
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <td style="padding: 12px 10px; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">${i + 1}</td>
+            <td style="padding: 12px 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(p.name) || 'Sin nombre'}</td>
+            <td style="padding: 12px 10px; min-width: 250px;">
+              <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 2px;">${escapeHtml(p.gameName) || '-'}</div>
+              ${teamInfo}
+            </td>
+            <td style="padding: 12px 10px; font-family: monospace; font-size: 0.9rem; color: var(--accent); white-space: nowrap;">${escapeHtml(p.gameId) || '-'}</td>
+            <td style="padding: 12px 10px; text-align: center;">${paymentBadge}</td>
+            <td style="padding: 12px 10px; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">${new Date(p.joinedAt).toLocaleString()}</td>
+            <td style="padding: 12px 10px; text-align: center; white-space: nowrap;">
               ${paymentActions}
-              <button class="btn btn-secondary" onclick="removeParticipant('${id}', '${p.uid}')" style="padding: 4px; font-size: 1rem; color: #ef4444; border:none; background:transparent;" title="Expulsar">🗑️</button>
+              <button class="btn btn-secondary" onclick="removeParticipant('${id}', '${p.uid}')" style="padding: 6px; font-size: 1.1rem; color: #ef4444; border:none; background:transparent; cursor:pointer;" title="Expulsar">🗑️</button>
             </td>
           </tr>
         `;
@@ -2111,32 +2116,32 @@ window.viewTournamentParticipants = function(id) {
       <div style="padding: 20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
           <div>
-            <h3>👥 Inscritos: ${torneo.title}</h3>
-            <p style="color:var(--text-muted); font-size:0.9rem;">Total: ${pList.length} participantes</p>
+            <h3 style="margin:0; font-size: 1.4rem;">👥 Inscritos: <span style="color:var(--accent);">${escapeHtml(torneo.title)}</span></h3>
+            <p style="color:var(--text-muted); font-size:0.95rem; margin-top:4px;">Total: <b>${pList.length}</b> participantes</p>
           </div>
-          <button class="btn btn-secondary" onclick="exportParticipantsCSV('${id}')" style="padding:8px 14px; font-size:0.85rem;">📥 Exportar CSV</button>
+          <button class="btn btn-secondary" onclick="exportParticipantsCSV('${id}')" style="padding:8px 16px; font-size:0.9rem; border-radius: 8px;">📥 Exportar CSV</button>
         </div>
         
-        <input type="text" class="admin-form-input" placeholder="🔍 Buscar por nombre o ID..." style="width: 100%; margin-bottom: 15px; padding: 10px;" onkeyup="filterAdminTable(this.value, 'admin-participants-tbody')">
+        <input type="text" class="admin-form-input" placeholder="🔍 Buscar por nombre o ID..." style="width: 100%; margin-bottom: 20px; padding: 12px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;" onkeyup="filterAdminTable(this.value, 'admin-participants-tbody')">
         
-        <div style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm);">
-          <table style="width: 100%; border-collapse: collapse;">
+        <div style="max-height: 50vh; overflow-y: auto; overflow-x: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.15);">
+          <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
             <thead>
-              <tr style="border-bottom: 1px solid var(--border); background:rgba(255,255,255,0.02);">
-                <th style="padding: 10px; text-align: left;">#</th>
-                <th style="padding: 10px; text-align: left;">Nombre</th>
-                <th style="padding: 10px; text-align: left;">IGN</th>
-                <th style="padding: 10px; text-align: left;">Game ID</th>
-                <th style="padding: 10px; text-align: center;">Estado/Pago</th>
-                <th style="padding: 10px; text-align: left;">Fecha</th>
-                <th style="padding: 10px; text-align: center;">Acción</th>
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03);">
+                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">#</th>
+                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Nombre</th>
+                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">IGN / Equipo</th>
+                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Game ID</th>
+                <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Estado/Pago</th>
+                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Fecha</th>
+                <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Acción</th>
               </tr>
             </thead>
             <tbody id="admin-participants-tbody">${tableRows}</tbody>
           </table>
         </div>
         <div style="margin-top: 20px; text-align: right;">
-          <button class="btn btn-secondary" onclick="closeAdminModal()">Cerrar</button>
+          <button class="btn btn-secondary" onclick="closeAdminModal()" style="padding: 10px 20px; border-radius: 8px;">Cerrar</button>
         </div>
       </div>
     `;
