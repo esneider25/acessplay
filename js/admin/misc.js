@@ -2093,19 +2093,21 @@ window.viewTournamentParticipants = function(id) {
         }
         
         tableRows += `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
-            <td style="padding: 12px 10px; color: var(--text-muted); font-size: 0.9rem; white-space: nowrap;">${i + 1}</td>
-            <td style="padding: 12px 10px; font-weight: 500; white-space: nowrap;">${escapeHtml(p.name) || 'Sin nombre'}</td>
-            <td style="padding: 12px 10px; min-width: 250px;">
+          <tr>
+            <td data-label="#">${i + 1}</td>
+            <td data-label="Nombre" style="font-weight: 500;">${escapeHtml(p.name) || 'Sin nombre'}</td>
+            <td data-label="IGN / Equipo">
               <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 2px;">${escapeHtml(p.gameName) || '-'}</div>
               ${teamInfo}
             </td>
-            <td style="padding: 12px 10px; font-family: monospace; font-size: 0.9rem; color: var(--accent); white-space: nowrap;">${escapeHtml(p.gameId) || '-'}</td>
-            <td style="padding: 12px 10px; text-align: center;">${paymentBadge}</td>
-            <td style="padding: 12px 10px; font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">${new Date(p.joinedAt).toLocaleString()}</td>
-            <td style="padding: 12px 10px; text-align: center; white-space: nowrap;">
-              ${paymentActions}
-              <button class="btn btn-secondary" onclick="removeParticipant('${id}', '${p.uid}')" style="padding: 6px; font-size: 1.1rem; color: #ef4444; border:none; background:transparent; cursor:pointer;" title="Expulsar">🗑️</button>
+            <td data-label="Game ID" style="font-family: monospace; font-size: 0.9rem; color: var(--accent);">${escapeHtml(p.gameId) || '-'}</td>
+            <td data-label="Estado/Pago" style="text-align: center;">${paymentBadge}</td>
+            <td data-label="Fecha" style="font-size: 0.85rem; color: var(--text-muted);">${new Date(p.joinedAt).toLocaleString()}</td>
+            <td data-label="Acción" style="text-align: center;">
+              <div style="display: flex; gap: 5px; justify-content: center;">
+                ${paymentActions}
+                <button class="btn btn-secondary" onclick="removeParticipant('${id}', '${p.uid}')" style="padding: 6px; font-size: 1.1rem; color: #ef4444; border:none; background:transparent; cursor:pointer;" title="Expulsar">🗑️</button>
+              </div>
             </td>
           </tr>
         `;
@@ -2113,6 +2115,85 @@ window.viewTournamentParticipants = function(id) {
     }
     
     let html = `
+      <style>
+        .responsive-admin-table {
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 800px;
+        }
+        .responsive-admin-table th, .responsive-admin-table td {
+          padding: 12px 10px;
+        }
+        .responsive-admin-table th {
+          text-align: left;
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+          background: rgba(255,255,255,0.03);
+        }
+        .responsive-admin-table td {
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          white-space: nowrap;
+        }
+        .responsive-admin-table tbody tr {
+          transition: background 0.2s;
+        }
+        .responsive-admin-table tbody tr:hover {
+          background: rgba(255,255,255,0.02);
+        }
+        
+        /* Mobile Cards Layout */
+        @media (max-width: 768px) {
+          .responsive-admin-table {
+            min-width: 100%;
+            display: block;
+          }
+          .responsive-admin-table thead {
+            display: none;
+          }
+          .responsive-admin-table tbody, .responsive-admin-table tr, .responsive-admin-table td {
+            display: block;
+            width: 100%;
+          }
+          .responsive-admin-table tr {
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+          }
+          .responsive-admin-table td {
+            white-space: normal !important;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+            padding: 8px 5px;
+            text-align: left !important;
+          }
+          .responsive-admin-table td:last-child {
+            border-bottom: none;
+            align-items: center;
+          }
+          .responsive-admin-table td::before {
+            content: attr(data-label);
+            font-size: 0.75rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 2px;
+          }
+          .responsive-admin-table td[data-label="IGN / Equipo"], 
+          .responsive-admin-table td[data-label="Acción"] {
+            align-items: flex-start;
+          }
+          .responsive-admin-table td[data-label="Acción"] {
+            align-items: center;
+          }
+        }
+      </style>
       <div style="padding: 20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
           <div>
@@ -2124,17 +2205,17 @@ window.viewTournamentParticipants = function(id) {
         
         <input type="text" class="admin-form-input" placeholder="🔍 Buscar por nombre o ID..." style="width: 100%; margin-bottom: 20px; padding: 12px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white;" onkeyup="filterAdminTable(this.value, 'admin-participants-tbody')">
         
-        <div style="max-height: 50vh; overflow-y: auto; overflow-x: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.15);">
-          <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+        <div style="max-height: 60vh; overflow-y: auto; overflow-x: hidden; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.15);">
+          <table class="responsive-admin-table">
             <thead>
-              <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03);">
-                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">#</th>
-                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Nombre</th>
-                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">IGN / Equipo</th>
-                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Game ID</th>
-                <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Estado/Pago</th>
-                <th style="padding: 12px 10px; text-align: left; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Fecha</th>
-                <th style="padding: 12px 10px; text-align: center; font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase;">Acción</th>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>IGN / Equipo</th>
+                <th>Game ID</th>
+                <th style="text-align: center;">Estado/Pago</th>
+                <th>Fecha</th>
+                <th style="text-align: center;">Acción</th>
               </tr>
             </thead>
             <tbody id="admin-participants-tbody">${tableRows}</tbody>
