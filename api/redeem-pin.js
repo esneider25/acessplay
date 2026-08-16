@@ -185,11 +185,10 @@ export default async function handler(req, res) {
       playerName: playerName || null,
       accountEmail: accountEmail || '',
       accountPassword: accountPassword || '',
-      status: 'completed',
-      adminNote: `Aprobado y entregado automáticamente (PIN: ${codeToSearch})`,
+      status: 'pending',
+      adminNote: `Canje de PIN: ${codeToSearch}. Esperando procesamiento...`,
       statusHistory: [
-        { status: 'pending', timestamp: new Date().toISOString(), note: `Pedido creado via PIN de regalo (${codeToSearch})` },
-        { status: 'completed', timestamp: new Date().toISOString(), note: `Aprobado y entregado automáticamente (PIN: ${codeToSearch})` }
+        { status: 'pending', timestamp: new Date().toISOString(), note: `Pedido creado via PIN de regalo (${codeToSearch})` }
       ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -199,14 +198,6 @@ export default async function handler(req, res) {
     await db.ref(`users/${uid}/notifications`).push({
       title: 'Pedido Recibido 📦',
       body: `Hemos recibido tu pedido de ${pinData.productName || 'producto'}. Pronto lo procesaremos.`,
-      type: 'order',
-      timestamp: new Date().toISOString(),
-      read: false
-    });
-
-    await db.ref(`users/${uid}/notifications`).push({
-      title: 'Pedido Completado ✅',
-      body: `Tu pedido de ${pinData.productName || 'producto'} ha sido procesado con éxito. Nota: Aprobado y entregado automáticamente (luego de procesar).`,
       type: 'order',
       timestamp: new Date().toISOString(),
       read: false
