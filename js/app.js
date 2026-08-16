@@ -1060,16 +1060,8 @@ async function _submitOrderLogic() {
 
     if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
 
-    // Handle Telegram notification
-    if (typeof triggerTelegramNotification === 'function') {
-      try {
-        const tgPromise = triggerTelegramNotification(order);
-        const tgTimeout = new Promise((resolve) => setTimeout(resolve, 15000));
-        await Promise.race([tgPromise, tgTimeout]);
-      } catch (err) {
-        console.warn('Error en Telegram notification:', err);
-      }
-    }
+    // Las notificaciones a Telegram ahora son manejadas exclusivamente por el backend (robot_tiendas)
+    // para evitar errores de permisos y duplicación.
 
     lastOrder = order;
 
@@ -1195,16 +1187,8 @@ async function _submitWalletRechargeLogic() {
 
   if (typeof recordOrderAttempt === 'function') recordOrderAttempt();
 
-  if (typeof triggerTelegramNotification === 'function') {
-    try {
-      const tgPromise = triggerTelegramNotification(order);
-      const tgTimeout = new Promise((resolve) => setTimeout(resolve, 15000));
-      await Promise.race([tgPromise, tgTimeout]);
-    } catch (err) {
-      console.warn('Error en Telegram notification:', err);
-    }
-  }
-
+  // Telegram notifications are handled by the backend bot
+  
   showOrderConfirmation(order);
   return true;
 }
@@ -2090,55 +2074,6 @@ function compressFileToBlob(file) {
     reader.onerror = () => resolve(file);
     reader.readAsDataURL(file);
   });
-}
-
-async function triggerTelegramNotification(order) {
-  let shouldSendPhoto = true;
-  try {
-    const [notifySnap, photoSnap] = await Promise.all([
-      firebase.database().ref('telegram_config/notifyOnNewOrder').once('value'),
-      firebase.database().ref('telegram_config/notifyWithPhoto').once('value')
-    ]);
-    if (notifySnap.exists() && notifySnap.val() === false) {
-      console.log('Web notifications disabled by admin.');
-      return;
-    }
-    if (photoSnap.exists()) {
-      shouldSendPhoto = photoSnap.val();
-    }
-  } catch (e) {
-    console.error('Could not check telegram_config:', e);
-  }
-
-  const tgMsg = typeof buildOrderTelegramMessage === 'function'
-    ? buildOrderTelegramMessage(order)
-    : `\u{1F916} <b>NUEVO PEDIDO \u2014 ${order.id}</b>\n\u{1F525} ${escapeHTML(order.productName)} (${escapeHTML(order.packageLabel)})\n\u{1F4B0} $${order.priceUsd} USD`;
-
-  const keyboard = typeof buildOrderKeyboard === 'function'
-    ? buildOrderKeyboard(order.id)
-    : null;
-
-  try {
-    if (appState.selectedScreenshot && shouldSendPhoto) {
-      const compressedBlob = await compressFileToBlob(appState.selectedScreenshot);
-      const photoSent = await sendTelegramPhoto(compressedBlob, tgMsg, keyboard);
-      if (!photoSent) {
-        console.warn('Photo send failed, falling back to text-only');
-        await sendTelegramMessage(tgMsg, keyboard);
-      }
-    } else {
-      await sendTelegramMessage(tgMsg, keyboard);
-    }
-  } catch (e) {
-    console.warn('Telegram notification error, sending text fallback:', e);
-    try {
-      await sendTelegramMessage(tgMsg, keyboard);
-    } catch (e2) {
-      console.warn('Telegram text fallback also failed:', e2);
-    }
-  }
-
-  appState.selectedScreenshot = null;
 }
 
 // ── Real-Time Tracking Polling ──
