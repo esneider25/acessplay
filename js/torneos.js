@@ -760,7 +760,7 @@ window.openInscriptionModal = function(tournamentId) {
     const exchangeRate = typeof EXCHANGE_RATE !== 'undefined' ? (EXCHANGE_RATE.tournamentsUsdToBs || EXCHANGE_RATE.usdToBs || 1) : 1;
     const feeBs = (torneo.entryFee * exchangeRate).toFixed(2);
     
-    let pmOptions = '<option value="wallet">Mi Billetera Virtual</option>';
+    let pmOptions = '';
     if (typeof PAYMENT_METHODS !== 'undefined') {
       PAYMENT_METHODS.forEach(pm => {
         if (pm.id !== 'wallet' && pm.name.toLowerCase().indexOf('binance') === -1) pmOptions += `<option value="${pm.id}">${pm.name}</option>`;
@@ -780,7 +780,7 @@ window.openInscriptionModal = function(tournamentId) {
         </select>
       </div>
       
-      <div id="insc-pm-details" style="display:none; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; border:1px dashed var(--border); margin-bottom:15px;">
+      <div id="insc-pm-details" style="display:block; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; border:1px dashed var(--border); margin-bottom:15px;">
         <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Realiza el pago a los siguientes datos y escribe la referencia:</p>
         <div id="insc-pm-dynamic-info" style="font-size:0.85rem; font-family:var(--font-mono); color:var(--text-primary); margin-bottom:10px; background:rgba(255,255,255,0.05); padding:8px; border-radius:4px;">
           <!-- Loaded dynamically -->
@@ -860,6 +860,10 @@ window.openInscriptionModal = function(tournamentId) {
   };
   
   document.getElementById('torneo-inscription-modal').classList.add('active');
+  
+  if (document.getElementById('insc-payment-method')) {
+      toggleInscPaymentMethod();
+  }
   
   setTimeout(() => {
     document.getElementById('inscription-form').addEventListener('submit', function(e) {
