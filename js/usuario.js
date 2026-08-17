@@ -1814,22 +1814,39 @@ function processAndRenderDashboardTournaments() {
       if (myEntry && myEntry.paymentStatus !== 'rejected') {
         myTournaments.push(t);
         
-        // Calculate earnings from Kills
-        if ((t.status === 'completed' || t.status === 'completado') && t.pricePerKill && t.leaderboard) {
+        // Calculate earnings from Kills and Placements
+        if ((t.status === 'completed' || t.status === 'completado') && t.leaderboard) {
            let myKills = 0;
+           let myPosition = 0;
            const myGameName = (myEntry.gameName || myEntry.name || 'Sin Nombre').trim().toLowerCase();
            const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
-           if (lbLider) myKills = parseInt(lbLider.kills) || 0;
+           if (lbLider) {
+               myKills = parseInt(lbLider.kills) || 0;
+               myPosition = lbLider.position || 0;
+           }
            
            let totalTeamKills = myKills;
            if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
               myEntry.teamMembers.forEach(tm => {
                  const tmName = (tm.gameName || 'Compañero').trim().toLowerCase();
                  const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
-                 if (lbTm) totalTeamKills += (parseInt(lbTm.kills) || 0);
+                 if (lbTm) {
+                     totalTeamKills += (parseInt(lbTm.kills) || 0);
+                     if (myPosition === 0) myPosition = lbTm.position || 0;
+                 }
               });
            }
-           totalTournamentEarnings += (totalTeamKills * (parseFloat(t.pricePerKill) || 0));
+           
+           if (t.pricePerKill) {
+               totalTournamentEarnings += (totalTeamKills * (parseFloat(t.pricePerKill) || 0));
+           }
+           
+           if (myPosition > 0 && t.prizes && t.prizes[myPosition - 1]) {
+               const prizeObj = t.prizes[myPosition - 1];
+               if (prizeObj.cashReward) {
+                   totalTournamentEarnings += parseFloat(prizeObj.cashReward);
+               }
+           }
         }
       }
     });

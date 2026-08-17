@@ -2829,6 +2829,23 @@ window.showCreateTournamentModal = function() {
       <form id="create-tournament-form" style="display: flex; flex-direction: column; gap: 14px;">
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
           <div>
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Tipo de Torneo</label>
+            <select id="ct-type" class="admin-form-input" style="width: 100%; padding: 10px;" onchange="toggleTournamentTypeForm()" required>
+              <option value="gratis">🆓 Gratis</option>
+              <option value="pago">💎 Premium (De Pago)</option>
+            </select>
+          </div>
+          <div id="ct-reward-mode-container" style="display:none;">
+            <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Modalidad de Recompensa</label>
+            <select id="ct-reward-mode" class="admin-form-input" style="width: 100%; padding: 10px;" onchange="toggleTournamentTypeForm()">
+              <option value="kill">🎯 Por Kill</option>
+              <option value="puestos">🏆 Por Puestos</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
             <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Producto / Juego</label>
             <select id="ct-product" class="admin-form-input" style="width: 100%; padding: 10px;" required>
               ${productOptions}
@@ -2851,7 +2868,7 @@ window.showCreateTournamentModal = function() {
             <input type="text" id="ct-title" class="admin-form-input" style="width: 100%; padding: 10px;" placeholder="Ej: Copa FreeFire Escuadras #1">
             <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Déjalo vacío para autogenerar</p>
           </div>
-          <div>
+          <div id="ct-price-per-kill-container" style="display:none;">
             <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Precio por Kill ($ USD)</label>
             <input type="number" step="0.01" min="0" id="ct-price-per-kill" class="admin-form-input" style="width: 100%; padding: 10px;" placeholder="0.50" value="0.00">
             <p style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Pago automático a jugadores</p>
@@ -2887,26 +2904,15 @@ window.showCreateTournamentModal = function() {
           </div>
         </div>
         
-        <div>
+        <div id="ct-entry-fee-container" style="display:none;">
           <label class="admin-form-label" style="margin-bottom: 5px; display: block;">Precio de Inscripción ($)</label>
           <input type="number" id="ct-entry-fee" class="admin-form-input" style="width: 100%; padding: 10px; margin-bottom: 14px;" value="0" min="0" step="0.01">
         </div>
         
-        <div>
+        <div id="ct-prizes-container">
           <label class="admin-form-label" style="margin-bottom: 5px; display: block;">🏅 Premios</label>
           <div id="ct-prizes-list" style="display:flex; flex-direction:column; gap:8px;">
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span style="font-size:1.2rem; min-width:28px;">🥇</span>
-              <input type="text" class="admin-form-input ct-prize-input" placeholder="1er lugar (opcional, Ej: 500 diamantes)" style="flex:1; padding:8px 10px;">
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span style="font-size:1.2rem; min-width:28px;">🥈</span>
-              <input type="text" class="admin-form-input ct-prize-input" placeholder="2do lugar (opcional)" style="flex:1; padding:8px 10px;">
-            </div>
-            <div style="display:flex; gap:8px; align-items:center;">
-              <span style="font-size:1.2rem; min-width:28px;">🥉</span>
-              <input type="text" class="admin-form-input ct-prize-input" placeholder="3er lugar (opcional)" style="flex:1; padding:8px 10px;">
-            </div>
+            <!-- Premios dinámicos aquí -->
           </div>
           <button type="button" onclick="addPrizeRow()" style="margin-top:6px; background:none; border:1px dashed var(--border); color:var(--text-muted); padding:6px 12px; border-radius:var(--radius-sm); cursor:pointer; font-size:0.8rem;">+ Agregar premio</button>
         </div>
@@ -2919,6 +2925,7 @@ window.showCreateTournamentModal = function() {
     </div>
   `;
   openAdminModal(html);
+  toggleTournamentTypeForm();
 
   setTimeout(() => {
     document.getElementById('create-tournament-form').addEventListener('submit', function(e) {
@@ -2935,17 +2942,44 @@ window.showCreateTournamentModal = function() {
       const bannerUrl = document.getElementById('ct-banner').value.trim();
       const maxP = parseInt(document.getElementById('ct-max').value) || 100;
       const deadline = document.getElementById('ct-deadline').value;
-      const entryFee = parseFloat(document.getElementById('ct-entry-fee').value) || 0;
-      const pricePerKill = parseFloat(document.getElementById('ct-price-per-kill').value) || 0;
+      const tournamentType = document.getElementById('ct-type').value;
+      const rewardMode = document.getElementById('ct-reward-mode').value;
+      
+      const entryFee = tournamentType === 'pago' ? (parseFloat(document.getElementById('ct-entry-fee').value) || 0) : 0;
+      const pricePerKill = (tournamentType === 'pago' && rewardMode === 'kill') ? (parseFloat(document.getElementById('ct-price-per-kill').value) || 0) : 0;
       
       // Collect prizes
-      const prizeInputs = document.querySelectorAll('.ct-prize-input');
-      const places = ['1er Lugar', '2do Lugar', '3er Lugar', '4to Lugar', '5to Lugar'];
       const prizes = [];
-      prizeInputs.forEach((input, i) => {
-        const val = input.value.trim();
-        if (val) prizes.push({ place: places[i] || (i + 1) + '° Lugar', reward: val });
-      });
+      const places = ['1er Lugar', '2do Lugar', '3er Lugar', '4to Lugar', '5to Lugar', '6to Lugar'];
+      
+      if (tournamentType === 'pago' && rewardMode === 'puestos') {
+        const cashInputs = document.querySelectorAll('.ct-prize-cash');
+        const descInputs = document.querySelectorAll('.ct-prize-desc');
+        cashInputs.forEach((input, i) => {
+          const cashVal = parseFloat(input.value) || 0;
+          const descVal = descInputs[i] ? descInputs[i].value.trim() : '';
+          if (cashVal > 0 || descVal) {
+            let rewardStr = '';
+            if (cashVal > 0 && descVal) rewardStr = `$${cashVal.toFixed(2)} USD + ${descVal}`;
+            else if (cashVal > 0) rewardStr = `$${cashVal.toFixed(2)} USD`;
+            else rewardStr = descVal;
+            
+            prizes.push({ 
+               place: places[i] || (i + 1) + '° Lugar', 
+               reward: rewardStr,
+               cashReward: cashVal 
+            });
+          }
+        });
+      } else if (tournamentType === 'gratis') {
+        const prizeInputs = document.querySelectorAll('.ct-prize-input');
+        if(prizeInputs) {
+          prizeInputs.forEach((input, i) => {
+            const val = input.value.trim();
+            if (val) prizes.push({ place: places[i] || (i + 1) + '° Lugar', reward: val });
+          });
+        }
+      }
       
       // Game mode labels
       const modeLabels = { solo: 'Solo', duo: 'Dúo', squad: 'Escuadras' };
@@ -2970,6 +3004,8 @@ window.showCreateTournamentModal = function() {
         status: 'registration_open',
         createdAt: new Date().toISOString(),
         maxParticipants: maxP,
+        tournamentType: tournamentType,
+        rewardMode: tournamentType === 'pago' ? rewardMode : null,
         entryFee: entryFee,
         pricePerKill: pricePerKill,
         prize: prizes.length > 0 ? prizes[0].reward : (pricePerKill > 0 ? `Pago por Kill: $${pricePerKill.toFixed(2)}` : 'Sin Premios Fijos')
@@ -2989,16 +3025,75 @@ window.showCreateTournamentModal = function() {
   }, 100);
 };
 
+window.toggleTournamentTypeForm = function() {
+  const type = document.getElementById('ct-type') ? document.getElementById('ct-type').value : 'gratis';
+  const rewardMode = document.getElementById('ct-reward-mode') ? document.getElementById('ct-reward-mode').value : 'puestos';
+  
+  const rewardModeContainer = document.getElementById('ct-reward-mode-container');
+  const pricePerKillContainer = document.getElementById('ct-price-per-kill-container');
+  const entryFeeContainer = document.getElementById('ct-entry-fee-container');
+  const entryFeeInput = document.getElementById('ct-entry-fee');
+  const prizesContainer = document.getElementById('ct-prizes-container');
+  
+  if (rewardModeContainer && pricePerKillContainer && entryFeeContainer && entryFeeInput && prizesContainer) {
+    if (type === 'gratis') {
+      rewardModeContainer.style.display = 'none';
+      pricePerKillContainer.style.display = 'none';
+      entryFeeContainer.style.display = 'none';
+      entryFeeInput.value = '0';
+      prizesContainer.style.display = 'block';
+    } else {
+      rewardModeContainer.style.display = 'block';
+      entryFeeContainer.style.display = 'block';
+      
+      if (rewardMode === 'kill') {
+        pricePerKillContainer.style.display = 'block';
+        prizesContainer.style.display = 'none';
+      } else {
+        pricePerKillContainer.style.display = 'none';
+        prizesContainer.style.display = 'block';
+      }
+    }
+  }
+  
+  resetPrizeRows();
+};
+
+window.resetPrizeRows = function() {
+  const list = document.getElementById('ct-prizes-list');
+  if(list) {
+    list.innerHTML = '';
+    addPrizeRow();
+    addPrizeRow();
+    addPrizeRow();
+  }
+};
+
 window.addPrizeRow = function() {
   const list = document.getElementById('ct-prizes-list');
+  if(!list) return;
   const count = list.children.length + 1;
   const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️', '⭐'];
+  const type = document.getElementById('ct-type') ? document.getElementById('ct-type').value : 'gratis';
+  const rewardMode = document.getElementById('ct-reward-mode') ? document.getElementById('ct-reward-mode').value : 'puestos';
+  
   const div = document.createElement('div');
-  div.style.cssText = 'display:flex; gap:8px; align-items:center;';
-  div.innerHTML = `
-    <span style="font-size:1.2rem; min-width:28px;">${medals[count - 1] || '🎖️'}</span>
-    <input type="text" class="admin-form-input ct-prize-input" placeholder="${count}° lugar (opcional)" style="flex:1; padding:8px 10px;">
-  `;
+  div.style.cssText = 'display:flex; gap:8px; align-items:center; margin-bottom: 8px;';
+  
+  let innerHtml = `<span style="font-size:1.2rem; min-width:28px;">${medals[count - 1] || '🎖️'}</span>`;
+  
+  if (type === 'pago' && rewardMode === 'puestos') {
+    innerHtml += `
+      <input type="number" step="0.01" min="0" class="admin-form-input ct-prize-cash" placeholder="$ USD para ${count}º lugar" style="flex:1; padding:8px 10px;">
+      <input type="text" class="admin-form-input ct-prize-desc" placeholder="Extra desc. (opcional)" style="flex:1; padding:8px 10px;">
+    `;
+  } else {
+    innerHtml += `
+      <input type="text" class="admin-form-input ct-prize-input" placeholder="${count}° lugar (opcional)" style="flex:1; padding:8px 10px;">
+    `;
+  }
+  
+  div.innerHTML = innerHtml;
   list.appendChild(div);
 };
 

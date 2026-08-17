@@ -163,25 +163,42 @@ export default async function handler(req, res) {
       Object.keys(allTournaments).forEach(key => {
         const t = allTournaments[key];
         if (!t || (t.status !== 'completed' && t.status !== 'completado')) return;
-        if (!t.pricePerKill || !t.leaderboard) return;
+        if (!t.leaderboard) return;
         
         const myEntry = allParticipants[key] ? allParticipants[key][uid] : null;
         if (!myEntry || myEntry.paymentStatus === 'rejected') return;
         
         const myGameName = (myEntry.gameName || myEntry.name || '').trim().toLowerCase();
         let totalTeamKills = 0;
+        let myPosition = 0;
         
         const lbLider = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === myGameName);
-        if (lbLider) totalTeamKills += (parseInt(lbLider.kills) || 0);
+        if (lbLider) {
+          totalTeamKills += (parseInt(lbLider.kills) || 0);
+          myPosition = lbLider.position || 0;
+        }
         
         if (myEntry.teamMembers && myEntry.teamMembers.length > 0) {
           myEntry.teamMembers.forEach(tm => {
             const tmName = (tm.gameName || '').trim().toLowerCase();
             const lbTm = t.leaderboard.find(l => (l.playerName || '').trim().toLowerCase() === tmName);
-            if (lbTm) totalTeamKills += (parseInt(lbTm.kills) || 0);
+            if (lbTm) {
+              totalTeamKills += (parseInt(lbTm.kills) || 0);
+              if (myPosition === 0) myPosition = lbTm.position || 0;
+            }
           });
         }
-        totalEarnings += totalTeamKills * (parseFloat(t.pricePerKill) || 0);
+        
+        if (t.pricePerKill) {
+          totalEarnings += totalTeamKills * (parseFloat(t.pricePerKill) || 0);
+        }
+        
+        if (myPosition > 0 && t.prizes && t.prizes[myPosition - 1]) {
+          const prizeObj = t.prizes[myPosition - 1];
+          if (prizeObj.cashReward) {
+             totalEarnings += parseFloat(prizeObj.cashReward);
+          }
+        }
       });
       
       const refundedEarnings = userData.refundedTournamentEarnings || 0;
