@@ -2104,6 +2104,10 @@ window.viewTournamentParticipants = function(id) {
           paymentBadge = `<span style="background:rgba(34,197,94,0.2); color:#4ade80; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight: 500; white-space: nowrap;">✅ Aprobado (${escapeHtml(p.paymentMethod)})</span>`;
         } else if (p.paymentStatus === 'rejected') {
           paymentBadge = `<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight: 500; white-space: nowrap;">❌ Rechazado</span>`;
+          paymentActions = `
+            <button class="btn btn-primary" onclick="revertTournamentPaymentToPending('${id}', '${p.uid}')" style="padding: 6px; font-size: 1.1rem; background:transparent; border:none; box-shadow:none; color:#ffb74d; cursor:pointer;" title="Volver a Pendiente">↩️</button>
+            <button class="btn btn-primary" onclick="approveTournamentPayment('${id}', '${p.uid}')" style="padding: 6px; font-size: 1.1rem; background:transparent; border:none; box-shadow:none; color:#4ade80; cursor:pointer;" title="Aprobar Pago">✅</button>
+          `;
         } else {
           paymentBadge = `<span style="background:rgba(255,255,255,0.05); color:var(--text-muted); padding:4px 8px; border-radius:6px; font-size:0.75rem; font-weight: 500; white-space: nowrap;">Gratis</span>`;
         }
@@ -2290,6 +2294,17 @@ window.rejectTournamentPayment = function(tournamentId, userId) {
       paymentStatus: 'rejected'
     }).then(() => {
       alert('Pago rechazado.');
+      viewTournamentParticipants(tournamentId);
+    }).catch(err => alert('Error: ' + err.message));
+  }
+};
+
+window.revertTournamentPaymentToPending = function(tournamentId, userId) {
+  if (confirm('¿Volver a poner esta inscripción en estado Pendiente?')) {
+    firebase.database().ref(`tournament_participants/${tournamentId}/${userId}`).update({
+      paymentStatus: 'pending'
+    }).then(() => {
+      alert('Inscripción vuelta a pendiente.');
       viewTournamentParticipants(tournamentId);
     }).catch(err => alert('Error: ' + err.message));
   }
