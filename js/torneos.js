@@ -372,11 +372,19 @@ function renderTorneos(torneos) {
             winnerText = `<span style="color:var(--text-primary); font-weight:bold; margin-right:5px;">${escapeHTML(winner.playerName)}</span>`;
           }
         }
+        
+        const isPagoPorKill = p.reward && p.reward.toLowerCase().includes('pago por kill');
         let placeText = p.place ? escapeHTML(p.place) + ': ' : '';
+        let medal = medals[i] || '🎖️';
+        if (isPagoPorKill) {
+          placeText = '';
+          medal = '🎯';
+        }
+
         if (winnerText) {
-          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${escapeHTML(p.reward)})</span></span></div>`;
+          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medal}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${winnerText} <span style="font-size:0.8rem; opacity:0.8;">(${escapeHTML(p.reward)})</span></span></div>`;
         } else {
-          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${escapeHTML(p.reward)}</span></div>`;
+          prizesHTML += `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medal}</span><span class="torneo-prize-text ${classes[i] || ''}">${placeText}${escapeHTML(p.reward)}</span></div>`;
         }
       });
       prizesHTML += '</div>';
@@ -763,7 +771,7 @@ window.openInscriptionModal = function(tournamentId) {
 
     paymentHtml = `
       <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">💳 Pago de Inscripción</h4>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Costo del torneo: <strong style="color:var(--text-primary);">Bs. ${feeBs}</strong> (Aprox. $${torneo.entryFee.toFixed(2)} USD)</p>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Costo del torneo: <strong style="color:var(--text-primary);">Bs. ${feeBs}</strong></p>
       
       <div class="torneo-form-group">
         <label class="torneo-form-label">Método de Pago</label>
@@ -1144,10 +1152,21 @@ window.openDetailModal = function(tournamentId) {
   const prizes = torneo.prizes || [];
   if (prizes.length > 0) {
     const medals = ['🥇', '🥈', '🥉', '🏅', '🎖️'];
-    prizesHTML = prizes.map((p, i) => `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medals[i] || '🎖️'}</span><span class="torneo-prize-text">${p.place ? escapeHTML(p.place) + ': ' : ''}${escapeHTML(p.reward)}</span></div>`).join('');
+    prizesHTML = prizes.map((p, i) => {
+      const isPagoPorKill = p.reward && p.reward.toLowerCase().includes('pago por kill');
+      let placeText = p.place ? escapeHTML(p.place) + ': ' : '';
+      let medal = medals[i] || '🎖️';
+      if (isPagoPorKill) {
+        placeText = '';
+        medal = '🎯';
+      }
+      return `<div class="torneo-prize-row"><span class="torneo-prize-medal">${medal}</span><span class="torneo-prize-text">${placeText}${escapeHTML(p.reward)}</span></div>`;
+    }).join('');
     prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;">${prizesHTML}</div></div>`;
   } else if (torneo.prize) {
-    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">🏆</span><span class="torneo-prize-text">${escapeHTML(torneo.prize)}</span></div></div></div>`;
+    const isPagoPorKill = torneo.prize && torneo.prize.toLowerCase().includes('pago por kill');
+    const medal = isPagoPorKill ? '🎯' : '🏆';
+    prizesHTML = `<div class="torneo-detail-section"><h4>🏅 Premios</h4><div class="torneo-prizes" style="margin-top: 10px;"><div class="torneo-prize-row"><span class="torneo-prize-medal">${medal}</span><span class="torneo-prize-text">${escapeHTML(torneo.prize)}</span></div></div></div>`;
   }
   
   // Rules and Description
