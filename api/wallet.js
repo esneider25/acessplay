@@ -189,10 +189,12 @@ export default async function handler(req, res) {
           });
         }
         
-        if (t.pricePerKill) {
+        // Add Kill Earnings
+        if (t.pricePerKill && t.rewardMode !== 'puestos') {
           totalEarnings += totalTeamKills * (parseFloat(t.pricePerKill) || 0);
         }
         
+        // Add Placement Earnings
         if (myPosition > 0 && t.prizes && t.prizes[myPosition - 1]) {
           const prizeObj = t.prizes[myPosition - 1];
           if (prizeObj.cashReward) {

@@ -1837,7 +1837,7 @@ function processAndRenderDashboardTournaments() {
               });
            }
            
-           if (t.pricePerKill) {
+           if (t.pricePerKill && t.rewardMode !== 'puestos') {
                totalTournamentEarnings += (totalTeamKills * (parseFloat(t.pricePerKill) || 0));
            }
            
@@ -2003,7 +2003,7 @@ function processAndRenderDashboardTournaments() {
               `;
             }
 
-            if (t.pricePerKill && parseFloat(t.pricePerKill) > 0) {
+            if (t.pricePerKill && parseFloat(t.pricePerKill) > 0 && t.rewardMode !== 'puestos') {
               const borderStyle = myPosition > 0 || (!t.pricePerKill || parseFloat(t.pricePerKill) === 0) ? '' : 'border-top:1px dashed rgba(102, 187, 106, 0.3); margin-top:6px; padding-top:6px;';
               extraHtml += `
                 <div style="display:flex; justify-content:space-between; margin-top:4px; color:#f59e0b; ${borderStyle}">
