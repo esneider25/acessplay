@@ -2065,6 +2065,22 @@ window.viewTournamentParticipants = function(id) {
     const participants = snaps[1].val() || {};
     const pList = Object.values(participants);
     
+    // AUTO-SYNC: Recalcular los cupos reales (solo aprobados o gratis) para arreglar desajustes
+    let realCount = 0;
+    pList.forEach(p => {
+      if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
+        realCount += 1 + (p.teamMembers ? p.teamMembers.length : 0);
+      }
+    });
+    
+    if ((torneo.participantsCount || 0) !== realCount) {
+      console.log(`[Auto-Sync] Corrigiendo cupos del torneo ${id}: ${torneo.participantsCount} -> ${realCount}`);
+      const diff = realCount - (torneo.participantsCount || 0);
+      firebase.database().ref('tournaments/' + id + '/participantsCount').set(realCount);
+      firebase.database().ref('tournament_metadata/participants').transaction(c => (c || 0) + diff);
+      torneo.participantsCount = realCount; // Actualizar variable local para la vista
+    }
+    
     let tableRows = '';
     if (pList.length === 0) {
       tableRows = '<tr><td colspan="7" style="text-align:center; padding: 15px;">Nadie se ha inscrito aún.</td></tr>';
@@ -3394,7 +3410,8 @@ window.migrateTournamentsData = async function() {
         updates['tournament_participants/' + tId + '/' + uid] = p;
         
         let adds = 1 + (p.teamMembers ? p.teamMembers.length : 0);
-        if (p.paymentStatus !== 'rejected') {
+        // FIX: Solo contar como cupo ocupado si el pago está aprobado o es gratis
+        if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
             count += adds;
             totalParticipants += adds;
         }

@@ -188,7 +188,7 @@ export default async function handler(req, res) {
       status: 'pending',
       adminNote: `Canje de PIN: ${codeToSearch}. Esperando procesamiento...`,
       statusHistory: [
-        { status: 'pending', timestamp: new Date().toISOString(), note: `Pedido creado via PIN de regalo (${codeToSearch})` }
+        { status: 'pending', timestamp: new Date().toISOString(), note: 'Tarjeta de regalo en proceso' }
       ],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
