@@ -688,7 +688,7 @@ window.verifyTournamentPlayerId = async function(btnEl, apiServiceId) {
   
   // Guardar icono original y poner estado de carga
   const originalIconHTML = btnEl.innerHTML;
-  btnEl.innerHTML = '<span class="ph-spin" style="display:inline-block; font-size:1.1rem;">⏳</span>';
+  btnEl.innerHTML = '<span style="animation: spin 1.5s linear infinite; display:inline-block; font-size:1.1rem;">⏳</span>';
   btnEl.disabled = true;
   
   const originalPlaceholder = ignInput.placeholder;
