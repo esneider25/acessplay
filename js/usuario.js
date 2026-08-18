@@ -801,6 +801,12 @@ function renderDashboardContent() {
             <i class="ph ph-copy"></i> Copiar
           </button>
         </div>
+        ${currentRole === 'cliente' ? `
+        <div style="width: 100%; text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+           <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">¿Eres creador de contenido? Únete al programa VIP y desbloquea el límite de referidos.</p>
+           <button onclick="openInfluencerModal()" class="btn-primary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #6d28d9);"><i class="ph-fill ph-sparkle"></i> Aplicar para Influencer</button>
+        </div>
+        ` : ''}
       </div>
       ` : ''}
 
@@ -2102,4 +2108,115 @@ function processAndRenderDashboardTournaments() {
     console.error("Error rendering tournaments:", err);
     container.innerHTML = `<div style="color:red; padding:20px;">Error al cargar tus torneos.</div>`;
   }
+};
+
+window.openInfluencerModal = function() {
+  Swal.fire({
+    title: '<span style="color:var(--accent); font-weight:800; font-size: 1.4rem;"><i class="ph-fill ph-sparkle"></i> Programa de Influencers</span>',
+    html: `
+      <div style="text-align: left; font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary);">
+        <p style="margin-bottom: 15px;">Al convertirte en <strong>Influencer de AccessPlay</strong>, tu límite de referidos se ampliará considerablemente, recibirás una insignia VIP en tu perfil y podrás monetizar a tu audiencia.</p>
+        <p style="margin-bottom: 10px;"><strong>Normas básicas:</strong></p>
+        <ul style="margin-left: 20px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted);">
+          <li>Mínimo 1,000 seguidores en tu red social principal.</li>
+          <li>Contenido activo relacionado a videojuegos.</li>
+          <li>Colocar tu link de referido en tu perfil/descripción.</li>
+        </ul>
+        <form id="influencer-app-form" style="display:flex; flex-direction:column; gap: 12px; margin-top: 10px;">
+          <div>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Red Social Principal (URL)</label>
+            <input type="url" id="inf-social" class="admin-form-input" placeholder="Ej: tiktok.com/@tu_usuario" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;" required>
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Cantidad de Seguidores</label>
+            <select id="inf-followers" class="admin-form-input" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;" required>
+              <option value="">Selecciona una opción...</option>
+              <option value="1k-5k">1,000 a 5,000</option>
+              <option value="5k-15k">5,000 a 15,000</option>
+              <option value="15k-50k">15,000 a 50,000</option>
+              <option value="+50k">Más de 50,000</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">¿De qué juegos creas contenido?</label>
+            <input type="text" id="inf-game" class="admin-form-input" placeholder="Ej: Free Fire, Valorant, COD..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;" required>
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">¿Por qué quieres ser Influencer?</label>
+            <textarea id="inf-reason" class="admin-form-input" rows="3" placeholder="Cuéntanos brevemente..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: none;" required></textarea>
+          </div>
+        </form>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: '<i class="ph-fill ph-paper-plane-tilt"></i> Enviar Solicitud',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#8b5cf6',
+    cancelButtonColor: 'rgba(255,255,255,0.1)',
+    background: 'var(--bg-surface)',
+    color: 'var(--text-primary)',
+    customClass: {
+      popup: 'border-accent-purple',
+      confirmButton: 'btn-primary'
+    },
+    preConfirm: () => {
+      const social = document.getElementById('inf-social').value.trim();
+      const followers = document.getElementById('inf-followers').value;
+      const game = document.getElementById('inf-game').value.trim();
+      const reason = document.getElementById('inf-reason').value.trim();
+
+      if (!social || !followers || !game || !reason) {
+        Swal.showValidationMessage('Por favor completa todos los campos.');
+        return false;
+      }
+      return { social, followers, game, reason };
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      const data = result.value;
+      const user = firebase.auth().currentUser;
+      if (!user) {
+        Swal.fire({ icon: 'error', title: 'Oops', text: 'Debes iniciar sesión.' });
+        return;
+      }
+
+      Swal.fire({
+        title: 'Enviando solicitud...',
+        allowOutsideClick: false,
+        background: 'var(--bg-surface)',
+        color: 'var(--text-primary)',
+        didOpen: () => Swal.showLoading()
+      });
+
+      firebase.database().ref('influencer_applications').push({
+        uid: user.uid,
+        email: user.email || '',
+        name: user.displayName || 'Usuario',
+        social: data.social,
+        followers: data.followers,
+        game: data.game,
+        reason: data.reason,
+        status: 'pending',
+        timestamp: new Date().toISOString()
+      }).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Solicitud Enviada!',
+          text: 'Nuestro equipo evaluará tu perfil y nos pondremos en contacto contigo pronto.',
+          background: 'var(--bg-surface)',
+          color: 'var(--text-primary)',
+          confirmButtonColor: '#0ea5e9'
+        });
+      }).catch((err) => {
+        console.error("Error submitting application:", err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo enviar la solicitud. Intenta nuevamente.',
+          background: 'var(--bg-surface)',
+          color: 'var(--text-primary)'
+        });
+      });
+    }
+  });
 };
