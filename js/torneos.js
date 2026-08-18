@@ -765,7 +765,8 @@ window.openInscriptionModal = function(tournamentId) {
   const content = document.getElementById('torneo-modal-content');
   const gm = torneo.gameMode || 'solo';
   
-  const product = window.PRODUCTS ? window.PRODUCTS.find(p => p.id === torneo.productId) : null;
+  const availableProducts = typeof PRODUCTS !== 'undefined' ? PRODUCTS : (window.PRODUCTS || []);
+  const product = availableProducts.find(p => p.id === torneo.productId);
   const apiServiceId = product ? (product.apiServiceId || '') : '';
   const verifyBtnHtml = apiServiceId ? `<button type="button" class="torneo-btn-verify" onclick="verifyTournamentPlayerId(this, '${apiServiceId}')" style="background:var(--accent); border:none; border-radius:8px; width:45px; color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;" title="Verificar ID"><i class="ph ph-magnifying-glass" style="font-size:1.1rem;"></i></button>` : '';
   
