@@ -1296,3 +1296,16 @@
 .torneo-detail-participant span.avatar {
   font-size: 1.1rem;
 }
+
+/* ── Responsive Form Rows (Mobile) ── */
+.torneo-row-responsive {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 650px) {
+  .torneo-row-responsive {
+    flex-direction: column;
+    gap: 15px;
+  }
+}

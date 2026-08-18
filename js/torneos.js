@@ -776,7 +776,7 @@ window.openInscriptionModal = function(tournamentId) {
   if (gm === 'duo') {
     extraMembersHtml = `
       <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👥 Miembro 2</h4>
-      <div class="tm-player-row" style="display:flex; gap:10px; margin-bottom: 15px;">
+      <div class="tm-player-row torneo-row-responsive" style="margin-bottom: 15px;">
         <div style="flex:1;">
           <label class="torneo-form-label" style="font-size: 0.75rem; margin-bottom:4px; color:var(--text-muted)">ID del Juego</label>
           <div style="display:flex; gap:5px;">
@@ -796,7 +796,7 @@ window.openInscriptionModal = function(tournamentId) {
       
       <div style="margin-bottom: 15px;">
         <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 2</h5>
-        <div class="tm-player-row" style="display:flex; gap:10px;">
+        <div class="tm-player-row torneo-row-responsive">
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
             <div style="display:flex; gap:5px;">
@@ -813,7 +813,7 @@ window.openInscriptionModal = function(tournamentId) {
 
       <div style="margin-bottom: 15px;">
         <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 3</h5>
-        <div class="tm-player-row" style="display:flex; gap:10px;">
+        <div class="tm-player-row torneo-row-responsive">
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
             <div style="display:flex; gap:5px;">
@@ -830,7 +830,7 @@ window.openInscriptionModal = function(tournamentId) {
 
       <div style="margin-bottom: 15px;">
         <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 4</h5>
-        <div class="tm-player-row" style="display:flex; gap:10px;">
+        <div class="tm-player-row torneo-row-responsive">
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
             <div style="display:flex; gap:5px;">
