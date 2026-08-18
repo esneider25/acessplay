@@ -132,6 +132,9 @@ function initAdminApp() {
           <li class="admin-nav-item" data-tab="customers" onclick="switchTab('customers')">
             <span class="admin-nav-icon">👥</span> Clientes
           </li>
+          <li class="admin-nav-item" data-tab="influencers" onclick="switchTab('influencers')">
+            <span class="admin-nav-icon">🌟</span> Influencers VIP
+          </li>
           <li class="admin-nav-item" data-tab="banners" onclick="switchTab('banners')">
             <span class="admin-nav-icon">🖼️</span> Banners
           </li>
@@ -295,6 +298,9 @@ function renderActiveTab() {
     case 'orders': renderOrders(main); break;
     case 'products': renderProducts(main); break;
     case 'customers': renderCustomers(main); break;
+    case 'influencers':
+      if (typeof renderInfluencers === 'function') renderInfluencers(main);
+      break;
     case 'banners': renderBanners(main); break;
     case 'landing': renderLanding(main); break;
     case 'categories': renderCategories(main); break;
