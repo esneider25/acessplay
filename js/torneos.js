@@ -976,8 +976,8 @@ window.openInscriptionModal = function(tournamentId) {
       }
       
       const teamMembers = [];
-      const idInputs = document.querySelectorAll('.tm-id');
-      const ignInputs = document.querySelectorAll('.tm-ign');
+      const idInputs = document.querySelectorAll('.tm-id:not(#insc-game-id)');
+      const ignInputs = document.querySelectorAll('.tm-ign:not(#insc-game-name)');
       for (let i = 0; i < idInputs.length; i++) {
         const tId = idInputs[i].value.trim();
         const tIgn = ignInputs[i].value.trim();
@@ -1301,7 +1301,8 @@ window.openDetailModal = function(tournamentId) {
       
       participantsList.forEach((p, i) => {
         const avatarCap = avatars[i % avatars.length];
-        const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
+        const validTeamMembers = (p.teamMembers || []).filter(tm => tm.gameId !== p.gameId);
+        const teamType = validTeamMembers.length > 0 ? (validTeamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
         const capName = escapeHTML(p.gameName || p.name || 'Jugador');
         
         if (teamType === 'Solo') {
@@ -1314,7 +1315,7 @@ window.openDetailModal = function(tournamentId) {
           `;
         } else {
           let membersHTML = `<span class="torneo-detail-participant"><span class="avatar">${avatarCap}</span> <span>${capName} <span style="font-size:0.65rem; opacity:0.6;">(Líder)</span></span></span>`;
-          p.teamMembers.forEach((tm, tmIdx) => {
+          validTeamMembers.forEach((tm, tmIdx) => {
             const avatarTm = avatars[(i + tmIdx + 1) % avatars.length];
             const tmName = escapeHTML(tm.gameName || 'Compañero');
             membersHTML += `<span class="torneo-detail-participant"><span class="avatar">${avatarTm}</span> <span>${tmName}</span></span>`;

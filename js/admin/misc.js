@@ -2069,7 +2069,7 @@ window.viewTournamentParticipants = function(id) {
     let realCount = 0;
     pList.forEach(p => {
       if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
-        realCount += 1 + (p.teamMembers ? p.teamMembers.length : 0);
+        realCount += 1 + (p.teamMembers ? p.teamMembers.filter(tm => tm.gameId !== p.gameId).length : 0);
       }
     });
     
@@ -2087,9 +2087,10 @@ window.viewTournamentParticipants = function(id) {
     } else {
       pList.forEach((p, i) => {
         let teamInfo = '';
-        if (p.teamMembers && p.teamMembers.length > 0) {
+        const validTeamMembers = (p.teamMembers || []).filter(tm => tm.gameId !== p.gameId);
+        if (validTeamMembers.length > 0) {
           teamInfo = `<div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 5px;">` + 
-            p.teamMembers.map(tm => `<span style="background: rgba(0, 229, 195, 0.1); color: var(--accent); border: 1px solid rgba(0, 229, 195, 0.2); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; white-space: nowrap;">👥 ${escapeHtml(tm.gameName)} <small style="opacity:0.7">(${escapeHtml(tm.gameId)})</small></span>`).join('') + 
+            validTeamMembers.map(tm => `<span style="background: rgba(0, 229, 195, 0.1); color: var(--accent); border: 1px solid rgba(0, 229, 195, 0.2); padding: 3px 8px; border-radius: 6px; font-size: 0.75rem; white-space: nowrap;">👥 ${escapeHtml(tm.gameName)} <small style="opacity:0.7">(${escapeHtml(tm.gameId)})</small></span>`).join('') + 
             `</div>`;
         }
         let paymentBadge = '';
@@ -2480,7 +2481,8 @@ window.manageTournamentResults = function(id) {
       let index = 1;
       
       groupedParticipants.forEach((p) => {
-        const teamType = (p.teamMembers && p.teamMembers.length > 0) ? (p.teamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
+        const validTeamMembers = (p.teamMembers || []).filter(tm => tm.gameId !== p.gameId);
+        const teamType = validTeamMembers.length > 0 ? (validTeamMembers.length === 1 ? 'Dúo' : 'Escuadra') : 'Solo';
         const pName = p.gameName || p.name || 'Sin Nombre';
         
         if (teamType !== 'Solo') {
@@ -2516,8 +2518,8 @@ window.manageTournamentResults = function(id) {
         `;
         
         // Team members rows
-        if (p.teamMembers && p.teamMembers.length > 0) {
-          p.teamMembers.forEach(tm => {
+        if (validTeamMembers.length > 0) {
+          validTeamMembers.forEach(tm => {
             const tmName = tm.gameName || 'Compañero';
             const tmKills = killsMap[tmName] || 0;
             const tmInputsHTML = `<input type="number" class="admin-form-input bulk-kill-input" data-player="${tmName.replace(/"/g, '&quot;')}" data-leader="${pName.replace(/"/g, '&quot;')}" value="${tmKills}" min="0" style="width:70px; padding:6px; margin:0;" title="Kills logradas">`;
