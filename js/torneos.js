@@ -669,7 +669,80 @@ function buildHofHtml(topPlayers, emptyMessage) {
   return html;
 }
 
-// â”€â”€ Inscription Modal â”€â”€
+// ── Auto-Verificación de ID ──
+window.verifyTournamentPlayerId = async function(btnEl, apiServiceId) {
+  if (!apiServiceId) return;
+  
+  let row = btnEl.closest('.tm-player-row');
+  if (!row) return;
+  
+  const idInput = row.querySelector('.tm-id');
+  const ignInput = row.querySelector('.tm-ign');
+  if (!idInput || !ignInput) return;
+  
+  const id = idInput.value.trim();
+  if (!id) {
+    if (typeof showToast !== 'undefined') showToast('Ingresa un ID primero', 'warning');
+    return;
+  }
+  
+  // Guardar icono original y poner estado de carga
+  const originalIconHTML = btnEl.innerHTML;
+  btnEl.innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+  btnEl.disabled = true;
+  
+  const originalPlaceholder = ignInput.placeholder;
+  ignInput.placeholder = 'Verificando...';
+  ignInput.value = '';
+  
+  try {
+    const proxyUrl = '/api/proxy';
+    const requestBody = {
+      action: 'verify_id',
+      apiIdx: 0,
+      data: {
+        producto_id: parseInt(apiServiceId) || 0,
+        id_juego: id
+      }
+    };
+    
+    const response = await fetch(proxyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+    const data = await response.json();
+    const isSuccess = data.ok || data.status == 200 || data.code == 200 || data.success || data.alerta === 'green' || data.mensaje === 'Consulta exitosa' || (data.data && typeof data.data === 'object' && !Array.isArray(data.data));
+
+    if (isSuccess) {
+      const src = (data.data && typeof data.data === 'object' && !Array.isArray(data.data)) ? data.data : data;
+      let name = src.nickname || src.nick_name || src.rolename || src.role_name || src.PlayerName || src.player_name || src.nombre || src.Name;
+      if (!name) {
+        const secondary = src.username || src.name || src.role || src.account;
+        if (secondary && typeof secondary === 'string' && !secondary.includes('.com') && !secondary.includes('@gmail')) {
+          name = secondary;
+        }
+      }
+      if (name) {
+        ignInput.value = decodeURIComponent(escape(name));
+        if (typeof showToast !== 'undefined') showToast('ID Verificado ✅', 'success');
+      } else {
+        if (typeof showToast !== 'undefined') showToast('No se encontró el nombre', 'warning');
+      }
+    } else {
+        if (typeof showToast !== 'undefined') showToast('ID no encontrado', 'error');
+    }
+  } catch(e) {
+    console.error('Error auto-verifying ID:', e);
+    if (typeof showToast !== 'undefined') showToast('Error al verificar', 'error');
+  } finally {
+    ignInput.placeholder = originalPlaceholder;
+    btnEl.innerHTML = originalIconHTML;
+    btnEl.disabled = false;
+  }
+};
+
+// ── Inscription Modal ──
 window.openInscriptionModal = function(tournamentId) {
   const user = firebase.auth().currentUser;
   if (!user) {
@@ -692,14 +765,21 @@ window.openInscriptionModal = function(tournamentId) {
   const content = document.getElementById('torneo-modal-content');
   const gm = torneo.gameMode || 'solo';
   
+  const product = window.PRODUCTS ? window.PRODUCTS.find(p => p.id === torneo.productId) : null;
+  const apiServiceId = product ? (product.apiServiceId || '') : '';
+  const verifyBtnHtml = apiServiceId ? `<button type="button" class="torneo-btn-verify" onclick="verifyTournamentPlayerId(this, '${apiServiceId}')" style="background:var(--accent); border:none; border-radius:8px; width:45px; color:white; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;" title="Verificar ID"><i class="ph ph-magnifying-glass" style="font-size:1.1rem;"></i></button>` : '';
+  
   let extraMembersHtml = '';
   if (gm === 'duo') {
     extraMembersHtml = `
       <h4 style="margin-top: 15px; margin-bottom: 10px; color: var(--accent); font-size: 0.9rem;">👥 Miembro 2</h4>
-      <div style="display:flex; gap:10px; margin-bottom: 15px;">
+      <div class="tm-player-row" style="display:flex; gap:10px; margin-bottom: 15px;">
         <div style="flex:1;">
           <label class="torneo-form-label" style="font-size: 0.75rem; margin-bottom:4px; color:var(--text-muted)">ID del Juego</label>
-          <input class="torneo-form-input tm-id" type="text" required placeholder="Ej: 123456789">
+          <div style="display:flex; gap:5px;">
+            <input class="torneo-form-input tm-id" type="text" required placeholder="Ej: 123456789" style="flex:1;">
+            ${verifyBtnHtml}
+          </div>
         </div>
         <div style="flex:1;">
           <label class="torneo-form-label" style="font-size: 0.75rem; margin-bottom:4px; color:var(--text-muted)">Nombre en el juego</label>
@@ -713,10 +793,13 @@ window.openInscriptionModal = function(tournamentId) {
       
       <div style="margin-bottom: 15px;">
         <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 2</h5>
-        <div style="display:flex; gap:10px;">
+        <div class="tm-player-row" style="display:flex; gap:10px;">
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
-            <input class="torneo-form-input tm-id" type="text" required placeholder="ID">
+            <div style="display:flex; gap:5px;">
+              <input class="torneo-form-input tm-id" type="text" required placeholder="ID" style="flex:1;">
+              ${verifyBtnHtml}
+            </div>
           </div>
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">Nombre en el juego</label>
@@ -727,10 +810,13 @@ window.openInscriptionModal = function(tournamentId) {
 
       <div style="margin-bottom: 15px;">
         <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 3</h5>
-        <div style="display:flex; gap:10px;">
+        <div class="tm-player-row" style="display:flex; gap:10px;">
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
-            <input class="torneo-form-input tm-id" type="text" required placeholder="ID">
+            <div style="display:flex; gap:5px;">
+              <input class="torneo-form-input tm-id" type="text" required placeholder="ID" style="flex:1;">
+              ${verifyBtnHtml}
+            </div>
           </div>
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">Nombre en el juego</label>
@@ -741,10 +827,13 @@ window.openInscriptionModal = function(tournamentId) {
 
       <div style="margin-bottom: 15px;">
         <h5 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px;">Miembro 4</h5>
-        <div style="display:flex; gap:10px;">
+        <div class="tm-player-row" style="display:flex; gap:10px;">
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">ID del Juego</label>
-            <input class="torneo-form-input tm-id" type="text" required placeholder="ID">
+            <div style="display:flex; gap:5px;">
+              <input class="torneo-form-input tm-id" type="text" required placeholder="ID" style="flex:1;">
+              ${verifyBtnHtml}
+            </div>
           </div>
           <div style="flex:1;">
             <label class="torneo-form-label" style="font-size: 0.7rem; margin-bottom:2px; color:var(--text-muted)">Nombre en el juego</label>
@@ -801,14 +890,19 @@ window.openInscriptionModal = function(tournamentId) {
         <label class="torneo-form-label">Tu nombre</label>
         <input class="torneo-form-input" id="insc-name" type="text" value="${userName}" required placeholder="Tu nombre">
       </div>
-      <div class="torneo-form-group">
-        <label class="torneo-form-label">ID del juego</label>
-        <input class="torneo-form-input" id="insc-game-id" type="text" required placeholder="Ej: 123456789">
-        <p class="torneo-form-hint" style="margin-top:2px;">Tu ID numérico dentro del juego</p>
-      </div>
-      <div class="torneo-form-group">
-        <label class="torneo-form-label">Nombre en el juego (Jugador)</label>
-        <input class="torneo-form-input" id="insc-game-name" type="text" required placeholder="Ej: ProPlayer99">
+      <div class="tm-player-row">
+        <div class="torneo-form-group">
+          <label class="torneo-form-label">ID del juego</label>
+          <div style="display:flex; gap:5px;">
+            <input class="torneo-form-input tm-id" id="insc-game-id" type="text" required placeholder="Ej: 123456789" style="flex:1;">
+            ${verifyBtnHtml}
+          </div>
+          <p class="torneo-form-hint" style="margin-top:2px;">Tu ID numérico dentro del juego</p>
+        </div>
+        <div class="torneo-form-group" style="margin-top:-10px;">
+          <label class="torneo-form-label">Nombre en el juego (Jugador)</label>
+          <input class="torneo-form-input tm-ign" id="insc-game-name" type="text" required placeholder="Ej: ProPlayer99">
+        </div>
       </div>
       
       ${extraMembersHtml}
