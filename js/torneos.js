@@ -724,7 +724,9 @@ window.verifyTournamentPlayerId = async function(btnEl, apiServiceId) {
         }
       }
       if (name) {
-        ignInput.value = decodeURIComponent(escape(name));
+        let finalName = name;
+        try { finalName = decodeURIComponent(escape(name)); } catch(e) {}
+        ignInput.value = finalName;
         if (typeof showToast !== 'undefined') showToast('ID Verificado ✅', 'success');
       } else {
         if (typeof showToast !== 'undefined') showToast('No se encontró el nombre', 'warning');
