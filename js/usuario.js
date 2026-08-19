@@ -2083,12 +2083,12 @@ function processAndRenderDashboardTournaments() {
             </div>
             
             <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
-              <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">ðŸŽ® ${escapeHTML(t.productName || 'Juego')}</span>
+              <span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">?? ${escapeHTML(t.productName || 'Juego')}</span>
               ${modeStr ? `<span style="font-size: 0.85rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 6px;">${modeStr}</span>` : ''}
             </div>
             
             <p style="margin:0 0 10px 0; color:var(--text-muted); font-size:0.8rem; display: flex; align-items: center; gap: 4px;">
-              <i class="ph ph-calendar"></i> Fecha de InscripciÃ³n: ${dateStr}
+              <i class="ph ph-calendar"></i> Fecha de Inscripción: ${dateStr}
             </p>
             
             ${myInfoHtml}
@@ -2111,16 +2111,24 @@ function processAndRenderDashboardTournaments() {
 };
 
 window.openInfluencerModal = function() {
+  const rules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
+    ? window.SITE_SETTINGS.influencerRules 
+    : [
+      'Mínimo 1,000 seguidores en tu red social principal.',
+      'Contenido activo relacionado a videojuegos.',
+      'Colocar tu link de referido en tu perfil/descripción.'
+    ];
+  
+  const rulesHtml = rules.map(r => `<li>${escapeHTML(r)}</li>`).join('');
+
   Swal.fire({
     title: '<span style="color:var(--accent); font-weight:800; font-size: 1.4rem;"><i class="ph-fill ph-sparkle"></i> Programa de Influencers</span>',
     html: `
       <div style="text-align: left; font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary);">
-        <p style="margin-bottom: 15px;">Al convertirte en <strong>Influencer de AccessPlay</strong>, tu lÃ­mite de referidos se ampliarÃ¡ considerablemente, recibirÃ¡s una insignia VIP en tu perfil y podrÃ¡s monetizar a tu audiencia.</p>
-        <p style="margin-bottom: 10px;"><strong>Normas bÃ¡sicas:</strong></p>
+        <p style="margin-bottom: 15px;">Al convertirte en <strong>Influencer de AccessPlay</strong>, tu límite de referidos se ampliará considerablemente, recibirás una insignia VIP en tu perfil y podrás monetizar a tu audiencia.</p>
+        <p style="margin-bottom: 10px;"><strong>Normas básicas:</strong></p>
         <ul style="margin-left: 20px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted);">
-          <li>MÃ­nimo 1,000 seguidores en tu red social principal.</li>
-          <li>Contenido activo relacionado a videojuegos.</li>
-          <li>Colocar tu link de referido en tu perfil/descripciÃ³n.</li>
+          ${rulesHtml}
         </ul>
         <form id="influencer-app-form" style="display:flex; flex-direction:column; gap: 12px; margin-top: 10px;">
           <div>
@@ -2130,20 +2138,20 @@ window.openInfluencerModal = function() {
           <div>
             <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Cantidad de Seguidores</label>
             <select id="inf-followers" class="admin-form-input" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;" required>
-              <option value="">Selecciona una opciÃ³n...</option>
+              <option value="">Selecciona una opción...</option>
               <option value="1k-5k">1,000 a 5,000</option>
               <option value="5k-15k">5,000 a 15,000</option>
               <option value="15k-50k">15,000 a 50,000</option>
-              <option value="+50k">MÃ¡s de 50,000</option>
+              <option value="+50k">Más de 50,000</option>
             </select>
           </div>
           <div>
-            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Â¿De quÃ© juegos creas contenido?</label>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">¿De qué juegos creas contenido?</label>
             <input type="text" id="inf-game" class="admin-form-input" placeholder="Ej: Free Fire, Valorant, COD..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;" required>
           </div>
           <div>
-            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Â¿Por quÃ© quieres ser Influencer?</label>
-            <textarea id="inf-reason" class="admin-form-input" rows="3" placeholder="CuÃ©ntanos brevemente..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: none;" required></textarea>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">¿Por qué quieres ser Influencer?</label>
+            <textarea id="inf-reason" class="admin-form-input" rows="3" placeholder="Cuéntanos brevemente..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: none;" required></textarea>
           </div>
         </form>
       </div>
@@ -2220,3 +2228,5 @@ window.openInfluencerModal = function() {
     }
   });
 };
+
+

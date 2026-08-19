@@ -97,6 +97,13 @@ let SITE_SETTINGS = {
       desc: 'Contamos con sistemas Anti-Spam. Cualquier intento de enviar comprobantes falsos, comprobantes reciclados, o hacer múltiples pedidos falsos resultará en el BLOQUEO PERMANENTE de la IP, número de WhatsApp y cuenta del usuario, perdiendo acceso a su Monedero sin derecho a reclamo.', 
       descColor: '#e2e8f0' 
     }
+  ],
+  influencerRules: [
+    'Deben tener una base de seguidores real (al menos 1,000 en su red principal) y subir contenido de videojuegos regularmente.',
+    'Tienen que colocar su link de referido en sus biografías o descripciones.',
+    'Se espera que mencionen a AccessPlay en sus videos o directos al menos un par de veces al mes.',
+    'Cero toxicidad, sin promover el uso de hacks, y no deben promocionar competencia directa simultáneamente.',
+    'Las cuentas que generen referidos falsos (multicuentas) serán bloqueadas y perderán sus puntos y rol.'
   ]
 };
 

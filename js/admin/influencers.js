@@ -3,6 +3,18 @@
 // ============================================================
 
 window.renderInfluencers = function(container) {
+  const rules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
+    ? window.SITE_SETTINGS.influencerRules 
+    : [
+      'Deben tener una base de seguidores real (al menos 1,000 en su red principal) y subir contenido de videojuegos regularmente.',
+      'Tienen que colocar su link de referido en sus biografías o descripciones.',
+      'Se espera que mencionen a AccessPlay en sus videos o directos al menos un par de veces al mes.',
+      'Cero toxicidad, sin promover el uso de hacks, y no deben promocionar competencia directa simultáneamente.',
+      'Las cuentas que generen referidos falsos (multicuentas) serán bloqueadas y perderán sus puntos y rol.'
+    ];
+
+  let rulesHtml = rules.map(r => `<li>${escapeHTML(r)}</li>`).join('');
+
   container.innerHTML = `
     <div class="admin-card" style="margin-bottom: 20px;">
       <h2 class="admin-card-title" style="display: flex; align-items: center; gap: 10px;">
@@ -10,16 +22,15 @@ window.renderInfluencers = function(container) {
       </h2>
       <p style="color: var(--text-secondary); margin-bottom: 20px;">Gestiona las postulaciones de creadores de contenido que quieren ser Influencers VIP.</p>
       
-      <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 25px;">
+      <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 25px; position: relative;">
+        <button onclick="editInfluencerRules()" class="btn-secondary" style="position: absolute; top: 15px; right: 15px; padding: 6px 12px; font-size: 0.8rem; border-color: rgba(139, 92, 246, 0.5); color: #a78bfa;">
+          <i class="ph-fill ph-pencil"></i> Editar Normas
+        </button>
         <h4 style="color: #a78bfa; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
           <i class="ph-fill ph-check-circle"></i> Normas "Ganar-Ganar" (Recordatorio)
         </h4>
         <ul style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-left: 20px; display: flex; flex-direction: column; gap: 8px;">
-          <li><strong>Requisitos:</strong> Deben tener una base de seguidores real (al menos 1,000 en su red principal) y subir contenido de videojuegos regularmente.</li>
-          <li><strong>Compromiso:</strong> Tienen que colocar su link de referido en sus biografías o descripciones.</li>
-          <li><strong>Menciones:</strong> Se espera que mencionen a AccessPlay en sus videos o directos al menos un par de veces al mes.</li>
-          <li><strong>Conducta:</strong> Cero toxicidad, sin promover el uso de hacks, y no deben promocionar competencia directa simultáneamente.</li>
-          <li><strong>Penalización:</strong> Las cuentas que generen referidos falsos (multicuentas) serán bloqueadas y perderán sus puntos y rol.</li>
+          ${rulesHtml}
         </ul>
       </div>
 
@@ -60,7 +71,7 @@ window.renderInfluencers = function(container) {
 };
 
 function loadInfluencerApplications() {
-  firebase.database().ref('influencer_applications').orderByChild('timestamp').once('value').then(snap => {
+  firebase.database().ref('influencer_applications').once('value').then(snap => {
     const tbody = document.getElementById('influencers-tbody');
     if (!tbody) return;
 
@@ -74,8 +85,8 @@ function loadInfluencerApplications() {
       apps.push({ id: child.key, ...child.val() });
     });
 
-    // Ordenar de más reciente a más antiguo
-    apps.reverse();
+    // Ordenar de más reciente a más antiguo en Javascript para evitar errores de índice en Firebase
+    apps.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
 
     if (apps.length === 0) {
       tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay solicitudes actualmente.</td></tr>';
@@ -206,3 +217,49 @@ function escapeHTML(str) {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
   }[tag]));
 }
+
+window.editInfluencerRules = function() {
+  const currentRules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
+    ? window.SITE_SETTINGS.influencerRules.join('\\n')
+    : "Escribe aquí cada norma en una nueva línea...";
+
+  Swal.fire({
+    title: 'Editar Normas de Influencers',
+    html: `
+      <div style="text-align: left; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-secondary);">
+        Cada línea representará un punto en la lista de normas que verán los usuarios al aplicar.
+      </div>
+      <textarea id="influencer-rules-input" class="admin-form-input" style="width: 100%; height: 200px; padding: 12px; border-radius: 8px; font-size: 0.9rem; font-family: monospace; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: vertical;" spellcheck="false">\${escapeHTML(currentRules)}</textarea>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar Normas',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#8b5cf6',
+    cancelButtonColor: 'rgba(255,255,255,0.1)',
+    background: 'var(--bg-surface)',
+    color: 'var(--text-primary)',
+    preConfirm: () => {
+      const val = document.getElementById('influencer-rules-input').value.trim();
+      if (!val) {
+        Swal.showValidationMessage('Las normas no pueden estar vacías.');
+        return false;
+      }
+      return val.split('\\n').map(line => line.trim()).filter(line => line.length > 0);
+    }
+  }).then(result => {
+    if (result.isConfirmed) {
+      const newRules = result.value;
+      if (typeof saveSettings === 'function') {
+        Swal.fire({ title: 'Guardando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, background: 'var(--bg-surface)' });
+        saveSettings({ influencerRules: newRules });
+        Swal.fire({ icon: 'success', title: 'Guardado', text: 'Las normas se han actualizado.', confirmButtonColor: '#0ea5e9', background: 'var(--bg-surface)', color: 'var(--text-primary)' })
+        .then(() => {
+          if(document.getElementById('admin-main-content')) {
+             renderInfluencers(document.getElementById('admin-main-content'));
+          }
+        });
+      }
+    }
+  });
+};
+
