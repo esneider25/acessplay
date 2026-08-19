@@ -127,6 +127,7 @@ function loadInfluencerApplications() {
           <td style="padding: 12px 15px;">
             <div style="font-weight: 500; color: var(--text-primary);">${escapeHTML(app.name || 'Sin Nombre')}</div>
             <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(app.email || '')}</div>
+            <button onclick="navigator.clipboard.writeText('${app.id}'); showAdminToast('UID Copiado', 'success')" style="background: none; border: none; color: #a78bfa; cursor: pointer; padding: 0; font-size: 0.75rem; margin-top: 4px; display:flex; align-items:center; gap:4px;"><i class="ph ph-copy"></i> Copiar UID</button>
           </td>
           <td style="padding: 12px 15px;">
             <a href="${escapeHTML(safeSocial)}" target="_blank" style="color: #0ea5e9; text-decoration: none; font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; gap: 4px;"><i class="ph ph-link"></i> Ver Perfil</a>

@@ -115,7 +115,7 @@ async function renderCustomers(container) {
     );
   }
 
-  // Pagination Logic
+    // Pagination Logic
   const itemsPerPage = 10;
   const totalPages = Math.ceil(customers.length / itemsPerPage) || 1;
   if (!adminState.crmVipPage) adminState.crmVipPage = 1;
@@ -134,6 +134,7 @@ async function renderCustomers(container) {
         <div style="display: flex; flex-direction: column;">
           <span style="word-break: break-all;">${c.name ? c.name + ' (' + c.contact + ')' : c.contact}</span>
           ${c.whatsapp ? `<span style="font-size: 0.8rem; color: #25D366; margin-top: 2px;">WhatsApp: ${c.whatsapp}</span>` : ''}
+          ${c.uid ? `<button onclick="navigator.clipboard.writeText('${c.uid}'); showAdminToast('UID Copiado', 'success')" style="background: none; border: none; color: #a78bfa; cursor: pointer; padding: 0; font-size: 0.75rem; margin-top: 4px; display:flex; align-items:center; gap:4px; width:fit-content;"><i class="ph ph-copy"></i> Copiar UID</button>` : ''}
         </div>
       </div>
       <div style="color: var(--text-secondary);">
