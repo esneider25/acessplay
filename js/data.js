@@ -530,7 +530,7 @@ function saveDiscounts() {
   saveToDb('discounts', DISCOUNT_CODES);
 }
 
-function createDiscount(code, type, value, expiryDate = null, globalLimit = null, perClientLimit = null) {
+function createDiscount(code, type, value, expiryDate = null, globalLimit = null, perClientLimit = null, influencerUid = null, commissionRate = 0) {
   const newCode = code.trim().toUpperCase();
   if (DISCOUNT_CODES.some(d => d.code === newCode)) return false;
   DISCOUNT_CODES.push({
@@ -540,6 +540,8 @@ function createDiscount(code, type, value, expiryDate = null, globalLimit = null
     expiryDate: expiryDate ? new Date(expiryDate + 'T23:59:59').toISOString() : null,
     globalLimit: globalLimit ? parseInt(globalLimit) : null,
     perClientLimit: perClientLimit ? parseInt(perClientLimit) : null,
+    influencerUid: influencerUid ? influencerUid.trim() : null,
+    commissionRate: parseFloat(commissionRate) || 0,
     active: true,
     createdAt: new Date().toISOString()
   });
@@ -949,6 +951,19 @@ function updateOrderStatus(orderId, newStatus, note) {
               timestamp: new Date().toISOString(),
               read: false
             });
+          }
+        }
+
+        // 5. Lógica de Comisión para Influencers (Sincronizado con robot_tiendas)
+        if (order.discountCode) {
+          const discountObj = getDiscounts().find(d => d.code === order.discountCode);
+          if (discountObj && discountObj.influencerUid && discountObj.commissionRate > 0) {
+            const commissionUsd = price * (discountObj.commissionRate / 100);
+            const commissionPoints = Math.floor(commissionUsd * 100);
+            if (commissionPoints > 0) {
+               db.ref('users/' + discountObj.influencerUid + '/points').transaction(current => (current || 0) + commissionPoints);
+               console.log(`🌟 Influencer ${discountObj.influencerUid} recibió ${commissionPoints} PTS por comisión del cupón ${order.discountCode}`);
+            }
           }
         }
 

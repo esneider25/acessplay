@@ -473,6 +473,16 @@ function renderDiscounts(container) {
               <input type="number" id="discount-client-limit" class="admin-form-input" min="1" placeholder="Ilimitado">
             </div>
           </div>
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-top: 10px; padding: 10px; background: rgba(139,92,246,0.1); border-radius: 8px; border: 1px solid rgba(139,92,246,0.2);">
+            <div class="admin-form-group" style="margin: 0;">
+              <label class="admin-form-label" style="color: #c4b5fd;">🌟 UID del Influencer (Opcional)</label>
+              <input type="text" id="discount-influencer-uid" class="admin-form-input" placeholder="Pega el UID del usuario">
+            </div>
+            <div class="admin-form-group" style="margin: 0;">
+              <label class="admin-form-label" style="color: #c4b5fd;">Comisión (%)</label>
+              <input type="number" id="discount-commission" class="admin-form-input" min="0" step="0.1" placeholder="Ej: 5">
+            </div>
+          </div>
           <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">➕ Crear Cupón</button>
         </form>
       </div>
@@ -497,13 +507,15 @@ function adminCreateDiscount(event) {
   const expiryDate = document.getElementById('discount-expiry').value || null;
   const globalLimit = document.getElementById('discount-global-limit').value || null;
   const clientLimit = document.getElementById('discount-client-limit').value || null;
+  const influencerUid = document.getElementById('discount-influencer-uid').value || null;
+  const commissionRate = document.getElementById('discount-commission').value || 0;
 
   if (window.editingDiscountCode) {
     deleteDiscount(window.editingDiscountCode);
     window.editingDiscountCode = null;
   }
 
-  if (createDiscount(code, type, value, expiryDate, globalLimit, clientLimit)) {
+  if (createDiscount(code, type, value, expiryDate, globalLimit, clientLimit, influencerUid, commissionRate)) {
     showAdminToast('✅ Cupón guardado exitosamente', 'success');
     renderActiveTab();
   } else {
@@ -530,6 +542,8 @@ function adminEditDiscount(code) {
   
   document.getElementById('discount-global-limit').value = d.globalLimit || '';
   document.getElementById('discount-client-limit').value = d.perClientLimit || '';
+  document.getElementById('discount-influencer-uid').value = d.influencerUid || '';
+  document.getElementById('discount-commission').value = d.commissionRate || '';
   
   const btn = document.querySelector('#admin-discount-form button[type="submit"]');
   btn.innerHTML = '💾 Actualizar Cupón';
