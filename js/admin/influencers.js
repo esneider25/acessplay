@@ -145,8 +145,14 @@ function loadInfluencerApplications() {
               <div style="display: flex; gap: 6px; justify-content: center;">
                 <button onclick="approveInfluencer('${app.id}', '${app.uid}')" class="btn-primary" style="padding: 6px 10px; font-size: 0.8rem; background: rgba(34, 197, 94, 0.2); border: 1px solid #4ade80; color: #4ade80;" title="Aprobar y dar rol">✅</button>
                 <button onclick="rejectInfluencer('${app.id}')" class="btn-secondary" style="padding: 6px 10px; font-size: 0.8rem; background: rgba(239, 68, 68, 0.2); border: 1px solid #f87171; color: #f87171;" title="Rechazar">❌</button>
+                <button onclick="deleteInfluencerApplication('${app.id}')" class="btn-secondary" style="padding: 6px 10px; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #f87171; color: #f87171;" title="Eliminar registro permanentemente"><i class="ph ph-trash"></i></button>
               </div>
-            ` : `<span style="font-size: 0.8rem; color: var(--text-muted);">Procesado</span>`}
+            ` : `
+              <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Procesado</span>
+                <button onclick="deleteInfluencerApplication('${app.id}')" class="btn-secondary" style="padding: 4px 8px; font-size: 0.8rem; background: rgba(239, 68, 68, 0.1); border: 1px solid #f87171; color: #f87171;" title="Eliminar registro permanentemente"><i class="ph ph-trash"></i></button>
+              </div>
+            `}
           </td>
         </tr>
       `;
