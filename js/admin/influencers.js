@@ -95,7 +95,15 @@ function loadInfluencerApplications() {
 
     let html = '';
     apps.forEach(app => {
-      const date = new Date(app.timestamp).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit' });
+      let date = 'Fecha desconocida';
+      try {
+        if (app.timestamp) {
+          date = new Date(app.timestamp).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute:'2-digit' });
+        }
+      } catch(e) {
+        console.warn("Invalid date for app", app.id);
+      }
+      
       let statusBadge = '';
       if (app.status === 'pending') {
         statusBadge = '<span style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">⏳ Pendiente</span>';
