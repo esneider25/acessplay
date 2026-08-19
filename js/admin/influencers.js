@@ -220,7 +220,7 @@ function escapeHTML(str) {
 
 window.editInfluencerRules = function() {
   const currentRules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
-    ? window.SITE_SETTINGS.influencerRules.join('\\n')
+    ? window.SITE_SETTINGS.influencerRules.join('\n')
     : "Escribe aquí cada norma en una nueva línea...";
 
   Swal.fire({
@@ -229,7 +229,7 @@ window.editInfluencerRules = function() {
       <div style="text-align: left; font-size: 0.9rem; margin-bottom: 10px; color: var(--text-secondary);">
         Cada línea representará un punto en la lista de normas que verán los usuarios al aplicar.
       </div>
-      <textarea id="influencer-rules-input" class="admin-form-input" style="width: 100%; height: 200px; padding: 12px; border-radius: 8px; font-size: 0.9rem; font-family: monospace; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: vertical;" spellcheck="false">\${escapeHTML(currentRules)}</textarea>
+      <textarea id="influencer-rules-input" class="admin-form-input" style="width: 100%; height: 200px; padding: 12px; border-radius: 8px; font-size: 0.9rem; font-family: monospace; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: vertical;" spellcheck="false">${escapeHTML(currentRules)}</textarea>
     `,
     showCancelButton: true,
     confirmButtonText: 'Guardar Normas',
@@ -244,7 +244,7 @@ window.editInfluencerRules = function() {
         Swal.showValidationMessage('Las normas no pueden estar vacías.');
         return false;
       }
-      return val.split('\\n').map(line => line.trim()).filter(line => line.length > 0);
+      return val.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     }
   }).then(result => {
     if (result.isConfirmed) {
