@@ -141,11 +141,11 @@
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
     "influencer_applications": {
-      ".read": "auth != null && (auth.token.email === 'admin@accesplay.com' || (query.orderByChild == 'uid' && query.equalTo == auth.uid))",
-      ".indexOn": ["uid", "timestamp", "status"],
-      "$appId": {
-        ".read": "auth != null && (auth.token.email === 'admin@accesplay.com' || data.child('uid').val() === auth.uid)",
-        ".write": "auth != null && (auth.token.email === 'admin@accesplay.com' || (!data.exists() && newData.child('uid').val() === auth.uid))"
+      ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
+      ".indexOn": ["timestamp", "status"],
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com')",
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'admin@accesplay.com')"
       }
     },
     "users": {

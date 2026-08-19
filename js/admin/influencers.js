@@ -36,7 +36,13 @@ window.renderInfluencers = function(container) {
 
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
         <div style="display: flex; gap: 10px;">
-          <button class="btn btn-secondary" onclick="renderInfluencers(document.getElementById('admin-main-content'))">
+          <button class="btn btn-secondary" onclick="setInfFilter('all')" id="btn-inf-filter-all" style="border-color: var(--accent); color: var(--accent);">Todas</button>
+          <button class="btn btn-secondary" onclick="setInfFilter('pending')" id="btn-inf-filter-pending">Pendientes</button>
+          <button class="btn btn-secondary" onclick="setInfFilter('approved')" id="btn-inf-filter-approved">Aprobadas</button>
+          <button class="btn btn-secondary" onclick="setInfFilter('rejected')" id="btn-inf-filter-rejected">Rechazadas</button>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" onclick="loadInfluencerApplications()">
             <i class="ph ph-arrows-clockwise"></i> Actualizar
           </button>
         </div>
@@ -65,6 +71,31 @@ window.renderInfluencers = function(container) {
         </table>
       </div>
     </div>
+
+    <div class="admin-card">
+      <h2 class="admin-card-title" style="display: flex; align-items: center; gap: 10px;">
+        <i class="ph-fill ph-crown" style="color: #fbbf24;"></i> Influencers Activos
+      </h2>
+      <p style="color: var(--text-secondary); margin-bottom: 15px;">Lista de usuarios que ya tienen el rol VIP asignado.</p>
+      
+      <div style="overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--border);">
+        <table class="admin-table" style="width: 100%; text-align: left; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 0.85rem; background: rgba(255,255,255,0.02);">
+              <th style="padding: 12px 15px; font-weight: 500;">Usuario / Email</th>
+              <th style="padding: 12px 15px; font-weight: 500;">Puntos Ganados</th>
+              <th style="padding: 12px 15px; font-weight: 500;">Referidos</th>
+              <th style="padding: 12px 15px; font-weight: 500; text-align: center;">Código / UID</th>
+            </tr>
+          </thead>
+          <tbody id="active-influencers-tbody">
+            <tr>
+              <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">Cargando influencers activos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   `;
 
   loadInfluencerApplications();
@@ -88,13 +119,52 @@ function loadInfluencerApplications() {
     // Ordenar de más reciente a más antiguo en Javascript para evitar errores de índice en Firebase
     apps.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
 
-    if (apps.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay solicitudes actualmente.</td></tr>';
-      return;
-    }
+    window.influencerAppsData = apps;
+    window.currentInfFilter = window.currentInfFilter || 'all';
+    renderInfluencerTable();
+  }).catch(err => {
+    console.error("Error loading influencers:", err);
+    const tbody = document.getElementById('influencers-tbody');
+    if (tbody) tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #f87171;">Error al cargar datos.</td></tr>';
+  });
 
-    let html = '';
-    apps.forEach(app => {
+  renderActiveInfluencers();
+}
+
+window.setInfFilter = function(filter) {
+  window.currentInfFilter = filter;
+  ['all', 'pending', 'approved', 'rejected'].forEach(f => {
+    const btn = document.getElementById('btn-inf-filter-' + f);
+    if(btn) {
+      if(f === filter) {
+        btn.style.borderColor = 'var(--accent)';
+        btn.style.color = 'var(--accent)';
+      } else {
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }
+    }
+  });
+  renderInfluencerTable();
+};
+
+function renderInfluencerTable() {
+  const tbody = document.getElementById('influencers-tbody');
+  if (!tbody) return;
+
+  let apps = window.influencerAppsData || [];
+  
+  if (window.currentInfFilter !== 'all') {
+    apps = apps.filter(a => a.status === window.currentInfFilter);
+  }
+
+  if (apps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay solicitudes con este filtro.</td></tr>';
+    return;
+  }
+
+  let html = '';
+  apps.forEach(app => {
       let date = 'Fecha desconocida';
       try {
         if (app.timestamp) {
@@ -159,10 +229,47 @@ function loadInfluencerApplications() {
     });
 
     tbody.innerHTML = html;
-  }).catch(err => {
-    console.error("Error loading influencers:", err);
-    document.getElementById('influencers-tbody').innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #f87171;">Error al cargar datos.</td></tr>';
+}
+
+function renderActiveInfluencers() {
+  if (!window.ADMIN_CUSTOMERS) return;
+  const tbody = document.getElementById('active-influencers-tbody');
+  if (!tbody) return;
+
+  const influencers = Object.keys(window.ADMIN_CUSTOMERS)
+    .map(uid => ({ uid, ...window.ADMIN_CUSTOMERS[uid] }))
+    .filter(u => u.role === 'influencer');
+
+  if (influencers.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay influencers activos.</td></tr>';
+    return;
+  }
+
+  let html = '';
+  influencers.forEach(inf => {
+    const earned = inf.referralsEarnedPoints || 0;
+    const refCount = inf.referralsCount || 0;
+    
+    html += `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s; hover:background:rgba(255,255,255,0.02);">
+        <td style="padding: 12px 15px;">
+          <div style="font-weight: 500; color: var(--text-primary);">${escapeHTML(inf.name || 'Sin Nombre')}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(inf.email || '')}</div>
+        </td>
+        <td style="padding: 12px 15px; color: #3b82f6; font-weight: bold;">
+          ${earned} pts
+        </td>
+        <td style="padding: 12px 15px; color: var(--accent); font-weight: bold;">
+          ${refCount} usuarios
+        </td>
+        <td style="padding: 12px 15px; text-align: center;">
+          <div style="margin-bottom: 4px; color: #a78bfa; font-weight: bold;">${escapeHTML(inf.referralCode || 'Sin código')}</div>
+          <button onclick="navigator.clipboard.writeText('${inf.uid}'); showAdminToast('UID Copiado', 'success')" class="btn-secondary" style="padding: 4px 8px; font-size: 0.7rem;"><i class="ph ph-copy"></i> Copiar UID</button>
+        </td>
+      </tr>
+    `;
   });
+  tbody.innerHTML = html;
 }
 
 window.approveInfluencer = function(appId, uid) {

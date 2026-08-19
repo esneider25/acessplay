@@ -339,6 +339,21 @@ async function loadDashboardData() {
   renderDashboardTransactions();
   renderDashboardTournaments();
   initUserChat();
+
+  try {
+    const infSnap = await firebase.database().ref('influencer_applications/' + currentUser.uid).once('value');
+    if (infSnap.exists() && infSnap.val().status === 'pending') {
+      const btn = document.getElementById('btn-apply-inf');
+      if (btn) {
+        btn.innerHTML = 'Solicitud en Revisión ⏳';
+        btn.style.background = 'rgba(255,255,255,0.1)';
+        btn.onclick = null;
+        btn.style.cursor = 'default';
+      }
+    }
+  } catch (err) {
+    console.error("Error checking influencer status:", err);
+  }
 }
 
 
@@ -786,12 +801,13 @@ function renderDashboardContent() {
       
       ${(currentRole === 'cliente' || currentRole === 'influencer' || currentRole === 'partner') ? `
       <!-- Referral Banner -->
-      <div class="glass-card" style="background: linear-gradient(90deg, rgba(15,31,56,0.8), rgba(0,229,195,0.1)); border-color: var(--accent); padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;">
+      <div class="glass-card" style="background: linear-gradient(90deg, rgba(15,31,56,0.8), rgba(0,229,195,0.1)); border-color: var(--accent); padding: 20px 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; position: relative;">
+        ${(currentRole === 'influencer' || currentRole === 'partner') ? '<div style="position: absolute; top: -10px; right: -10px; background: #fbbf24; color: #000; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.8rem; display: flex; align-items: center; gap: 4px; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);"><i class="ph-fill ph-crown"></i> VIP</div>' : ''}
         <div style="flex: 1; min-width: 250px;">
           <h3 style="margin: 0 0 5px 0; color: var(--accent); display: flex; align-items: center; gap: 8px;"><i class="ph-fill ph-users-three"></i> ¡Invita y Gana!</h3>
-          <p style="margin: 0 0 10px 0; color: var(--text-secondary); font-size: 0.9rem;">Gana AccessPoints cada vez que tus invitados realicen compras.</p>
+          <p style="margin: 0 0 10px 0; color: var(--text-secondary); font-size: 0.9rem;">${(currentRole === 'influencer' || currentRole === 'partner') ? 'Genera AccessPoints por las compras que hagan tus seguidores y monetiza tu audiencia.' : 'Gana AccessPoints cada vez que tus invitados realicen compras.'}</p>
           <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.85rem;">
-            <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: var(--accent); font-weight: bold;">${userProfile?.referralsCount || 0} / ${(currentRole === 'influencer' || currentRole === 'partner') ? (userProfile?.referralLimit || 100) : 10}</span> Amigos</div>
+            <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: var(--accent); font-weight: bold;">${userProfile?.referralsCount || 0} / ${(currentRole === 'influencer' || currentRole === 'partner') ? 'Ilimitado' : 10}</span> Amigos</div>
             <div style="background: rgba(0,0,0,0.3); padding: 6px 12px; border-radius: 8px;"><span style="color: #3b82f6; font-weight: bold;">${userProfile?.referralsEarnedPoints || 0}</span> Puntos Ganados</div>
           </div>
         </div>
@@ -802,9 +818,9 @@ function renderDashboardContent() {
           </button>
         </div>
         ${currentRole === 'cliente' ? `
-        <div style="width: 100%; text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <div id="influencer-apply-container" style="width: 100%; text-align: center; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">¿Eres creador de contenido? Únete al programa VIP y desbloquea el límite de referidos.</p>
-           <button onclick="openInfluencerModal()" class="btn-primary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #6d28d9);"><i class="ph-fill ph-sparkle"></i> Aplicar para Influencer</button>
+           <button id="btn-apply-inf" onclick="openInfluencerModal()" class="btn-primary" style="padding: 8px 16px; font-size: 0.85rem; border-radius: 8px; background: linear-gradient(135deg, #8b5cf6, #6d28d9);"><i class="ph-fill ph-sparkle"></i> Aplicar para Influencer</button>
         </div>
         ` : ''}
       </div>
@@ -2198,7 +2214,7 @@ window.openInfluencerModal = function() {
         didOpen: () => Swal.showLoading()
       });
 
-      firebase.database().ref('influencer_applications').push({
+      firebase.database().ref('influencer_applications/' + user.uid).set({
         uid: user.uid,
         email: user.email || '',
         name: user.displayName || 'Usuario',
@@ -2217,6 +2233,13 @@ window.openInfluencerModal = function() {
           color: 'var(--text-primary)',
           confirmButtonColor: '#0ea5e9'
         });
+        const btn = document.getElementById('btn-apply-inf');
+        if (btn) {
+          btn.innerHTML = 'Solicitud en Revisión ⏳';
+          btn.style.background = 'rgba(255,255,255,0.1)';
+          btn.onclick = null;
+          btn.style.cursor = 'default';
+        }
       }).catch((err) => {
         console.error("Error submitting application:", err);
         Swal.fire({
