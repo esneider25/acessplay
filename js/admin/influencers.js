@@ -356,7 +356,13 @@ function escapeHTML(str) {
 window.editInfluencerRules = function() {
   const currentRules = (typeof SITE_SETTINGS !== 'undefined' && SITE_SETTINGS.influencerRules) 
     ? SITE_SETTINGS.influencerRules.join('\n')
-    : "Escribe aquí cada norma en una nueva línea...";
+    : [
+      'Deben tener una base de seguidores real (al menos 1,000 en su red principal) y subir contenido de videojuegos regularmente.',
+      'Tienen que colocar su link de referido en sus biografías o descripciones.',
+      'Se espera que mencionen a AccessPlay en sus videos o directos al menos un par de veces al mes.',
+      'Cero toxicidad, sin promover el uso de hacks, y no deben promocionar competencia directa simultáneamente.',
+      'Las cuentas que generen referidos falsos (multicuentas) serán bloqueadas y perderán sus puntos y rol.'
+    ].join('\n');
 
   Swal.fire({
     title: 'Editar Normas de Influencers',
