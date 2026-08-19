@@ -3,8 +3,8 @@
 // ============================================================
 
 window.renderInfluencers = function(container) {
-  const rules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
-    ? window.SITE_SETTINGS.influencerRules 
+  const rules = (typeof SITE_SETTINGS !== 'undefined' && SITE_SETTINGS.influencerRules) 
+    ? SITE_SETTINGS.influencerRules 
     : [
       'Deben tener una base de seguidores real (al menos 1,000 en su red principal) y subir contenido de videojuegos regularmente.',
       'Tienen que colocar su link de referido en sus biografías o descripciones.',
@@ -232,44 +232,57 @@ function renderInfluencerTable() {
 }
 
 function renderActiveInfluencers() {
-  if (!window.ADMIN_CUSTOMERS) return;
   const tbody = document.getElementById('active-influencers-tbody');
   if (!tbody) return;
 
-  const influencers = Object.keys(window.ADMIN_CUSTOMERS)
-    .map(uid => ({ uid, ...window.ADMIN_CUSTOMERS[uid] }))
-    .filter(u => u.role === 'influencer');
+  firebase.database().ref('users').once('value').then(snap => {
+    if (!snap.exists()) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay influencers activos.</td></tr>';
+      return;
+    }
 
-  if (influencers.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay influencers activos.</td></tr>';
-    return;
-  }
+    const influencers = [];
+    snap.forEach(child => {
+      const u = child.val();
+      if (u.role === 'influencer' || u.role === 'partner') {
+        influencers.push({ uid: child.key, ...u });
+      }
+    });
 
-  let html = '';
-  influencers.forEach(inf => {
-    const earned = inf.referralsEarnedPoints || 0;
-    const refCount = inf.referralsCount || 0;
-    
-    html += `
-      <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s; hover:background:rgba(255,255,255,0.02);">
-        <td style="padding: 12px 15px;">
-          <div style="font-weight: 500; color: var(--text-primary);">${escapeHTML(inf.name || 'Sin Nombre')}</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(inf.email || '')}</div>
-        </td>
-        <td style="padding: 12px 15px; color: #3b82f6; font-weight: bold;">
-          ${earned} pts
-        </td>
-        <td style="padding: 12px 15px; color: var(--accent); font-weight: bold;">
-          ${refCount} usuarios
-        </td>
-        <td style="padding: 12px 15px; text-align: center;">
-          <div style="margin-bottom: 4px; color: #a78bfa; font-weight: bold;">${escapeHTML(inf.referralCode || 'Sin código')}</div>
-          <button onclick="navigator.clipboard.writeText('${inf.uid}'); showAdminToast('UID Copiado', 'success')" class="btn-secondary" style="padding: 4px 8px; font-size: 0.7rem;"><i class="ph ph-copy"></i> Copiar UID</button>
-        </td>
-      </tr>
-    `;
+    if (influencers.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted);">No hay influencers activos.</td></tr>';
+      return;
+    }
+
+    let html = '';
+    influencers.forEach(inf => {
+      const earned = inf.referralsEarnedPoints || 0;
+      const refCount = inf.referralsCount || 0;
+      
+      html += `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.3s; hover:background:rgba(255,255,255,0.02);">
+          <td style="padding: 12px 15px;">
+            <div style="font-weight: 500; color: var(--text-primary);">${escapeHTML(inf.name || 'Sin Nombre')}</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">${escapeHTML(inf.email || '')}</div>
+          </td>
+          <td style="padding: 12px 15px; color: #3b82f6; font-weight: bold;">
+            ${earned} pts
+          </td>
+          <td style="padding: 12px 15px; color: var(--accent); font-weight: bold;">
+            ${refCount} usuarios
+          </td>
+          <td style="padding: 12px 15px; text-align: center;">
+            <div style="margin-bottom: 4px; color: #a78bfa; font-weight: bold;">${escapeHTML(inf.referralCode || 'Sin código')}</div>
+            <button onclick="navigator.clipboard.writeText('${inf.uid}'); showAdminToast('UID Copiado', 'success')" class="btn-secondary" style="padding: 4px 8px; font-size: 0.7rem;"><i class="ph ph-copy"></i> Copiar UID</button>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = html;
+  }).catch(err => {
+    console.error("Error cargando influencers activos:", err);
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #f87171;">Error al cargar datos.</td></tr>';
   });
-  tbody.innerHTML = html;
 }
 
 window.approveInfluencer = function(appId, uid) {
@@ -341,8 +354,8 @@ function escapeHTML(str) {
 }
 
 window.editInfluencerRules = function() {
-  const currentRules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
-    ? window.SITE_SETTINGS.influencerRules.join('\n')
+  const currentRules = (typeof SITE_SETTINGS !== 'undefined' && SITE_SETTINGS.influencerRules) 
+    ? SITE_SETTINGS.influencerRules.join('\n')
     : "Escribe aquí cada norma en una nueva línea...";
 
   Swal.fire({

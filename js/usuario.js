@@ -2127,8 +2127,8 @@ function processAndRenderDashboardTournaments() {
 };
 
 window.openInfluencerModal = function() {
-  const rules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
-    ? window.SITE_SETTINGS.influencerRules 
+  const rules = (typeof SITE_SETTINGS !== 'undefined' && SITE_SETTINGS.influencerRules) 
+    ? SITE_SETTINGS.influencerRules 
     : [
       'Deben tener una base de seguidores real (al menos 1,000 en su red principal) y subir contenido de videojuegos regularmente.',
       'Tienen que colocar su link de referido en sus biografías o descripciones.',
