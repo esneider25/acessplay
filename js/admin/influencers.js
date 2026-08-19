@@ -278,3 +278,31 @@ window.editInfluencerRules = function() {
   });
 };
 
+
+window.deleteInfluencerApplication = function(appId) {
+  Swal.fire({
+    title: '¿Eliminar Solicitud?',
+    text: "Esta acción borrará la solicitud de la base de datos para no llenar espacio. Esto NO afecta la cuenta del usuario ni su rol, solo limpia esta lista.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, Eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: 'rgba(255,255,255,0.1)',
+    background: 'var(--bg-surface)',
+    color: 'var(--text-primary)'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Swal.fire({ title: 'Eliminando...', didOpen: () => Swal.showLoading(), allowOutsideClick: false, background: 'var(--bg-surface)' });
+      firebase.database().ref('influencer_applications/' + appId).remove()
+        .then(() => {
+          Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El registro ha sido eliminado correctamente.', confirmButtonColor: '#0ea5e9', background: 'var(--bg-surface)', color: 'var(--text-primary)' });
+          loadInfluencerApplications();
+        })
+        .catch(error => {
+          console.error("Error eliminando solicitud:", error);
+          Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo eliminar de la base de datos.', confirmButtonColor: '#0ea5e9', background: 'var(--bg-surface)', color: 'var(--text-primary)' });
+        });
+    }
+  });
+};
