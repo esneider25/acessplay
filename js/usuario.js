@@ -710,7 +710,7 @@ function renderDashboardContent() {
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;"><i class="ph ph-wallet"></i> Saldo Monedero</div>
-              <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);">\$${wallet.toFixed(2)}</div>
+              <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);">$${wallet.toFixed(2)}</div>
             </div>
             <button onclick="startWalletRecharge()" class="btn-primary" style="padding: 10px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #0284c7); box-shadow: 0 4px 15px rgba(16,185,129,0.3);" title="Recargar">
               <i class="ph ph-plus" style="font-size: 1.2rem;"></i>
@@ -724,7 +724,7 @@ function renderDashboardContent() {
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;"><i class="ph ph-chart-line-up"></i> Total Gastado</div>
-              <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 20px rgba(14, 165, 233, 0.4);">\$${spent.toFixed(2)}</div>
+              <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 20px rgba(14, 165, 233, 0.4);">$${spent.toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -753,7 +753,7 @@ function renderDashboardContent() {
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; display: flex; align-items: center; gap: 5px;"><i class="ph ph-wallet"></i> Saldo Monedero</div>
-              <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);">\$${wallet.toFixed(2)}</div>
+              <div style="font-size: 2.5rem; font-weight: 800; color: #0ea5e9; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);">$${wallet.toFixed(2)}</div>
             </div>
             <button onclick="startWalletRecharge()" class="btn-primary" style="padding: 10px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #0284c7); box-shadow: 0 4px 15px rgba(16,185,129,0.3);" title="Recargar">
               <i class="ph ph-plus" style="font-size: 1.2rem;"></i>
@@ -1198,7 +1198,7 @@ function renderDashboardTransactions() {
            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; display: flex; align-items: center; gap: 4px;"><i class="ph ph-clock"></i> ${new Date(tx.date).toLocaleString()}</div>
          </div>
        </div>
-       <div style="font-weight: 900; color: ${color}; font-size: 1.1rem;">${sign}\$${parseFloat(tx.amount).toFixed(2)}</div>
+       <div style="font-weight: 900; color: ${color}; font-size: 1.1rem;">${sign}$${parseFloat(tx.amount).toFixed(2)}</div>
     </div>
     `;
   }).join('');
@@ -2088,7 +2088,7 @@ function processAndRenderDashboardTournaments() {
             </div>
             
             <p style="margin:0 0 10px 0; color:var(--text-muted); font-size:0.8rem; display: flex; align-items: center; gap: 4px;">
-              <i class="ph ph-calendar"></i> Fecha de Inscripción: ${dateStr}
+              <i class="ph ph-calendar"></i> Fecha de Inscripcin: ${dateStr}
             </p>
             
             ${myInfoHtml}
@@ -2114,9 +2114,11 @@ window.openInfluencerModal = function() {
   const rules = (window.SITE_SETTINGS && window.SITE_SETTINGS.influencerRules) 
     ? window.SITE_SETTINGS.influencerRules 
     : [
-      'Mínimo 1,000 seguidores en tu red social principal.',
-      'Contenido activo relacionado a videojuegos.',
-      'Colocar tu link de referido en tu perfil/descripción.'
+      'Deben tener una base de seguidores real (al menos 1,000 en su red principal) y subir contenido de videojuegos regularmente.',
+      'Tienen que colocar su link de referido en sus biografÃ­as o descripciones.',
+      'Se espera que mencionen a AccessPlay en sus videos o directos al menos un par de veces al mes.',
+      'Cero toxicidad, sin promover el uso de hacks, y no deben promocionar competencia directa simultÃ¡neamente.',
+      'Las cuentas que generen referidos falsos (multicuentas) serÃ¡n bloqueadas y perderÃ¡n sus puntos y rol.'
     ];
   
   const rulesHtml = rules.map(r => `<li>${escapeHTML(r)}</li>`).join('');
@@ -2125,8 +2127,8 @@ window.openInfluencerModal = function() {
     title: '<span style="color:var(--accent); font-weight:800; font-size: 1.4rem;"><i class="ph-fill ph-sparkle"></i> Programa de Influencers</span>',
     html: `
       <div style="text-align: left; font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary);">
-        <p style="margin-bottom: 15px;">Al convertirte en <strong>Influencer de AccessPlay</strong>, tu límite de referidos se ampliará considerablemente, recibirás una insignia VIP en tu perfil y podrás monetizar a tu audiencia.</p>
-        <p style="margin-bottom: 10px;"><strong>Normas básicas:</strong></p>
+        <p style="margin-bottom: 15px;">Al convertirte en <strong>Influencer de AccessPlay</strong>, tu lÃ­mite de referidos se ampliarÃ¡ considerablemente, recibirÃ¡s una insignia VIP en tu perfil y podrÃ¡s monetizar a tu audiencia.</p>
+        <p style="margin-bottom: 10px;"><strong>Normas bÃ¡sicas:</strong></p>
         <ul style="margin-left: 20px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted);">
           ${rulesHtml}
         </ul>
@@ -2138,20 +2140,20 @@ window.openInfluencerModal = function() {
           <div>
             <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Cantidad de Seguidores</label>
             <select id="inf-followers" class="admin-form-input" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;" required>
-              <option value="">Selecciona una opción...</option>
+              <option value="">Selecciona una opciÃ³n...</option>
               <option value="1k-5k">1,000 a 5,000</option>
               <option value="5k-15k">5,000 a 15,000</option>
               <option value="15k-50k">15,000 a 50,000</option>
-              <option value="+50k">Más de 50,000</option>
+              <option value="+50k">MÃ¡s de 50,000</option>
             </select>
           </div>
           <div>
-            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">¿De qué juegos creas contenido?</label>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Â¿De quÃ© juegos creas contenido?</label>
             <input type="text" id="inf-game" class="admin-form-input" placeholder="Ej: Free Fire, Valorant, COD..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white;" required>
           </div>
           <div>
-            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">¿Por qué quieres ser Influencer?</label>
-            <textarea id="inf-reason" class="admin-form-input" rows="3" placeholder="Cuéntanos brevemente..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: none;" required></textarea>
+            <label style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 4px; display: block;">Â¿Por quÃ© quieres ser Influencer?</label>
+            <textarea id="inf-reason" class="admin-form-input" rows="3" placeholder="CuÃ©ntanos brevemente..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.3); color: white; resize: none;" required></textarea>
           </div>
         </form>
       </div>
