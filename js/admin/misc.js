@@ -2270,7 +2270,7 @@ window.removeParticipant = function(tournamentId, userId) {
     firebase.database().ref('tournament_participants/' + tournamentId + '/' + userId).once('value').then(snap => {
       const p = snap.val();
       if (p) {
-        let countSub = 1 + (p.teamMembers ? p.teamMembers.length : 0);
+        let countSub = 1 + (p.teamMembers ? p.teamMembers.filter(tm => tm.gameId !== p.gameId).length : 0);
         firebase.database().ref('tournament_participants/' + tournamentId + '/' + userId).remove().then(() => {
           if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
              firebase.database().ref('tournaments/' + tournamentId + '/participantsCount').transaction(c => (c || 0) - countSub);
@@ -2292,7 +2292,7 @@ window.approveTournamentPayment = function(tournamentId, userId) {
       firebase.database().ref(`tournament_participants/${tournamentId}/${userId}`).once('value').then(snap => {
          let p = snap.val();
          if(p) {
-             let countAdd = 1 + (p.teamMembers ? p.teamMembers.length : 0);
+             let countAdd = 1 + (p.teamMembers ? p.teamMembers.filter(tm => tm.gameId !== p.gameId).length : 0);
              firebase.database().ref('tournaments/' + tournamentId + '/participantsCount').transaction(c => (c || 0) + countAdd);
              firebase.database().ref('tournament_metadata/participants').transaction(c => (c || 0) + countAdd);
          }
@@ -3149,8 +3149,8 @@ window.recalcTournamentCounters = async function() {
             if (participants) {
                 Object.keys(participants).forEach(uid => {
                     const p = participants[uid];
-                    if (p.paymentStatus !== 'rejected') {
-                        count += 1 + (p.teamMembers ? p.teamMembers.length : 0);
+                    if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
+                        count += 1 + (p.teamMembers ? p.teamMembers.filter(tm => tm.gameId !== p.gameId).length : 0);
                     }
                 });
             }
@@ -3535,7 +3535,7 @@ window.migrateTournamentsData = async function() {
         const p = participants[uid];
         updates['tournament_participants/' + tId + '/' + uid] = p;
         
-        let adds = 1 + (p.teamMembers ? p.teamMembers.length : 0);
+        let adds = 1 + (p.teamMembers ? p.teamMembers.filter(tm => tm.gameId !== p.gameId).length : 0);
         // FIX: Solo contar como cupo ocupado si el pago está aprobado o es gratis
         if (p.paymentStatus === 'approved' || p.paymentStatus === 'free') {
             count += adds;
