@@ -1010,7 +1010,8 @@ window.openInscriptionModal = function(tournamentId) {
           .then(() => {
             window.userTournamentRegistrations[tournamentId] = participantData;
             if (paymentStatus === 'approved' || paymentStatus === 'free') {
-              const countAddition = 1 + (participantData.teamMembers ? participantData.teamMembers.length : 0);
+              const extraMembers = participantData.teamMembers ? participantData.teamMembers.filter(tm => tm.gameId !== participantData.gameId).length : 0;
+              const countAddition = 1 + extraMembers;
               firebase.database().ref('tournaments/' + tournamentId + '/participantsCount').transaction(c => (c || 0) + countAddition);
               firebase.database().ref('tournament_metadata/participants').transaction(c => (c || 0) + countAddition);
             }
