@@ -1753,6 +1753,7 @@ function renderTournaments(container) {
     <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
       <h2>🏆 Gestión de Torneos</h2>
       <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <button class="btn btn-secondary" onclick="recalcTournamentCounters()" style="padding: 10px 15px; font-size: 0.9rem; border-color: #38bdf8; color: #38bdf8;" title="Recalcula la cantidad de participantes de todos los torneos basándose en los inscritos actuales">🔄 Recalcular Contadores</button>
         <button id="btn-migrate-tournaments" class="btn btn-secondary" onclick="migrateTournamentsData()" style="padding: 10px 15px; font-size: 0.9rem; border-color: #fbbf24; color: #fbbf24;" title="Convierte datos antiguos al nuevo formato rápido">⚡ Optimizar y Migrar</button>
         <button class="btn btn-secondary" onclick="showAdjustWithdrawalsModal()" style="padding: 10px 15px; font-size: 0.9rem;" title="Ajusta el historial de retiros de torneos de un cliente">🔧 Ajustar Retiros</button>
         <button class="btn btn-primary" onclick="showCreateTournamentModal()" style="padding: 10px 15px; font-size: 0.9rem;">+ Crear Torneo</button>
