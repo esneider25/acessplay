@@ -58,12 +58,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    let bodyObj = req.body;
+    let bodyObj = req.body || {};
     if (typeof bodyObj === 'string') {
       try { bodyObj = JSON.parse(bodyObj); } catch (e) {}
     }
 
-    const { title, text, secret } = bodyObj || {};
+    const title = bodyObj.title || req.query.title;
+    const text = bodyObj.text || req.query.text;
+    const secret = bodyObj.secret || req.query.secret;
 
     // ── Validate secret ──
     const expectedSecret = process.env.WEBHOOK_BANCO_SECRET;
