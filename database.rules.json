@@ -140,6 +140,15 @@
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".write": "auth != null && auth.token.email === 'admin@accesplay.com'"
     },
+    "bank_vault": {
+      ".read": "false",
+      ".write": "false",
+      ".indexOn": ["ref", "used"]
+    },
+    "bank_notifications": {
+      ".read": "false",
+      ".write": "false"
+    },
     "influencer_applications": {
       ".read": "auth != null && auth.token.email === 'admin@accesplay.com'",
       ".indexOn": ["timestamp", "status"],
